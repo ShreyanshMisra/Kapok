@@ -61,7 +61,7 @@ class _HamburgerMenuManagerWidgetState
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => HomePageWidget(),
+                builder: (context) => const HomePageWidget(),
               ),
             );
           },
@@ -101,7 +101,7 @@ class _HamburgerMenuManagerWidgetState
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => KapokMapWidget(),
+                builder: (context) => const KapokMapWidget(),
               ),
             );
           },
@@ -141,7 +141,7 @@ class _HamburgerMenuManagerWidgetState
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TeamManagementCopyWidget(),
+                builder: (context) => const TeamManagementCopyWidget(),
               ),
             );
           },
@@ -181,7 +181,7 @@ class _HamburgerMenuManagerWidgetState
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TeamManagementCopyWidget(),
+                builder: (context) => const TeamManagementCopyWidget(),
               ),
             );
           },
@@ -221,7 +221,7 @@ class _HamburgerMenuManagerWidgetState
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProfileHomeWidget(),
+                builder: (context) => const ProfileHomeWidget(),
               ),
             );
           },

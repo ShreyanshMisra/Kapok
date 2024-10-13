@@ -77,16 +77,16 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(60.0),
+          preferredSize: const Size.fromHeight(60.0),
           child: AppBar(
-            backgroundColor: Color(0xFF013576),
+            backgroundColor: const Color(0xFF013576),
             automaticallyImplyLeading: false,
             leading: FlutterFlowIconButton(
               borderColor: Colors.transparent,
               borderRadius: 30.0,
               borderWidth: 1.0,
               buttonSize: 60.0,
-              icon: Icon(
+              icon: const Icon(
                 Icons.arrow_back_rounded,
                 color: Colors.white,
                 size: 30.0,
@@ -103,7 +103,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                     fontSize: 22.0,
                   ),
             ),
-            actions: [],
+            actions: const [],
             centerTitle: true,
             elevation: 2.0,
           ),
@@ -117,7 +117,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                 child: Container(
                   width: double.infinity,
                   height: double.infinity,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.rectangle,
                   ),
@@ -127,16 +127,16 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(0.0, 0.0),
+                          alignment: const AlignmentDirectional(0.0, 0.0),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 20.0, 10.0, 20.0),
                             child: Container(
                               width: double.infinity,
                               height: 380.0,
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
                                     color: Color(0x4E000000),
                                     offset: Offset(4.0, 3.0),
@@ -145,11 +145,11 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                 borderRadius: BorderRadius.circular(20.0),
                                 shape: BoxShape.rectangle,
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
-                              alignment: AlignmentDirectional(0.0, -1.0),
+                              alignment: const AlignmentDirectional(0.0, -1.0),
                               child: Column(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -158,7 +158,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                   Container(
                                     width: double.infinity,
                                     height: 50.0,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Color(0xFF013576),
                                       borderRadius: BorderRadius.only(
                                         bottomLeft: Radius.circular(0.0),
@@ -167,9 +167,9 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                         topRight: Radius.circular(20.0),
                                       ),
                                     ),
-                                    alignment: AlignmentDirectional(0.0, 0.0),
+                                    alignment: const AlignmentDirectional(0.0, 0.0),
                                     child: Align(
-                                      alignment: AlignmentDirectional(0.0, 0.0),
+                                      alignment: const AlignmentDirectional(0.0, 0.0),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
@@ -179,7 +179,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                         children: [
                                           Align(
                                             alignment:
-                                                AlignmentDirectional(0.0, -1.0),
+                                                const AlignmentDirectional(0.0, -1.0),
                                             child: SelectionArea(
                                                 child: Text(
                                               'Location',
@@ -199,9 +199,9 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    alignment: const AlignmentDirectional(-1.0, 0.0),
                                     child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           5.0, 0.0, 0.0, 0.0),
                                       child: Text(
                                         'Address',
@@ -215,9 +215,9 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(0.0, -0.05),
+                                    alignment: const AlignmentDirectional(0.0, -0.05),
                                     child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           3.0, 0.0, 3.0, 0.0),
                                       child: Container(
                                         width: double.infinity,
@@ -228,7 +228,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                           borderRadius:
                                               BorderRadius.circular(25.0),
                                           border: Border.all(
-                                            color: Color(0xFF013576),
+                                            color: const Color(0xFF013576),
                                             width: 3.0,
                                           ),
                                         ),
@@ -243,7 +243,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                 FlutterFlowTheme.of(context)
                                                     .bodySmall,
                                             enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -251,7 +251,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                   BorderRadius.circular(25.0),
                                             ),
                                             focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -259,7 +259,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                   BorderRadius.circular(25.0),
                                             ),
                                             errorBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -268,7 +268,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                             ),
                                             focusedErrorBorder:
                                                 UnderlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -284,7 +284,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                               ),
                                           validator: _model
                                               .textController1Validator
@@ -293,7 +293,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                       ),
                                     ),
                                   ),
-                                  Divider(
+                                  const Divider(
                                     height: 20.0,
                                     thickness: 2.0,
                                     indent: 30.0,
@@ -301,7 +301,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     color: Color(0x307E8383),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         5.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Coordinates',
@@ -314,7 +314,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         3.0, 0.0, 3.0, 0.0),
                                     child: Container(
                                       width: double.infinity,
@@ -325,7 +325,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                         borderRadius:
                                             BorderRadius.circular(25.0),
                                         border: Border.all(
-                                          color: Color(0xFF013576),
+                                          color: const Color(0xFF013576),
                                           width: 3.0,
                                         ),
                                       ),
@@ -340,7 +340,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                               FlutterFlowTheme.of(context)
                                                   .bodySmall,
                                           enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -348,7 +348,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                 BorderRadius.circular(25.0),
                                           ),
                                           focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -356,7 +356,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                 BorderRadius.circular(25.0),
                                           ),
                                           errorBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -365,7 +365,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                           ),
                                           focusedErrorBorder:
                                               UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -381,7 +381,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                             .bodyMedium
                                             .override(
                                               fontFamily: 'Open Sans',
-                                              color: Color(0xFF14181B),
+                                              color: const Color(0xFF14181B),
                                             ),
                                         validator: _model
                                             .textController2Validator
@@ -389,7 +389,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                       ),
                                     ),
                                   ),
-                                  Divider(
+                                  const Divider(
                                     height: 20.0,
                                     thickness: 2.0,
                                     indent: 30.0,
@@ -397,7 +397,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     color: Color(0x307E8383),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         5.0, 0.0, 0.0, 0.0),
                                     child: Text(
                                       'Location Notes',
@@ -410,7 +410,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
                                         3.0, 0.0, 3.0, 0.0),
                                     child: Container(
                                       width: double.infinity,
@@ -421,7 +421,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                         borderRadius:
                                             BorderRadius.circular(25.0),
                                         border: Border.all(
-                                          color: Color(0xFF013576),
+                                          color: const Color(0xFF013576),
                                           width: 3.0,
                                         ),
                                       ),
@@ -436,7 +436,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                               FlutterFlowTheme.of(context)
                                                   .bodySmall,
                                           enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -444,7 +444,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                 BorderRadius.circular(25.0),
                                           ),
                                           focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -452,7 +452,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                 BorderRadius.circular(25.0),
                                           ),
                                           errorBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -461,7 +461,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                           ),
                                           focusedErrorBorder:
                                               UnderlineInputBorder(
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Color(0x00000000),
                                               width: 1.0,
                                             ),
@@ -477,7 +477,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                             .bodyMedium
                                             .override(
                                               fontFamily: 'Open Sans',
-                                              color: Color(0xFF14181B),
+                                              color: const Color(0xFF14181B),
                                             ),
                                         validator: _model
                                             .textController3Validator
@@ -490,7 +490,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                             ),
                           ),
                         ),
-                        Divider(
+                        const Divider(
                           height: 20.0,
                           thickness: 2.0,
                           indent: 30.0,
@@ -498,7 +498,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                           color: Color(0x307E8383),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               10.0, 20.0, 10.0, 20.0),
                           child: Container(
                             width: double.infinity,
@@ -506,7 +506,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
-                              boxShadow: [
+                              boxShadow: const [
                                 BoxShadow(
                                   color: Color(0x43000000),
                                   offset: Offset(5.0, 4.0),
@@ -514,7 +514,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                               ],
                               borderRadius: BorderRadius.circular(5.0),
                               border: Border.all(
-                                color: Color(0xFF163D6E),
+                                color: const Color(0xFF163D6E),
                                 width: 3.0,
                               ),
                             ),
@@ -524,12 +524,12 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                 Container(
                                   width: double.infinity,
                                   height: 50.0,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: Color(0xFF013576),
                                   ),
-                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  alignment: const AlignmentDirectional(0.0, 0.0),
                                   child: Align(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
+                                    alignment: const AlignmentDirectional(0.0, 0.0),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment:
@@ -539,7 +539,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(0.0, -0.2),
+                                              const AlignmentDirectional(0.0, -0.2),
                                           child: SelectionArea(
                                               child: Text(
                                             'Category',
@@ -559,7 +559,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                 FlutterFlowDropDown<String>(
                                   controller: _model.dropDownValueController ??=
                                       FormFieldController<String>(null),
-                                  options: [
+                                  options: const [
                                     'Construction',
                                     'Electrical',
                                     'Engineering',
@@ -586,7 +586,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                   borderColor: Colors.black,
                                   borderWidth: 0.0,
                                   borderRadius: 0.0,
-                                  margin: EdgeInsetsDirectional.fromSTEB(
+                                  margin: const EdgeInsetsDirectional.fromSTEB(
                                       12.0, 4.0, 12.0, 4.0),
                                   hidesUnderline: true,
                                   isSearchable: false,
@@ -596,7 +596,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                             ),
                           ),
                         ),
-                        Divider(
+                        const Divider(
                           height: 20.0,
                           thickness: 2.0,
                           indent: 30.0,
@@ -604,9 +604,9 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                           color: Color(0x307E8383),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(0.0, 0.0),
+                          alignment: const AlignmentDirectional(0.0, 0.0),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 20.0, 10.0, 20.0),
                             child: Container(
                               width: double.infinity,
@@ -615,7 +615,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10.0),
                                 border: Border.all(
-                                  color: Color(0xFF013567),
+                                  color: const Color(0xFF013567),
                                   width: 5.0,
                                 ),
                               ),
@@ -625,7 +625,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                   Container(
                                     width: double.infinity,
                                     height: 50.0,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Color(0xFF013576),
                                     ),
                                     child: Row(
@@ -635,7 +635,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(0.0, -0.1),
+                                              const AlignmentDirectional(0.0, -0.1),
                                           child: SelectionArea(
                                               child: Text(
                                             'Instructions/Notes',
@@ -643,7 +643,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                 .bodyMedium
                                                 .override(
                                                   fontFamily: 'Lexend Deca',
-                                                  color: Color(0xFFF2F4F8),
+                                                  color: const Color(0xFFF2F4F8),
                                                   fontSize: 24.0,
                                                 ),
                                           )),
@@ -652,7 +652,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(0.0, -0.05),
+                                    alignment: const AlignmentDirectional(0.0, -0.05),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
                                       crossAxisAlignment:
@@ -660,10 +660,10 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                       children: [
                                         Align(
                                           alignment:
-                                              AlignmentDirectional(0.3, 0.35),
+                                              const AlignmentDirectional(0.3, 0.35),
                                           child: Padding(
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     3.0, 0.0, 3.0, 0.0),
                                             child: Container(
                                               width: 355.0,
@@ -673,7 +673,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                     BorderRadius.circular(5.0),
                                               ),
                                               child: Align(
-                                                alignment: AlignmentDirectional(
+                                                alignment: const AlignmentDirectional(
                                                     0.0, -1.0),
                                                 child: TextFormField(
                                                   controller:
@@ -690,14 +690,14 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                                 context)
                                                             .bodySmall,
                                                     enabledBorder:
-                                                        UnderlineInputBorder(
+                                                        const UnderlineInputBorder(
                                                       borderSide: BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
                                                       ),
                                                       borderRadius:
-                                                          const BorderRadius
+                                                          BorderRadius
                                                               .only(
                                                         topLeft:
                                                             Radius.circular(
@@ -708,14 +708,14 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                       ),
                                                     ),
                                                     focusedBorder:
-                                                        UnderlineInputBorder(
+                                                        const UnderlineInputBorder(
                                                       borderSide: BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
                                                       ),
                                                       borderRadius:
-                                                          const BorderRadius
+                                                          BorderRadius
                                                               .only(
                                                         topLeft:
                                                             Radius.circular(
@@ -726,14 +726,14 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                       ),
                                                     ),
                                                     errorBorder:
-                                                        UnderlineInputBorder(
+                                                        const UnderlineInputBorder(
                                                       borderSide: BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
                                                       ),
                                                       borderRadius:
-                                                          const BorderRadius
+                                                          BorderRadius
                                                               .only(
                                                         topLeft:
                                                             Radius.circular(
@@ -744,14 +744,14 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                                       ),
                                                     ),
                                                     focusedErrorBorder:
-                                                        UnderlineInputBorder(
+                                                        const UnderlineInputBorder(
                                                       borderSide: BorderSide(
                                                         color:
                                                             Color(0x00000000),
                                                         width: 1.0,
                                                       ),
                                                       borderRadius:
-                                                          const BorderRadius
+                                                          BorderRadius
                                                               .only(
                                                         topLeft:
                                                             Radius.circular(
@@ -781,7 +781,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                             ),
                           ),
                         ),
-                        Divider(
+                        const Divider(
                           height: 20.0,
                           thickness: 2.0,
                           indent: 30.0,
@@ -789,7 +789,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                           color: Color(0x307E8383),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               10.0, 20.0, 10.0, 20.0),
                           child: Container(
                             width: double.infinity,
@@ -798,18 +798,18 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10.0),
                               border: Border.all(
-                                color: Color(0xFF013576),
+                                color: const Color(0xFF013576),
                                 width: 5.0,
                               ),
                             ),
-                            alignment: AlignmentDirectional(0.0, 0.0),
+                            alignment: const AlignmentDirectional(0.0, 0.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 Container(
                                   width: double.infinity,
                                   height: 50.0,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: Color(0xFF013576),
                                   ),
                                   child: Row(
@@ -822,7 +822,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                             .bodyMedium
                                             .override(
                                               fontFamily: 'Lexend Deca',
-                                              color: Color(0xFFF6F9FC),
+                                              color: const Color(0xFFF6F9FC),
                                               fontSize: 24.0,
                                             ),
                                       )),
@@ -830,13 +830,13 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                   ),
                                 ),
                                 Align(
-                                  alignment: AlignmentDirectional(0.0, -0.65),
+                                  alignment: const AlignmentDirectional(0.0, -0.65),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Align(
                                         alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                            const AlignmentDirectional(0.0, 0.0),
                                         child: SelectionArea(
                                             child: Text(
                                           'Select an urgency from 1-5. (5 being most urgent)',
@@ -853,7 +853,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                   ),
                                 ),
                                 Align(
-                                  alignment: AlignmentDirectional(0.0, 0.65),
+                                  alignment: const AlignmentDirectional(0.0, 0.65),
                                   child: Container(
                                     width: 360.0,
                                     height: 150.0,
@@ -863,7 +863,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     ),
                                     child: Align(
                                       alignment:
-                                          AlignmentDirectional(-0.05, 0.0),
+                                          const AlignmentDirectional(-0.05, 0.0),
                                       child: RatingBar.builder(
                                         onRatingUpdate: (newValue) => setState(
                                             () => _model.ratingBarValue =
@@ -876,7 +876,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                         direction: Axis.horizontal,
                                         initialRating: _model.ratingBarValue ??=
                                             3.0,
-                                        unratedColor: Color(0xFF9E9E9E),
+                                        unratedColor: const Color(0xFF9E9E9E),
                                         itemCount: 5,
                                         itemSize: 60.0,
                                         glowColor: FlutterFlowTheme.of(context)
@@ -889,7 +889,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                             ),
                           ),
                         ),
-                        Divider(
+                        const Divider(
                           height: 20.0,
                           thickness: 2.0,
                           indent: 30.0,
@@ -897,7 +897,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                           color: Color(0x307E8383),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 35.0, 0.0, 20.0),
                           child: FFButtonWidget(
                             onPressed: () async {
@@ -918,14 +918,14 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                 };
 
                                 String json = jsonEncode(data);
-                                print("JSON: " + json);
+                                print("JSON: $json");
 
 
                                 // Navigate to home page
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => KapokMapWidget()
+                                    builder: (context) => const KapokMapWidget()
                                   ),
                                 );
 
@@ -940,11 +940,11 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                             options: FFButtonOptions(
                               width: 130.0,
                               height: 40.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
-                              color: Color(0xFF013576),
+                              color: const Color(0xFF013576),
                               textStyle: FlutterFlowTheme.of(context)
                                   .titleSmall
                                   .override(
@@ -952,7 +952,7 @@ class _CreateTaskFinalCopyWidgetState extends State<CreateTaskFinalCopyWidget> {
                                     color: Colors.white,
                                   ),
                               elevation: 2.0,
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: Colors.transparent,
                                 width: 1.0,
                               ),

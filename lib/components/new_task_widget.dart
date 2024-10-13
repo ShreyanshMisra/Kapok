@@ -48,13 +48,13 @@ class _NewTaskWidgetState extends State<NewTaskWidget> {
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         border: Border.all(
-          color: Color(0x4E000000),
+          color: const Color(0x4E000000),
         ),
       ),
       child: wrapWithModel(
         model: _model.taskModel,
         updateCallback: () => setState(() {}),
-        child: TaskWidget(),
+        child: const TaskWidget(),
       ),
     );
   }

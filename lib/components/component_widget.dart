@@ -42,12 +42,12 @@ class _ComponentWidgetState extends State<ComponentWidget> {
     context.watch<FFAppState>();
 
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 0.0, 8.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 0.0, 8.0),
       child: Container(
         width: 220.0,
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               blurRadius: 3.0,
               color: Color(0x33000000),
@@ -64,7 +64,7 @@ class _ComponentWidgetState extends State<ComponentWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
               child: Text(
                 'Team Member',
                 style: FlutterFlowTheme.of(context).bodyMedium,

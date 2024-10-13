@@ -123,8 +123,8 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color error = const Color(0xFFE21C3D);
   late Color info = const Color(0xFF1C4494);
 
-  late Color primaryBtnText = Color(0xFFFFFFFF);
-  late Color lineColor = Color(0xFFE0E3E7);
+  late Color primaryBtnText = const Color(0xFFFFFFFF);
+  late Color lineColor = const Color(0xFFE0E3E7);
 }
 
 abstract class Typography {
@@ -182,7 +182,7 @@ class ThemeTypography extends Typography {
   String get displaySmallFamily => 'Open Sans';
   TextStyle get displaySmall => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF303030),
+        color: const Color(0xFF303030),
         fontWeight: FontWeight.w600,
         fontSize: 24.0,
       );
@@ -196,14 +196,14 @@ class ThemeTypography extends Typography {
   String get headlineMediumFamily => 'Open Sans';
   TextStyle get headlineMedium => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF303030),
+        color: const Color(0xFF303030),
         fontWeight: FontWeight.w500,
         fontSize: 22.0,
       );
   String get headlineSmallFamily => 'Open Sans';
   TextStyle get headlineSmall => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF303030),
+        color: const Color(0xFF303030),
         fontWeight: FontWeight.w500,
         fontSize: 20.0,
       );
@@ -217,14 +217,14 @@ class ThemeTypography extends Typography {
   String get titleMediumFamily => 'Open Sans';
   TextStyle get titleMedium => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF757575),
+        color: const Color(0xFF757575),
         fontWeight: FontWeight.w500,
         fontSize: 18.0,
       );
   String get titleSmallFamily => 'Open Sans';
   TextStyle get titleSmall => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF616161),
+        color: const Color(0xFF616161),
         fontWeight: FontWeight.normal,
         fontSize: 16.0,
       );
@@ -259,14 +259,14 @@ class ThemeTypography extends Typography {
   String get bodyMediumFamily => 'Open Sans';
   TextStyle get bodyMedium => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF303030),
+        color: const Color(0xFF303030),
         fontWeight: FontWeight.normal,
         fontSize: 14.0,
       );
   String get bodySmallFamily => 'Open Sans';
   TextStyle get bodySmall => GoogleFonts.getFont(
         'Open Sans',
-        color: Color(0xFF424242),
+        color: const Color(0xFF424242),
         fontWeight: FontWeight.normal,
         fontSize: 14.0,
       );

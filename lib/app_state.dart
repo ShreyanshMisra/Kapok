@@ -24,19 +24,19 @@ class FFAppState extends ChangeNotifier {
 
   bool _popupActivated = false;
   bool get popupActivated => _popupActivated;
-  set popupActivated(bool _value) {
-    _popupActivated = _value;
+  set popupActivated(bool value) {
+    _popupActivated = value;
   }
 
   int _popUp2 = 0;
   int get popUp2 => _popUp2;
-  set popUp2(int _value) {
-    _popUp2 = _value;
+  set popUp2(int value) {
+    _popUp2 = value;
   }
 
   int _test = 0;
   int get test => _test;
-  set test(int _value) {
-    _test = _value;
+  set test(int value) {
+    _test = value;
   }
 }

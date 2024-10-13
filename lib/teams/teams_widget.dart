@@ -58,31 +58,31 @@ class _TeamsWidgetState extends State<TeamsWidget> {
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color(0xFFF8F6F6),
+      backgroundColor: const Color(0xFFF8F6F6),
       body: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
         height: MediaQuery.sizeOf(context).height * 1.0,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(0xFF14181B),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.35,
                 height: MediaQuery.sizeOf(context).height * 0.15,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF14181B),
                 ),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 0.2,
                     height: MediaQuery.sizeOf(context).width * 0.2,
                     clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                     ),
                     child: Image.asset(
@@ -93,11 +93,11 @@ class _TeamsWidgetState extends State<TeamsWidget> {
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: MediaQuery.sizeOf(context).height * 1.0,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF013576),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(0.0),
@@ -110,10 +110,10 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
+                      alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 0.8,
                           height: MediaQuery.sizeOf(context).height * 0.28,
@@ -125,9 +125,9 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 10.0, 0.0, 0.0),
                                   child: Text(
                                     'Create Team',
@@ -136,7 +136,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Open Sans',
-                                          color: Color(0xFF013576),
+                                          color: const Color(0xFF013576),
                                           fontSize: 24.0,
                                         ),
                                   ),
@@ -145,11 +145,11 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                               Container(
                                 width: MediaQuery.sizeOf(context).width * 0.7,
                                 height: MediaQuery.sizeOf(context).height * 0.1,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 20.0, 0.0, 0.0),
                                   child: TextFormField(
                                     controller: _model.teamNameController,
@@ -161,7 +161,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF95A1AC),
+                                            color: const Color(0xFF95A1AC),
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.normal,
                                           ),
@@ -169,12 +169,12 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF95A1AC),
+                                            color: const Color(0xFF95A1AC),
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.normal,
                                           ),
                                       enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0xFF013576),
                                           width: 2.0,
                                         ),
@@ -182,7 +182,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -190,7 +190,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -198,7 +198,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -208,9 +208,9 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                       filled: true,
                                       fillColor: Colors.white,
                                       contentPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 24.0, 0.0, 24.0),
-                                      prefixIcon: Icon(
+                                      prefixIcon: const Icon(
                                         Icons.group,
                                         color: Color(0xFF013576),
                                       ),
@@ -219,7 +219,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Open Sans',
-                                          color: Color(0xFF14181B),
+                                          color: const Color(0xFF14181B),
                                           fontSize: 14.0,
                                           fontWeight: FontWeight.normal,
                                         ),
@@ -233,11 +233,11 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                               Container(
                                 width: MediaQuery.sizeOf(context).width * 0.7,
                                 height: MediaQuery.sizeOf(context).height * 0.1,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 20.0, 0.0, 0.0),
                                   child: TextFormField(
                                     controller: _model.locationController,
@@ -249,7 +249,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF95A1AC),
+                                            color: const Color(0xFF95A1AC),
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.normal,
                                           ),
@@ -257,12 +257,12 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF95A1AC),
+                                            color: const Color(0xFF95A1AC),
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.normal,
                                           ),
                                       enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0xFF013576),
                                           width: 2.0,
                                         ),
@@ -270,7 +270,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -278,7 +278,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -286,7 +286,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -296,9 +296,9 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                       filled: true,
                                       fillColor: Colors.white,
                                       contentPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 24.0, 0.0, 24.0),
-                                      prefixIcon: Icon(
+                                      prefixIcon: const Icon(
                                         Icons.map,
                                         color: Color(0xFF013576),
                                       ),
@@ -307,7 +307,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Open Sans',
-                                          color: Color(0xFF14181B),
+                                          color: const Color(0xFF14181B),
                                           fontSize: 14.0,
                                           fontWeight: FontWeight.normal,
                                         ),
@@ -324,10 +324,10 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                       ),
                     ),
                     Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
+                      alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                         child: FFButtonWidget(
                           onPressed: () {
                             print('Button pressed ...');
@@ -336,19 +336,19 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                           options: FFButtonOptions(
                             width: 130.0,
                             height: 40.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
+                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
                             color: Colors.white,
                             textStyle: FlutterFlowTheme.of(context)
                                 .titleSmall
                                 .override(
                                   fontFamily: 'Open Sans',
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                 ),
                             elevation: 2.0,
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.transparent,
                               width: 2.0,
                             ),
@@ -358,10 +358,10 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                       ),
                     ),
                     Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
+                      alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
                         child: Container(
                           width: MediaQuery.sizeOf(context).width * 0.8,
                           height: MediaQuery.sizeOf(context).height * 0.18,
@@ -373,7 +373,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 10.0, 0.0, 0.0),
                                 child: Text(
                                   'Join Team',
@@ -381,7 +381,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                       .bodyMedium
                                       .override(
                                         fontFamily: 'Open Sans',
-                                        color: Color(0xFF013576),
+                                        color: const Color(0xFF013576),
                                         fontSize: 24.0,
                                       ),
                                 ),
@@ -389,11 +389,11 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                               Container(
                                 width: MediaQuery.sizeOf(context).width * 0.7,
                                 height: MediaQuery.sizeOf(context).height * 0.1,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       0.0, 20.0, 0.0, 0.0),
                                   child: TextFormField(
                                     controller: _model.enterTeamNumController,
@@ -405,7 +405,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF95A1AC),
+                                            color: const Color(0xFF95A1AC),
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.normal,
                                           ),
@@ -413,12 +413,12 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF95A1AC),
+                                            color: const Color(0xFF95A1AC),
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.normal,
                                           ),
                                       enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0xFF013576),
                                           width: 2.0,
                                         ),
@@ -426,7 +426,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -434,7 +434,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -442,7 +442,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                             BorderRadius.circular(90.0),
                                       ),
                                       focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0x00000000),
                                           width: 2.0,
                                         ),
@@ -452,9 +452,9 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                       filled: true,
                                       fillColor: Colors.white,
                                       contentPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 24.0, 0.0, 24.0),
-                                      prefixIcon: Icon(
+                                      prefixIcon: const Icon(
                                         Icons.library_add_check_outlined,
                                         color: Color(0xFF013576),
                                       ),
@@ -463,7 +463,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Open Sans',
-                                          color: Color(0xFF14181B),
+                                          color: const Color(0xFF14181B),
                                           fontSize: 14.0,
                                           fontWeight: FontWeight.normal,
                                         ),
@@ -481,7 +481,7 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                     ),
                     Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: () {
                           print('Button pressed ...');
@@ -490,18 +490,18 @@ class _TeamsWidgetState extends State<TeamsWidget> {
                         options: FFButtonOptions(
                           width: 130.0,
                           height: 40.0,
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 0.0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 0.0),
                           color: Colors.white,
                           textStyle:
                               FlutterFlowTheme.of(context).titleSmall.override(
                                     fontFamily: 'Open Sans',
-                                    color: Color(0xFF013576),
+                                    color: const Color(0xFF013576),
                                   ),
                           elevation: 2.0,
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Colors.transparent,
                             width: 2.0,
                           ),

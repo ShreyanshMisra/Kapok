@@ -67,27 +67,27 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CreateTaskFinalCopyWidget(),
+                builder: (context) => const CreateTaskFinalCopyWidget(),
               ),
             );
           },
-          backgroundColor: Color(0xFF013576),
+          backgroundColor: const Color(0xFF013576),
           elevation: 10.0,
-          child: Icon(
+          child: const Icon(
             Icons.add,
             color: Colors.white,
             size: 30.0,
           ),
         ),
         appBar: AppBar(
-          backgroundColor: Color(0xFF013576),
+          backgroundColor: const Color(0xFF013576),
           automaticallyImplyLeading: false,
           leading: FlutterFlowIconButton(
             borderColor: Colors.transparent,
             borderRadius: 30.0,
             borderWidth: 1.0,
             buttonSize: 60.0,
-            icon: Icon(
+            icon: const Icon(
               Icons.arrow_back_rounded,
               color: Colors.white,
               size: 30.0,
@@ -104,7 +104,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: true,
           elevation: 2.0,
         ),
@@ -123,7 +123,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Color(0x4E000000),
+                          color: const Color(0x4E000000),
                         ),
                       ),
                       child: Container(
@@ -149,7 +149,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                                     .secondaryBackground,
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 8.0, 0.0, 0.0),
                                 child: Text(
                                   'Number of Tasks: #',
@@ -157,7 +157,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                                       .bodyMedium
                                       .override(
                                         fontFamily: 'Open Sans',
-                                        color: Color(0x8A000000),
+                                        color: const Color(0x8A000000),
                                       ),
                                 ),
                               ),
@@ -169,26 +169,26 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                                 wrapWithModel(
                                   model: _model.newTaskModel1,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                                 wrapWithModel(
                                   model: _model.newTaskModel2,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                                 wrapWithModel(
                                   model: _model.newTaskModel3,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                                 wrapWithModel(
                                   model: _model.newTaskModel4,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                               ],
                             ),
-                            theme: ExpandableThemeData(
+                            theme: const ExpandableThemeData(
                               tapHeaderToExpand: true,
                               tapBodyToExpand: false,
                               tapBodyToCollapse: false,
@@ -203,7 +203,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Color(0x4E000000),
+                          color: const Color(0x4E000000),
                         ),
                       ),
                       child: Container(
@@ -229,7 +229,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                                     .secondaryBackground,
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 8.0, 0.0, 0.0),
                                 child: Text(
                                   'Number of Tasks: #',
@@ -237,7 +237,7 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                                       .bodyMedium
                                       .override(
                                         fontFamily: 'Open Sans',
-                                        color: Color(0x8A000000),
+                                        color: const Color(0x8A000000),
                                       ),
                                 ),
                               ),
@@ -248,26 +248,26 @@ class _NewViewTasksManagerWidgetState extends State<NewViewTasksManagerWidget> {
                                 wrapWithModel(
                                   model: _model.newTaskModel5,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                                 wrapWithModel(
                                   model: _model.newTaskModel6,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                                 wrapWithModel(
                                   model: _model.newTaskModel7,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                                 wrapWithModel(
                                   model: _model.newTaskModel8,
                                   updateCallback: () => setState(() {}),
-                                  child: NewTaskWidget(),
+                                  child: const NewTaskWidget(),
                                 ),
                               ],
                             ),
-                            theme: ExpandableThemeData(
+                            theme: const ExpandableThemeData(
                               tapHeaderToExpand: true,
                               tapBodyToExpand: false,
                               tapBodyToCollapse: false,

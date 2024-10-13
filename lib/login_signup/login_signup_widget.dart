@@ -77,23 +77,23 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color(0xFF14181B),
+      backgroundColor: const Color(0xFF14181B),
       body: Form(
         key: _model.formKey,
         autovalidateMode: AutovalidateMode.always,
         child: Container(
           width: MediaQuery.sizeOf(context).width * 1.0,
           height: MediaQuery.sizeOf(context).height * 1.0,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Color(0xFF013576),
           ),
           child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 70.0, 0.0, 0.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 70.0, 0.0, 0.0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 20.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 20.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +102,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                         width: 200.0,
                         height: 200.0,
                         clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                         ),
                         child: Image.asset(
@@ -115,19 +115,19 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                 Expanded(
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
                     child: Column(
                       children: [
                         Align(
-                          alignment: Alignment(0.0, 0),
+                          alignment: const Alignment(0.0, 0),
                           child: TabBar(
                             labelColor: Colors.white,
                             labelStyle: GoogleFonts.getFont(
                               'Open Sans',
                             ),
-                            unselectedLabelStyle: TextStyle(),
+                            unselectedLabelStyle: const TextStyle(),
                             indicatorColor: Colors.white,
-                            tabs: [
+                            tabs: const [
                               Tab(
                                 text: 'Sign In',
                               ),
@@ -146,14 +146,14 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                             controller: _model.tabBarController,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 0.0, 20.0, 0.0),
                                 child: SingleChildScrollView(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller: _model
@@ -163,7 +163,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                           onChanged: (_) =>
                                               EasyDebounce.debounce(
                                             '_model.emailAddressLoginController',
-                                            Duration(milliseconds: 2000),
+                                            const Duration(milliseconds: 2000),
                                             () => setState(() {}),
                                           ),
                                           obscureText: false,
@@ -173,7 +173,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
@@ -184,13 +184,13 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -198,7 +198,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -206,7 +206,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -215,7 +215,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             ),
                                             focusedErrorBorder:
                                                 OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -225,9 +225,9 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             filled: true,
                                             fillColor: Colors.white,
                                             contentPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 24.0, 0.0, 24.0),
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.mail,
                                               color: Color(0xFF013576),
                                             ),
@@ -242,7 +242,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                           ?.clear();
                                                       setState(() {});
                                                     },
-                                                    child: Icon(
+                                                    child: const Icon(
                                                       Icons.clear,
                                                       color: Color(0xFF013576),
                                                       size: 22.0,
@@ -254,7 +254,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -267,7 +267,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller:
@@ -282,7 +282,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
@@ -293,13 +293,13 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -307,7 +307,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -315,7 +315,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -324,7 +324,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             ),
                                             focusedErrorBorder:
                                                 OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -334,9 +334,9 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             filled: true,
                                             fillColor: Colors.white,
                                             contentPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 24.0, 0.0, 24.0),
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.vpn_key,
                                               color: Color(0xFF013576),
                                             ),
@@ -354,7 +354,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     ? Icons.visibility_outlined
                                                     : Icons
                                                         .visibility_off_outlined,
-                                                color: Color(0xFF013576),
+                                                color: const Color(0xFF013576),
                                                 size: 20.0,
                                               ),
                                             ),
@@ -363,7 +363,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -376,7 +376,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 24.0, 0.0, 0.0),
                                         child: FFButtonWidget(
                                           onPressed: () async {
@@ -397,7 +397,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    KapokMapWidget(),
+                                                    const KapokMapWidget(),
                                               ),
                                               (r) => false,
                                             );
@@ -407,10 +407,10 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             width: 230.0,
                                             height: 60.0,
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 0.0),
                                             iconPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 0.0),
                                             color: Colors.white,
                                             textStyle:
@@ -418,13 +418,13 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .titleSmall
                                                     .override(
                                                       fontFamily: 'Open Sans',
-                                                      color: Color(0xFF013576),
+                                                      color: const Color(0xFF013576),
                                                       fontSize: 20.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             elevation: 3.0,
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Colors.transparent,
                                               width: 1.0,
                                             ),
@@ -438,14 +438,14 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     20.0, 0.0, 20.0, 0.0),
                                 child: SingleChildScrollView(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 20.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller: _model.fullNameController,
@@ -453,7 +453,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                           onChanged: (_) =>
                                               EasyDebounce.debounce(
                                             '_model.fullNameController',
-                                            Duration(milliseconds: 2000),
+                                            const Duration(milliseconds: 2000),
                                             () => setState(() {}),
                                           ),
                                           obscureText: false,
@@ -463,14 +463,14 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             hintText: 'Full Name',
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -478,7 +478,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -486,7 +486,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -495,7 +495,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             ),
                                             focusedErrorBorder:
                                                 OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -505,9 +505,9 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             filled: true,
                                             fillColor: Colors.white,
                                             contentPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 24.0, 0.0, 24.0),
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.person,
                                               color: Color(0xFF013576),
                                             ),
@@ -521,7 +521,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                           ?.clear();
                                                       setState(() {});
                                                     },
-                                                    child: Icon(
+                                                    child: const Icon(
                                                       Icons.clear,
                                                       color: Color(0xFF013576),
                                                       size: 22.0,
@@ -533,7 +533,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -544,7 +544,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller:
@@ -554,7 +554,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                           onChanged: (_) =>
                                               EasyDebounce.debounce(
                                             '_model.emailAddressController',
-                                            Duration(milliseconds: 2000),
+                                            const Duration(milliseconds: 2000),
                                             () => setState(() {}),
                                           ),
                                           obscureText: false,
@@ -564,14 +564,14 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             hintText: 'Email Address',
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -579,7 +579,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -587,7 +587,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -596,7 +596,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             ),
                                             focusedErrorBorder:
                                                 OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -606,9 +606,9 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             filled: true,
                                             fillColor: Colors.white,
                                             contentPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 24.0, 0.0, 24.0),
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.mail,
                                               color: Color(0xFF013576),
                                             ),
@@ -623,7 +623,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                           ?.clear();
                                                       setState(() {});
                                                     },
-                                                    child: Icon(
+                                                    child: const Icon(
                                                       Icons.clear,
                                                       color: Color(0xFF013576),
                                                       size: 22.0,
@@ -635,7 +635,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -648,7 +648,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller: _model.passwordController,
@@ -661,14 +661,14 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             hintText: 'Password',
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -676,7 +676,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -684,7 +684,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -693,7 +693,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             ),
                                             focusedErrorBorder:
                                                 OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -703,9 +703,9 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             filled: true,
                                             fillColor: Colors.white,
                                             contentPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 24.0, 0.0, 24.0),
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.vpn_key,
                                               color: Color(0xFF013576),
                                             ),
@@ -722,7 +722,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     ? Icons.visibility_outlined
                                                     : Icons
                                                         .visibility_off_outlined,
-                                                color: Color(0xFF013576),
+                                                color: const Color(0xFF013576),
                                                 size: 20.0,
                                               ),
                                             ),
@@ -731,7 +731,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -742,7 +742,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller:
@@ -757,14 +757,14 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .bodyMedium
                                                     .override(
                                                       fontFamily: 'Lexend Deca',
-                                                      color: Color(0xFF95A1AC),
+                                                      color: const Color(0xFF95A1AC),
                                                       fontSize: 14.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             hintText: 'Confirm Password',
                                             enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -772,7 +772,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -780,7 +780,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                   BorderRadius.circular(90.0),
                                             ),
                                             errorBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -789,7 +789,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             ),
                                             focusedErrorBorder:
                                                 OutlineInputBorder(
-                                              borderSide: BorderSide(
+                                              borderSide: const BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
@@ -799,9 +799,9 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             filled: true,
                                             fillColor: Colors.white,
                                             contentPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 24.0, 0.0, 24.0),
-                                            prefixIcon: Icon(
+                                            prefixIcon: const Icon(
                                               Icons.vpn_key,
                                               color: Color(0xFF013576),
                                             ),
@@ -819,7 +819,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     ? Icons.visibility_outlined
                                                     : Icons
                                                         .visibility_off_outlined,
-                                                color: Color(0xFF013576),
+                                                color: const Color(0xFF013576),
                                                 size: 20.0,
                                               ),
                                             ),
@@ -828,7 +828,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Open Sans',
-                                                color: Color(0xFF14181B),
+                                                color: const Color(0xFF14181B),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -839,7 +839,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 24.0, 0.0, 0.0),
                                         child: FFButtonWidget(
                                           onPressed: () async {
@@ -847,7 +847,7 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    ProfileOnboardingIanWidget(),
+                                                    const ProfileOnboardingIanWidget(),
                                               ),
                                               (r) => false,
                                             );
@@ -857,10 +857,10 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                             width: 230.0,
                                             height: 60.0,
                                             padding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 0.0),
                                             iconPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
+                                                const EdgeInsetsDirectional.fromSTEB(
                                                     0.0, 0.0, 0.0, 0.0),
                                             color: Colors.white,
                                             textStyle:
@@ -868,13 +868,13 @@ class _LoginSignupWidgetState extends State<LoginSignupWidget>
                                                     .titleSmall
                                                     .override(
                                                       fontFamily: 'Open Sans',
-                                                      color: Color(0xFF013576),
+                                                      color: const Color(0xFF013576),
                                                       fontSize: 20.0,
                                                       fontWeight:
                                                           FontWeight.normal,
                                                     ),
                                             elevation: 3.0,
-                                            borderSide: BorderSide(
+                                            borderSide: const BorderSide(
                                               color: Colors.transparent,
                                               width: 1.0,
                                             ),

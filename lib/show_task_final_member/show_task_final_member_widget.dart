@@ -79,7 +79,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
             'SHOW TASK',
             style: FlutterFlowTheme.of(context).bodyMedium,
           ),
-          actions: [],
+          actions: const [],
           centerTitle: true,
           elevation: 0.0,
         ),
@@ -89,7 +89,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
             mainAxisSize: MainAxisSize.max,
             children: [
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 0.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -101,12 +101,12 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).secondaryBackground,
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         blurRadius: 5.0,
                         color: Color(0x34111417),
@@ -120,7 +120,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                     children: [
                       Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -138,7 +138,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Align(
-                                    alignment: AlignmentDirectional(-0.85, 1.0),
+                                    alignment: const AlignmentDirectional(-0.85, 1.0),
                                     child: Text(
                                       'Location',
                                       style: FlutterFlowTheme.of(context)
@@ -152,7 +152,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(0.0, -0.1),
+                        alignment: const AlignmentDirectional(0.0, -0.1),
                         child: Container(
                           width: 312.3,
                           height: 39.5,
@@ -161,14 +161,14 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                 .secondaryBackground,
                           ),
                           child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.05),
+                            alignment: const AlignmentDirectional(0.0, 0.05),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 8.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  Align(
+                                  const Align(
                                     alignment: AlignmentDirectional(-0.2, 0.0),
                                     child: Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
@@ -181,7 +181,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(0.5, 0.05),
+                                    alignment: const AlignmentDirectional(0.5, 0.05),
                                     child: Text(
                                       ' Cherry Court SOUTHAMPTON SO53 5PD UK',
                                       style: FlutterFlowTheme.of(context)
@@ -195,7 +195,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(0.0, -0.1),
+                        alignment: const AlignmentDirectional(0.0, -0.1),
                         child: Container(
                           width: 312.3,
                           height: 39.5,
@@ -204,14 +204,14 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                 .secondaryBackground,
                           ),
                           child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.05),
+                            alignment: const AlignmentDirectional(0.0, 0.05),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 8.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  Padding(
+                                  const Padding(
                                     padding: EdgeInsetsDirectional.fromSTEB(
                                         2.0, 0.0, 5.0, 0.0),
                                     child: Icon(
@@ -221,9 +221,9 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(0.5, 0.05),
+                                    alignment: const AlignmentDirectional(0.5, 0.05),
                                     child: Text(
-                                      ' 41°24\'12.2\"N 2°10\'26.5\"E',
+                                      ' 41°24\'12.2"N 2°10\'26.5"E',
                                       style: FlutterFlowTheme.of(context)
                                           .bodySmall,
                                     ),
@@ -235,7 +235,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                         ),
                       ),
                       Align(
-                        alignment: AlignmentDirectional(0.0, -0.1),
+                        alignment: const AlignmentDirectional(0.0, -0.1),
                         child: Container(
                           width: 312.3,
                           height: 39.5,
@@ -244,14 +244,14 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                 .secondaryBackground,
                           ),
                           child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.05),
+                            alignment: const AlignmentDirectional(0.0, 0.05),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 8.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  Padding(
+                                  const Padding(
                                     padding: EdgeInsetsDirectional.fromSTEB(
                                         1.0, 0.0, 5.0, 0.0),
                                     child: Icon(
@@ -261,7 +261,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                     ),
                                   ),
                                   Align(
-                                    alignment: AlignmentDirectional(0.5, 0.05),
+                                    alignment: const AlignmentDirectional(0.5, 0.05),
                                     child: Text(
                                       'Location description',
                                       style: FlutterFlowTheme.of(context)
@@ -279,7 +279,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
@@ -291,12 +291,12 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).secondaryBackground,
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         blurRadius: 5.0,
                         color: Color(0x34111417),
@@ -307,16 +307,16 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                   ),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(-0.85, 0.0),
+                          alignment: const AlignmentDirectional(-0.85, 0.0),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 12.0, 0.0, 15.0),
                             child: Text(
                               'Instruction',
@@ -325,9 +325,9 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                           ),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(0.0, 0.1),
+                          alignment: const AlignmentDirectional(0.0, 0.1),
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 12.0, 0.0, 24.0, 0.0),
                             child: Text(
                               'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ',
@@ -341,9 +341,9 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                 ),
               ),
               Align(
-                alignment: AlignmentDirectional(-0.9, 0.0),
+                alignment: const AlignmentDirectional(-0.9, 0.0),
                 child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 0.0),
                   child: Text(
                     'Urgency',
                     style: FlutterFlowTheme.of(context).bodySmall,
@@ -351,12 +351,12 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).secondaryBackground,
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         blurRadius: 5.0,
                         color: Color(0x34111417),
@@ -366,7 +366,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Align(
-                    alignment: AlignmentDirectional(-0.05, 0.0),
+                    alignment: const AlignmentDirectional(-0.05, 0.0),
                     child: RatingBar.builder(
                       onRatingUpdate: (newValue) =>
                           setState(() => _model.ratingBarValue = newValue),
@@ -376,7 +376,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                       ),
                       direction: Axis.horizontal,
                       initialRating: _model.ratingBarValue ??= 3.0,
-                      unratedColor: Color(0xFF9E9E9E),
+                      unratedColor: const Color(0xFF9E9E9E),
                       itemCount: 5,
                       itemSize: 60.0,
                       glowColor: FlutterFlowTheme.of(context).secondary,
@@ -386,23 +386,23 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
               ),
               Expanded(
                 child: Align(
-                  alignment: AlignmentDirectional(0.0, 0.0),
+                  alignment: const AlignmentDirectional(0.0, 0.0),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 28.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 28.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(0.0, 0.1),
+                          alignment: const AlignmentDirectional(0.0, 0.1),
                           child: FFButtonWidget(
                             onPressed: () async {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      ProfileOnboardingWidget(),
+                                      const ProfileOnboardingWidget(),
                                 ),
                               );
                             },
@@ -410,11 +410,11 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                             options: FFButtonOptions(
                               width: 270.0,
                               height: 50.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 0.0),
-                              color: Color(0xFF013576),
+                              color: const Color(0xFF013576),
                               textStyle: FlutterFlowTheme.of(context)
                                   .titleSmall
                                   .override(
@@ -423,7 +423,7 @@ class _ShowTaskFinalMemberWidgetState extends State<ShowTaskFinalMemberWidget> {
                                         .primaryBackground,
                                   ),
                               elevation: 2.0,
-                              borderSide: BorderSide(
+                              borderSide: const BorderSide(
                                 color: Colors.transparent,
                                 width: 1.0,
                               ),

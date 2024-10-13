@@ -80,7 +80,7 @@ class _ShowTaskFinalManageCopyWidgetState
             'SHOW TASK',
             style: FlutterFlowTheme.of(context).bodyMedium,
           ),
-          actions: [],
+          actions: const [],
           centerTitle: true,
           elevation: 0.0,
         ),
@@ -91,9 +91,9 @@ class _ShowTaskFinalManageCopyWidgetState
               mainAxisSize: MainAxisSize.max,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(-0.9, 0.0),
+                  alignment: const AlignmentDirectional(-0.9, 0.0),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 0.0),
                     child: Text(
                       'Urgency',
                       style: FlutterFlowTheme.of(context).bodySmall,
@@ -102,12 +102,12 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           blurRadius: 5.0,
                           color: Color(0x34111417),
@@ -117,7 +117,7 @@ class _ShowTaskFinalManageCopyWidgetState
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: Align(
-                      alignment: AlignmentDirectional(-0.05, 0.0),
+                      alignment: const AlignmentDirectional(-0.05, 0.0),
                       child: RatingBar.builder(
                         onRatingUpdate: (newValue) =>
                             setState(() => _model.ratingBarValue = newValue),
@@ -127,7 +127,7 @@ class _ShowTaskFinalManageCopyWidgetState
                         ),
                         direction: Axis.horizontal,
                         initialRating: _model.ratingBarValue ??= 3.0,
-                        unratedColor: Color(0xFF9E9E9E),
+                        unratedColor: const Color(0xFF9E9E9E),
                         itemCount: 5,
                         itemSize: 60.0,
                         glowColor: FlutterFlowTheme.of(context).secondary,
@@ -137,7 +137,7 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -150,12 +150,12 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           blurRadius: 5.0,
                           color: Color(0x34111417),
@@ -166,16 +166,16 @@ class _ShowTaskFinalManageCopyWidgetState
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-0.85, 0.0),
+                            alignment: const AlignmentDirectional(-0.85, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 15.0),
                               child: Text(
                                 'Occupation',
@@ -191,7 +191,7 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -204,12 +204,12 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           blurRadius: 5.0,
                           color: Color(0x34111417),
@@ -220,16 +220,16 @@ class _ShowTaskFinalManageCopyWidgetState
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-0.85, 0.0),
+                            alignment: const AlignmentDirectional(-0.85, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 15.0),
                               child: Text(
                                 'Notes',
@@ -239,9 +239,9 @@ class _ShowTaskFinalManageCopyWidgetState
                             ),
                           ),
                           Align(
-                            alignment: AlignmentDirectional(0.0, 0.1),
+                            alignment: const AlignmentDirectional(0.0, 0.1),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 0.0, 24.0, 0.0),
                               child: Text(
                                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ',
@@ -255,7 +255,7 @@ class _ShowTaskFinalManageCopyWidgetState
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -268,12 +268,12 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           blurRadius: 5.0,
                           color: Color(0x34111417),
@@ -286,7 +286,7 @@ class _ShowTaskFinalManageCopyWidgetState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 12.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -306,7 +306,7 @@ class _ShowTaskFinalManageCopyWidgetState
                                   children: [
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(-0.85, 1.0),
+                                          const AlignmentDirectional(-0.85, 1.0),
                                       child: Text(
                                         'Location',
                                         style: FlutterFlowTheme.of(context)
@@ -320,7 +320,7 @@ class _ShowTaskFinalManageCopyWidgetState
                           ),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(0.0, -0.1),
+                          alignment: const AlignmentDirectional(0.0, -0.1),
                           child: Container(
                             width: 312.3,
                             height: 39.5,
@@ -329,14 +329,14 @@ class _ShowTaskFinalManageCopyWidgetState
                                   .secondaryBackground,
                             ),
                             child: Align(
-                              alignment: AlignmentDirectional(0.0, 0.05),
+                              alignment: const AlignmentDirectional(0.0, 0.05),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 8.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Align(
+                                    const Align(
                                       alignment:
                                           AlignmentDirectional(-0.2, 0.0),
                                       child: Padding(
@@ -351,7 +351,7 @@ class _ShowTaskFinalManageCopyWidgetState
                                     ),
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(0.5, 0.05),
+                                          const AlignmentDirectional(0.5, 0.05),
                                       child: Text(
                                         ' Cherry Court SOUTHAMPTON SO53 5PD UK',
                                         style: FlutterFlowTheme.of(context)
@@ -365,7 +365,7 @@ class _ShowTaskFinalManageCopyWidgetState
                           ),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(0.0, -0.1),
+                          alignment: const AlignmentDirectional(0.0, -0.1),
                           child: Container(
                             width: 312.3,
                             height: 39.5,
@@ -374,14 +374,14 @@ class _ShowTaskFinalManageCopyWidgetState
                                   .secondaryBackground,
                             ),
                             child: Align(
-                              alignment: AlignmentDirectional(0.0, 0.05),
+                              alignment: const AlignmentDirectional(0.0, 0.05),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 8.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    Padding(
+                                    const Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           2.0, 0.0, 5.0, 0.0),
                                       child: Icon(
@@ -392,9 +392,9 @@ class _ShowTaskFinalManageCopyWidgetState
                                     ),
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(0.5, 0.05),
+                                          const AlignmentDirectional(0.5, 0.05),
                                       child: Text(
-                                        ' 41°24\'12.2\"N 2°10\'26.5\"E',
+                                        ' 41°24\'12.2"N 2°10\'26.5"E',
                                         style: FlutterFlowTheme.of(context)
                                             .bodySmall,
                                       ),
@@ -406,7 +406,7 @@ class _ShowTaskFinalManageCopyWidgetState
                           ),
                         ),
                         Align(
-                          alignment: AlignmentDirectional(0.0, -0.1),
+                          alignment: const AlignmentDirectional(0.0, -0.1),
                           child: Container(
                             width: 312.3,
                             height: 39.5,
@@ -415,14 +415,14 @@ class _ShowTaskFinalManageCopyWidgetState
                                   .secondaryBackground,
                             ),
                             child: Align(
-                              alignment: AlignmentDirectional(0.0, 0.05),
+                              alignment: const AlignmentDirectional(0.0, 0.05),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 8.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    Padding(
+                                    const Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           1.0, 0.0, 5.0, 0.0),
                                       child: Icon(
@@ -433,7 +433,7 @@ class _ShowTaskFinalManageCopyWidgetState
                                     ),
                                     Align(
                                       alignment:
-                                          AlignmentDirectional(0.5, 0.05),
+                                          const AlignmentDirectional(0.5, 0.05),
                                       child: Text(
                                         'Location description',
                                         style: FlutterFlowTheme.of(context)
@@ -451,7 +451,7 @@ class _ShowTaskFinalManageCopyWidgetState
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 0.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -464,12 +464,12 @@ class _ShowTaskFinalManageCopyWidgetState
                 ),
                 Padding(
                   padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           blurRadius: 5.0,
                           color: Color(0x34111417),
@@ -480,16 +480,16 @@ class _ShowTaskFinalManageCopyWidgetState
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                          const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Align(
-                            alignment: AlignmentDirectional(-0.85, 0.0),
+                            alignment: const AlignmentDirectional(-0.85, 0.0),
                             child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 12.0, 0.0, 15.0),
                               child: Text(
                                 'Mark Complete?',
@@ -503,11 +503,11 @@ class _ShowTaskFinalManageCopyWidgetState
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     10.0, 0.0, 0.0, 0.0),
                                 child: Theme(
                                   data: ThemeData(
-                                    checkboxTheme: CheckboxThemeData(
+                                    checkboxTheme: const CheckboxThemeData(
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.only(
                                           bottomLeft: Radius.circular(0.0),
@@ -532,9 +532,9 @@ class _ShowTaskFinalManageCopyWidgetState
                                 ),
                               ),
                               Align(
-                                alignment: AlignmentDirectional(0.0, 0.1),
+                                alignment: const AlignmentDirectional(0.0, 0.1),
                                 child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
                                       40.0, 0.0, 0.0, 0.0),
                                   child: FFButtonWidget(
                                     onPressed: () async {
@@ -542,7 +542,7 @@ class _ShowTaskFinalManageCopyWidgetState
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) =>
-                                              ProfileOnboardingWidget(),
+                                              const ProfileOnboardingWidget(),
                                         ),
                                       );
                                     },
@@ -550,12 +550,12 @@ class _ShowTaskFinalManageCopyWidgetState
                                     options: FFButtonOptions(
                                       width: 176.0,
                                       height: 50.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
                                           0.0, 0.0, 0.0, 0.0),
                                       iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
+                                          const EdgeInsetsDirectional.fromSTEB(
                                               0.0, 0.0, 0.0, 0.0),
-                                      color: Color(0xFF013576),
+                                      color: const Color(0xFF013576),
                                       textStyle: FlutterFlowTheme.of(context)
                                           .titleSmall
                                           .override(
@@ -564,7 +564,7 @@ class _ShowTaskFinalManageCopyWidgetState
                                                 .primaryBackground,
                                           ),
                                       elevation: 2.0,
-                                      borderSide: BorderSide(
+                                      borderSide: const BorderSide(
                                         color: Colors.transparent,
                                         width: 1.0,
                                       ),

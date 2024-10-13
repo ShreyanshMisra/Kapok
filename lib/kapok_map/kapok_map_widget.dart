@@ -63,10 +63,10 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color(0xFFEFEFEF),
-      drawer: Container(
+      backgroundColor: const Color(0xFFEFEFEF),
+      drawer: SizedBox(
         width: MediaQuery.sizeOf(context).width * 0.7,
-        child: Drawer(
+        child: const Drawer(
           elevation: 16.0,
         ),
       ),
@@ -82,12 +82,12 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                   Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     height: 108.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color(0xFF013576),
                     ),
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(24.0, 50.0, 0.0, 0.0),
+                          const EdgeInsetsDirectional.fromSTEB(24.0, 50.0, 0.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
@@ -95,7 +95,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
                                 child: Text(
                                   'Hello',
                                   style: FlutterFlowTheme.of(context)
@@ -121,21 +121,21 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                 child: Stack(
                   children: [
                     Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
+                      alignment: const AlignmentDirectional(0.0, 0.0),
                       child: Container(
                         height: MediaQuery.sizeOf(context).height * 1.0,
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Align(
-                          alignment: AlignmentDirectional(0.0, 0.0),
+                          alignment: const AlignmentDirectional(0.0, 0.0),
                           child: FlutterFlowStaticMap(
-                            location: LatLng(9.341465, -79.891704),
+                            location: const LatLng(9.341465, -79.891704),
                             apiKey:
                                 'pk.eyJ1IjoiYXJrYW5lZ3J2IiwiYSI6ImNrdzg1enVrMDF5OGIycXBkbXltbWd1d3IifQ.UTwGUjE7A64wqczBwMW4cg',
                             style: MapBoxStyle.Light,
                             width: MediaQuery.sizeOf(context).width * 1.0,
                             height: MediaQuery.sizeOf(context).height * 1.0,
                             fit: BoxFit.cover,
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                               bottomLeft: Radius.circular(0.0),
                               bottomRight: Radius.circular(0.0),
                               topLeft: Radius.circular(0.0),
@@ -154,7 +154,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 16.0, 0.0, 0.0),
                           child: Material(
                             color: Colors.transparent,
@@ -167,7 +167,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                               height: 50.0,
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -176,17 +176,17 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                                 ],
                                 borderRadius: BorderRadius.circular(8.0),
                                 border: Border.all(
-                                  color: Color(0xFFEEEEEE),
+                                  color: const Color(0xFFEEEEEE),
                                   width: 2.0,
                                 ),
                               ),
                               child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     8.0, 0.0, 8.0, 0.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    Padding(
+                                    const Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
                                           4.0, 0.0, 4.0, 0.0),
                                       child: Icon(
@@ -197,7 +197,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                                     ),
                                     Expanded(
                                       child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(
                                             4.0, 0.0, 0.0, 0.0),
                                         child: TextFormField(
                                           controller: _model.textController,
@@ -205,53 +205,53 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                                           onChanged: (_) =>
                                               EasyDebounce.debounce(
                                             '_model.textController',
-                                            Duration(milliseconds: 2000),
+                                            const Duration(milliseconds: 2000),
                                             () => setState(() {}),
                                           ),
                                           obscureText: false,
                                           decoration: InputDecoration(
                                             labelText: 'Search events here...',
-                                            enabledBorder: UnderlineInputBorder(
+                                            enabledBorder: const UnderlineInputBorder(
                                               borderSide: BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
                                               borderRadius:
-                                                  const BorderRadius.only(
+                                                  BorderRadius.only(
                                                 topLeft: Radius.circular(4.0),
                                                 topRight: Radius.circular(4.0),
                                               ),
                                             ),
-                                            focusedBorder: UnderlineInputBorder(
+                                            focusedBorder: const UnderlineInputBorder(
                                               borderSide: BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
                                               borderRadius:
-                                                  const BorderRadius.only(
+                                                  BorderRadius.only(
                                                 topLeft: Radius.circular(4.0),
                                                 topRight: Radius.circular(4.0),
                                               ),
                                             ),
-                                            errorBorder: UnderlineInputBorder(
+                                            errorBorder: const UnderlineInputBorder(
                                               borderSide: BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
                                               borderRadius:
-                                                  const BorderRadius.only(
+                                                  BorderRadius.only(
                                                 topLeft: Radius.circular(4.0),
                                                 topRight: Radius.circular(4.0),
                                               ),
                                             ),
                                             focusedErrorBorder:
-                                                UnderlineInputBorder(
+                                                const UnderlineInputBorder(
                                               borderSide: BorderSide(
                                                 color: Color(0x00000000),
                                                 width: 1.0,
                                               ),
                                               borderRadius:
-                                                  const BorderRadius.only(
+                                                  BorderRadius.only(
                                                 topLeft: Radius.circular(4.0),
                                                 topRight: Radius.circular(4.0),
                                               ),
@@ -264,7 +264,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                                                           ?.clear();
                                                       setState(() {});
                                                     },
-                                                    child: Icon(
+                                                    child: const Icon(
                                                       Icons.clear,
                                                       color: Color(0xFF013576),
                                                       size: 20.0,
@@ -276,7 +276,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Lexend Deca',
-                                                color: Color(0xFF95A1AC),
+                                                color: const Color(0xFF95A1AC),
                                                 fontSize: 14.0,
                                                 fontWeight: FontWeight.normal,
                                               ),
@@ -286,7 +286,7 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                                         ),
                                       ),
                                     ),
-                                    Expanded(
+                                    const Expanded(
                                       child: Align(
                                         alignment:
                                             AlignmentDirectional(0.95, 0.0),
@@ -311,11 +311,11 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
             ],
           ),
           Align(
-            alignment: AlignmentDirectional(0.0, 1.0),
+            alignment: const AlignmentDirectional(0.0, 1.0),
             child: Container(
               width: MediaQuery.sizeOf(context).width * 1.0,
               height: MediaQuery.sizeOf(context).height * 0.08,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFF013576),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(0.0),
@@ -329,13 +329,13 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: FlutterFlowIconButton(
                       borderColor: Colors.transparent,
                       borderRadius: 10.0,
                       borderWidth: 1.0,
                       buttonSize: 60.0,
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.person,
                         color: Colors.white,
                         size: 30.0,
@@ -344,20 +344,20 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreateTaskFinalCopyWidget(),
+                            builder: (context) => const CreateTaskFinalCopyWidget(),
                           ),
                         );
                       },
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, -0.05),
+                    alignment: const AlignmentDirectional(-1.0, -0.05),
                     child: FlutterFlowIconButton(
                       borderColor: Colors.transparent,
                       borderRadius: 10.0,
                       borderWidth: 1.0,
                       buttonSize: 60.0,
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.chat,
                         color: Colors.white,
                         size: 30.0,
@@ -367,20 +367,20 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                NewViewTasksTeamMemberWidget(),
+                                const NewViewTasksTeamMemberWidget(),
                           ),
                         );
                       },
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: FlutterFlowIconButton(
                       borderColor: Colors.transparent,
                       borderRadius: 30.0,
                       borderWidth: 1.0,
                       buttonSize: 60.0,
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.people,
                         color: Colors.white,
                         size: 30.0,
@@ -389,20 +389,20 @@ class _KapokMapWidgetState extends State<KapokMapWidget> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TeamManagementCopyWidget(),
+                            builder: (context) => const TeamManagementCopyWidget(),
                           ),
                         );
                       },
                     ),
                   ),
                   Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    alignment: const AlignmentDirectional(-1.0, 0.0),
                     child: FlutterFlowIconButton(
                       borderColor: Colors.transparent,
                       borderRadius: 30.0,
                       borderWidth: 1.0,
                       buttonSize: 60.0,
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.group_add,
                         color: Colors.white,
                         size: 30.0,

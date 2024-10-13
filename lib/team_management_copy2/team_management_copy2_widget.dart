@@ -55,8 +55,8 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color(0xE6FFFFFF),
-      drawer: Container(
+      backgroundColor: const Color(0xE6FFFFFF),
+      drawer: SizedBox(
         width: MediaQuery.sizeOf(context).width * 0.5,
         child: Drawer(
           elevation: 100.0,
@@ -73,7 +73,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                 child: wrapWithModel(
                   model: _model.hamburgerMenuModel,
                   updateCallback: () => setState(() {}),
-                  child: HamburgerMenuWidget(),
+                  child: const HamburgerMenuWidget(),
                 ),
               ),
             ],
@@ -81,7 +81,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
         ),
       ),
       appBar: AppBar(
-        backgroundColor: Color(0xFF013576),
+        backgroundColor: const Color(0xFF013576),
         automaticallyImplyLeading: true,
         title: Text(
           'Team Name',
@@ -91,7 +91,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                 fontSize: 22.0,
               ),
         ),
-        actions: [],
+        actions: const [],
         centerTitle: true,
         elevation: 2.0,
       ),
@@ -108,11 +108,11 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
               scrollDirection: Axis.vertical,
               children: [
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 0.0, 0.0),
                   child: Container(
                     width: double.infinity,
                     height: 550.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color(0xE6FFFFFF),
                     ),
                     child: SingleChildScrollView(
@@ -121,14 +121,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -137,7 +137,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -151,12 +151,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -173,14 +173,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -189,7 +189,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -203,12 +203,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -225,14 +225,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -241,7 +241,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -255,12 +255,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -277,14 +277,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -293,7 +293,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -307,12 +307,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -329,14 +329,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -345,7 +345,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -359,12 +359,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -381,14 +381,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -397,7 +397,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -411,12 +411,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -433,14 +433,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -449,7 +449,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -463,12 +463,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -485,14 +485,14 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
                                 10.0, 5.0, 10.0, 5.0),
                             child: Container(
                               width: double.infinity,
                               height: 80.0,
                               decoration: BoxDecoration(
-                                color: Color(0xFFF6F9FC),
-                                boxShadow: [
+                                color: const Color(0xFFF6F9FC),
+                                boxShadow: const [
                                   BoxShadow(
                                     blurRadius: 2.0,
                                     color: Color(0x4E000000),
@@ -501,7 +501,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                 ],
                                 borderRadius: BorderRadius.circular(30.0),
                                 border: Border.all(
-                                  color: Color(0xFF013576),
+                                  color: const Color(0xFF013576),
                                   width: 2.0,
                                 ),
                               ),
@@ -515,12 +515,12 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                               !FFAppState().popupActivated);
                                     },
                                     value: FFAppState().popupActivated,
-                                    onIcon: Icon(
+                                    onIcon: const Icon(
                                       Icons.check_box,
                                       color: Colors.black,
                                       size: 25.0,
                                     ),
-                                    offIcon: Icon(
+                                    offIcon: const Icon(
                                       Icons.check_box_outline_blank,
                                       color: Colors.black,
                                       size: 25.0,
@@ -547,15 +547,15 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
               width: double.infinity,
               height: 190.0,
               decoration: BoxDecoration(
-                color: Color(0xFF013576),
-                borderRadius: BorderRadius.only(
+                color: const Color(0xFF013576),
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(0.0),
                   bottomRight: Radius.circular(0.0),
                   topLeft: Radius.circular(30.0),
                   topRight: Radius.circular(30.0),
                 ),
                 border: Border.all(
-                  color: Color(0x467E8383),
+                  color: const Color(0x467E8383),
                   width: 3.0,
                 ),
               ),
@@ -564,7 +564,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                 children: [
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                     child: Container(
                       width: 345.5,
                       height: 73.0,
@@ -574,11 +574,11 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                       ),
                       child: Padding(
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(5.0, 0.0, 5.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(5.0, 0.0, 5.0, 0.0),
                         child: GridView(
                           padding: EdgeInsets.zero,
                           gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 4,
                             crossAxisSpacing: 10.0,
                             mainAxisSpacing: 10.0,
@@ -590,7 +590,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                               borderRadius: 50.0,
                               borderWidth: 3.0,
                               buttonSize: 100.0,
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.remove_red_eye,
                                 color: Color(0xFF013576),
                                 size: 50.0,
@@ -603,7 +603,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                               borderRadius: 50.0,
                               borderWidth: 3.0,
                               buttonSize: 60.0,
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.highlight_off,
                                 color: Color(0xFF013576),
                                 size: 50.0,
@@ -616,7 +616,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                               borderRadius: 50.0,
                               borderWidth: 3.0,
                               buttonSize: 60.0,
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.add,
                                 color: Color(0xFF013576),
                                 size: 50.0,
@@ -626,7 +626,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        CreateTaskFinalCopyWidget(),
+                                        const CreateTaskFinalCopyWidget(),
                                   ),
                                 );
                               },
@@ -635,7 +635,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                               borderRadius: 50.0,
                               borderWidth: 3.0,
                               buttonSize: 60.0,
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.delete,
                                 color: Color(0xFF013576),
                                 size: 50.0,
@@ -651,7 +651,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                   ),
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                     child: InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
@@ -661,7 +661,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => NewViewTasksManagerWidget(),
+                            builder: (context) => const NewViewTasksManagerWidget(),
                           ),
                         );
                       },
@@ -686,7 +686,7 @@ class _TeamManagementCopy2WidgetState extends State<TeamManagementCopy2Widget> {
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.arrow_forward,
                               color: Colors.black,
                               size: 24.0,

@@ -50,48 +50,48 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color(0xFF013576),
+      backgroundColor: const Color(0xFF013576),
       body: Container(
         width: MediaQuery.sizeOf(context).width * 1.0,
         height: MediaQuery.sizeOf(context).height * 1.0,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(0xFF013576),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 200.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 200.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: MediaQuery.sizeOf(context).height * 0.3,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF013576),
                 ),
                 child: Align(
-                  alignment: AlignmentDirectional(0.0, 0.0),
+                  alignment: const AlignmentDirectional(0.0, 0.0),
                   child: Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     height: MediaQuery.sizeOf(context).width * 1.0,
                     clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                     ),
                     child: Image.asset(
                       'assets/images/Kapok_2-modified.png',
-                      alignment: Alignment(0.0, 1.0),
+                      alignment: const Alignment(0.0, 1.0),
                     ),
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.5,
                 height: MediaQuery.sizeOf(context).height * 0.06,
                 decoration: BoxDecoration(
-                  color: Color(0xFF013576),
+                  color: const Color(0xFF013576),
                   borderRadius: BorderRadius.circular(0.0),
                 ),
                 child: FFButtonWidget(
@@ -99,7 +99,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => LoginSignupWidget(),
+                        builder: (context) => const LoginSignupWidget(),
                       ),
                     );
                   },
@@ -107,17 +107,17 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   options: FFButtonOptions(
                     width: 130.0,
                     height: 40.0,
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     iconPadding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: Colors.white,
                     textStyle:
                         FlutterFlowTheme.of(context).headlineSmall.override(
                               fontFamily: 'Open Sans',
-                              color: Color(0xFF013576),
+                              color: const Color(0xFF013576),
                             ),
                     elevation: 2.0,
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Colors.transparent,
                       width: 1.0,
                     ),

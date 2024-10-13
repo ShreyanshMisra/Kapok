@@ -60,12 +60,12 @@ class _TaskWidgetState extends State<TaskWidget> {
                   FFAppState().popupActivated = !FFAppState().popupActivated);
             },
             value: FFAppState().popupActivated,
-            onIcon: Icon(
+            onIcon: const Icon(
               Icons.check_box,
               color: Colors.black,
               size: 25.0,
             ),
-            offIcon: Icon(
+            offIcon: const Icon(
               Icons.check_box_outline_blank,
               color: Colors.black,
               size: 25.0,
@@ -79,7 +79,7 @@ class _TaskWidgetState extends State<TaskWidget> {
             color: FlutterFlowTheme.of(context).secondaryBackground,
           ),
           child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
             child: Text(
               'Task Name',
               textAlign: TextAlign.center,
@@ -105,7 +105,7 @@ class _TaskWidgetState extends State<TaskWidget> {
                 style: FlutterFlowTheme.of(context).bodyMedium,
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                 child: Text(
                   'Team Member',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -145,7 +145,7 @@ class _TaskWidgetState extends State<TaskWidget> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ShowTaskFinalManageWidget(),
+                      builder: (context) => const ShowTaskFinalManageWidget(),
                     ),
                   );
                 },

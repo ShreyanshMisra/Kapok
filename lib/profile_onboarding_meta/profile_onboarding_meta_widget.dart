@@ -58,7 +58,7 @@ class _ProfileOnboardingMetaWidgetState
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Color(0xFFF1F4F8),
+      backgroundColor: const Color(0xFFF1F4F8),
       drawer: Drawer(
         elevation: 16.0,
         child: Column(
@@ -70,28 +70,28 @@ class _ProfileOnboardingMetaWidgetState
                 Container(
                   width: 304.0,
                   height: 180.0,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color(0xFF4B39EF),
                   ),
                   child: Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 0.0, 0.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 20.0, 0.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Align(
-                                alignment: AlignmentDirectional(-0.7, 0.0),
+                                alignment: const AlignmentDirectional(-0.7, 0.0),
                                 child: Container(
                                   width: 80.0,
                                   height: 80.0,
                                   clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
                                   ),
                                   child: Image.asset(
@@ -99,7 +99,7 @@ class _ProfileOnboardingMetaWidgetState
                                   ),
                                 ),
                               ),
-                              Expanded(
+                              const Expanded(
                                 child: Align(
                                   alignment: AlignmentDirectional(0.7, 0.0),
                                   child: Icon(
@@ -113,7 +113,7 @@ class _ProfileOnboardingMetaWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 8.0, 0.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -133,7 +133,7 @@ class _ProfileOnboardingMetaWidgetState
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
                               0.0, 8.0, 0.0, 0.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -144,7 +144,7 @@ class _ProfileOnboardingMetaWidgetState
                                     .titleSmall
                                     .override(
                                       fontFamily: 'Lexend Deca',
-                                      color: Color(0xFFEE8B60),
+                                      color: const Color(0xFFEE8B60),
                                       fontSize: 16.0,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -164,7 +164,7 @@ class _ProfileOnboardingMetaWidgetState
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(0xFFF1F4F8),
         ),
         child: Column(
@@ -174,7 +174,7 @@ class _ProfileOnboardingMetaWidgetState
             Container(
               width: double.infinity,
               height: 252.8,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFFF1F4F8),
               ),
               child: Row(
@@ -183,7 +183,7 @@ class _ProfileOnboardingMetaWidgetState
                   Container(
                     width: MediaQuery.sizeOf(context).width * 1.0,
                     height: 267.0,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color(0xFF013576),
                     ),
                     child: Column(
@@ -191,12 +191,12 @@ class _ProfileOnboardingMetaWidgetState
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Align(
-                          alignment: AlignmentDirectional(0.0, 0.0),
+                          alignment: const AlignmentDirectional(0.0, 0.0),
                           child: Container(
                             width: MediaQuery.sizeOf(context).width * 0.5,
                             height: MediaQuery.sizeOf(context).width * 0.5,
                             clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                             ),
                             child: Image.asset(
@@ -211,12 +211,12 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 height: MediaQuery.sizeOf(context).height * 0.026,
                 decoration: BoxDecoration(
-                  color: Color(0xFFF1F4F8),
+                  color: const Color(0xFFF1F4F8),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
@@ -229,13 +229,13 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 height: MediaQuery.sizeOf(context).height * 0.057,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).primaryBtnText,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       blurRadius: 5.0,
                       color: Color(0x33000000),
@@ -244,14 +244,14 @@ class _ProfileOnboardingMetaWidgetState
                   ],
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Container(
+                child: SizedBox(
                   width: double.infinity,
                   child: TextFormField(
                     controller: _model.textController,
                     focusNode: _model.textFieldFocusNode,
                     onChanged: (_) => EasyDebounce.debounce(
                       '_model.textController',
-                      Duration(milliseconds: 2000),
+                      const Duration(milliseconds: 2000),
                       () => setState(() {}),
                     ),
                     autofocus: true,
@@ -259,47 +259,47 @@ class _ProfileOnboardingMetaWidgetState
                     decoration: InputDecoration(
                       hintText: 'YourName',
                       hintStyle: FlutterFlowTheme.of(context).bodySmall,
-                      enabledBorder: OutlineInputBorder(
+                      enabledBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Color(0x00000000),
                           width: 1.0,
                         ),
-                        borderRadius: const BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(4.0),
                           topRight: Radius.circular(4.0),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
+                      focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Color(0x43000000),
                           width: 1.0,
                         ),
-                        borderRadius: const BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(4.0),
                           topRight: Radius.circular(4.0),
                         ),
                       ),
-                      errorBorder: OutlineInputBorder(
+                      errorBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Color(0x00000000),
                           width: 1.0,
                         ),
-                        borderRadius: const BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(4.0),
                           topRight: Radius.circular(4.0),
                         ),
                       ),
-                      focusedErrorBorder: OutlineInputBorder(
+                      focusedErrorBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Color(0x00000000),
                           width: 1.0,
                         ),
-                        borderRadius: const BorderRadius.only(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(4.0),
                           topRight: Radius.circular(4.0),
                         ),
                       ),
-                      prefixIcon: FaIcon(
+                      prefixIcon: const FaIcon(
                         FontAwesomeIcons.pencilAlt,
                         color: Color(0xFF424242),
                       ),
@@ -309,7 +309,7 @@ class _ProfileOnboardingMetaWidgetState
                                 _model.textController?.clear();
                                 setState(() {});
                               },
-                              child: Icon(
+                              child: const Icon(
                                 Icons.clear,
                                 color: Color(0xFF757575),
                                 size: 22.0,
@@ -326,12 +326,12 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 height: MediaQuery.sizeOf(context).height * 0.026,
                 decoration: BoxDecoration(
-                  color: Color(0xFFF1F4F8),
+                  color: const Color(0xFFF1F4F8),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
@@ -341,13 +341,13 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 height: MediaQuery.sizeOf(context).height * 0.125,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).primaryBtnText,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       blurRadius: 5.0,
                       color: Color(0x33000000),
@@ -359,7 +359,7 @@ class _ProfileOnboardingMetaWidgetState
                 child: FlutterFlowDropDown<String>(
                   controller: _model.dropDownValueController ??=
                       FormFieldController<String>(null),
-                  options: [
+                  options: const [
                     'Plumbing',
                     'Electrical',
                     'Medical',
@@ -383,7 +383,7 @@ class _ProfileOnboardingMetaWidgetState
                   borderColor: Colors.transparent,
                   borderWidth: 0.0,
                   borderRadius: 8.0,
-                  margin: EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0),
+                  margin: const EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0),
                   hidesUnderline: true,
                   isSearchable: false,
                   isMultiSelect: false,
@@ -391,12 +391,12 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 height: MediaQuery.sizeOf(context).height * 0.026,
                 decoration: BoxDecoration(
-                  color: Color(0xFFF1F4F8),
+                  color: const Color(0xFFF1F4F8),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
@@ -406,13 +406,13 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 0.8,
                 height: MediaQuery.sizeOf(context).height * 0.111,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).primaryBtnText,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       blurRadius: 5.0,
                       color: Color(0x33000000),
@@ -426,7 +426,7 @@ class _ProfileOnboardingMetaWidgetState
                   children: [
                     Theme(
                       data: ThemeData(
-                        checkboxTheme: CheckboxThemeData(
+                        checkboxTheme: const CheckboxThemeData(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(0.0),
@@ -436,7 +436,7 @@ class _ProfileOnboardingMetaWidgetState
                             ),
                           ),
                         ),
-                        unselectedWidgetColor: Color(0xFFF5F5F5),
+                        unselectedWidgetColor: const Color(0xFFF5F5F5),
                       ),
                       child: Checkbox(
                         value: _model.checkboxValue ??= true,
@@ -455,14 +455,14 @@ class _ProfileOnboardingMetaWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 20.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 20.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
                     child: FFButtonWidget(
                       onPressed: () {
                         print('Button pressed ...');
@@ -472,19 +472,19 @@ class _ProfileOnboardingMetaWidgetState
                         width: 90.0,
                         height: 40.0,
                         padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                         iconPadding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: Color(0xFF013576),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        color: const Color(0xFF013576),
                         textStyle:
                             FlutterFlowTheme.of(context).bodySmall.override(
                                   fontFamily: 'Lexend Deca',
-                                  color: Color(0xFFF1F4F8),
+                                  color: const Color(0xFFF1F4F8),
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.normal,
                                 ),
                         elevation: 3.0,
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Colors.transparent,
                           width: 1.0,
                         ),
