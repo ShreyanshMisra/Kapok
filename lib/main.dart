@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kapok_new/pages/auth_page/login_page.dart';
+import 'package:kapok_new/pages/home_screens/create_task_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),  //change MyApp to your page name to see your page output
+      home: CreateTaskPage(),  //change MyApp to your page name to see your page output
     );
   }
 }
