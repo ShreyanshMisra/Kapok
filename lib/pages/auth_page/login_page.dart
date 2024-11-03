@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
           Expanded(
             flex: 1,
             child: Container(
-              color: Colors.indigo,
+              color: Color(0xFF4B5499),
               child: Center(
                 // temporary image provider until we add into assets
                 child: Image.network('https://images.squarespace-cdn.com/content/v1/545e4c9ce4b016683bd50935/1631996083297-WIGHQU6ASS2LCXGY4ULC/ATT00001.jpg?format=750w'),
