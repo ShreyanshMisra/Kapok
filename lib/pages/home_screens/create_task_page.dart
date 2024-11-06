@@ -103,11 +103,18 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             SizedBox(height: 20),
 
             // Instructions/Notes 
+            // TODO: 
             Text('Instructions/Notes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             TextField(
               controller: _instructionsController,
               decoration: InputDecoration(labelText: 'Instructions'),
               maxLines: 5,
+              onTapOutside: (event) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              onSubmitted: (_) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }, //TODO: Add gesture detector for swiping down on the keyboard to get rid of it
             ),
             SizedBox(height: 20),
 
