@@ -3,8 +3,12 @@ import 'package:get/get.dart';
 import 'package:kapok_new/pages/auth_page/login_page.dart';
 import 'package:kapok_new/pages/auth_page/sign_up_page.dart';
 import 'package:kapok_new/pages/home_screens/create_task_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
