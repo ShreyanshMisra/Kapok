@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:kapok_new/pages/home_screens/map_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -126,9 +128,14 @@ class _SignUpPageState extends State<SignUpPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        'Create Account',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      child: GestureDetector(
+                        child: Text(
+                          'Create Account',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                        onTap: (){
+                          Get.to(MapPage());
+                        },
                       ),
                     ),
                   ),

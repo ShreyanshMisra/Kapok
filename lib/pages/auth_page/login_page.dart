@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:kapok_new/pages/auth_page/sign_up_page.dart';
+import 'package:kapok_new/pages/home_screens/map_page.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -57,14 +60,19 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                  'Login',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                  GestureDetector(
+                    child: Text(
+                    'Login',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    ),
+                    onTap: (){
+                      Get.to(MapPage());
+                    },
                   ),
-                ),
                 const SizedBox(height: 50),
                   TextField(
                     controller: _emailController,
@@ -99,9 +107,14 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      child: GestureDetector(
+                        child: Text(
+                          'Login',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                        onTap: (){
+                          Get.to(MapPage());
+                        },
                       ),
                     ),
                   ),
@@ -114,12 +127,17 @@ class _LoginPageState extends State<LoginPage> {
                         MaterialPageRoute(builder: (context) => const SignUpPage()), // redirect to signup page
                       );*/
                     },
-                    child: const Text(
-                      'Create Account',
-                      style: TextStyle(
-                        color: Colors.indigo,
-                        fontSize: 16,
+                    child: GestureDetector(
+                      child: Text(
+                        'Create Account',
+                        style: TextStyle(
+                          color: Colors.indigo,
+                          fontSize: 16,
+                        ),
                       ),
+                      onTap: (){
+                        Get.to(SignUpPage());
+                      }
                     ),
                   ),
                 ],

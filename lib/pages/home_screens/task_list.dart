@@ -1,24 +1,49 @@
 import 'package:flutter/material.dart';
 
+class TaskListPage extends StatefulWidget {
+  const TaskListPage({super.key});
 
-class TaskListHome extends StatelessWidget {
+  @override
+  State<TaskListPage> createState() => _TaskListPageState();
+}
+
+class _TaskListPageState extends State<TaskListPage> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Member Tasks'),
-          // TODO: possbile global styles to reduce styling issues
-          backgroundColor: Color(0xFF083677),
-          titleTextStyle: TextStyle(
-          color: Colors.white
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Member Tasks'),
+        // TODO: possbile global styles to reduce styling issues
+        backgroundColor: Color(0xFF083677),
+        titleTextStyle: TextStyle(
+            color: Colors.white
         ),
-        body: TaskScreen(),
       ),
+      body: TaskScreen(),
     );
   }
 }
+
+
+
+// class TaskListHome extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(
+//           title: Text('Member Tasks'),
+//           // TODO: possbile global styles to reduce styling issues
+//           backgroundColor: Color(0xFF083677),
+//           titleTextStyle: TextStyle(
+//           color: Colors.white
+//           ),
+//         ),
+//         body: TaskScreen(),
+//       ),
+//     );
+//   }
+// }
 
 class TaskScreen extends StatefulWidget {
   @override

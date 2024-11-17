@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:kapok_new/pages/auth_page/login_page.dart';
 import 'package:kapok_new/pages/auth_page/sign_up_page.dart';
 import 'package:kapok_new/pages/home_screens/create_task_page.dart';
@@ -13,10 +14,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: SignUpPage(),  //change MyApp to your page name to see your page output
+      home: LoginPage(),  //change MyApp to your page name to see your page output
     );
   }
 }
