@@ -29,6 +29,7 @@ ios/Pods/
 ios/Podfile.lock
 ios/Runner.xcworkspace/
 ios/DerivedData/
+ios/Runner/GoogleService-Info.plist
 
 # Android
 .android/
