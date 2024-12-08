@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kapok_new/pages/home_screens/map_page.dart';
+import 'package:translator/translator.dart';
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -14,6 +16,20 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+
+  // Translator instance
+  final GoogleTranslator _translator = GoogleTranslator();
+
+  // Variables to hold UI text
+  String _signUpLabel = 'Sign Up';
+  String _fullNameLabel = 'Full Name';
+  String _emailLabel = 'Email Address';
+  String _passwordLabel = 'Password';
+  String _confirmPasswordLabel = 'Confirm Password';
+  String _createAccountLabel = 'Create Account';
+
+  // Tracks whether or not page is translated
+  bool _isTranslated = false;
 
   @override
   void dispose() {
@@ -37,6 +53,41 @@ class _SignUpPageState extends State<SignUpPage> {
     } else {
       print('Passwords do not match');
     }
+  }
+
+  Future<void> _translateTexts() async {
+    // If already translated, revert to English
+    if (_isTranslated) {
+      setState(() {
+        _signUpLabel = 'Sign Up';
+        _fullNameLabel = 'Full Name';
+        _emailLabel = 'Email Address';
+        _passwordLabel = 'Password';
+        _confirmPasswordLabel = 'Confirm Password';
+        _createAccountLabel = 'Create Account';
+        _isTranslated = false;
+      });
+      return;
+    }
+
+    // Translate each text to Spanish
+    final signUpLabelEs = await _translator.translate(_signUpLabel, to: 'es');
+    final fullNameLabelEs = await _translator.translate(_fullNameLabel, to: 'es');
+    final emailLabelEs = await _translator.translate(_emailLabel, to: 'es');
+    final passwordLabelEs = await _translator.translate(_passwordLabel, to: 'es');
+    final confirmPasswordLabelEs = await _translator.translate(_confirmPasswordLabel, to: 'es');
+    final createAccountLabelEs = await _translator.translate(_createAccountLabel, to: 'es');
+
+    // Update state with translated text
+    setState(() {
+      _signUpLabel = signUpLabelEs.text;
+      _fullNameLabel = fullNameLabelEs.text;
+      _emailLabel = emailLabelEs.text;
+      _passwordLabel = passwordLabelEs.text;
+      _confirmPasswordLabel = confirmPasswordLabelEs.text;
+      _createAccountLabel = createAccountLabelEs.text;
+      _isTranslated = true;
+    });
   }
 
   @override
@@ -66,8 +117,8 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Sign Up',
+                  Text(
+                    _signUpLabel,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -78,7 +129,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   TextField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: 'Full Name',
+                      labelText: _fullNameLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -88,7 +139,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email Address',
+                      labelText: _emailLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -99,7 +150,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: _passwordLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -110,7 +161,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     controller: _confirmPasswordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: _confirmPasswordLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -130,7 +181,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       child: GestureDetector(
                         child: Text(
-                          'Create Account',
+                          _createAccountLabel,
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                         onTap: (){
@@ -145,6 +196,14 @@ class _SignUpPageState extends State<SignUpPage> {
           ],
         ),
       ),
+
+      // Floating action button for translation, positioned at bottom right
+      floatingActionButton: FloatingActionButton(
+        onPressed: _translateTexts, // Translates text on the page
+        backgroundColor: Colors.white,
+        child: const Icon(Icons.translate),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

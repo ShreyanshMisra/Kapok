@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kapok_new/pages/auth_page/sign_up_page.dart';
 import 'package:kapok_new/pages/home_screens/map_page.dart';
+import 'package:translator/translator.dart';
+
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -11,6 +14,18 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Translator instance
+  final GoogleTranslator _translator = GoogleTranslator();
+
+  // Variables to hold UI text
+  String _loginLabel = 'Login';
+  String _emailLabel = 'Email';
+  String _passwordLabel = 'Password';
+  String _createAccountLabel = 'Create Account';
+
+  // Tracks whether or not page is translated
+  bool _isTranslated = false;
 
   @override
   void dispose() {
@@ -27,6 +42,35 @@ class _LoginPageState extends State<LoginPage> {
 
     print('Email: $email'); // for testing
     print('Password: $password'); // for testing
+  }
+
+  Future<void> _translateTexts() async {
+    // If already translated, revert to English
+    if (_isTranslated) {
+      setState(() {
+        _loginLabel = 'Login';
+        _emailLabel = 'Email';
+        _passwordLabel = 'Password';
+        _createAccountLabel = 'Create Account';
+        _isTranslated = false;
+      });
+      return;
+    }
+
+    // Translate each text to Spanish
+    final loginLabelEs = await _translator.translate(_loginLabel, to: 'es');
+    final emailLabelEs = await _translator.translate(_emailLabel, to: 'es');
+    final passwordLabelEs = await _translator.translate(_passwordLabel, to: 'es');
+    final createAccountLabelEs = await _translator.translate(_createAccountLabel, to: 'es');
+
+    // Update state with translated text
+    setState(() {
+      _loginLabel = loginLabelEs.text;
+      _emailLabel = emailLabelEs.text;
+      _passwordLabel = passwordLabelEs.text;
+      _createAccountLabel = createAccountLabelEs.text;
+      _isTranslated = true;
+    });
   }
 
   @override
@@ -62,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   GestureDetector(
                     child: Text(
-                    'Login',
+                    _loginLabel,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -77,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: _emailLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -88,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: _passwordLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -109,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: GestureDetector(
                         child: Text(
-                          'Login',
+                          _loginLabel,
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                         onTap: (){
@@ -129,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     child: GestureDetector(
                       child: Text(
-                        'Create Account',
+                        _createAccountLabel,
                         style: TextStyle(
                           color: Colors.indigo,
                           fontSize: 16,
@@ -146,6 +190,13 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
+      // Floating action button for translation, positioned at bottom right
+      floatingActionButton: FloatingActionButton(
+        onPressed: _translateTexts, // Translates text on the page
+        backgroundColor: Colors.white,
+        child: const Icon(Icons.translate),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
