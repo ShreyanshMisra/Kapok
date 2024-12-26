@@ -103,7 +103,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             SizedBox(height: 20),
 
             // Instructions/Notes 
-            // TODO: 
             Text('Instructions/Notes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             TextField(
               controller: _instructionsController,

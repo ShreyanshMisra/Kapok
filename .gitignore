@@ -88,3 +88,11 @@ packages/
 
 # Thumbnails
 Thumbs.db
+
+*.env
+ios/Podfile
+ios/Flutter/Release.xcconfig
+ios/Flutter/Debug.xcconfig
+pubspec.lock
+macos/Flutter/Flutter-Debug.xcconfig
+macos/Flutter/Flutter-Release.xcconfig
