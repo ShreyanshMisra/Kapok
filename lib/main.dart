@@ -11,7 +11,7 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-  MapboxOptions.setAccessToken('pk.eyJ1IjoiZW1tZXRoYW1lbGwiLCJhIjoiY201NWhtOWFxMzYxczJqcHRueHNpNG40NiJ9.mANCSDfoAA9Xtr2oAqM0EQ');
+  MapboxOptions.setAccessToken(dotenv.env['MAPBOX_ACCESS_TOKEN']!);
   runApp(const MyApp());
 }
 
