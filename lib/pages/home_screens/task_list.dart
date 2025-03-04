@@ -12,12 +12,16 @@ class _TaskListPageState extends State<TaskListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Member Tasks'),
+        title: Text(
+            'Member Tasks',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white
+          ),
+        ),
         // TODO: possbile global styles to reduce styling issues
         backgroundColor: Color(0xFF083677),
-        titleTextStyle: TextStyle(
-            color: Colors.white
-        ),
       ),
       body: TaskScreen(),
     );
