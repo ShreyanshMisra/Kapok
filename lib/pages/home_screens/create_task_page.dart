@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kapok_new/models/task_model.dart';
 
 class CreateTaskPage extends StatefulWidget {
+  const CreateTaskPage({super.key});
+
   @override
   _CreateTaskPageState createState() => _CreateTaskPageState();
 }
@@ -46,15 +49,16 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
 
     try {
-      // TODO: Create firebase instance and store
-     // await FirebaseFirestore.instance.collection('tasks').add(task.toMap());
+      // Save the task to Firestore
+      await FirebaseFirestore.instance.collection('tasks').add(task.toMap());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Task created successfully')),
+        const SnackBar(content: Text('Task created successfully')),
       );
+      Navigator.pop(context);  // Return to the previous page
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create task')),
+        const SnackBar(content: Text('Failed to create task')),
       );
     }
   }
@@ -63,38 +67,37 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            'Create Task',
+        title: const Text(
+          'Create Task',
           style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white
-          ),
+              color: Colors.white),
         ),
-        backgroundColor: Color(0xFF083677),
+        backgroundColor: const Color(0xFF083677),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Location 
-            Text('Location', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            // Location
+            const Text('Location', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             TextField(
               controller: _addressController,
-              decoration: InputDecoration(labelText: 'Address'),
+              decoration: const InputDecoration(labelText: 'Address'),
             ),
             TextField(
               controller: _coordinatesController,
-              decoration: InputDecoration(labelText: 'Coordinates'),
+              decoration: const InputDecoration(labelText: 'Coordinates'),
             ),
             TextField(
               controller: _locationNotesController,
-              decoration: InputDecoration(labelText: 'Location Notes'),
+              decoration: const InputDecoration(labelText: 'Location Notes'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            // Category 
-            Text('Category', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            // Category
+            const Text('Category', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               items: _categories
@@ -106,34 +109,33 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               onChanged: (value) => setState(() {
                 _selectedCategory = value!;
               }),
-              decoration: InputDecoration(labelText: 'Select Category'),
+              decoration: const InputDecoration(labelText: 'Select Category'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            // Instructions/Notes 
-            // TODO: 
-            Text('Instructions/Notes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            // Instructions/Notes
+            const Text('Instructions/Notes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             TextField(
               controller: _instructionsController,
-              decoration: InputDecoration(labelText: 'Instructions'),
+              decoration: const InputDecoration(labelText: 'Instructions'),
               maxLines: 5,
               onTapOutside: (event) {
                 FocusManager.instance.primaryFocus?.unfocus();
               },
               onSubmitted: (_) {
                 FocusManager.instance.primaryFocus?.unfocus();
-              }, //TODO: Add gesture detector for swiping down on the keyboard to get rid of it
+              },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            // Urgency 
-            Text('Urgency', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            // Urgency
+            const Text('Urgency', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             _buildStarRating(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             ElevatedButton(
               onPressed: _saveTask,
-              child: Text('Create Task'),
+              child: const Text('Create Task'),
             ),
           ],
         ),
