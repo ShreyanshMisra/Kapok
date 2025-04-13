@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:kapok_new/models/task_model.dart';
 import 'package:translator/translator.dart';
 
+import 'package:kapok_new/theme/app_theme.dart';
+
 // class CreateTaskPage extends StatefulWidget {
 //   @override
 //   _CreateTaskPageState createState() => _CreateTaskPageState();
@@ -319,68 +321,113 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           _pageTitle,
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          style: theme.textTheme.displayLarge?.copyWith(color: Colors.white),
         ),
-        backgroundColor: Color(0xFF083677),
+        backgroundColor: theme.primaryColor,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_locationLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              _locationLabel,
+              style: theme.textTheme.displayLarge,
+            ),
+            const SizedBox(height: 8),
             TextField(
               controller: _addressController,
-              decoration: InputDecoration(labelText: _addressLabel),
+              style: theme.textTheme.bodyLarge,
+              decoration: InputDecoration(
+                labelText: _addressLabel,
+                labelStyle: theme.textTheme.bodyMedium,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _coordinatesController,
-              decoration: InputDecoration(labelText: _coordinatesLabel),
+              style: theme.textTheme.bodyLarge,
+              decoration: InputDecoration(
+                labelText: _coordinatesLabel,
+                labelStyle: theme.textTheme.bodyMedium,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _locationNotesController,
-              decoration: InputDecoration(labelText: _locationNotesLabel),
+              style: theme.textTheme.bodyLarge,
+              decoration: InputDecoration(
+                labelText: _locationNotesLabel,
+                labelStyle: theme.textTheme.bodyMedium,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
-            SizedBox(height: 20),
-            Text(_categoryLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Text(
+              _categoryLabel,
+              style: theme.textTheme.displayLarge,
+            ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               items: _categories
                   .map((category) => DropdownMenuItem(
                         value: category,
-                        child: Text(category),
+                        child:
+                            Text(category, style: theme.textTheme.bodyMedium),
                       ))
                   .toList(),
-              onChanged: (value) => setState(() {
-                _selectedCategory = value!;
-              }),
-              decoration: InputDecoration(labelText: _selectCategoryLabel),
+              onChanged: (value) => setState(() => _selectedCategory = value!),
+              decoration: InputDecoration(
+                labelText: _selectCategoryLabel,
+                labelStyle: theme.textTheme.bodyMedium,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
-            SizedBox(height: 20),
-            Text(_instructionsLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Text(
+              _instructionsLabel,
+              style: theme.textTheme.displayLarge,
+            ),
+            const SizedBox(height: 8),
             TextField(
               controller: _instructionsController,
-              decoration: InputDecoration(labelText: _instructionsHint),
               maxLines: 5,
-              onTapOutside: (event) =>
+              style: theme.textTheme.bodyLarge,
+              decoration: InputDecoration(
+                labelText: _instructionsHint,
+                labelStyle: theme.textTheme.bodyMedium,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onTapOutside: (_) =>
                   FocusManager.instance.primaryFocus?.unfocus(),
               onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             ),
-            SizedBox(height: 20),
-            Text(_urgencyLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Text(
+              _urgencyLabel,
+              style: theme.textTheme.displayLarge,
+            ),
             _buildStarRating(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveTask,
-              child: Text(_createTaskLabel),
+              child: Text(_createTaskLabel,
+                  style:
+                      theme.textTheme.bodyLarge?.copyWith(color: Colors.white)),
             ),
           ],
         ),
@@ -388,7 +435,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _translateTexts,
         backgroundColor: Colors.white,
-        child: Icon(Icons.translate),
+        child: const Icon(Icons.translate, color: Colors.black87),
       ),
     );
   }

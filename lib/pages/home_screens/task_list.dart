@@ -223,14 +223,15 @@ class _TaskListPageState extends State<TaskListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.primaryColor,
         title: Text(
           _titleLabel,
-          style: const TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          style: theme.textTheme.displayLarge?.copyWith(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF083677),
       ),
       body: TaskScreen(
         completeLabel: _completeLabel,
@@ -277,6 +278,8 @@ class _TaskScreenState extends State<TaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
@@ -285,8 +288,8 @@ class _TaskScreenState extends State<TaskScreen> {
             ExpansionTile(
               title: Text(
                 widget.completeLabel,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               trailing: Text(widget.taskCountLabel),
               children: [
@@ -301,8 +304,8 @@ class _TaskScreenState extends State<TaskScreen> {
               initiallyExpanded: true,
               title: Text(
                 widget.incompleteLabel,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               children: [
                 TaskList(
