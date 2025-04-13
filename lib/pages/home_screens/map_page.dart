@@ -243,15 +243,16 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           _titleLabel,
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          style: theme.textTheme.displayLarge?.copyWith(color: Colors.white),
         ),
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xFF083677),
+        backgroundColor: theme.primaryColor,
       ),
       body: Stack(
         children: [
@@ -283,7 +284,7 @@ class _MapPageState extends State<MapPage> {
       ),
       bottomNavigationBar: BottomAppBar(
         height: 60,
-        color: Color(0xFF083677),
+        color: theme.primaryColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
