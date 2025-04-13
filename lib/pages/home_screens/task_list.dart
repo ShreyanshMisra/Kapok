@@ -177,7 +177,7 @@ class _TaskListPageState extends State<TaskListPage> {
   final GoogleTranslator _translator = GoogleTranslator();
   bool _isTranslated = false;
 
-  String _titleLabel = 'Member Tasks';
+  String _titleLabel = 'Tasks';
   String _completeLabel = 'Complete Tasks';
   String _incompleteLabel = 'Incomplete Tasks';
   String _noTasksLabel = 'No tasks completed.';
@@ -188,7 +188,7 @@ class _TaskListPageState extends State<TaskListPage> {
   Future<void> _translateTexts() async {
     if (_isTranslated) {
       setState(() {
-        _titleLabel = 'Member Tasks';
+        _titleLabel = 'Tasks';
         _completeLabel = 'Complete Tasks';
         _incompleteLabel = 'Incomplete Tasks';
         _noTasksLabel = 'No tasks completed.';

@@ -275,17 +275,17 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo,
+      backgroundColor: const Color(0xFF083677),
       body: Column(
         children: [
           // Top section for image
           Expanded(
             flex: 1,
             child: Container(
-              color: Color(0xFF4B5499),
+              color: const Color(0xFF083677),
               child: Center(
                 // temporary image provider until we add into assets
-                child: Image.network('https://images.squarespace-cdn.com/content/v1/545e4c9ce4b016683bd50935/1631996083297-WIGHQU6ASS2LCXGY4ULC/ATT00001.jpg?format=750w'),
+                child: Image.asset('assets/images/logo.png'),
               ),
             ),
           ),
@@ -339,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: ElevatedButton(
                       onPressed: _handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
+                        backgroundColor: const Color(0xFF083677),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -406,8 +406,8 @@ class _LoginPageState extends State<LoginPage> {
                     child: GestureDetector(
                         child: Text(
                           _createAccountLabel,
-                          style: TextStyle(
-                            color: Colors.indigo,
+                          style: const TextStyle(
+                            color: Color(0xFF083677),
                             fontSize: 16,
                           ),
                         ),

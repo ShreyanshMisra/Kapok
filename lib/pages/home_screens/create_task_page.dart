@@ -200,6 +200,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   List<String> _categories = [
     'Construction',
     'Electrical',
+    'Education',
     'Engineering',
     'Medical',
     'Plumbing',

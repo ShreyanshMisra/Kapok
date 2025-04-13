@@ -348,16 +348,16 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo,
+      backgroundColor: const Color(0xFF083677),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Top section for image
             Container(
-              color: const Color(0xFF4B5499),
+              color: const Color(0xFF083677),
               height: MediaQuery.of(context).size.height * 0.3, // Adjusted to fit screen
               child: Center(
-                child: Image.network('https://images.squarespace-cdn.com/content/v1/545e4c9ce4b016683bd50935/1631996083297-WIGHQU6ASS2LCXGY4ULC/ATT00001.jpg?format=750w'),
+                child: Image.asset('assets/images/logo.png'),
               ),
             ),
             Container(
@@ -428,7 +428,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: ElevatedButton(
                       onPressed: _handleSignUp,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
+                        backgroundColor: const Color(0xFF083677),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
