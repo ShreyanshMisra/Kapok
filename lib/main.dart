@@ -2,9 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kapok_new/pages/auth_page/login_page.dart';
+import 'package:kapok_new/pages/home_screens/create_task_page.dart';
+import 'package:kapok_new/pages/home_screens/map_page.dart';
+import 'package:kapok_new/pages/home_screens/task_list.dart';
 import 'controllers/authentication_controller.dart';
 
-void main() async {  // Make sure to add async here
+void main() async {
+  // Make sure to add async here
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -34,7 +38,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      home: LoginPage(), //revert to LoginPage() again
     );
   }
 }
