@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: SignUpPage(),  //change MyApp to your page name to see your page output
+      home: CreateTaskPage(),  //change MyApp to your page name to see your page output
     );
   }
 }

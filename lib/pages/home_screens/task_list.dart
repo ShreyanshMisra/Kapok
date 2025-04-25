@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:kapok_new/pages/auth_page/login_page.dart';
 
 class TaskListHome extends StatelessWidget {
   @override
@@ -7,11 +7,22 @@ class TaskListHome extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Member Tasks'),
-          // TODO: possbile global styles to reduce styling issues
           backgroundColor: Color(0xFF083677),
-          titleTextStyle: TextStyle(
-          color: Colors.white
+          title: Text(
+            'Member Tasks',
+            style: TextStyle(color: Colors.white),
+          ),
+          leading: IconButton(
+            icon: Image.network(
+              'https://images.squarespace-cdn.com/content/v1/545e4c9ce4b016683bd50935/1631996083297-WIGHQU6ASS2LCXGY4ULC/ATT00001.jpg?format=750w',
+              height: 30,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
           ),
         ),
         body: TaskScreen(),

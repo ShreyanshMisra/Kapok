@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kapok_new/models/task_model.dart';
+import 'package:kapok_new/pages/auth_page/login_page.dart';
 
 class CreateTaskPage extends StatefulWidget {
   @override
@@ -63,6 +64,18 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Image.network(
+              'https://images.squarespace-cdn.com/content/v1/545e4c9ce4b016683bd50935/1631996083297-WIGHQU6ASS2LCXGY4ULC/ATT00001.jpg?format=750w',
+            height: 30,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          },
+        ),
         title: Text('Create Task'),
       ),
       body: SingleChildScrollView(
