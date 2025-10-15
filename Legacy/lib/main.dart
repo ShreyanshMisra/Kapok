@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return const GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       home: LoginPage(), //revert to LoginPage() again

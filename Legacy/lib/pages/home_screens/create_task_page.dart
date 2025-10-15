@@ -166,6 +166,8 @@ import 'package:translator/translator.dart';
 // }
 
 class CreateTaskPage extends StatefulWidget {
+  const CreateTaskPage({super.key});
+
   @override
   _CreateTaskPageState createState() => _CreateTaskPageState();
 }
@@ -307,12 +309,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     try {
       // await FirebaseFirestore.instance.collection('tasks').add(task.toMap());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Task created successfully')),
+        const SnackBar(content: Text('Task created successfully')),
       );
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create task')),
+        const SnackBar(content: Text('Failed to create task')),
       );
     }
   }
@@ -323,17 +325,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       appBar: AppBar(
         title: Text(
           _pageTitle,
-          style: TextStyle(
+          style: const TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Color(0xFF083677),
+        backgroundColor: const Color(0xFF083677),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(_locationLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             TextField(
               controller: _addressController,
               decoration: InputDecoration(labelText: _addressLabel),
@@ -346,11 +348,11 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               controller: _locationNotesController,
               decoration: InputDecoration(labelText: _locationNotesLabel),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(_categoryLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               items: _categories
                   .map((category) => DropdownMenuItem(
                         value: category,
@@ -362,9 +364,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               }),
               decoration: InputDecoration(labelText: _selectCategoryLabel),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(_instructionsLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             TextField(
               controller: _instructionsController,
               decoration: InputDecoration(labelText: _instructionsHint),
@@ -373,11 +375,11 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   FocusManager.instance.primaryFocus?.unfocus(),
               onSubmitted: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(_urgencyLabel,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             _buildStarRating(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveTask,
               child: Text(_createTaskLabel),
@@ -388,7 +390,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _translateTexts,
         backgroundColor: Colors.white,
-        child: Icon(Icons.translate),
+        child: const Icon(Icons.translate),
       ),
     );
   }

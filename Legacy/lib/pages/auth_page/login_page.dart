@@ -305,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Text(
                     _loginLabel,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -348,7 +348,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: GestureDetector(
                         child: Text(
                           _loginLabel,
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
                         ),
                         onTap: () async{
                           if (_emailController.text.trim().isNotEmpty
@@ -365,7 +365,7 @@ class _LoginPageState extends State<LoginPage> {
                                 SnackBar(
                                   content: Text(
                                     'Account login failed: $error',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'GemunuLibreBold',
@@ -377,7 +377,7 @@ class _LoginPageState extends State<LoginPage> {
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
+                              const SnackBar(
                                 content: Text(
                                   'A Field is empty. Please fill out all text fields.',
                                   style: TextStyle(
@@ -412,7 +412,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         onTap: (){
-                          Get.to(SignUpPage());
+                          Get.to(const SignUpPage());
                         }
                     ),
                   ),

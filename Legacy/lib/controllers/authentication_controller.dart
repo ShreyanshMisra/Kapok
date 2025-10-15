@@ -70,7 +70,7 @@ class AuthenticationController extends GetxController {
       }
 
     } else {
-      User? credential = await FirebaseAuth.instance.currentUser;
+      User? credential = FirebaseAuth.instance.currentUser;
       await sendVerificationEmail(credential!);
     }
   }

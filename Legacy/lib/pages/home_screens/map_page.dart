@@ -247,11 +247,11 @@ class _MapPageState extends State<MapPage> {
       appBar: AppBar(
         title: Text(
           _titleLabel,
-          style: TextStyle(
+          style: const TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xFF083677),
+        backgroundColor: const Color(0xFF083677),
       ),
       body: Stack(
         children: [
@@ -259,7 +259,7 @@ class _MapPageState extends State<MapPage> {
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(
+              initialCameraPosition: const CameraPosition(
                 target: LatLng(42.3909, -72.5257),
                 zoom: 18,
               ),
@@ -271,8 +271,8 @@ class _MapPageState extends State<MapPage> {
                 }
               },
               markers: {
-                Marker(
-                  markerId: const MarkerId("CurrentLocation"),
+                const Marker(
+                  markerId: MarkerId("CurrentLocation"),
                   position: LatLng(42.3909, -72.5257),
                 ),
               },
@@ -283,12 +283,12 @@ class _MapPageState extends State<MapPage> {
       ),
       bottomNavigationBar: BottomAppBar(
         height: 60,
-        color: Color(0xFF083677),
+        color: const Color(0xFF083677),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              onPressed: () => Get.to(() => TaskListPage()),
+              onPressed: () => Get.to(() => const TaskListPage()),
               icon: const Icon(Icons.list, size: 30, color: Colors.white),
             ),
             IconButton(
