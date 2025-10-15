@@ -45,7 +45,6 @@ dependencies:
   location:
   google_maps_flutter_ios:
   translator:
-  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

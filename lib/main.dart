@@ -1,8 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kapok_new/pages/auth_page/sign_up_page.dart';
-import 'package:kapok_new/theme/app_theme.dart'; // add theme
 import 'package:kapok_new/pages/auth_page/login_page.dart';
 import 'package:kapok_new/pages/home_screens/create_task_page.dart';
 import 'package:kapok_new/pages/home_screens/map_page.dart';
@@ -40,8 +38,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: TaskListPage(), //revert to LoginPage() again
-      theme: appTheme, // for the theme
+      home: LoginPage(), //revert to LoginPage() again
     );
   }
 }
