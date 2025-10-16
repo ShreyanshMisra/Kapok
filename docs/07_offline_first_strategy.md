@@ -1,8 +1,3 @@
----
-title: Offline-First Strategy
-description: Comprehensive guide to implementing offline-first functionality in the Kapok application
----
-
 # Offline-First Strategy
 
 ## Overview
@@ -867,8 +862,3 @@ class CacheManager {
   }
 }
 ```
-
----
-
-*This offline-first strategy documentation provides comprehensive guidance for implementing robust offline functionality in the Kapok application. Follow these patterns to ensure reliable operation in disaster relief scenarios.*
-

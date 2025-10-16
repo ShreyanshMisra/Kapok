@@ -1,8 +1,3 @@
----
-title: State Management
-description: Comprehensive guide to BLoC state management patterns and implementation in the Kapok application
----
-
 # State Management
 
 ## Overview
@@ -818,8 +813,3 @@ class MockTaskRepository extends Mock implements TaskRepository {}
 - **Consistent Naming**: Use consistent naming conventions
 - **Documentation**: Document complex business logic
 - **Separation of Concerns**: Keep UI and business logic separate
-
----
-
-*This state management documentation provides comprehensive guidance for implementing BLoC pattern in the Kapok application. Follow these patterns to ensure maintainable and testable state management.*
-

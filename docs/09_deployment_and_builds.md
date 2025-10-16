@@ -1,8 +1,3 @@
----
-title: Deployment and Builds
-description: Comprehensive guide to building, deploying, and distributing the Kapok Flutter application
----
-
 # Deployment and Builds
 
 ## Overview
@@ -846,8 +841,3 @@ flutter build apk --analyze-size
 # Check for unused code
 flutter build apk --tree-shake-icons
 ```
-
----
-
-*This deployment and builds documentation provides comprehensive guidance for building, deploying, and distributing the Kapok Flutter application. Follow these patterns to ensure reliable and efficient deployment processes.*
-

@@ -1,0 +1,241 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/validators.dart';
+import '../bloc/team_bloc.dart';
+import '../bloc/team_event.dart';
+import '../bloc/team_state.dart';
+
+/// Join team page for entering team codes
+class JoinTeamPage extends StatefulWidget {
+  const JoinTeamPage({super.key});
+
+  @override
+  State<JoinTeamPage> createState() => _JoinTeamPageState();
+}
+
+class _JoinTeamPageState extends State<JoinTeamPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _teamCodeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _teamCodeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.surface,
+        title: const Text('Join Team'),
+        elevation: 0,
+      ),
+      body: BlocListener<TeamBloc, TeamState>(
+        listener: (context, state) {
+          if (state is TeamError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          } else if (state is TeamJoined) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Successfully joined team "${state.team.name}"!'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Icon(
+                  Icons.group_add,
+                  size: 80,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(height: 24),
+                
+                Text(
+                  'Join a Team',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                
+                Text(
+                  'Enter the team code provided by your team leader',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                
+                // Team code field
+                TextFormField(
+                  controller: _teamCodeController,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: InputDecoration(
+                    labelText: 'Team Code',
+                    hintText: 'Enter 6-character team code',
+                    prefixIcon: const Icon(Icons.vpn_key_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a team code';
+                    }
+                    if (value.length != 6) {
+                      return 'Team code must be 6 characters';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    // Auto-format to uppercase
+                    if (value != value.toUpperCase()) {
+                      _teamCodeController.value = _teamCodeController.value.copyWith(
+                        text: value.toUpperCase(),
+                        selection: TextSelection.collapsed(offset: value.length),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                
+                // Info card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.info.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: AppColors.info,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'How to get a team code',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: AppColors.info,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Ask your team leader to provide you with a 6-character team code. This code allows you to join their team and participate in disaster relief coordination.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.info,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
+                // Join team button
+                BlocBuilder<TeamBloc, TeamState>(
+                  builder: (context, state) {
+                    return ElevatedButton(
+                      onPressed: state is TeamLoading
+                          ? null
+                          : _handleJoinTeam,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.surface,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: state is TeamLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Join Team',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                
+                // Alternative actions
+                TextButton(
+                  onPressed: () {
+                    // TODO: Navigate to create team page
+                    Navigator.of(context).pushNamed('/create-team');
+                  },
+                  child: Text(
+                    'Don\'t have a team code? Create a new team',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Handle join team form submission
+  void _handleJoinTeam() {
+    if (_formKey.currentState!.validate()) {
+      // TODO: Get current user ID from auth state
+      final currentUserId = 'current_user_id'; // This should come from auth state
+      
+      context.read<TeamBloc>().add(
+        JoinTeamRequested(
+          teamCode: _teamCodeController.text.trim().toUpperCase(),
+          userId: currentUserId,
+        ),
+      );
+    }
+  }
+}

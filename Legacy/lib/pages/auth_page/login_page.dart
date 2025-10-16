@@ -196,7 +196,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kapok_new/pages/auth_page/sign_up_page.dart';
-import 'package:kapok_new/pages/home_screens/map_page.dart';
 import 'package:translator/translator.dart';
 
 import '../../controllers/authentication_controller.dart';

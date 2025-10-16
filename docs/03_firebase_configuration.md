@@ -1,8 +1,3 @@
----
-title: Firebase Configuration
-description: Comprehensive guide for Firebase setup and configuration in the Kapok project
----
-
 # Firebase Configuration
 
 ## Overview
@@ -507,8 +502,3 @@ firebase projects:list --json
 - Offline sync optimization
 - Advanced analytics
 - A/B testing
-
----
-
-*This Firebase configuration guide provides comprehensive setup instructions for the Kapok project. Follow each section carefully to ensure proper backend integration.*
-

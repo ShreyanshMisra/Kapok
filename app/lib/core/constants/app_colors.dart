@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors
-  static const Color primary = Color(0xFF2E7D32); // Forest Green
-  static const Color primaryLight = Color(0xFF4CAF50);
-  static const Color primaryDark = Color(0xFF1B5E20);
+  static const Color primary = Color(0xFF013576); // Blue
+  static const Color primaryLight = Color(0xFF1976D2);
+  static const Color primaryDark = Color(0xFF001A3A);
   
   // Secondary Colors
   static const Color secondary = Color(0xFF1976D2); // Blue
@@ -25,8 +25,8 @@ class AppColors {
   static const Color info = Color(0xFF2196F3);
   
   // Neutral Colors
-  static const Color background = Color(0xFFFAFAFA);
-  static const Color surface = Color(0xFFFFFFFF);
+  static const Color background = Color(0xFFFEFEFF); // Light blue-white
+  static const Color surface = Color(0xFFFEFEFF); // Light blue-white
   static const Color card = Color(0xFFFFFFFF);
   static const Color divider = Color(0xFFE0E0E0);
   

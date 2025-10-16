@@ -189,7 +189,7 @@ class AppLocalizations {
 
   /// Gets localized string
   String _getString(String key) {
-    final Map<String, Map<String, String>> _localizedValues = {
+    final Map<String, Map<String, String>> localizedValues = {
       'en': {
         // App Information
         'appName': 'Kapok',
@@ -482,6 +482,6 @@ class AppLocalizations {
       },
     };
 
-    return _localizedValues[locale.languageCode]?[key] ?? key;
+    return localizedValues[locale.languageCode]?[key] ?? key;
   }
 }

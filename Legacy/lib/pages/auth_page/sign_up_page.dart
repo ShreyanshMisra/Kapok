@@ -374,7 +374,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 children: [
                   Text(
                     _signUpLabel,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -437,7 +437,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: GestureDetector(
                         child: Text(
                           _createAccountLabel,
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
                         ),
                         onTap: () async{
                           //Get.to(const NamePage(), transition: Transition.fade, duration: const Duration(milliseconds: 400));
@@ -455,7 +455,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 );
 
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text(
                                       'Account created successfully!',
                                       style: TextStyle(
@@ -464,7 +464,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                         fontFamily: 'GemunuLibreBold',
                                       ),
                                     ),
-                                    duration: const Duration(seconds: 2),
+                                    duration: Duration(seconds: 2),
                                   ),
                                 );
                                 Get.to(const MapPage(), transition: Transition.fade, duration: const Duration(milliseconds: 400));
@@ -474,7 +474,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   SnackBar(
                                     content: Text(
                                       'Account creation failed: $error',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                         fontFamily: 'GemunuLibreBold',
@@ -486,7 +486,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   content: Text(
                                     'Passwords do not match. Please ensure that the passwords are the same.',
                                     style: TextStyle(
@@ -495,13 +495,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                       fontFamily: 'GemunuLibreBold',
                                     ),
                                   ),
-                                  duration: const Duration(seconds: 2),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
+                              const SnackBar(
                                 content: Text(
                                   'A Field is empty. Please fill out all text fields.',
                                   style: TextStyle(
@@ -510,7 +510,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     fontFamily: 'GemunuLibreBold',
                                   ),
                                 ),
-                                duration: const Duration(seconds: 2),
+                                duration: Duration(seconds: 2),
                               ),
                             );
                           }

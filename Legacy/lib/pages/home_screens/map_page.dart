@@ -292,7 +292,7 @@ class _MapPageState extends State<MapPage> {
               icon: const Icon(Icons.list, size: 30, color: Colors.white),
             ),
             IconButton(
-              onPressed: () => Get.to(() => CreateTaskPage()),
+              onPressed: () => Get.to(() => const CreateTaskPage()),
               icon: const Icon(Icons.create, size: 30, color: Colors.white),
             ),
           ],

@@ -1,8 +1,3 @@
----
-title: Kapok Project Overview
-description: Comprehensive overview of the Kapok disaster relief coordination app project
----
-
 # Kapok Project Overview
 
 ## Project Mission
@@ -143,38 +138,10 @@ Kapok/
 ### Use Cases
 - **Natural Disasters** - Hurricane, earthquake, flood response
 - **Emergency Situations** - Search and rescue operations
-- **Community Events** - Large-scale volunteer coordination
-
-## Success Metrics
-
-- **User Adoption** - Number of active users and teams
-- **Task Completion** - Percentage of tasks completed on time
-- **Offline Usage** - Frequency of offline functionality usage
-- **Response Time** - Time from task creation to assignment
-- **Data Sync** - Success rate of offline-to-online synchronization
-
-## Future Considerations
-
-- **Web Platform** - Browser-based access for coordinators
-- **API Integration** - Third-party emergency service APIs
-- **Advanced Analytics** - Performance metrics and reporting
-- **Multi-tenant Support** - Support for multiple organizations
-- **IoT Integration** - Sensor data and automated task creation
 
 ## Getting Started
-
-For developers looking to contribute to the Kapok project:
 
 1. Review the [Project Setup Guide](02_project_setup.md)
 2. Understand the [Architecture Overview](01_architecture.md)
 3. Explore the [App Structure](04_app_structure.md)
 4. Follow the [Development Guidelines](05_models_and_data_flow.md)
-
-## Support & Contact
-
-For questions about the Kapok project or contributions, please refer to the project documentation or contact the development team through the appropriate channels.
-
----
-
-*This document is part of the Kapok project documentation suite. For the most up-to-date information, please refer to the latest version in the project repository.*
-

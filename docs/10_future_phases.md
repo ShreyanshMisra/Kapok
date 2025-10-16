@@ -1,8 +1,3 @@
----
-title: Future Phases
-description: Roadmap and future development phases for the Kapok disaster relief coordination application
----
-
 # Future Phases
 
 ## Overview
@@ -462,8 +457,3 @@ The Kapok application is designed with a phased development approach to ensure s
 The Kapok application's future development is structured to provide steady, incremental improvements while maintaining focus on the core mission of disaster relief coordination. Each phase builds upon the previous one, ensuring a solid foundation for future growth and enhancement.
 
 The roadmap is designed to be flexible and adaptable, allowing for adjustments based on user feedback, technological advances, and changing requirements. Regular reviews and updates will ensure the project remains aligned with its goals and continues to provide value to disaster relief organizations worldwide.
-
----
-
-*This future phases documentation provides a comprehensive roadmap for the Kapok application's continued development. Regular updates and reviews will ensure the roadmap remains relevant and achievable.*
-

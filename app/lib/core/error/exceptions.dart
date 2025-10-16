@@ -17,10 +17,10 @@ abstract class AppException implements Exception {
 /// Authentication related exceptions
 class AuthException extends AppException {
   const AuthException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'AuthException: $message';
@@ -29,10 +29,10 @@ class AuthException extends AppException {
 /// Network related exceptions
 class NetworkException extends AppException {
   const NetworkException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'NetworkException: $message';
@@ -41,10 +41,10 @@ class NetworkException extends AppException {
 /// Database related exceptions
 class DatabaseException extends AppException {
   const DatabaseException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'DatabaseException: $message';
@@ -53,10 +53,10 @@ class DatabaseException extends AppException {
 /// Location related exceptions
 class LocationException extends AppException {
   const LocationException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'LocationException: $message';
@@ -65,10 +65,10 @@ class LocationException extends AppException {
 /// Validation related exceptions
 class ValidationException extends AppException {
   const ValidationException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'ValidationException: $message';
@@ -77,10 +77,10 @@ class ValidationException extends AppException {
 /// Permission related exceptions
 class PermissionException extends AppException {
   const PermissionException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'PermissionException: $message';
@@ -89,10 +89,10 @@ class PermissionException extends AppException {
 /// Cache related exceptions
 class CacheException extends AppException {
   const CacheException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'CacheException: $message';
@@ -101,10 +101,10 @@ class CacheException extends AppException {
 /// Team related exceptions
 class TeamException extends AppException {
   const TeamException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'TeamException: $message';
@@ -113,10 +113,10 @@ class TeamException extends AppException {
 /// Task related exceptions
 class TaskException extends AppException {
   const TaskException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'TaskException: $message';
@@ -125,10 +125,10 @@ class TaskException extends AppException {
 /// Offline sync related exceptions
 class SyncException extends AppException {
   const SyncException({
-    required String message,
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    required super.message,
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'SyncException: $message';

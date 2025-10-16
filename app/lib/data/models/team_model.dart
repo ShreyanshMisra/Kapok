@@ -9,6 +9,7 @@ class TeamModel {
   final String leaderId;
   final String teamCode;
   final List<String> memberIds;
+  final String? description;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isActive;
@@ -19,6 +20,7 @@ class TeamModel {
     required this.leaderId,
     required this.teamCode,
     required this.memberIds,
+    this.description,
     required this.createdAt,
     required this.updatedAt,
     this.isActive = true,
@@ -33,6 +35,7 @@ class TeamModel {
     String? leaderId,
     String? teamCode,
     List<String>? memberIds,
+    String? description,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isActive,
@@ -43,6 +46,7 @@ class TeamModel {
       leaderId: leaderId ?? this.leaderId,
       teamCode: teamCode ?? this.teamCode,
       memberIds: memberIds ?? this.memberIds,
+      description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,

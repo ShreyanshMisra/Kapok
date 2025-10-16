@@ -1,8 +1,3 @@
----
-title: Models and Data Flow
-description: Comprehensive guide to data models, serialization, and data flow patterns in the Kapok application
----
-
 # Models and Data Flow
 
 ## Overview
@@ -715,8 +710,3 @@ void main() {
   });
 }
 ```
-
----
-
-*This models and data flow documentation provides comprehensive guidance for working with data in the Kapok application. Follow these patterns to ensure consistency and maintainability across the codebase.*
-

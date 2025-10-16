@@ -1,8 +1,3 @@
----
-title: App Structure
-description: Detailed documentation of the Kapok Flutter application structure and organization
----
-
 # App Structure
 
 ## Overview
@@ -524,8 +519,3 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:kapok_app/core/constants/app_colors.dart';
 import 'package:kapok_app/features/auth/bloc/auth_bloc.dart';
 ```
-
----
-
-*This app structure documentation provides a comprehensive guide to understanding and navigating the Kapok Flutter application. Follow the established patterns when adding new features or modifying existing ones.*
-

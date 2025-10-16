@@ -1,8 +1,3 @@
----
-title: Localization and Translation
-description: Comprehensive guide to implementing multi-language support in the Kapok application
----
-
 # Localization and Translation
 
 ## Overview
@@ -1452,8 +1447,3 @@ void main() {
 - **Caching**: Cache frequently used translations
 - **Minimal Bundle**: Include only necessary translations
 - **Efficient Updates**: Update only changed translations
-
----
-
-*This localization and translation documentation provides comprehensive guidance for implementing multi-language support in the Kapok application. Follow these patterns to ensure consistent and maintainable internationalization.*
-

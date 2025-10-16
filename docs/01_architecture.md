@@ -1,8 +1,3 @@
----
-title: Kapok Architecture Overview
-description: Detailed architecture documentation for the Kapok Flutter application
----
-
 # Kapok Architecture Overview
 
 ## Architecture Principles
@@ -283,8 +278,4 @@ final firebaseService = sl<FirebaseService>();
 - **Firebase Monitoring** - Backend service health
 - **Error Logging** - Comprehensive error tracking
 - **Alert System** - Proactive issue detection
-
----
-
-*This architecture documentation provides a comprehensive overview of the Kapok application's design and implementation. For specific implementation details, refer to the individual component documentation.*
 

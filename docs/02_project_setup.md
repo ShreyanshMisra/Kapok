@@ -1,8 +1,3 @@
----
-title: Project Setup Guide
-description: Step-by-step guide for setting up the Kapok Flutter development environment
----
-
 # Project Setup Guide
 
 ## Prerequisites
@@ -380,9 +375,4 @@ If you encounter issues:
 1. Check the [Troubleshooting](#troubleshooting) section
 2. Review Flutter documentation: https://flutter.dev/docs
 3. Check Firebase documentation: https://firebase.google.com/docs
-4. Consult the project's issue tracker
-
----
-
-*This setup guide ensures a smooth development experience for the Kapok project. Follow each step carefully and verify the setup before proceeding with development.*
 
