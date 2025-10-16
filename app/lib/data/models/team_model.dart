@@ -1,0 +1,77 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'team_model.g.dart';
+
+@JsonSerializable()
+class TeamModel {
+  final String id;
+  final String name;
+  final String leaderId;
+  final String teamCode;
+  final List<String> memberIds;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isActive;
+
+  const TeamModel({
+    required this.id,
+    required this.name,
+    required this.leaderId,
+    required this.teamCode,
+    required this.memberIds,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isActive = true,
+  });
+
+  factory TeamModel.fromJson(Map<String, dynamic> json) => _$TeamModelFromJson(json);
+  Map<String, dynamic> toJson() => _$TeamModelToJson(this);
+
+  TeamModel copyWith({
+    String? id,
+    String? name,
+    String? leaderId,
+    String? teamCode,
+    List<String>? memberIds,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isActive,
+  }) {
+    return TeamModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      leaderId: leaderId ?? this.leaderId,
+      teamCode: teamCode ?? this.teamCode,
+      memberIds: memberIds ?? this.memberIds,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is TeamModel &&
+        other.id == id &&
+        other.name == name &&
+        other.leaderId == leaderId &&
+        other.teamCode == teamCode &&
+        other.isActive == isActive;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        leaderId.hashCode ^
+        teamCode.hashCode ^
+        isActive.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'TeamModel(id: $id, name: $name, leaderId: $leaderId, teamCode: $teamCode, memberIds: $memberIds, isActive: $isActive)';
+  }
+}
+
