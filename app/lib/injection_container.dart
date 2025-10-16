@@ -1,6 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 // Core services
 import 'core/services/firebase_service.dart';
@@ -22,8 +20,6 @@ import 'data/repositories/team_repository.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/tasks/bloc/task_bloc.dart';
 import 'features/teams/bloc/team_bloc.dart';
-import 'features/map/bloc/map_bloc.dart';
-import 'features/profile/bloc/profile_bloc.dart';
 
 /// Dependency injection container
 final GetIt sl = GetIt.instance;
@@ -42,16 +38,32 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<MapboxSource>(() => MapboxSource());
 
   // Repositories
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepository());
-  sl.registerLazySingleton<TaskRepository>(() => TaskRepository());
-  sl.registerLazySingleton<TeamRepository>(() => TeamRepository());
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepository(
+    firebaseSource: sl<FirebaseSource>(),
+    hiveSource: sl<HiveSource>(),
+    networkChecker: sl<NetworkChecker>(),
+  ));
+  sl.registerLazySingleton<TaskRepository>(() => TaskRepository(
+    firebaseSource: sl<FirebaseSource>(),
+    hiveSource: sl<HiveSource>(),
+    networkChecker: sl<NetworkChecker>(),
+  ));
+  sl.registerLazySingleton<TeamRepository>(() => TeamRepository(
+    firebaseSource: sl<FirebaseSource>(),
+    hiveSource: sl<HiveSource>(),
+    networkChecker: sl<NetworkChecker>(),
+  ));
 
   // BLoCs
-  sl.registerFactory<AuthBloc>(() => AuthBloc());
-  sl.registerFactory<TaskBloc>(() => TaskBloc());
-  sl.registerFactory<TeamBloc>(() => TeamBloc());
-  sl.registerFactory<MapBloc>(() => MapBloc());
-  sl.registerFactory<ProfileBloc>(() => ProfileBloc());
+  sl.registerFactory<AuthBloc>(() => AuthBloc(
+    authRepository: sl<AuthRepository>(),
+  ));
+  sl.registerFactory<TaskBloc>(() => TaskBloc(
+    taskRepository: sl<TaskRepository>(),
+  ));
+  sl.registerFactory<TeamBloc>(() => TeamBloc(
+    teamRepository: sl<TeamRepository>(),
+  ));
 }
 
 /// Initializes core services

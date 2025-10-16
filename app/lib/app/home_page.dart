@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/constants/app_colors.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
+import '../features/auth/bloc/auth_event.dart';
 import '../features/map/pages/map_page.dart';
 import '../features/teams/pages/teams_page.dart';
 import '../features/tasks/pages/tasks_page.dart';
@@ -216,7 +217,7 @@ class AppDrawer extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<AuthBloc>().add(const SignOutRequested());
+              context.read<AuthBloc>().add(SignOutRequested());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,

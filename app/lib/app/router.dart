@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
+import '../data/models/team_model.dart';
+import '../data/models/task_model.dart';
 import '../features/auth/pages/login_page.dart';
 import '../features/auth/pages/signup_page.dart';
 import '../features/auth/pages/forgot_password_page.dart';
@@ -92,7 +94,13 @@ class AppRouter {
         );
       
       case teamDetail:
-        final team = settings.arguments;
+        final team = settings.arguments as TeamModel?;
+        if (team == null) {
+          return MaterialPageRoute(
+            builder: (_) => const NotFoundPage(),
+            settings: settings,
+          );
+        }
         return MaterialPageRoute(
           builder: (_) => TeamDetailPage(team: team),
           settings: settings,
@@ -110,7 +118,7 @@ class AppRouter {
           settings: settings,
         );
       
-      case settings:
+      case '/settings':
         return MaterialPageRoute(
           builder: (_) => const SettingsPage(),
           settings: settings,
@@ -129,14 +137,26 @@ class AppRouter {
         );
       
       case taskDetail:
-        final task = settings.arguments;
+        final task = settings.arguments as TaskModel?;
+        if (task == null) {
+          return MaterialPageRoute(
+            builder: (_) => const NotFoundPage(),
+            settings: settings,
+          );
+        }
         return MaterialPageRoute(
           builder: (_) => TaskDetailPage(task: task),
           settings: settings,
         );
       
       case editTask:
-        final task = settings.arguments;
+        final task = settings.arguments as TaskModel?;
+        if (task == null) {
+          return MaterialPageRoute(
+            builder: (_) => const NotFoundPage(),
+            settings: settings,
+          );
+        }
         return MaterialPageRoute(
           builder: (_) => EditTaskPage(task: task),
           settings: settings,

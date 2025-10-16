@@ -9,6 +9,9 @@ class NetworkChecker {
   static NetworkChecker get instance => _instance ??= NetworkChecker._();
   
   NetworkChecker._();
+  
+  // Public constructor for dependency injection
+  NetworkChecker();
 
   final Connectivity _connectivity = Connectivity();
 
@@ -18,9 +21,9 @@ class NetworkChecker {
       Logger.network('Checking network connectivity');
       
       // Check connectivity status
-      final connectivityResult = await _connectivity.checkConnectivity();
+      final connectivityResults = await _connectivity.checkConnectivity();
       
-      if (connectivityResult == ConnectivityResult.none) {
+      if (connectivityResults.contains(ConnectivityResult.none)) {
         Logger.network('No network connection');
         return false;
       }
@@ -48,7 +51,7 @@ class NetworkChecker {
   }
 
   /// Gets current connectivity status
-  Future<ConnectivityResult> getConnectivityStatus() async {
+  Future<List<ConnectivityResult>> getConnectivityStatus() async {
     try {
       Logger.network('Getting connectivity status');
       final status = await _connectivity.checkConnectivity();
@@ -64,7 +67,7 @@ class NetworkChecker {
   }
 
   /// Listens to connectivity changes
-  Stream<ConnectivityResult> get connectivityStream {
+  Stream<List<ConnectivityResult>> get connectivityStream {
     Logger.network('Starting connectivity stream');
     return _connectivity.onConnectivityChanged;
   }
@@ -73,7 +76,7 @@ class NetworkChecker {
   Future<bool> isConnectedViaWiFi() async {
     try {
       final status = await getConnectivityStatus();
-      final isWiFi = status == ConnectivityResult.wifi;
+      final isWiFi = status.contains(ConnectivityResult.wifi);
       Logger.network('Connected via WiFi: $isWiFi');
       return isWiFi;
     } catch (e) {
@@ -86,7 +89,7 @@ class NetworkChecker {
   Future<bool> isConnectedViaMobile() async {
     try {
       final status = await getConnectivityStatus();
-      final isMobile = status == ConnectivityResult.mobile;
+      final isMobile = status.contains(ConnectivityResult.mobile);
       Logger.network('Connected via mobile: $isMobile');
       return isMobile;
     } catch (e) {
@@ -99,7 +102,7 @@ class NetworkChecker {
   Future<bool> isConnectedViaEthernet() async {
     try {
       final status = await getConnectivityStatus();
-      final isEthernet = status == ConnectivityResult.ethernet;
+      final isEthernet = status.contains(ConnectivityResult.ethernet);
       Logger.network('Connected via ethernet: $isEthernet');
       return isEthernet;
     } catch (e) {
@@ -114,28 +117,20 @@ class NetworkChecker {
       final status = await getConnectivityStatus();
       String connectionType = 'Unknown';
       
-      switch (status) {
-        case ConnectivityResult.wifi:
-          connectionType = 'WiFi';
-          break;
-        case ConnectivityResult.mobile:
-          connectionType = 'Mobile Data';
-          break;
-        case ConnectivityResult.ethernet:
-          connectionType = 'Ethernet';
-          break;
-        case ConnectivityResult.bluetooth:
-          connectionType = 'Bluetooth';
-          break;
-        case ConnectivityResult.vpn:
-          connectionType = 'VPN';
-          break;
-        case ConnectivityResult.other:
-          connectionType = 'Other';
-          break;
-        case ConnectivityResult.none:
-          connectionType = 'No Connection';
-          break;
+      if (status.contains(ConnectivityResult.none)) {
+        connectionType = 'No Connection';
+      } else if (status.contains(ConnectivityResult.wifi)) {
+        connectionType = 'WiFi';
+      } else if (status.contains(ConnectivityResult.mobile)) {
+        connectionType = 'Mobile Data';
+      } else if (status.contains(ConnectivityResult.ethernet)) {
+        connectionType = 'Ethernet';
+      } else if (status.contains(ConnectivityResult.bluetooth)) {
+        connectionType = 'Bluetooth';
+      } else if (status.contains(ConnectivityResult.vpn)) {
+        connectionType = 'VPN';
+      } else if (status.contains(ConnectivityResult.other)) {
+        connectionType = 'Other';
       }
       
       Logger.network('Connection type: $connectionType');

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -278,7 +279,7 @@ class FirebaseService {
     try {
       Logger.firebase('Uploading file to: $path');
       final ref = storage.ref().child(path);
-      final uploadTask = ref.putData(data);
+      final uploadTask = ref.putData(Uint8List.fromList(data));
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
       Logger.firebase('File uploaded successfully: $downloadUrl');

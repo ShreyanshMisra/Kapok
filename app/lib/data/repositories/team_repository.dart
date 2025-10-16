@@ -126,8 +126,11 @@ class TeamRepository {
       if (await _networkChecker.isConnected()) {
         team = await _firebaseSource.getTeam(teamId);
       } else {
-        team = await _hiveSource.getTeam(teamId) ?? 
-               throw TeamException(message: 'Team not found');
+        final localTeam = await _hiveSource.getTeam(teamId);
+        if (localTeam == null) {
+          throw TeamException(message: 'Team not found');
+        }
+        team = localTeam;
       }
       
       // Check if user is a member
@@ -270,8 +273,11 @@ class TeamRepository {
       if (await _networkChecker.isConnected()) {
         team = await _firebaseSource.getTeam(teamId);
       } else {
-        team = await _hiveSource.getTeam(teamId) ?? 
-               throw TeamException(message: 'Team not found');
+        final localTeam = await _hiveSource.getTeam(teamId);
+        if (localTeam == null) {
+          throw TeamException(message: 'Team not found');
+        }
+        team = localTeam;
       }
       
       // Check if user is the leader
@@ -320,8 +326,11 @@ class TeamRepository {
       if (await _networkChecker.isConnected()) {
         team = await _firebaseSource.getTeam(teamId);
       } else {
-        team = await _hiveSource.getTeam(teamId) ?? 
-               throw TeamException(message: 'Team not found');
+        final localTeam = await _hiveSource.getTeam(teamId);
+        if (localTeam == null) {
+          throw TeamException(message: 'Team not found');
+        }
+        team = localTeam;
       }
       
       // Check if user is the leader

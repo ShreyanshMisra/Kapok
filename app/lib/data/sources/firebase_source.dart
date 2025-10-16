@@ -352,4 +352,7 @@ class FirebaseSource {
   }
 
   User? get currentUser => _auth.currentUser;
+  
+  /// Get Firebase Auth instance for stream access
+  FirebaseAuth get auth => _auth;
 }

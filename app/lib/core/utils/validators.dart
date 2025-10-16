@@ -270,5 +270,10 @@ class Validators {
     }
     return null;
   }
+
+  // Convenience methods with the expected names
+  static String? validateEmail(String? value) => email(value);
+  static String? validatePassword(String? value) => password(value);
+  static String? validateName(String? value) => name(value);
 }
 
