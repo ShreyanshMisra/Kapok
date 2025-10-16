@@ -1,0 +1,33 @@
+# Node / Firebase
+firebase-debug.log
+firebase/.firebaserc
+firebase/.firebase/
+firebase/functions/node_modules/
+firebase/functions/lib/
+firebase/functions/.env
+
+# Environment files
+.env
+*.env
+*.key
+*.pem
+*.json
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build and logs
+logs/
+*.log
+*.tmp
+
+# Python / scripts (if added later)
+__pycache__/
+*.pyc
+
+# Local tooling
+scripts/tmp/
+notes/
