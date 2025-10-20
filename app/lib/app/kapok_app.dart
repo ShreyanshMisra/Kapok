@@ -13,6 +13,7 @@ import '../data/repositories/task_repository.dart';
 import '../data/sources/firebase_source.dart';
 import '../data/sources/hive_source.dart';
 import '../core/services/network_checker.dart';
+import '../core/utils/logger.dart';
 import 'router.dart';
 import 'home_page.dart';
 
