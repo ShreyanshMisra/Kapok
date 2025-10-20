@@ -6,6 +6,7 @@ class KapokApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("✅ KapokApp build() called");
     return MaterialApp(
       title: 'Kapok',
       debugShowCheckedModeBanner: false,
