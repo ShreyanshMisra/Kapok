@@ -10,6 +10,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  # Localization support for Flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Internet connectivity checker
+  connectivity_plus: ^6.0.3
 
   # Core UI & Icons
   cupertino_icons: ^1.0.8
