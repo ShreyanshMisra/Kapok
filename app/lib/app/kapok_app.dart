@@ -89,37 +89,30 @@ class KapokApp extends StatelessWidget {
           Locale('es'),
         ],
         onGenerateRoute: AppRouter.generateRoute,
-        home: BlocBuilder<AuthBloc, AuthState>(
-          listenWhen: (previous, current) => previous.runtimeType != current.runtimeType,
+        home: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthAuthenticated) {
-              Logger.auth('Redirecting to HomePage');
               Navigator.of(context).pushReplacementNamed(AppRouter.home);
-            } else if (state is AuthUnauthenticated) {
-              Logger.auth('Redirecting to LoginPage');
-              Navigator.of(context).pushReplacementNamed(AppRouter.login);
-            }
-          },
-          child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading) {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else if (state is AuthAuthenticated) {
-                return const HomePage();
-              } else if (state is AuthUnauthenticated) {
-                return const LoginPage();
-              } else {
-                return const Scaffold(
-                  body: Center(child: Text('Initializing...')),
-                  );
-                }
-          },
-        ),
-      ),
-    );
-  }
+          } else if (state is AuthUnauthenticated) {
+            Logger.auth('Redirecting to LoginPage');
+            Navigator.of(context).pushReplacementNamed(AppRouter.login);
+          }
+        },
+        builder: (context, state) {
+          if (state is AuthLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (state is AuthAuthenticated) {
+          return const HomePage();
+        } else {
+          return const Scaffold(
+            body: Center(child: Text('Redirecting to login...')),
+      );
+    }
+  },
+),
+),
+);
+}
 }
