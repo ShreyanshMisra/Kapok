@@ -23,16 +23,7 @@ class TasksPage extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('Tasks page - To be implemented'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to create task page
-        },
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add),
-      ),
+      body: const Center(child: Text('Tasks page - To be implemented')),
     );
   }
 }

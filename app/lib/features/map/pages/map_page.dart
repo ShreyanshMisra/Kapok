@@ -32,13 +32,6 @@ class MapPage extends StatelessWidget {
       body: const Center(
         child: Text('Map page - To be implemented with Mapbox integration'),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to create task page
-        },
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
