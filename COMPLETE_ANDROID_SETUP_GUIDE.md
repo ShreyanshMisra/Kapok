@@ -71,7 +71,7 @@ Android Studio main window should now be open!
 Navigate to your project:
 
 ```powershell
-cd C:\Users\sonny\Desktop\kapok\Kapok\app
+cd C:\Users\Kapok\app #whatever filepath it is on
 ```
 
 ### Step 2: Configure Flutter for Android
@@ -152,7 +152,7 @@ flutter emulators --create --name kapok_emulator
 
 ```powershell
 # 1. Navigate to app directory
-cd C:\Users\sonny\Desktop\kapok\Kapok\app
+cd C:\Users\Kapok\app #whatever filepath it is on
 
 # 2. Launch the emulator
 flutter emulators --launch Medium_Phone_API_36.1
@@ -178,7 +178,7 @@ flutter run -d emulator-5554
 ### Login to Test
 
 - **Email**: `test@gmail.com`
-- **Password**: Your Firebase password
+- **Password**: Your Firebase password 
 - Click **"Sign In"**
 
 You'll see the main dashboard with Map, Tasks, Teams, Profile tabs!
