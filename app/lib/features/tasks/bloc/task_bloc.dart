@@ -39,7 +39,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         taskName: event.taskName,
         taskSeverity: event.taskSeverity,
         taskDescription: event.taskDescription,
-        taskCompleted: false,
+        taskCompleted: event.taskCompleted,
         assignedTo: event.assignedTo,
         teamName: event.teamName,
         teamId: event.teamId,
@@ -47,7 +47,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         longitude: event.longitude,
         createdAt: now,
         updatedAt: now,
-        createdBy: event.assignedTo,
+        createdBy: event.createdBy,
       );
       
       final createdTask = await _taskRepository.createTask(task);
@@ -69,10 +69,17 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(const TaskLoading());
       Logger.task('Loading all tasks');
       
-      final tasks = await _taskRepository.getTasks();
-      
-      emit(TasksLoaded(tasks: tasks));
-      Logger.task('Loaded ${tasks.length} tasks');
+      await emit.forEach<List<TaskModel>>(
+        _taskRepository.getTasksStream(),
+        onData: (tasks) {
+          Logger.task('Loaded ${tasks.length} tasks');
+          return TasksLoaded(tasks: tasks);
+        },
+        onError: (error, stackTrace) {
+          Logger.task('Error loading tasks stream', error: error);
+          return TaskError(message: error.toString());
+        },
+      );
     } catch (e) {
       Logger.task('Error loading tasks', error: e);
       emit(TaskError(message: e.toString()));

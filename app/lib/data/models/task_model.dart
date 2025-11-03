@@ -40,7 +40,39 @@ class TaskModel {
 
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return TaskModel.fromJson({...data, 'id': doc.id});
+    
+    return TaskModel(
+      id: doc.id,
+      taskName: data['taskName'] as String? ?? '',
+      taskSeverity: data['taskSeverity'] as int? ?? 3,
+      taskDescription: data['taskDescription'] as String? ?? '',
+      taskCompleted: data['taskCompleted'] as bool? ?? false,
+      assignedTo: data['assignedTo'] as String? ?? '',
+      teamName: data['teamName'] as String? ?? '',
+      teamId: data['teamId'] as String? ?? '',
+      latitude: (data['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (data['longitude'] as num?)?.toDouble() ?? 0.0,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdBy: data['createdBy'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'taskName': taskName,
+      'taskSeverity': taskSeverity,
+      'taskDescription': taskDescription,
+      'taskCompleted': taskCompleted,
+      'assignedTo': assignedTo,
+      'teamName': teamName,
+      'teamId': teamId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
+      'createdBy': createdBy,
+    };
   }
 
   TaskModel copyWith({

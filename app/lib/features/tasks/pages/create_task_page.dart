@@ -22,14 +22,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
+  final _assignedToController = TextEditingController();
   String _selectedPriority = 'Medium';
   final List<String> _priorities = ['Low', 'Medium', 'High'];
+  bool _taskCompleted = false;
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
+    _assignedToController.dispose();
     super.dispose();
   }
 
@@ -87,7 +90,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Create a new task for disaster relief coordination',
+                  'Create a new task or log',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -141,7 +144,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   controller: _locationController,
                   decoration: InputDecoration(
                     labelText: 'Location',
-                    hintText: 'Enter task location',
+                    hintText: 'Enter task location or leave empty for current location',
                     prefixIcon: const Icon(Icons.location_on_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -196,6 +199,41 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       });
                     }
                   },
+                ),
+                const SizedBox(height: 16),
+                
+                TextFormField(
+                  controller: _assignedToController,
+                  decoration: InputDecoration(
+                    labelText: 'Assigned To (Optional)',
+                    hintText: 'Enter user email or ID',
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                CheckboxListTile(
+                  value: _taskCompleted,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _taskCompleted = value ?? false;
+                    });
+                  },
+                  title: const Text('Mark as Completed'),
+                  subtitle: const Text('Check if this task is already completed'),
+                  activeColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: AppColors.textSecondary.withOpacity(0.3)),
+                  ),
+                  tileColor: AppColors.surface,
                 ),
                 const SizedBox(height: 24),
                 
@@ -328,17 +366,22 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       final user = authState.user;
       final teamId = user.teamId ?? 'default_team';
       final teamName = 'Default Team';
+      final assignedTo = _assignedToController.text.trim().isEmpty 
+          ? user.id 
+          : _assignedToController.text.trim();
       
       context.read<TaskBloc>().add(
         CreateTaskRequested(
           taskName: _titleController.text.trim(),
           taskSeverity: _getPrioritySeverity(_selectedPriority),
           taskDescription: _descriptionController.text.trim(),
-          assignedTo: user.id,
+          taskCompleted: _taskCompleted,
+          assignedTo: assignedTo,
           teamName: teamName,
           teamId: teamId,
           latitude: 0.0,
           longitude: 0.0,
+          createdBy: user.id,
         ),
       );
     }

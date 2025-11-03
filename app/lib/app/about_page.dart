@@ -24,10 +24,10 @@ class AboutPage extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  Icon(
-                    Icons.volunteer_activism,
-                    size: 80,
-                    color: AppColors.primary,
+                  Image.asset(
+                    'assets/images/kapok_icon.png',
+                    height: 120,
+                    width: 120,
                   ),
                   const SizedBox(height: 16),
                   Text(
