@@ -76,6 +76,7 @@ class _TasksPageState extends State<TasksPage> {
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add),
       ),
+      body: const Center(child: Text('Tasks page - To be implemented')),
     );
   }
 
