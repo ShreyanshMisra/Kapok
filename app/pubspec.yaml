@@ -61,6 +61,19 @@ dev_dependencies:
   # Build tools for code generation
   build_runner: ^2.4.9
   json_serializable: ^6.9.0
+  
+  # Launcher icons
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+  image_path: "assets/images/kapok_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/kapok_icon.png"
 
 flutter:
   uses-material-design: true
@@ -68,10 +81,10 @@ flutter:
   # Localization resources
   generate: true
 
-  # Uncomment and add assets when ready
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
+  # Assets
+  assets:
+    - assets/images/kapok_icon.png
+    - assets/images/icons/
 
   # Example custom font setup
   # fonts:

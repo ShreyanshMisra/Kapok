@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/validators.dart';
+import '../../../app/router.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
@@ -48,8 +51,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
           } else if (state is TeamCreated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Team "${state.team.name}" created successfully!'),
+                content: Text('Team "${state.team.name}" created successfully! Team code: ${state.team.teamCode}'),
                 backgroundColor: AppColors.success,
+                duration: const Duration(seconds: 5),
               ),
             );
             Navigator.of(context).pop();
@@ -218,8 +222,20 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
   /// Handle create team form submission
   void _handleCreateTeam() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Get current user ID from auth state
-      final currentUserId = 'current_user_id'; // This should come from auth state
+      final authState = context.read<AuthBloc>().state;
+      
+      if (authState is! AuthAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('You must be logged in to create teams'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        Navigator.of(context).pushReplacementNamed(AppRouter.login);
+        return;
+      }
+      
+      final currentUserId = authState.user.id;
       
       context.read<TeamBloc>().add(
         CreateTeamRequested(

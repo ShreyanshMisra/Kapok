@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'team_model.g.dart';
@@ -28,6 +29,35 @@ class TeamModel {
 
   factory TeamModel.fromJson(Map<String, dynamic> json) => _$TeamModelFromJson(json);
   Map<String, dynamic> toJson() => _$TeamModelToJson(this);
+
+  factory TeamModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    
+    return TeamModel(
+      id: doc.id,
+      name: data['name'] as String? ?? '',
+      leaderId: data['leaderId'] as String? ?? '',
+      teamCode: data['teamCode'] as String? ?? '',
+      memberIds: (data['memberIds'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      description: data['description'] as String?,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isActive: data['isActive'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'name': name,
+      'leaderId': leaderId,
+      'teamCode': teamCode,
+      'memberIds': memberIds,
+      'description': description,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
+      'isActive': isActive,
+    };
+  }
 
   TeamModel copyWith({
     String? id,

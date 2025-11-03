@@ -60,10 +60,10 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 60),
                   
                   // Logo and title
-                  Icon(
-                    Icons.volunteer_activism,
-                    size: 80,
-                    color: AppColors.primary,
+                  Image.asset(
+                    'assets/images/kapok_icon.png',
+                    height: 120,
+                    width: 120,
                   ),
                   const SizedBox(height: 24),
                   
