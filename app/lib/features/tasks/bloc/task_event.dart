@@ -15,6 +15,7 @@ class CreateTaskRequested extends TaskEvent {
   final String taskDescription;
   final String assignedTo;
   final String teamName;
+  final String teamId;
   final double latitude;
   final double longitude;
 
@@ -24,6 +25,7 @@ class CreateTaskRequested extends TaskEvent {
     required this.taskDescription,
     required this.assignedTo,
     required this.teamName,
+    required this.teamId,
     required this.latitude,
     required this.longitude,
   });
@@ -35,6 +37,7 @@ class CreateTaskRequested extends TaskEvent {
     taskDescription,
     assignedTo,
     teamName,
+    teamId,
     latitude,
     longitude,
   ];

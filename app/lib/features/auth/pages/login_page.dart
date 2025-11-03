@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'signup_page.dart';
 import 'forgot_password_page.dart';
+import 'package:kapok_app/core/utils/validators.dart';
 
 /// Login page for user authentication
 class LoginPage extends StatefulWidget {

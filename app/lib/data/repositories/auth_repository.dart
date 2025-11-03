@@ -210,5 +210,5 @@ class AuthRepository {
   User? get currentFirebaseUser => _firebaseSource.currentUser;
 
   /// Stream of authentication state changes
-  Stream<User?> get authStateChanges => _firebaseSource.auth.authStateChanges();
+  Stream<User?> get authStateChanges => _firebaseSource.authStateChanges;
 }

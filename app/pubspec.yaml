@@ -10,13 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  # Localization support for Flutter
-  flutter_localizations:
-    sdk: flutter
-
-  # Internet connectivity checker
-  connectivity_plus: ^6.0.3
 
   # Core UI & Icons
   cupertino_icons: ^1.0.8
@@ -37,10 +30,7 @@ dependencies:
   path_provider: ^2.1.2
 
   # Maps & Location
-mapbox_gl:
-  git:
-    url: https://github.com/tobrun/flutter-mapbox-gl.git
-    ref: master
+  # mapbox_gl: ^0.16.0
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   
@@ -71,9 +61,6 @@ dev_dependencies:
   # Build tools for code generation
   build_runner: ^2.4.9
   json_serializable: ^6.9.0
-
-dependency_overrides:
-  collection: ^1.17.0
 
 flutter:
   uses-material-design: true
