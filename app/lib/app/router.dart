@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kapok_app/data/models/team_model.dart';
 import '../core/constants/app_colors.dart';
-import '../data/models/team_model.dart';
-import '../data/models/task_model.dart';
 import '../features/auth/pages/login_page.dart';
 import '../features/auth/pages/signup_page.dart';
 import '../features/auth/pages/forgot_password_page.dart';
@@ -34,7 +33,7 @@ class AppRouter {
   static const String teamDetail = '/team-detail';
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
-  static const String settings = '/settings';
+  static const String appSettings = '/settings';
   static const String tasks = '/tasks';
   static const String createTask = '/create-task';
   static const String taskDetail = '/task-detail';
@@ -93,7 +92,7 @@ class AppRouter {
           settings: settings,
         );
       
-      case teamDetail:
+      case AppRouter.teamDetail:
         final team = settings.arguments as TeamModel?;
         if (team == null) {
           return MaterialPageRoute(
@@ -118,7 +117,7 @@ class AppRouter {
           settings: settings,
         );
       
-      case '/settings':
+      case appSettings:
         return MaterialPageRoute(
           builder: (_) => const SettingsPage(),
           settings: settings,
@@ -137,26 +136,14 @@ class AppRouter {
         );
       
       case taskDetail:
-        final task = settings.arguments as TaskModel?;
-        if (task == null) {
-          return MaterialPageRoute(
-            builder: (_) => const NotFoundPage(),
-            settings: settings,
-          );
-        }
+        final task = settings.arguments;
         return MaterialPageRoute(
           builder: (_) => TaskDetailPage(task: task),
           settings: settings,
         );
       
       case editTask:
-        final task = settings.arguments as TaskModel?;
-        if (task == null) {
-          return MaterialPageRoute(
-            builder: (_) => const NotFoundPage(),
-            settings: settings,
-          );
-        }
+        final task = settings.arguments;
         return MaterialPageRoute(
           builder: (_) => EditTaskPage(task: task),
           settings: settings,

@@ -136,6 +136,26 @@ class TaskRepository {
     }
   }
 
+  /// Get tasks stream
+  Stream<List<TaskModel>> getTasksStream({String? teamId, String? userId}) {
+    try {
+      Logger.task('Starting tasks stream');
+      return _firebaseSource.getTasksStream(teamId: teamId, userId: userId).handleError((error) {
+        Logger.task('Error in tasks stream', error: error);
+        throw TaskException(
+          message: 'Failed to stream tasks',
+          originalError: error,
+        );
+      });
+    } catch (e) {
+      Logger.task('Error creating tasks stream', error: e);
+      return Stream.error(TaskException(
+        message: 'Failed to create tasks stream',
+        originalError: e,
+      ));
+    }
+  }
+
   /// Get tasks by team
   Future<List<TaskModel>> getTasksByTeam(String teamId) async {
     try {

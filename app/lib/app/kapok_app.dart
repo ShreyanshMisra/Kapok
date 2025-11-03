@@ -7,13 +7,7 @@ import '../features/auth/bloc/auth_event.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/teams/bloc/team_bloc.dart';
 import '../features/tasks/bloc/task_bloc.dart';
-import '../data/repositories/auth_repository.dart';
-import '../data/repositories/team_repository.dart';
-import '../data/repositories/task_repository.dart';
-import '../data/sources/firebase_source.dart';
-import '../data/sources/hive_source.dart';
-import '../core/services/network_checker.dart';
-import '../core/utils/logger.dart';
+import '../injection_container.dart';
 import 'router.dart';
 import 'home_page.dart';
 
@@ -24,33 +18,14 @@ class KapokApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // TODO: Replace with actual dependency injection
         BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(
-            authRepository: AuthRepository(
-              firebaseSource: FirebaseSource(),
-              hiveSource: HiveSource(),
-              networkChecker: NetworkChecker(),
-            ),
-          )..add(const AuthCheckRequested()),
+          create: (context) => sl<AuthBloc>()..add(const AuthCheckRequested()),
         ),
         BlocProvider<TeamBloc>(
-          create: (context) => TeamBloc(
-            teamRepository: TeamRepository(
-              firebaseSource: FirebaseSource(),
-              hiveSource: HiveSource(),
-              networkChecker: NetworkChecker(),
-            ),
-          ),
+          create: (context) => sl<TeamBloc>(),
         ),
         BlocProvider<TaskBloc>(
-          create: (context) => TaskBloc(
-            taskRepository: TaskRepository(
-              firebaseSource: FirebaseSource(),
-              hiveSource: HiveSource(),
-              networkChecker: NetworkChecker(),
-            ),
-          ),
+          create: (context) => sl<TaskBloc>(),
         ),
       ],
       child: MaterialApp(
@@ -90,30 +65,33 @@ class KapokApp extends StatelessWidget {
           Locale('es'),
         ],
         onGenerateRoute: AppRouter.generateRoute,
-        home: BlocConsumer<AuthBloc, AuthState>(
+        home: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthAuthenticated) {
-              Navigator.of(context).pushReplacementNamed(AppRouter.home);
-          } else if (state is AuthUnauthenticated) {
-            Logger.auth('Redirecting to LoginPage');
-            Navigator.of(context).pushReplacementNamed(AppRouter.login);
-          }
-        },
-        builder: (context, state) {
-          if (state is AuthLoading) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-          );
-        } else if (state is AuthAuthenticated) {
-          return const HomePage();
-        } else {
-          return const Scaffold(
-            body: Center(child: Text('Redirecting to login...')),
-      );
-    }
-  },
-),
-),
-);
-}
+            if (state is AuthUnauthenticated) {
+              Navigator.pushReplacementNamed(context, '/login');
+            } 
+            else if (state is AuthAuthenticated) {
+                Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthLoading) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              } else if (state is AuthAuthenticated) {
+                 return const HomePage();
+              } else {
+                // Show a temporary screen while redirect happens
+                return const Scaffold(
+                body: Center(child: Text('Redirecting to login...')),
+              );
+            }
+          },
+        ),
+        ),
+      ),
+    );
+  }
 }

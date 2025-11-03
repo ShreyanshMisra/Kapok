@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/utils/logger.dart';
+import '../../../data/models/task_model.dart';
 import '../../../data/repositories/task_repository.dart';
 import 'task_event.dart';
 import 'task_state.dart';
@@ -30,11 +31,28 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(const TaskLoading());
       Logger.task('Creating task: ${event.taskName}');
       
-      // TODO: Create TaskModel and call repository
-      // final task = TaskModel(...);
-      // final createdTask = await _taskRepository.createTask(task);
+      final now = DateTime.now();
+      final taskId = '${event.teamId}_${now.millisecondsSinceEpoch}';
       
-      // emit(TaskCreated(task: createdTask));
+      final task = TaskModel(
+        id: taskId,
+        taskName: event.taskName,
+        taskSeverity: event.taskSeverity,
+        taskDescription: event.taskDescription,
+        taskCompleted: event.taskCompleted,
+        assignedTo: event.assignedTo,
+        teamName: event.teamName,
+        teamId: event.teamId,
+        latitude: event.latitude,
+        longitude: event.longitude,
+        createdAt: now,
+        updatedAt: now,
+        createdBy: event.createdBy,
+      );
+      
+      final createdTask = await _taskRepository.createTask(task);
+      
+      emit(TaskCreated(task: createdTask));
       Logger.task('Task created successfully');
     } catch (e) {
       Logger.task('Error creating task', error: e);
@@ -51,10 +69,17 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(const TaskLoading());
       Logger.task('Loading all tasks');
       
-      final tasks = await _taskRepository.getTasks();
-      
-      emit(TasksLoaded(tasks: tasks));
-      Logger.task('Loaded ${tasks.length} tasks');
+      await emit.forEach<List<TaskModel>>(
+        _taskRepository.getTasksStream(),
+        onData: (tasks) {
+          Logger.task('Loaded ${tasks.length} tasks');
+          return TasksLoaded(tasks: tasks);
+        },
+        onError: (error, stackTrace) {
+          Logger.task('Error loading tasks stream', error: error);
+          return TaskError(message: error.toString());
+        },
+      );
     } catch (e) {
       Logger.task('Error loading tasks', error: e);
       emit(TaskError(message: e.toString()));

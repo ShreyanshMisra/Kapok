@@ -70,37 +70,21 @@ class TeamRepository {
     try {
       Logger.team('Joining team with code: $teamCode');
       
-      TeamModel team;
-      
-      if (await _networkChecker.isConnected()) {
-        // Get team from Firebase
-        team = await _firebaseSource.getTeamByCode(teamCode);
-      } else {
-        // TODO: Implement offline team code lookup
-        throw TeamException(message: 'Cannot join team offline');
+      if (!await _networkChecker.isConnected()) {
+        throw TeamException(message: 'Cannot join team while offline');
       }
       
-      // Check if user is already a member
-      if (team.memberIds.contains(userId)) {
-        throw TeamException(message: 'User is already a member of this team');
-      }
+      // Join team via Firebase
+      await _firebaseSource.joinTeamByCode(teamCode, userId);
       
-      // Add user to team
-      final updatedTeam = team.copyWith(
-        memberIds: [...team.memberIds, userId],
-        updatedAt: DateTime.now(),
-      );
-      
-      if (await _networkChecker.isConnected()) {
-        // Update on Firebase
-        await _firebaseSource.updateTeam(updatedTeam);
-      }
+      // Get updated team
+      final team = await _firebaseSource.getTeamByCode(teamCode);
       
       // Update local cache
-      await _hiveSource.saveTeam(updatedTeam);
+      await _hiveSource.saveTeam(team);
       
       Logger.team('User joined team successfully: ${team.id}');
-      return updatedTeam;
+      return team;
     } catch (e) {
       Logger.team('Error joining team', error: e);
       if (e is TeamException) {
@@ -126,11 +110,11 @@ class TeamRepository {
       if (await _networkChecker.isConnected()) {
         team = await _firebaseSource.getTeam(teamId);
       } else {
-        final localTeam = await _hiveSource.getTeam(teamId);
-        if (localTeam == null) {
+        final cachedTeam = await _hiveSource.getTeam(teamId);
+        if (cachedTeam == null) {
           throw TeamException(message: 'Team not found');
         }
-        team = localTeam;
+        team = cachedTeam;
       }
       
       // Check if user is a member
@@ -273,11 +257,11 @@ class TeamRepository {
       if (await _networkChecker.isConnected()) {
         team = await _firebaseSource.getTeam(teamId);
       } else {
-        final localTeam = await _hiveSource.getTeam(teamId);
-        if (localTeam == null) {
+        final cachedTeam = await _hiveSource.getTeam(teamId);
+        if (cachedTeam == null) {
           throw TeamException(message: 'Team not found');
         }
-        team = localTeam;
+        team = cachedTeam;
       }
       
       // Check if user is the leader
@@ -326,11 +310,11 @@ class TeamRepository {
       if (await _networkChecker.isConnected()) {
         team = await _firebaseSource.getTeam(teamId);
       } else {
-        final localTeam = await _hiveSource.getTeam(teamId);
-        if (localTeam == null) {
+        final cachedTeam = await _hiveSource.getTeam(teamId);
+        if (cachedTeam == null) {
           throw TeamException(message: 'Team not found');
         }
-        team = localTeam;
+        team = cachedTeam;
       }
       
       // Check if user is the leader
