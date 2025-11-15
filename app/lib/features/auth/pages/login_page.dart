@@ -8,7 +8,6 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'signup_page.dart';
 import 'forgot_password_page.dart';
-import 'package:kapok_app/core/utils/validators.dart';
 
 /// Login page for user authentication
 class LoginPage extends StatefulWidget {

@@ -165,7 +165,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 const SizedBox(height: 16),
                 
                 DropdownButtonFormField<String>(
-                  value: _selectedPriority,
+                  initialValue: _selectedPriority,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context).priority,
                     prefixIcon: const Icon(Icons.priority_high_outlined),

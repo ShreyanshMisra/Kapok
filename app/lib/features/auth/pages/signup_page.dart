@@ -135,7 +135,7 @@ class _SignupPageState extends State<SignupPage> {
                   
                   // Account type dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedAccountType,
+                    initialValue: _selectedAccountType,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).accountType,
                       prefixIcon: const Icon(Icons.group_outlined),
@@ -171,7 +171,7 @@ class _SignupPageState extends State<SignupPage> {
                   
                   // Role dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedRole,
+                    initialValue: _selectedRole,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).role,
                       prefixIcon: const Icon(Icons.work_outlined),

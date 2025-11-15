@@ -4,7 +4,6 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/team_model.dart';
 import '../bloc/team_bloc.dart';
-import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
 import 'create_team_page.dart';
 import 'join_team_page.dart';
