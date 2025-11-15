@@ -63,8 +63,8 @@ class AboutPage extends StatelessWidget {
             // NCTDR section
             _buildSection(
               context,
-              AppLocalizations.of(context).nationalCenterForTechnologyAndDisputeResolution,
-              AppLocalizations.of(context).nctdrDescription,
+              'A Fair Resolution, LLC',
+              'A Fair Resolution, LLC is an organization that supports developing technology for conflict management. It works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
               Icons.business,
             ),
             const SizedBox(height: 24),
@@ -90,8 +90,8 @@ class AboutPage extends StatelessWidget {
             // Contact section
             _buildSection(
               context,
-              AppLocalizations.of(context).contactAndSupport,
-              AppLocalizations.of(context).contactAndSupportDescription,
+              'Contact & Support',
+              'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
               Icons.contact_support,
             ),
             const SizedBox(height: 32),
@@ -132,8 +132,8 @@ class AboutPage extends StatelessWidget {
             // Legal section
             _buildSection(
               context,
-              AppLocalizations.of(context).legal,
-              AppLocalizations.of(context).legalDescription,
+              'Legal',
+              'This application is developed for the organization A Fair Resolution, LLC. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
               Icons.gavel,
             ),
           ],

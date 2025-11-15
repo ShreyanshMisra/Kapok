@@ -24,6 +24,7 @@ class _SignupPageState extends State<SignupPage> {
   
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _tosAgreed = false;
   
   String _selectedAccountType = 'TeamMember';
   String _selectedRole = 'Other';
@@ -278,7 +279,7 @@ class _SignupPageState extends State<SignupPage> {
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       return ElevatedButton(
-                        onPressed: state is AuthLoading
+                        onPressed: (state is AuthLoading || !_tosAgreed)
                             ? null
                             : _handleSignUp,
                         style: ElevatedButton.styleFrom(
@@ -310,6 +311,21 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   const SizedBox(height: 24),
                   
+                  // Terms of Service button
+                  Center(
+                    child: TextButton(
+                      onPressed: _showTermsOfServiceDialog,
+                      child: Text(
+                        'View Terms of Service',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          decoration: TextDecoration.underline,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
                   // Terms and conditions
                   Text(
                     AppLocalizations.of(context).byCreatingAnAccountYouAgreeToOurTermsOfServiceAndPrivacyPolicy,
@@ -330,6 +346,15 @@ class _SignupPageState extends State<SignupPage> {
   /// Handle sign up form submission
   void _handleSignUp() {
     if (_formKey.currentState!.validate()) {
+      if (!_tosAgreed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please agree to the Terms of Service to continue.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
       context.read<AuthBloc>().add(
         SignUpRequested(
           email: _emailController.text.trim(),
@@ -340,5 +365,105 @@ class _SignupPageState extends State<SignupPage> {
         ),
       );
     }
+  }
+
+  /// Show Terms of Service dialog
+  void _showTermsOfServiceDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        bool agreed = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.description, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  const Text('Terms of Service'),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Please read and agree to the following terms:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Need to add terms and conditions\n',
+                      style: TextStyle(fontSize: 13, height: 1.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: agreed,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              agreed = value ?? false;
+                            });
+                          },
+                          activeColor: AppColors.primary,
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setDialogState(() {
+                                agreed = !agreed;
+                              });
+                            },
+                            child: const Text(
+                              'I have read and agree to the Terms of Service',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: agreed
+                      ? () {
+                          Navigator.of(dialogContext).pop();
+                          setState(() {
+                            _tosAgreed = true;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Terms of Service accepted'),
+                              backgroundColor: AppColors.primary,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
+                  ),
+                  child: const Text('I Agree'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }
