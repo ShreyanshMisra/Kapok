@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Map page showing interactive map with task markers
 class MapPage extends StatelessWidget {
@@ -12,7 +13,7 @@ class MapPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Map'),
+        title: Text(AppLocalizations.of(context).map),
         elevation: 0,
         actions: [
           IconButton(
@@ -29,8 +30,8 @@ class MapPage extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('Map page - To be implemented with Mapbox integration'),
+      body: Center(
+        child: Text(AppLocalizations.of(context).mapPageToBeImplemented),
       ),
     );
   }

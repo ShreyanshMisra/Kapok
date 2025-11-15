@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
 import '../bloc/task_bloc.dart';
@@ -29,7 +30,7 @@ class _TasksPageState extends State<TasksPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Tasks'),
+        title: Text(AppLocalizations.of(context).tasks),
         elevation: 0,
         actions: [
           IconButton(
@@ -72,6 +73,7 @@ class _TasksPageState extends State<TasksPage> {
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add),
       ),
+      //body: const Center(child: Text('Tasks page - To be implemented')),
     );
   }
 
@@ -89,7 +91,7 @@ class _TasksPageState extends State<TasksPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'No Tasks Yet',
+              AppLocalizations.of(context).noTasksYet,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -97,10 +99,10 @@ class _TasksPageState extends State<TasksPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Create your first task to get started with disaster relief coordination',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+              AppLocalizations.of(context).createYourFirstTaskToGetStarted,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -109,7 +111,7 @@ class _TasksPageState extends State<TasksPage> {
                 Navigator.of(context).pushNamed(AppRouter.createTask);
               },
               icon: const Icon(Icons.add),
-              label: const Text('Create Task'),
+              label: Text(AppLocalizations.of(context).createTask),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.surface,
@@ -135,7 +137,7 @@ class _TasksPageState extends State<TasksPage> {
             Icon(Icons.error_outline, size: 80, color: AppColors.error),
             const SizedBox(height: 24),
             Text(
-              'Error Loading Tasks',
+              AppLocalizations.of(context).errorLoadingTasks,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -155,7 +157,7 @@ class _TasksPageState extends State<TasksPage> {
                 context.read<TaskBloc>().add(const LoadTasksRequested());
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context).retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.surface,
@@ -293,9 +295,10 @@ class _TasksPageState extends State<TasksPage> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              'Assigned to: ${task.assignedTo}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.textSecondary),
+                              '${AppLocalizations.of(context).assignedToLabel}: ${task.assignedTo}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -312,18 +315,19 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _buildPriorityBadge(int severity) {
+    final localizations = AppLocalizations.of(context);
     Color color;
     String label;
 
     if (severity >= 5) {
       color = AppColors.error;
-      label = 'High';
+      label = localizations.high;
     } else if (severity >= 3) {
       color = AppColors.warning;
-      label = 'Medium';
+      label = localizations.medium;
     } else {
       color = AppColors.success;
-      label = 'Low';
+      label = localizations.low;
     }
 
     return Container(
@@ -352,6 +356,7 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _buildStatusChip(bool completed) {
+    final localizations = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
@@ -373,7 +378,7 @@ class _TasksPageState extends State<TasksPage> {
           ),
           const SizedBox(width: 4),
           Text(
-            completed ? 'Completed' : 'Open',
+            completed ? localizations.completed : localizations.open,
             style: TextStyle(
               color: completed ? AppColors.success : AppColors.info,
               fontSize: 12,

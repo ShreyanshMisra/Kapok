@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kapok_app/features/auth/bloc/auth_event.dart';
 import '../core/constants/app_colors.dart';
+import '../core/localization/app_localizations.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/map/pages/map_page.dart';
@@ -53,22 +54,22 @@ class _HomePageState extends State<HomePage> {
               selectedLabelStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
-              items: const [
+              items: [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.map),
-                  label: 'Map',
+                  icon: const Icon(Icons.map),
+                  label: AppLocalizations.of(context).map,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.assignment),
-                  label: 'Tasks',
+                  icon: const Icon(Icons.assignment),
+                  label: AppLocalizations.of(context).tasks,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.group),
-                  label: 'Teams',
+                  icon: const Icon(Icons.group),
+                  label: AppLocalizations.of(context).teams,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
+                  icon: const Icon(Icons.person),
+                  label: AppLocalizations.of(context).profile,
                 ),
               ],
             ),
@@ -153,14 +154,14 @@ class AppDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Kapok',
+                  AppLocalizations.of(context).appName,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: AppColors.surface,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Disaster Relief Coordination',
+                  AppLocalizations.of(context).disasterReliefCoordination,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.surface.withOpacity(0.8),
                   ),
@@ -170,7 +171,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
+            title: Text(AppLocalizations.of(context).about),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
@@ -182,7 +183,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(AppLocalizations.of(context).settings),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/settings');
@@ -191,7 +192,7 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Sign Out'),
+            title: Text(AppLocalizations.of(context).signOut),
             onTap: () {
               Navigator.of(context).pop();
               _showSignOutDialog(context);
@@ -204,15 +205,16 @@ class AppDrawer extends StatelessWidget {
 
   /// Show sign out confirmation dialog
   void _showSignOutDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(localizations.signOut),
+        content: Text(localizations.confirmSignOut),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -222,7 +224,7 @@ class AppDrawer extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
             ),
-            child: const Text('Sign Out'),
+            child: Text(localizations.signOut),
           ),
         ],
       ),
