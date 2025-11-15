@@ -121,7 +121,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 
                 // Role dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: InputDecoration(
                     labelText: 'Role',
                     prefixIcon: const Icon(Icons.work_outlined),
