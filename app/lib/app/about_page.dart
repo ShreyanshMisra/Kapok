@@ -62,8 +62,8 @@ class AboutPage extends StatelessWidget {
             // NCTDR section
             _buildSection(
               context,
-              'National Center for Technology and Dispute Resolution',
-              'The National Center for Technology and Dispute Resolution (NCTDR) is an organization that supports developing technology for conflict management. NCTDR works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
+              'A Fair Resolution, LLC',
+              'A Fair Resolution, LLC is an organization that supports developing technology for conflict management. It works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
               Icons.business,
             ),
             const SizedBox(height: 24),
@@ -96,7 +96,7 @@ class AboutPage extends StatelessWidget {
             _buildSection(
               context,
               'Contact & Support',
-              'For technical support, feature requests, or general inquiries, please contact the National Center for Technology and Dispute Resolution.',
+              'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
               Icons.contact_support,
             ),
             const SizedBox(height: 32),
@@ -138,7 +138,7 @@ class AboutPage extends StatelessWidget {
             _buildSection(
               context,
               'Legal',
-              'This application is developed for the National Center for Technology and Dispute Resolution. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
+              'This application is developed for the organization A Fair Resolution, LLC. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
               Icons.gavel,
             ),
           ],
