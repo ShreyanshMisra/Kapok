@@ -16,7 +16,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<LoadTasksRequested>(_onLoadTasksRequested);
     on<LoadTasksByTeamRequested>(_onLoadTasksByTeamRequested);
     on<LoadTasksByUserRequested>(_onLoadTasksByUserRequested);
+    on<LoadTasksForUserTeamsRequested>(_onLoadTasksForUserTeamsRequested);
     on<UpdateTaskRequested>(_onUpdateTaskRequested);
+    on<EditTaskRequested>(_onEditTaskRequested);
     on<DeleteTaskRequested>(_onDeleteTaskRequested);
     on<MarkTaskCompletedRequested>(_onMarkTaskCompletedRequested);
     on<AssignTaskRequested>(_onAssignTaskRequested);
@@ -40,7 +42,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         taskSeverity: event.taskSeverity,
         taskDescription: event.taskDescription,
         taskCompleted: event.taskCompleted,
-        assignedTo: event.assignedTo,
+        assignedTo: event.assignedTo.isEmpty ? event.createdBy : event.assignedTo,
         teamName: event.teamName,
         teamId: event.teamId,
         latitude: event.latitude,
@@ -68,18 +70,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       emit(const TaskLoading());
       Logger.task('Loading all tasks');
-      
-      await emit.forEach<List<TaskModel>>(
-        _taskRepository.getTasksStream(),
-        onData: (tasks) {
-          Logger.task('Loaded ${tasks.length} tasks');
-          return TasksLoaded(tasks: tasks);
-        },
-        onError: (error, stackTrace) {
-          Logger.task('Error loading tasks stream', error: error);
-          return TaskError(message: error.toString());
-        },
-      );
+
+      final tasks = await _taskRepository.getTasks();
+
+      emit(TasksLoaded(tasks: tasks));
+      Logger.task('Loaded ${tasks.length} tasks');
     } catch (e) {
       Logger.task('Error loading tasks', error: e);
       emit(TaskError(message: e.toString()));
@@ -113,13 +108,32 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       emit(const TaskLoading());
       Logger.task('Loading tasks for user: ${event.userId}');
-      
+
       final tasks = await _taskRepository.getTasksByUser(event.userId);
-      
+
       emit(TasksLoaded(tasks: tasks));
       Logger.task('Loaded ${tasks.length} tasks for user');
     } catch (e) {
       Logger.task('Error loading user tasks', error: e);
+      emit(TaskError(message: e.toString()));
+    }
+  }
+
+  /// Handle load tasks for user's teams request (permission-aware)
+  Future<void> _onLoadTasksForUserTeamsRequested(
+    LoadTasksForUserTeamsRequested event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(const TaskLoading());
+      Logger.task('Loading tasks for user\'s teams: ${event.teamIds.length} teams');
+
+      final tasks = await _taskRepository.getTasksForUserTeams(event.teamIds);
+
+      emit(TasksLoaded(tasks: tasks));
+      Logger.task('Loaded ${tasks.length} tasks for user\'s teams');
+    } catch (e) {
+      Logger.task('Error loading tasks for user\'s teams', error: e);
       emit(TaskError(message: e.toString()));
     }
   }
@@ -132,16 +146,50 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       emit(const TaskLoading());
       Logger.task('Updating task: ${event.taskId}');
-      
-      // TODO: Get current task and update it
-      // final currentTask = await _taskRepository.getTask(event.taskId);
-      // final updatedTask = currentTask.copyWith(...);
-      // final task = await _taskRepository.updateTask(updatedTask);
-      
-      // emit(TaskUpdated(task: task));
+
+      // Get current task and update it
+      final currentTask = await _taskRepository.getTask(event.taskId);
+      final updatedTask = currentTask.copyWith(
+        taskName: event.taskName,
+        taskSeverity: event.taskSeverity,
+        taskDescription: event.taskDescription,
+        taskCompleted: event.taskCompleted,
+        assignedTo: event.assignedTo,
+        updatedAt: DateTime.now(),
+      );
+      final task = await _taskRepository.updateTask(updatedTask);
+
+      emit(TaskUpdated(task: task));
       Logger.task('Task updated successfully');
     } catch (e) {
       Logger.task('Error updating task', error: e);
+      emit(TaskError(message: e.toString()));
+    }
+  }
+
+  /// Handle edit task request (with permission check)
+  Future<void> _onEditTaskRequested(
+    EditTaskRequested event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(const TaskLoading());
+      Logger.task('Editing task: ${event.taskId} by user: ${event.userId}');
+
+      final task = await _taskRepository.editTask(
+        taskId: event.taskId,
+        userId: event.userId,
+        taskName: event.taskName,
+        taskSeverity: event.taskSeverity,
+        taskDescription: event.taskDescription,
+        taskCompleted: event.taskCompleted,
+        assignedTo: event.assignedTo,
+      );
+
+      emit(TaskUpdated(task: task));
+      Logger.task('Task edited successfully');
+    } catch (e) {
+      Logger.task('Error editing task', error: e);
       emit(TaskError(message: e.toString()));
     }
   }

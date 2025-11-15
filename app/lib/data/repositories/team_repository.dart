@@ -27,10 +27,10 @@ class TeamRepository {
   }) async {
     try {
       Logger.team('Creating team: $name');
-      
+
       // Generate unique team code
       final teamCode = _generateTeamCode();
-      
+
       // Create team model
       final team = TeamModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -42,17 +42,43 @@ class TeamRepository {
         updatedAt: DateTime.now(),
         isActive: true,
       );
-      
-      if (await _networkChecker.isConnected()) {
-        // Save to Firebase
-        await _firebaseSource.createTeam(team);
-      }
-      
-      // Always save locally
+
+      // Always save locally first
       await _hiveSource.saveTeam(team);
-      
-      Logger.team('Team created successfully: ${team.id}');
-      return team;
+
+      if (await _networkChecker.isConnected()) {
+        try {
+          // Save to Firebase
+          await _firebaseSource.createTeam(team);
+
+          Logger.team('Team created successfully: ${team.id}');
+          return team;
+        } catch (e) {
+          // Firebase failed, but local save succeeded
+          Logger.team('Firebase save failed, team saved locally', error: e);
+
+          // Queue for sync
+          await _hiveSource.queueForSync({
+            'operation': 'create_team',
+            'type': 'team',
+            'data': team.toJson(),
+            'timestamp': DateTime.now().toIso8601String(),
+          });
+
+          return team;
+        }
+      } else {
+        // Offline: queue for sync
+        await _hiveSource.queueForSync({
+          'operation': 'create_team',
+          'type': 'team',
+          'data': team.toJson(),
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+
+        Logger.team('Team created offline: ${team.id}');
+        return team;
+      }
     } catch (e) {
       Logger.team('Error creating team', error: e);
       throw TeamException(
@@ -222,19 +248,45 @@ class TeamRepository {
   Future<TeamModel> updateTeam(TeamModel team) async {
     try {
       Logger.team('Updating team: ${team.id}');
-      
+
       final updatedTeam = team.copyWith(updatedAt: DateTime.now());
-      
-      if (await _networkChecker.isConnected()) {
-        // Update on Firebase
-        await _firebaseSource.updateTeam(updatedTeam);
-      }
-      
-      // Always update local cache
+
+      // Always update local cache first
       await _hiveSource.saveTeam(updatedTeam);
-      
-      Logger.team('Team updated successfully');
-      return updatedTeam;
+
+      if (await _networkChecker.isConnected()) {
+        try {
+          // Update on Firebase
+          await _firebaseSource.updateTeam(updatedTeam);
+
+          Logger.team('Team updated successfully');
+          return updatedTeam;
+        } catch (e) {
+          // Firebase failed, but local update succeeded
+          Logger.team('Firebase update failed, team updated locally', error: e);
+
+          // Queue for sync
+          await _hiveSource.queueForSync({
+            'operation': 'update_team',
+            'type': 'team',
+            'data': updatedTeam.toJson(),
+            'timestamp': DateTime.now().toIso8601String(),
+          });
+
+          return updatedTeam;
+        }
+      } else {
+        // Offline: queue for sync
+        await _hiveSource.queueForSync({
+          'operation': 'update_team',
+          'type': 'team',
+          'data': updatedTeam.toJson(),
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+
+        Logger.team('Team updated offline');
+        return updatedTeam;
+      }
     } catch (e) {
       Logger.team('Error updating team', error: e);
       throw TeamException(

@@ -7,7 +7,7 @@ part 'task_model.g.dart';
 class TaskModel {
   final String id;
   final String taskName;
-  final int taskSeverity; // 1–5
+  final int taskSeverity; // 1–5 (1=Lowest, 2=Low, 3=Medium, 4=High, 5=Critical)
   final String taskDescription;
   final bool taskCompleted;
   final String assignedTo;
@@ -15,6 +15,7 @@ class TaskModel {
   final String teamId;
   final double latitude;
   final double longitude;
+  final String? address; // Optional address field
   final DateTime createdAt;
   final DateTime updatedAt;
   final String createdBy;
@@ -30,6 +31,7 @@ class TaskModel {
     required this.teamId,
     required this.latitude,
     required this.longitude,
+    this.address,
     required this.createdAt,
     required this.updatedAt,
     required this.createdBy,
@@ -40,7 +42,7 @@ class TaskModel {
 
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return TaskModel(
       id: doc.id,
       taskName: data['taskName'] as String? ?? '',
@@ -52,6 +54,7 @@ class TaskModel {
       teamId: data['teamId'] as String? ?? '',
       latitude: (data['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (data['longitude'] as num?)?.toDouble() ?? 0.0,
+      address: data['address'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       createdBy: data['createdBy'] as String? ?? '',
@@ -69,6 +72,7 @@ class TaskModel {
       'teamId': teamId,
       'latitude': latitude,
       'longitude': longitude,
+      if (address != null) 'address': address,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'createdBy': createdBy,
@@ -86,6 +90,7 @@ class TaskModel {
     String? teamId,
     double? latitude,
     double? longitude,
+    String? address,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? createdBy,
@@ -101,6 +106,7 @@ class TaskModel {
       teamId: teamId ?? this.teamId,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      address: address ?? this.address,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       createdBy: createdBy ?? this.createdBy,
@@ -133,5 +139,34 @@ class TaskModel {
   String toString() {
     return 'TaskModel(id: $id, taskName: $taskName, taskSeverity: $taskSeverity, taskCompleted: $taskCompleted, assignedTo: $assignedTo, teamName: $teamName)';
   }
+
+  /// Get priority label from severity level
+  String get priorityLabel {
+    switch (taskSeverity) {
+      case 1:
+        return 'Lowest';
+      case 2:
+        return 'Low';
+      case 3:
+        return 'Medium';
+      case 4:
+        return 'High';
+      case 5:
+        return 'Critical';
+      default:
+        return 'Medium';
+    }
+  }
+
+  /// Get priority color from severity level
+  static const priorityColors = {
+    1: 0xFF4CAF50, // Green - Lowest
+    2: 0xFF8BC34A, // Light Green - Low
+    3: 0xFFFFC107, // Amber - Medium
+    4: 0xFFFF9800, // Orange - High
+    5: 0xFFF44336, // Red - Critical
+  };
+
+  int get priorityColor => priorityColors[taskSeverity] ?? priorityColors[3]!;
 }
 

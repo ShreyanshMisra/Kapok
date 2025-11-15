@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
@@ -191,10 +193,25 @@ class _TasksPageState extends State<TasksPage> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () {
-          Navigator.of(
-            context,
-          ).pushNamed(AppRouter.taskDetail, arguments: task);
+        onTap: () async {
+          final authState = context.read<AuthBloc>().state;
+          String currentUserId = '';
+          if (authState is AuthAuthenticated) {
+            currentUserId = authState.user.id;
+          }
+
+          final result = await Navigator.of(context).pushNamed(
+            AppRouter.taskDetail,
+            arguments: {
+              'task': task,
+              'currentUserId': currentUserId,
+            },
+          );
+
+          // Reload tasks if task was updated
+          if (result == true && mounted) {
+            context.read<TaskBloc>().add(const LoadTasksRequested());
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

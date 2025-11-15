@@ -136,9 +136,12 @@ class AppRouter {
         );
       
       case taskDetail:
-        final task = settings.arguments;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (_) => TaskDetailPage(task: task),
+          builder: (_) => TaskDetailPage(
+            task: args['task'],
+            currentUserId: args['currentUserId'],
+          ),
           settings: settings,
         );
       
