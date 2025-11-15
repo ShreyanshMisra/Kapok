@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
+import '../core/localization/app_localizations.dart';
+import '../core/providers/language_provider.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_event.dart';
 import '../features/auth/bloc/auth_state.dart';
@@ -28,68 +31,78 @@ class KapokApp extends StatelessWidget {
           create: (context) => sl<TaskBloc>(),
         ),
       ],
-      child: MaterialApp(
-        title: 'Kapok',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: MaterialColor(
-            AppColors.primary.value,
-            <int, Color>{
-              50: AppColors.primary.withOpacity(0.1),
-              100: AppColors.primary.withOpacity(0.2),
-              200: AppColors.primary.withOpacity(0.3),
-              300: AppColors.primary.withOpacity(0.4),
-              400: AppColors.primary.withOpacity(0.5),
-              500: AppColors.primary,
-              600: AppColors.primaryDark,
-              700: AppColors.primaryDark,
-              800: AppColors.primaryDark,
-              900: AppColors.primaryDark,
-            },
-          ),
-          scaffoldBackgroundColor: AppColors.background,
-          appBarTheme: AppBarTheme(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.surface,
-            elevation: 0,
-          ),
-          useMaterial3: true,
-        ),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('es'),
-        ],
-        onGenerateRoute: AppRouter.generateRoute,
-        home: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is AuthUnauthenticated) {
-              Navigator.pushReplacementNamed(context, '/login');
-            } 
-            else if (state is AuthAuthenticated) {
-                Navigator.pushReplacementNamed(context, '/home');
-            }
+      child: ChangeNotifierProvider(
+        create: (_) => LanguageProvider(),
+        child: Consumer<LanguageProvider>(
+          builder: (context, languageProvider, _) {
+            return MaterialApp(
+              key: ValueKey(languageProvider.currentLocale.languageCode),
+              title: 'Kapok',
+              debugShowCheckedModeBanner: false,
+              locale: languageProvider.currentLocale,
+              theme: ThemeData(
+                primarySwatch: MaterialColor(
+                  AppColors.primary.value,
+                  <int, Color>{
+                    50: AppColors.primary.withOpacity(0.1),
+                    100: AppColors.primary.withOpacity(0.2),
+                    200: AppColors.primary.withOpacity(0.3),
+                    300: AppColors.primary.withOpacity(0.4),
+                    400: AppColors.primary.withOpacity(0.5),
+                    500: AppColors.primary,
+                    600: AppColors.primaryDark,
+                    700: AppColors.primaryDark,
+                    800: AppColors.primaryDark,
+                    900: AppColors.primaryDark,
+                  },
+                ),
+                scaffoldBackgroundColor: AppColors.background,
+                appBarTheme: AppBarTheme(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.surface,
+                  elevation: 0,
+                ),
+                useMaterial3: true,
+              ),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en'),
+                Locale('es'),
+              ],
+              onGenerateRoute: AppRouter.generateRoute,
+              home: BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthUnauthenticated) {
+                    Navigator.pushReplacementNamed(context, '/login');
+                  } 
+                  else if (state is AuthAuthenticated) {
+                      Navigator.pushReplacementNamed(context, '/home');
+                  }
+                },
+                child: BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthLoading) {
+                      return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    } else if (state is AuthAuthenticated) {
+                       return const HomePage();
+                    } else {
+                      // Show a temporary screen while redirect happens
+                      return const Scaffold(
+                      body: Center(child: Text('Redirecting to login...')),
+                    );
+                  }
+                },
+              ),
+              ),
+            );
           },
-          child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              } else if (state is AuthAuthenticated) {
-                 return const HomePage();
-              } else {
-                // Show a temporary screen while redirect happens
-                return const Scaffold(
-                body: Center(child: Text('Redirecting to login...')),
-              );
-            }
-          },
-        ),
         ),
       ),
     );
