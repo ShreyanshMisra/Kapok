@@ -134,7 +134,7 @@ class _SignupPageState extends State<SignupPage> {
                   
                   // Account type dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedAccountType,
+                    initialValue: _selectedAccountType,
                     decoration: InputDecoration(
                       labelText: 'Account Type',
                       prefixIcon: const Icon(Icons.group_outlined),
@@ -162,7 +162,7 @@ class _SignupPageState extends State<SignupPage> {
                   
                   // Role dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedRole,
+                    initialValue: _selectedRole,
                     decoration: InputDecoration(
                       labelText: 'Role',
                       prefixIcon: const Icon(Icons.work_outlined),

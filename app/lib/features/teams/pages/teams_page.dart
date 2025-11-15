@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/team_model.dart';
 import '../bloc/team_bloc.dart';
-import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
 import 'create_team_page.dart';
 import 'join_team_page.dart';
@@ -39,9 +38,7 @@ class _TeamsPageState extends State<TeamsPage> {
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CreateTeamPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const CreateTeamPage()),
               );
             },
           ),
@@ -50,19 +47,13 @@ class _TeamsPageState extends State<TeamsPage> {
       body: BlocBuilder<TeamBloc, TeamState>(
         builder: (context, state) {
           if (state is TeamLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           } else if (state is TeamError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.error,
-                  ),
+                  Icon(Icons.error_outline, size: 64, color: AppColors.error),
                   const SizedBox(height: 16),
                   Text(
                     'Error loading teams',
@@ -89,11 +80,11 @@ class _TeamsPageState extends State<TeamsPage> {
             );
           } else if (state is TeamLoaded) {
             final teams = state.teams;
-            
+
             if (teams.isEmpty) {
               return _buildEmptyState();
             }
-            
+
             return RefreshIndicator(
               onRefresh: () async {
                 // TODO: Refresh teams
@@ -109,41 +100,9 @@ class _TeamsPageState extends State<TeamsPage> {
               ),
             );
           }
-          
+
           return _buildEmptyState();
         },
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const JoinTeamPage(),
-                ),
-              );
-            },
-            backgroundColor: AppColors.secondary,
-            foregroundColor: AppColors.surface,
-            icon: const Icon(Icons.group_add),
-            label: const Text('Join Team'),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CreateTeamPage(),
-                ),
-              );
-            },
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.surface,
-            icon: const Icon(Icons.add),
-            label: const Text('Create Team'),
-          ),
-        ],
       ),
     );
   }
@@ -172,9 +131,9 @@ class _TeamsPageState extends State<TeamsPage> {
             const SizedBox(height: 16),
             Text(
               'Join an existing team or create a new one to get started with disaster relief coordination.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -224,15 +183,11 @@ class _TeamsPageState extends State<TeamsPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => TeamDetailPage(team: team),
-            ),
+            MaterialPageRoute(builder: (context) => TeamDetailPage(team: team)),
           );
         },
         borderRadius: BorderRadius.circular(12),
@@ -262,30 +217,25 @@ class _TeamsPageState extends State<TeamsPage> {
                       children: [
                         Text(
                           team.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '${team.memberIds.length} member${team.memberIds.length != 1 ? 's' : ''}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: AppColors.textSecondary,
-                  ),
+                  Icon(Icons.chevron_right, color: AppColors.textSecondary),
                 ],
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: team.isActive 
+                  color: team.isActive
                       ? AppColors.success.withOpacity(0.1)
                       : AppColors.error.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
