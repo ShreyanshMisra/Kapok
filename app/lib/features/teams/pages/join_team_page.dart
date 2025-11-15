@@ -7,6 +7,7 @@ import '../../auth/bloc/auth_state.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Join team page for entering team codes
 class JoinTeamPage extends StatefulWidget {

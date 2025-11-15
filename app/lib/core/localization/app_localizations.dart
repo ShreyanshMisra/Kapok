@@ -308,7 +308,6 @@ class AppLocalizations {
   String get profilePictureChangeNotImplementedYet => _getString('profilePictureChangeNotImplementedYet');
   String get profileUpdatedSuccessfully => _getString('profileUpdatedSuccessfully');
   String get editTeam => _getString('editTeam');
-  String get closeTeam => _getString('closeTeam');
   String get leaveTeam => _getString('leaveTeam');
   String get teamCodeCopiedToClipboard => _getString('teamCodeCopiedToClipboard');
   String get copyCode => _getString('copyCode');
@@ -318,7 +317,6 @@ class AppLocalizations {
   String get editTeamFunctionalityWillBeImplementedHere => _getString('editTeamFunctionalityWillBeImplementedHere');
   String get remove => _getString('remove');
   String get removeFromTeam => _getString('removeFromTeam');
-  String get removeMember => _getString('removeMember');
   String get editTaskPageToBeImplemented => _getString('editTaskPageToBeImplemented');
 
   /// Gets localized string
