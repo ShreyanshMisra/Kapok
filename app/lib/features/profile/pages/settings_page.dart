@@ -41,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _notificationsEnabled = value;
                   });
                 },
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               ),
             ],
           ),
@@ -60,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _locationEnabled = value;
                   });
                 },
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               ),
             ],
           ),
