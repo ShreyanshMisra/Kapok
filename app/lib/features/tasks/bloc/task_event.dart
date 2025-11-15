@@ -13,19 +13,25 @@ class CreateTaskRequested extends TaskEvent {
   final String taskName;
   final int taskSeverity;
   final String taskDescription;
+  final bool taskCompleted;
   final String assignedTo;
   final String teamName;
+  final String teamId;
   final double latitude;
   final double longitude;
+  final String createdBy;
 
   const CreateTaskRequested({
     required this.taskName,
     required this.taskSeverity,
     required this.taskDescription,
+    this.taskCompleted = false,
     required this.assignedTo,
     required this.teamName,
+    required this.teamId,
     required this.latitude,
     required this.longitude,
+    required this.createdBy,
   });
 
   @override
@@ -33,10 +39,13 @@ class CreateTaskRequested extends TaskEvent {
     taskName,
     taskSeverity,
     taskDescription,
+    taskCompleted,
     assignedTo,
     teamName,
+    teamId,
     latitude,
     longitude,
+    createdBy,
   ];
 }
 

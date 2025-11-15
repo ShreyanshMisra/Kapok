@@ -65,10 +65,13 @@ class FirebaseSource {
   // Team operations
   Future<TeamModel> createTeam(TeamModel team) async {
     try {
-      Logger.firebase('Creating team: ${team.id}');
-      await _firestore.collection('teams').doc(team.id).set(team.toJson());
-      Logger.firebase('Team created successfully');
-      return team;
+      Logger.firebase('Creating team: ${team.name}');
+      final docRef = _firestore.collection('teams').doc();
+      final teamData = team.toFirestore();
+      await docRef.set(teamData);
+      final doc = await docRef.get();
+      Logger.firebase('Team created successfully: ${docRef.id}');
+      return TeamModel.fromFirestore(doc);
     } catch (e) {
       Logger.firebase('Error creating team', error: e);
       throw DatabaseException(
@@ -83,7 +86,7 @@ class FirebaseSource {
       Logger.firebase('Getting team: $teamId');
       final doc = await _firestore.collection('teams').doc(teamId).get();
       if (doc.exists) {
-        return TeamModel.fromJson(doc.data()!);
+        return TeamModel.fromFirestore(doc);
       } else {
         throw DatabaseException(message: 'Team not found');
       }
@@ -103,10 +106,11 @@ class FirebaseSource {
           .collection('teams')
           .where('teamCode', isEqualTo: teamCode)
           .where('isActive', isEqualTo: true)
+          .limit(1)
           .get();
       
       if (query.docs.isNotEmpty) {
-        return TeamModel.fromJson(query.docs.first.data());
+        return TeamModel.fromFirestore(query.docs.first);
       } else {
         throw DatabaseException(message: 'Team code not found');
       }
@@ -114,6 +118,32 @@ class FirebaseSource {
       Logger.firebase('Error getting team by code', error: e);
       throw DatabaseException(
         message: 'Failed to get team by code',
+        originalError: e,
+      );
+    }
+  }
+
+  Future<void> joinTeamByCode(String teamCode, String userId) async {
+    try {
+      Logger.firebase('Joining team with code: $teamCode for user: $userId');
+      
+      final team = await getTeamByCode(teamCode);
+      
+      if (team.memberIds.contains(userId)) {
+        Logger.firebase('User already in team');
+        return;
+      }
+      
+      await _firestore.collection('teams').doc(team.id).update({
+        'memberIds': FieldValue.arrayUnion([userId]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      Logger.firebase('User joined team successfully');
+    } catch (e) {
+      Logger.firebase('Error joining team', error: e);
+      throw DatabaseException(
+        message: 'Failed to join team',
         originalError: e,
       );
     }
@@ -128,7 +158,7 @@ class FirebaseSource {
           .get();
       
       return query.docs
-          .map((doc) => TeamModel.fromJson(doc.data()))
+          .map((doc) => TeamModel.fromFirestore(doc))
           .toList();
     } catch (e) {
       Logger.firebase('Error getting user teams', error: e);
@@ -142,7 +172,7 @@ class FirebaseSource {
   Future<TeamModel> updateTeam(TeamModel team) async {
     try {
       Logger.firebase('Updating team: ${team.id}');
-      await _firestore.collection('teams').doc(team.id).update(team.toJson());
+      await _firestore.collection('teams').doc(team.id).update(team.toFirestore());
       Logger.firebase('Team updated successfully');
       return team;
     } catch (e) {
@@ -157,10 +187,12 @@ class FirebaseSource {
   // Task operations
   Future<TaskModel> createTask(TaskModel task) async {
     try {
-      Logger.firebase('Creating task: ${task.id}');
-      final docRef = await _firestore.collection('tasks').add(task.toJson());
+      Logger.firebase('Creating task: ${task.taskName}');
+      final docRef = _firestore.collection('tasks').doc();
+      final taskData = task.toFirestore();
+      await docRef.set(taskData);
       final doc = await docRef.get();
-      Logger.firebase('Task created successfully');
+      Logger.firebase('Task created successfully: ${docRef.id}');
       return TaskModel.fromFirestore(doc);
     } catch (e) {
       Logger.firebase('Error creating task', error: e);
@@ -168,6 +200,31 @@ class FirebaseSource {
         message: 'Failed to create task',
         originalError: e,
       );
+    }
+  }
+
+  Stream<List<TaskModel>> getTasksStream({String? teamId, String? userId}) {
+    try {
+      Logger.firebase('Getting tasks stream');
+      var query = _firestore.collection('tasks').orderBy('createdAt', descending: true);
+      
+      if (teamId != null) {
+        query = query.where('teamId', isEqualTo: teamId) as Query<Map<String, dynamic>>;
+      }
+      
+      if (userId != null) {
+        query = query.where('assignedTo', isEqualTo: userId) as Query<Map<String, dynamic>>;
+      }
+      
+      return query.snapshots().map((snapshot) => 
+        snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList()
+      );
+    } catch (e) {
+      Logger.firebase('Error getting tasks stream', error: e);
+      return Stream.error(DatabaseException(
+        message: 'Failed to get tasks stream',
+        originalError: e,
+      ));
     }
   }
 
@@ -254,7 +311,7 @@ class FirebaseSource {
   Future<TaskModel> updateTask(TaskModel task) async {
     try {
       Logger.firebase('Updating task: ${task.id}');
-      await _firestore.collection('tasks').doc(task.id).update(task.toJson());
+      await _firestore.collection('tasks').doc(task.id).update(task.toFirestore());
       Logger.firebase('Task updated successfully');
       return task;
     } catch (e) {
@@ -353,6 +410,5 @@ class FirebaseSource {
 
   User? get currentUser => _auth.currentUser;
   
-  /// Get Firebase Auth instance for stream access
-  FirebaseAuth get auth => _auth;
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

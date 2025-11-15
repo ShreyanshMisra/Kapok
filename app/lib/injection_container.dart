@@ -1,4 +1,6 @@
 import 'package:get_it/get_it.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Core services
 import 'core/services/firebase_service.dart';
@@ -9,7 +11,7 @@ import 'core/services/network_checker.dart';
 // Data sources
 import 'data/sources/firebase_source.dart';
 import 'data/sources/hive_source.dart';
-import 'data/sources/mapbox_source.dart';
+// import 'data/sources/mapbox_source.dart';
 
 // Repositories
 import 'data/repositories/auth_repository.dart';
@@ -20,6 +22,8 @@ import 'data/repositories/team_repository.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/tasks/bloc/task_bloc.dart';
 import 'features/teams/bloc/team_bloc.dart';
+//import 'features/map/bloc/map_bloc.dart';
+// import 'features/profile/bloc/profile_bloc.dart';
 
 /// Dependency injection container
 final GetIt sl = GetIt.instance;
@@ -35,7 +39,7 @@ Future<void> initializeDependencies() async {
   // Data sources
   sl.registerLazySingleton<FirebaseSource>(() => FirebaseSource());
   sl.registerLazySingleton<HiveSource>(() => HiveSource());
-  sl.registerLazySingleton<MapboxSource>(() => MapboxSource());
+  // sl.registerLazySingleton<MapboxSource>(() => MapboxSource());
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepository(
@@ -64,6 +68,10 @@ Future<void> initializeDependencies() async {
   sl.registerFactory<TeamBloc>(() => TeamBloc(
     teamRepository: sl<TeamRepository>(),
   ));
+  // sl.registerFactory<MapBloc>(() => MapBloc());
+  // sl.registerFactory<ProfileBloc>(() => ProfileBloc(
+ //    authRepository: sl<AuthRepository>(),
+ //  ));
 }
 
 /// Initializes core services

@@ -1,6 +1,6 @@
 class Validators {
   /// Validates email format
-  static String? email(String? value) {
+  static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
@@ -14,7 +14,7 @@ class Validators {
   }
 
   /// Validates password strength
-  static String? password(String? value) {
+  static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
@@ -40,7 +40,7 @@ class Validators {
   }
 
   /// Validates name field
-  static String? name(String? value) {
+  static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Name is required';
     }
@@ -53,14 +53,13 @@ class Validators {
       return 'Name must be less than 50 characters';
     }
     
-    // Check for valid characters (letters, spaces, hyphens, apostrophes)
-    final nameRegex = RegExp(r"^[a-zA-Z\s\-']+$");
-    if (!nameRegex.hasMatch(value)) {
-      return 'Name can only contain letters, spaces, hyphens, and apostrophes';
-    }
-    
     return null;
   }
+
+  // Keep legacy methods for backward compatibility
+  static String? email(String? value) => validateEmail(value);
+  static String? password(String? value) => validatePassword(value);
+  static String? name(String? value) => validateName(value);
 
   /// Validates team code format
   static String? teamCode(String? value) {
@@ -270,10 +269,5 @@ class Validators {
     }
     return null;
   }
-
-  // Convenience methods with the expected names
-  static String? validateEmail(String? value) => email(value);
-  static String? validatePassword(String? value) => password(value);
-  static String? validateName(String? value) => name(value);
 }
 
