@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_strings.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 24),
                   
                   Text(
-                    'Kapok',
+                    AppLocalizations.of(context).appName,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 8),
                   
                   Text(
-                    'Disaster Relief Coordination',
+                    AppLocalizations.of(context).disasterReliefCoordination,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -91,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: AppLocalizations.of(context).email,
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -110,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: AppLocalizations.of(context).password,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -146,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                         );
                       },
                       child: Text(
-                        'Forgot Password?',
+                        AppLocalizations.of(context).forgotPassword,
                         style: TextStyle(color: AppColors.primary),
                       ),
                     ),
@@ -177,9 +177,9 @@ class _LoginPageState extends State<LoginPage> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                            : const Text(
-                                'Sign In',
-                                style: TextStyle(
+                            : Text(
+                                AppLocalizations.of(context).signIn,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -193,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account? "),
+                      Text(AppLocalizations.of(context).dontHaveAnAccount),
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).push(
@@ -203,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         },
                         child: Text(
-                          'Sign Up',
+                          AppLocalizations.of(context).signUp,
                           style: TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,

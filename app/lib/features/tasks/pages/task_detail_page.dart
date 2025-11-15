@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Task detail page showing task information
 class TaskDetailPage extends StatelessWidget {
@@ -14,11 +15,11 @@ class TaskDetailPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Task Details'),
+        title: Text(AppLocalizations.of(context).taskDetails),
         elevation: 0,
       ),
-      body: const Center(
-        child: Text('Task Detail page - To be implemented'),
+      body: Center(
+        child: Text(AppLocalizations.of(context).taskDetailPageToBeImplemented),
       ),
     );
   }

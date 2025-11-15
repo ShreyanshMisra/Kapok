@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/team_model.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_event.dart';
@@ -32,7 +33,7 @@ class _TeamsPageState extends State<TeamsPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('My Teams'),
+        title: Text(AppLocalizations.of(context).myTeams),
         elevation: 0,
         actions: [
           IconButton(
@@ -57,7 +58,7 @@ class _TeamsPageState extends State<TeamsPage> {
                   Icon(Icons.error_outline, size: 64, color: AppColors.error),
                   const SizedBox(height: 16),
                   Text(
-                    'Error loading teams',
+                    AppLocalizations.of(context).errorLoadingTeams,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -74,7 +75,7 @@ class _TeamsPageState extends State<TeamsPage> {
                       // TODO: Retry loading teams
                       // context.read<TeamBloc>().add(LoadUserTeams());
                     },
-                    child: const Text('Retry'),
+                    child: Text(AppLocalizations.of(context).retry),
                   ),
                 ],
               ),
@@ -123,7 +124,7 @@ class _TeamsPageState extends State<TeamsPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'No Teams Yet',
+              AppLocalizations.of(context).noTeamsYet,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -131,7 +132,7 @@ class _TeamsPageState extends State<TeamsPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Join an existing team or create a new one to get started with disaster relief coordination.',
+              AppLocalizations.of(context).joinAnExistingTeamOrCreateANewOneToGetStarted,
               style: Theme.of(
                 context,
               ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
@@ -150,7 +151,7 @@ class _TeamsPageState extends State<TeamsPage> {
                     );
                   },
                   icon: const Icon(Icons.group_add),
-                  label: const Text('Join Team'),
+                  label: Text(AppLocalizations.of(context).joinTeam),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondary,
                     foregroundColor: AppColors.surface,
@@ -165,7 +166,7 @@ class _TeamsPageState extends State<TeamsPage> {
                     );
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('Create Team'),
+                  label: Text(AppLocalizations.of(context).createTeam),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.surface,
@@ -222,7 +223,7 @@ class _TeamsPageState extends State<TeamsPage> {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${team.memberIds.length} member${team.memberIds.length != 1 ? 's' : ''}',
+                          '${team.memberIds.length} ${team.memberIds.length != 1 ? AppLocalizations.of(context).members : AppLocalizations.of(context).member}',
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: AppColors.textSecondary),
                         ),
@@ -242,7 +243,7 @@ class _TeamsPageState extends State<TeamsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  team.isActive ? 'Active' : 'Inactive',
+                  team.isActive ? AppLocalizations.of(context).active : AppLocalizations.of(context).inactive,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: team.isActive ? AppColors.success : AppColors.error,
                     fontWeight: FontWeight.w600,

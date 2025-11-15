@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../../../app/router.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -24,7 +25,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final _locationController = TextEditingController();
   final _assignedToController = TextEditingController();
   String _selectedPriority = 'Medium';
-  final List<String> _priorities = ['Low', 'Medium', 'High'];
   bool _taskCompleted = false;
 
   @override
@@ -43,7 +43,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Create Task'),
+        title: Text(AppLocalizations.of(context).createTask),
         elevation: 0,
       ),
       body: BlocListener<TaskBloc, TaskState>(
@@ -56,9 +56,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               ),
             );
           } else if (state is TaskCreated) {
+            final localizations = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Task "${state.task.taskName}" created successfully!'),
+                content: Text(localizations.taskCreatedSuccessfully.replaceAll('{taskName}', state.task.taskName)),
                 backgroundColor: AppColors.success,
               ),
             );
@@ -80,7 +81,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 const SizedBox(height: 24),
                 
                 Text(
-                  'Create New Task',
+                  AppLocalizations.of(context).createNewTask,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -90,7 +91,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Create a new task or log',
+                  AppLocalizations.of(context).createANewTaskOrLog,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -101,8 +102,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'Task Title',
-                    hintText: 'Enter task title',
+                    labelText: AppLocalizations.of(context).taskTitle,
+                    hintText: AppLocalizations.of(context).enterTaskTitle,
                     prefixIcon: const Icon(Icons.title_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -120,8 +121,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   controller: _descriptionController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Enter task description',
+                    labelText: AppLocalizations.of(context).taskDescription,
+                    hintText: AppLocalizations.of(context).enterTaskDescription,
                     prefixIcon: const Icon(Icons.description_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -133,7 +134,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a description';
+                      return AppLocalizations.of(context).pleaseEnterADescription;
                     }
                     return null;
                   },
@@ -143,8 +144,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 TextFormField(
                   controller: _locationController,
                   decoration: InputDecoration(
-                    labelText: 'Location',
-                    hintText: 'Enter task location or leave empty for current location',
+                    labelText: AppLocalizations.of(context).location,
+                    hintText: AppLocalizations.of(context).enterTaskLocationOrLeaveEmptyForCurrentLocation,
                     prefixIcon: const Icon(Icons.location_on_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -156,7 +157,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a location';
+                      return AppLocalizations.of(context).pleaseEnterALocation;
                     }
                     return null;
                   },
@@ -166,7 +167,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 DropdownButtonFormField<String>(
                   value: _selectedPriority,
                   decoration: InputDecoration(
-                    labelText: 'Priority',
+                    labelText: AppLocalizations.of(context).priority,
                     prefixIcon: const Icon(Icons.priority_high_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -176,22 +177,30 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       borderSide: BorderSide(color: AppColors.primary),
                     ),
                   ),
-                  items: _priorities.map((String priority) {
-                    return DropdownMenuItem<String>(
-                      value: priority,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 12,
-                            color: _getPriorityColor(priority),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(priority),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                  items: () {
+                    final localizations = AppLocalizations.of(context);
+                    final priorities = [
+                      {'value': 'Low', 'label': localizations.low},
+                      {'value': 'Medium', 'label': localizations.medium},
+                      {'value': 'High', 'label': localizations.high},
+                    ];
+                    return priorities.map((Map<String, String> priority) {
+                      return DropdownMenuItem<String>(
+                        value: priority['value'],
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 12,
+                              color: _getPriorityColor(priority['value']!),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(priority['label']!),
+                          ],
+                        ),
+                      );
+                    }).toList();
+                  }(),
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       setState(() {
@@ -205,8 +214,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 TextFormField(
                   controller: _assignedToController,
                   decoration: InputDecoration(
-                    labelText: 'Assigned To (Optional)',
-                    hintText: 'Enter user email or ID',
+                    labelText: AppLocalizations.of(context).assignedToOptional,
+                    hintText: AppLocalizations.of(context).enterUserEmailOrId,
                     prefixIcon: const Icon(Icons.person_outline),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -226,8 +235,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       _taskCompleted = value ?? false;
                     });
                   },
-                  title: const Text('Mark as Completed'),
-                  subtitle: const Text('Check if this task is already completed'),
+                  title: Text(AppLocalizations.of(context).markAsCompleted),
+                  subtitle: Text(AppLocalizations.of(context).checkIfThisTaskIsAlreadyCompleted),
                   activeColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -258,7 +267,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Task Information',
+                            AppLocalizations.of(context).taskInformation,
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: AppColors.info,
                               fontWeight: FontWeight.bold,
@@ -268,10 +277,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '• Tasks will be visible to all team members\n'
-                        '• You can assign tasks to specific volunteers\n'
-                        '• Priority helps organize task urgency\n'
-                        '• Location coordinates will be set automatically',
+                        AppLocalizations.of(context).taskInformationDescription,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.info,
                         ),
@@ -304,9 +310,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              'Create Task',
-                              style: TextStyle(
+                          : Text(
+                              AppLocalizations.of(context).createTask,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -355,7 +361,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       if (authState is! AuthAuthenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('You must be logged in to create tasks'),
+            content: Text(AppLocalizations.of(context).youMustBeLoggedInToCreateTasks),
             backgroundColor: AppColors.error,
           ),
         );

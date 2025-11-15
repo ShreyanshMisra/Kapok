@@ -23,6 +23,7 @@ dependencies:
   # State Management
   flutter_bloc: ^9.0.0
   equatable: ^2.0.5
+  provider: ^6.1.1
 
   # Local Storage (Offline-First)
   hive: ^2.2.3
@@ -52,6 +53,9 @@ dependencies:
 
   # JSON & Utility
   json_annotation: ^4.9.0
+
+  # Translation
+  translator: ^1.0.4
 
 dev_dependencies:
   flutter_test:

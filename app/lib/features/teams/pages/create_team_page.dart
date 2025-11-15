@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../../../app/router.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -36,7 +37,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Create Team'),
+        title: Text(AppLocalizations.of(context).createTeam),
         elevation: 0,
       ),
       body: BlocListener<TeamBloc, TeamState>(
@@ -49,9 +50,12 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               ),
             );
           } else if (state is TeamCreated) {
+            final localizations = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Team "${state.team.name}" created successfully! Team code: ${state.team.teamCode}'),
+                content: Text(localizations.teamCreatedSuccessfullyWithCode
+                    .replaceAll('{teamName}', state.team.name)
+                    .replaceAll('{teamCode}', state.team.teamCode)),
                 backgroundColor: AppColors.success,
                 duration: const Duration(seconds: 5),
               ),
@@ -75,7 +79,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                 const SizedBox(height: 24),
                 
                 Text(
-                  'Create New Team',
+                  AppLocalizations.of(context).createNewTeam,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -85,7 +89,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Set up a new team for disaster relief coordination',
+                  AppLocalizations.of(context).setUpANewTeamForDisasterReliefCoordination,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -97,8 +101,8 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                 TextFormField(
                   controller: _teamNameController,
                   decoration: InputDecoration(
-                    labelText: 'Team Name',
-                    hintText: 'Enter team name',
+                    labelText: AppLocalizations.of(context).teamName,
+                    hintText: AppLocalizations.of(context).enterTeamName,
                     prefixIcon: const Icon(Icons.group_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -117,8 +121,8 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   controller: _descriptionController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    labelText: 'Description (Optional)',
-                    hintText: 'Brief description of the team\'s purpose',
+                    labelText: AppLocalizations.of(context).descriptionOptional,
+                    hintText: AppLocalizations.of(context).briefDescriptionOfTheTeamsPurpose,
                     prefixIcon: const Icon(Icons.description_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -153,7 +157,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Team Leader Benefits',
+                            AppLocalizations.of(context).teamLeaderBenefits,
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: AppColors.info,
                               fontWeight: FontWeight.bold,
@@ -163,11 +167,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '• Generate team codes for members to join\n'
-                        '• View and manage all team tasks\n'
-                        '• Assign tasks to team members\n'
-                        '• Edit task priorities and completion status\n'
-                        '• Manage team members',
+                        AppLocalizations.of(context).teamLeaderBenefitsDescription,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.info,
                         ),
@@ -201,9 +201,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              'Create Team',
-                              style: TextStyle(
+                          : Text(
+                              AppLocalizations.of(context).createTeam,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -227,7 +227,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
       if (authState is! AuthAuthenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('You must be logged in to create teams'),
+            content: Text(AppLocalizations.of(context).youMustBeLoggedInToCreateTeams),
             backgroundColor: AppColors.error,
           ),
         );
