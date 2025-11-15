@@ -232,6 +232,8 @@ class AppLocalizations {
   String get ourMission => _getString('ourMission');
   String get ourMissionDescription => _getString('ourMissionDescription');
   String get nctdrDescription => _getString('nctdrDescription');
+  String get aFairResolutionLLC => _getString('aFairResolutionLLC');
+  String get aFairResolutionLLCDescription => _getString('aFairResolutionLLCDescription');
   String get keyFeatures => _getString('keyFeatures');
   String get keyFeaturesDescription => _getString('keyFeaturesDescription');
   String get technology => _getString('technology');
@@ -517,10 +519,12 @@ class AppLocalizations {
         'technology': 'Technology',
         'technologyDescription': 'Kapok is built using modern mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work reliably even in areas with limited internet connectivity.',
         'contactAndSupport': 'Contact & Support',
-        'contactAndSupportDescription': 'For technical support, feature requests, or general inquiries, please contact the National Center for Technology and Dispute Resolution.',
+        'contactAndSupportDescription': 'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
         'builtWithLove': 'Built with ❤️ for disaster relief coordination',
         'legal': 'Legal',
-        'legalDescription': 'This application is developed for the National Center for Technology and Dispute Resolution. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
+        'legalDescription': 'This application is developed for the organization A Fair Resolution, LLC. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
+        'aFairResolutionLLC': 'A Fair Resolution, LLC',
+        'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization that supports developing technology for conflict management. It works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
         'myTeams': 'My Teams',
         'errorLoadingTeams': 'Error loading teams',
         'createNewTask': 'Create New Task',
@@ -797,10 +801,12 @@ class AppLocalizations {
         'technology': 'Tecnología',
         'technologyDescription': 'Kapok está construido usando tecnologías móviles modernas incluyendo Flutter para desarrollo multiplataforma, Firebase para servicios backend, y Mapbox para servicios de ubicación. La aplicación está diseñada para funcionar de manera confiable incluso en áreas con conectividad limitada a internet.',
         'contactAndSupport': 'Contacto y Soporte',
-        'contactAndSupportDescription': 'Para soporte técnico, solicitudes de funciones o consultas generales, por favor contacte al Centro Nacional de Tecnología y Resolución de Disputas.',
+        'contactAndSupportDescription': 'Para soporte técnico, solicitudes de funciones o consultas generales, por favor contacte a A Fair Resolution, LLC.',
         'builtWithLove': 'Construido con ❤️ para coordinación de ayuda en desastres',
         'legal': 'Legal',
-        'legalDescription': 'Esta aplicación está desarrollada para el Centro Nacional de Tecnología y Resolución de Disputas. Todos los derechos reservados. La aplicación está diseñada para asistir en la coordinación de ayuda en desastres y debe usarse de manera responsable.',
+        'legalDescription': 'Esta aplicación está desarrollada para la organización A Fair Resolution, LLC. Todos los derechos reservados. La aplicación está diseñada para asistir en la coordinación de ayuda en desastres y debe usarse de manera responsable.',
+        'aFairResolutionLLC': 'A Fair Resolution, LLC',
+        'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización que apoya el desarrollo de tecnología para la gestión de conflictos. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'myTeams': 'Mis Equipos',
         'errorLoadingTeams': 'Error al cargar equipos',
         'createNewTask': 'Crear Nueva Tarea',
