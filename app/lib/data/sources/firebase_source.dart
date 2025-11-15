@@ -209,11 +209,11 @@ class FirebaseSource {
       var query = _firestore.collection('tasks').orderBy('createdAt', descending: true);
       
       if (teamId != null) {
-        query = query.where('teamId', isEqualTo: teamId) as Query<Map<String, dynamic>>;
+        query = query.where('teamId', isEqualTo: teamId);
       }
       
       if (userId != null) {
-        query = query.where('assignedTo', isEqualTo: userId) as Query<Map<String, dynamic>>;
+        query = query.where('assignedTo', isEqualTo: userId);
       }
       
       return query.snapshots().map((snapshot) => 

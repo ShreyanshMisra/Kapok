@@ -44,9 +44,7 @@ class _TasksPageState extends State<TasksPage> {
         builder: (context, state) {
           if (state is TaskLoading) {
             return Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           } else if (state is TasksLoaded) {
             if (state.tasks.isEmpty) {
@@ -60,12 +58,10 @@ class _TasksPageState extends State<TasksPage> {
               context.read<TaskBloc>().add(const LoadTasksRequested());
             });
             return Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
-          
+
           return _buildEmptyState();
         },
       ),
@@ -76,7 +72,6 @@ class _TasksPageState extends State<TasksPage> {
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add),
       ),
-      body: const Center(child: Text('Tasks page - To be implemented')),
     );
   }
 
@@ -103,9 +98,9 @@ class _TasksPageState extends State<TasksPage> {
             const SizedBox(height: 8),
             Text(
               'Create your first task to get started with disaster relief coordination',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -137,11 +132,7 @@ class _TasksPageState extends State<TasksPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 80,
-              color: AppColors.error,
-            ),
+            Icon(Icons.error_outline, size: 80, color: AppColors.error),
             const SizedBox(height: 24),
             Text(
               'Error Loading Tasks',
@@ -153,9 +144,9 @@ class _TasksPageState extends State<TasksPage> {
             const SizedBox(height: 8),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -198,15 +189,12 @@ class _TasksPageState extends State<TasksPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).pushNamed(
-            AppRouter.taskDetail,
-            arguments: task,
-          );
+          Navigator.of(
+            context,
+          ).pushNamed(AppRouter.taskDetail, arguments: task);
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -306,9 +294,8 @@ class _TasksPageState extends State<TasksPage> {
                           Expanded(
                             child: Text(
                               'Assigned to: ${task.assignedTo}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.textSecondary),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -327,7 +314,7 @@ class _TasksPageState extends State<TasksPage> {
   Widget _buildPriorityBadge(int severity) {
     Color color;
     String label;
-    
+
     if (severity >= 5) {
       color = AppColors.error;
       label = 'High';
@@ -349,11 +336,7 @@ class _TasksPageState extends State<TasksPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.circle,
-            size: 8,
-            color: color,
-          ),
+          Icon(Icons.circle, size: 8, color: color),
           const SizedBox(width: 4),
           Text(
             label,
@@ -372,8 +355,8 @@ class _TasksPageState extends State<TasksPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: completed 
-            ? AppColors.success.withOpacity(0.1) 
+        color: completed
+            ? AppColors.success.withOpacity(0.1)
             : AppColors.info.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(

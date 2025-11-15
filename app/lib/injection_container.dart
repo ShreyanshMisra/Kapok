@@ -1,6 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 // Core services
 import 'core/services/firebase_service.dart';
