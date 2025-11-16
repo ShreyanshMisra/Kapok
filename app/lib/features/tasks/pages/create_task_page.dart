@@ -25,7 +25,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final _descriptionController = TextEditingController();
   final _addressController = TextEditingController();
   final _assignedToController = TextEditingController();
-  String _selectedPriority = 'Medium';
+  int _selectedPriority = 3; // Default to Medium (3)
   bool _taskCompleted = false;
   bool _isLoadingLocation = false;
   double? _latitude;
@@ -301,14 +301,24 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 ),
                 const SizedBox(height: 16),
                 
-                TextFormField(
-                  controller: _locationController,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).location,
-                    hintText: AppLocalizations.of(context).enterTaskLocationOrLeaveEmptyForCurrentLocation,
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _addressController,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).location,
+                          hintText: AppLocalizations.of(context).enterTaskLocationOrLeaveEmptyForCurrentLocation,
+                          prefixIcon: const Icon(Icons.location_on_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppColors.primary),
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
@@ -326,13 +336,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         foregroundColor: AppColors.surface,
                       ),
                     ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return AppLocalizations.of(context).pleaseEnterALocation;
-                    }
-                    return null;
-                  },
+                  ],
                 ),
                 if (_latitude != null && _longitude != null)
                   Padding(
@@ -361,31 +365,23 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       borderSide: BorderSide(color: AppColors.primary),
                     ),
                   ),
-                  items: () {
-                    final localizations = AppLocalizations.of(context);
-                    final priorities = [
-                      {'value': 'Low', 'label': localizations.low},
-                      {'value': 'Medium', 'label': localizations.medium},
-                      {'value': 'High', 'label': localizations.high},
-                    ];
-                    return priorities.map((Map<String, String> priority) {
-                      return DropdownMenuItem<String>(
-                        value: priority['value'],
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.circle,
-                              size: 12,
-                              color: _getPriorityColor(priority['value']!),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(priority['label']!),
-                          ],
-                        ),
-                      );
-                    }).toList();
-                  }(),
-                  onChanged: (String? newValue) {
+                  items: [1, 2, 3, 4, 5].map((int priority) {
+                    return DropdownMenuItem<int>(
+                      value: priority,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.circle,
+                            size: 12,
+                            color: _getPriorityColor(priority),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(_getPriorityLabel(priority)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (int? newValue) {
                     if (newValue != null) {
                       setState(() {
                         _selectedPriority = newValue;
