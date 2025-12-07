@@ -32,8 +32,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: AppColors.error, // Error color stays the same
                 ),
               );
             } else if (state is AuthAuthenticated) {
@@ -69,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     AppLocalizations.of(context).appName,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: AppColors.primary,
+                      color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -79,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     AppLocalizations.of(context).disasterReliefCoordination,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -97,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     validator: Validators.validateEmail,
@@ -126,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     validator: Validators.validatePassword,
@@ -146,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: Text(
                         AppLocalizations.of(context).forgotPassword,
-                        style: TextStyle(color: AppColors.primary),
+                        style: TextStyle(color: theme.colorScheme.primary),
                       ),
                     ),
                   ),
@@ -160,8 +161,8 @@ class _LoginPageState extends State<LoginPage> {
                             ? null
                             : _handleLogin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.surface,
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -204,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: Text(
                           AppLocalizations.of(context).signUp,
                           style: TextStyle(
-                            color: AppColors.primary,
+                            color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

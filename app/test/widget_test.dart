@@ -6,12 +6,17 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kapok_app/app/kapok_app.dart';
 
 void main() {
-  testWidgets('Kapok app smoke test', (WidgetTester tester) async {
+  testWidgets('App loads successfully', (WidgetTester tester) async {
     // TODO: Add proper widget tests for Kapok app
     // The app requires Firebase initialization which needs to be mocked
     // for widget testing to work properly.
-    expect(true, isTrue);
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const KapokApp());
+
+    // Verify that the app loads (this is a basic smoke test)
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

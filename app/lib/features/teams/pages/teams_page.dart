@@ -27,11 +27,12 @@ class _TeamsPageState extends State<TeamsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).myTeams),
         elevation: 0,
         actions: [
@@ -110,6 +111,7 @@ class _TeamsPageState extends State<TeamsPage> {
 
   /// Build empty state when no teams
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -119,22 +121,22 @@ class _TeamsPageState extends State<TeamsPage> {
             Icon(
               Icons.group_outlined,
               size: 80,
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
             ),
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context).noTeamsYet,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context).joinAnExistingTeamOrCreateANewOneToGetStarted,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -152,8 +154,8 @@ class _TeamsPageState extends State<TeamsPage> {
                   icon: const Icon(Icons.group_add),
                   label: Text(AppLocalizations.of(context).joinTeam),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: AppColors.surface,
+                    backgroundColor: theme.colorScheme.secondary,
+                    foregroundColor: theme.colorScheme.onSecondary,
                   ),
                 ),
                 ElevatedButton.icon(
@@ -167,8 +169,8 @@ class _TeamsPageState extends State<TeamsPage> {
                   icon: const Icon(Icons.add),
                   label: Text(AppLocalizations.of(context).createTeam),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                   ),
                 ),
               ],
