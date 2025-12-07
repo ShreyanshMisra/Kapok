@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../app/router.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
 import '../../../features/auth/bloc/auth_state.dart';
@@ -18,7 +19,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context).profile),
         elevation: 0,
         actions: [
           IconButton(
@@ -54,8 +55,8 @@ class ProfilePage extends StatelessWidget {
               ),
             );
           } else {
-            return const Center(
-              child: Text('User not authenticated'),
+            return Center(
+              child: Text(AppLocalizations.of(context).userNotAuthenticated),
             );
           }
         },
@@ -132,7 +133,7 @@ class ProfilePage extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.edit),
-            title: const Text('Edit Profile'),
+            title: Text(AppLocalizations.of(context).editProfile),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -145,7 +146,7 @@ class ProfilePage extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(AppLocalizations.of(context).settings),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -158,7 +159,7 @@ class ProfilePage extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
+            title: Text(AppLocalizations.of(context).about),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).pushNamed(AppRouter.about);
@@ -182,17 +183,17 @@ class ProfilePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Account Information',
+              AppLocalizations.of(context).accountInformation,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Email', user.email),
-            _buildInfoRow('Account Type', user.accountType),
-            _buildInfoRow('Role', user.role),
+            _buildInfoRow(AppLocalizations.of(context).email, user.email),
+            _buildInfoRow(AppLocalizations.of(context).accountType, user.accountType),
+            _buildInfoRow(AppLocalizations.of(context).role, user.role),
             if (user.teamId != null)
-              _buildInfoRow('Team ID', user.teamId!),
+              _buildInfoRow(AppLocalizations.of(context).teamId, user.teamId!),
           ],
         ),
       ),

@@ -376,4 +376,111 @@ class TaskRepository {
       );
     }
   }
+
+  /// Get tasks for user's teams (permission-aware)
+  /// Only returns tasks from teams the user belongs to
+  Future<List<TaskModel>> getTasksForUserTeams(List<String> teamIds) async {
+    try {
+      Logger.task('Getting tasks for ${teamIds.length} teams');
+
+      List<TaskModel> allTasks = [];
+
+      if (await _networkChecker.isConnected()) {
+        try {
+          // Get tasks from Firebase for each team
+          for (final teamId in teamIds) {
+            final teamTasks = await _firebaseSource.getTasksByTeam(teamId);
+            allTasks.addAll(teamTasks);
+          }
+
+          // Cache all tasks locally
+          await _hiveSource.cacheTasks(allTasks);
+
+          Logger.task('Loaded ${allTasks.length} tasks from Firebase');
+        } catch (e) {
+          // Firebase failed, get from local cache
+          Logger.task('Firebase failed, loading from cache', error: e);
+          allTasks = await _getLocalTasksForTeams(teamIds);
+        }
+      } else {
+        // Offline: get from local cache
+        allTasks = await _getLocalTasksForTeams(teamIds);
+      }
+
+      Logger.task('Found ${allTasks.length} tasks for user teams');
+      return allTasks;
+    } catch (e) {
+      Logger.task('Error getting tasks for user teams', error: e);
+      throw TaskException(
+        message: 'Failed to get tasks for user teams',
+        originalError: e,
+      );
+    }
+  }
+
+  /// Get tasks from local cache for specific teams
+  Future<List<TaskModel>> _getLocalTasksForTeams(List<String> teamIds) async {
+    final List<TaskModel> allTasks = [];
+
+    for (final teamId in teamIds) {
+      final teamTasks = await _hiveSource.getTasksByTeam(teamId);
+      allTasks.addAll(teamTasks);
+    }
+
+    Logger.task('Loaded ${allTasks.length} tasks from local cache');
+    return allTasks;
+  }
+
+  /// Check if user has permission to edit task
+  /// User can edit if they created the task or it's assigned to them
+  bool canEditTask(TaskModel task, String userId) {
+    return task.createdBy == userId || task.assignedTo == userId;
+  }
+
+  /// Edit task (with permission check)
+  Future<TaskModel> editTask({
+    required String taskId,
+    required String userId,
+    String? taskName,
+    int? taskSeverity,
+    String? taskDescription,
+    bool? taskCompleted,
+    String? assignedTo,
+  }) async {
+    try {
+      Logger.task('Editing task: $taskId by user: $userId');
+
+      // Get current task
+      final currentTask = await getTask(taskId);
+
+      // Check permissions
+      if (!canEditTask(currentTask, userId)) {
+        throw TaskException(
+          message: 'User does not have permission to edit this task',
+        );
+      }
+
+      // Create updated task
+      final updatedTask = currentTask.copyWith(
+        taskName: taskName,
+        taskSeverity: taskSeverity,
+        taskDescription: taskDescription,
+        taskCompleted: taskCompleted,
+        assignedTo: assignedTo,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update task
+      return await updateTask(updatedTask);
+    } catch (e) {
+      Logger.task('Error editing task', error: e);
+      if (e is TaskException) {
+        rethrow;
+      }
+      throw TaskException(
+        message: 'Failed to edit task',
+        originalError: e,
+      );
+    }
+  }
 }

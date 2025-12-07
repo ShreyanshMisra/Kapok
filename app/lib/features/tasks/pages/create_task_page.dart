@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../../../app/router.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -8,7 +11,6 @@ import '../../auth/bloc/auth_state.dart';
 import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
-import 'package:kapok_app/core/utils/validators.dart';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({super.key});
@@ -21,19 +23,177 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _addressController = TextEditingController();
   final _assignedToController = TextEditingController();
-  String _selectedPriority = 'Medium';
-  final List<String> _priorities = ['Low', 'Medium', 'High'];
+  int _selectedPriority = 3; // Default to Medium (3)
   bool _taskCompleted = false;
+  bool _isLoadingLocation = false;
+  double? _latitude;
+  double? _longitude;
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _locationController.dispose();
+    _addressController.dispose();
     _assignedToController.dispose();
     super.dispose();
+  }
+
+  /// Get priority label
+  String _getPriorityLabel(int priority) {
+    switch (priority) {
+      case 1:
+        return 'Lowest';
+      case 2:
+        return 'Low';
+      case 3:
+        return 'Medium';
+      case 4:
+        return 'High';
+      case 5:
+        return 'Critical';
+      default:
+        return 'Medium';
+    }
+  }
+
+  /// Get priority color
+  Color _getPriorityColor(int priority) {
+    switch (priority) {
+      case 1:
+        return const Color(0xFF4CAF50); // Green
+      case 2:
+        return const Color(0xFF8BC34A); // Light Green
+      case 3:
+        return const Color(0xFFFFC107); // Amber
+      case 4:
+        return const Color(0xFFFF9800); // Orange
+      case 5:
+        return const Color(0xFFF44336); // Red
+      default:
+        return const Color(0xFFFFC107);
+    }
+  }
+
+  /// Get current location
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isLoadingLocation = true;
+    });
+
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permission denied')),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location permission denied permanently'),
+            ),
+          );
+        }
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+
+      try {
+        final placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+
+        if (placemarks.isNotEmpty) {
+          final placemark = placemarks.first;
+          final address = [
+            placemark.street,
+            placemark.locality,
+            placemark.administrativeArea,
+            placemark.postalCode,
+            placemark.country,
+          ].where((e) => e != null && e.isNotEmpty).join(', ');
+
+          _addressController.text = address;
+        }
+      } catch (e) {
+        // Reverse geocoding failed, that's okay
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Current location set')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error getting location: $e')),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoadingLocation = false;
+      });
+    }
+  }
+
+  /// Validate and geocode address
+  Future<bool> _validateAndGeocodeAddress() async {
+    final address = _addressController.text.trim();
+
+    if (address.isEmpty) {
+      // No address provided, use default coordinates
+      setState(() {
+        _latitude = 0.0;
+        _longitude = 0.0;
+      });
+      return true;
+    }
+
+    try {
+      final locations = await locationFromAddress(address);
+
+      if (locations.isNotEmpty) {
+        setState(() {
+          _latitude = locations.first.latitude;
+          _longitude = locations.first.longitude;
+        });
+        return true;
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not find this address')),
+          );
+        }
+        return false;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid address: $e')),
+        );
+      }
+      return false;
+    }
   }
 
   @override
@@ -43,7 +203,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
-        title: const Text('Create Task'),
+        title: Text(AppLocalizations.of(context).createTask),
         elevation: 0,
       ),
       body: BlocListener<TaskBloc, TaskState>(
@@ -56,9 +216,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               ),
             );
           } else if (state is TaskCreated) {
+            final localizations = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Task "${state.task.taskName}" created successfully!'),
+                content: Text(localizations.taskCreatedSuccessfully.replaceAll('{taskName}', state.task.taskName)),
                 backgroundColor: AppColors.success,
               ),
             );
@@ -80,7 +241,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 const SizedBox(height: 24),
                 
                 Text(
-                  'Create New Task',
+                  AppLocalizations.of(context).createNewTask,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -90,7 +251,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Create a new task or log',
+                  AppLocalizations.of(context).createANewTaskOrLog,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -101,8 +262,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'Task Title',
-                    hintText: 'Enter task title',
+                    labelText: AppLocalizations.of(context).taskTitle,
+                    hintText: AppLocalizations.of(context).enterTaskTitle,
                     prefixIcon: const Icon(Icons.title_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -120,8 +281,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   controller: _descriptionController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Enter task description',
+                    labelText: AppLocalizations.of(context).taskDescription,
+                    hintText: AppLocalizations.of(context).enterTaskDescription,
                     prefixIcon: const Icon(Icons.description_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -133,40 +294,68 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a description';
+                      return AppLocalizations.of(context).pleaseEnterADescription;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 
-                TextFormField(
-                  controller: _locationController,
-                  decoration: InputDecoration(
-                    labelText: 'Location',
-                    hintText: 'Enter task location or leave empty for current location',
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _addressController,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).location,
+                          hintText: AppLocalizations.of(context).enterTaskLocationOrLeaveEmptyForCurrentLocation,
+                          prefixIcon: const Icon(Icons.location_on_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppColors.primary),
+                          ),
+                        ),
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: _isLoadingLocation
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.my_location),
+                      onPressed: _isLoadingLocation ? null : _getCurrentLocation,
+                      tooltip: 'Use current location',
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.surface,
+                      ),
+                    ),
+                  ],
+                ),
+                if (_latitude != null && _longitude != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Coordinates: ${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a location';
-                    }
-                    return null;
-                  },
-                ),
                 const SizedBox(height: 16),
-                
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedPriority,
+
+                // Priority selector - 5 levels
+                DropdownButtonFormField<int>(
+                  value: _selectedPriority,
                   decoration: InputDecoration(
-                    labelText: 'Priority',
+                    labelText: AppLocalizations.of(context).priority,
                     prefixIcon: const Icon(Icons.priority_high_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -176,8 +365,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       borderSide: BorderSide(color: AppColors.primary),
                     ),
                   ),
-                  items: _priorities.map((String priority) {
-                    return DropdownMenuItem<String>(
+                  items: [1, 2, 3, 4, 5].map((int priority) {
+                    return DropdownMenuItem<int>(
                       value: priority,
                       child: Row(
                         children: [
@@ -187,12 +376,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                             color: _getPriorityColor(priority),
                           ),
                           const SizedBox(width: 8),
-                          Text(priority),
+                          Text(_getPriorityLabel(priority)),
                         ],
                       ),
                     );
                   }).toList(),
-                  onChanged: (String? newValue) {
+                  onChanged: (int? newValue) {
                     if (newValue != null) {
                       setState(() {
                         _selectedPriority = newValue;
@@ -205,8 +394,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 TextFormField(
                   controller: _assignedToController,
                   decoration: InputDecoration(
-                    labelText: 'Assigned To (Optional)',
-                    hintText: 'Enter user email or ID',
+                    labelText: AppLocalizations.of(context).assignedToOptional,
+                    hintText: AppLocalizations.of(context).enterUserEmailOrId,
                     prefixIcon: const Icon(Icons.person_outline),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -226,8 +415,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       _taskCompleted = value ?? false;
                     });
                   },
-                  title: const Text('Mark as Completed'),
-                  subtitle: const Text('Check if this task is already completed'),
+                  title: Text(AppLocalizations.of(context).markAsCompleted),
+                  subtitle: Text(AppLocalizations.of(context).checkIfThisTaskIsAlreadyCompleted),
                   activeColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -258,7 +447,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Task Information',
+                            AppLocalizations.of(context).taskInformation,
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: AppColors.info,
                               fontWeight: FontWeight.bold,
@@ -268,10 +457,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '• Tasks will be visible to all team members\n'
-                        '• You can assign tasks to specific volunteers\n'
-                        '• Priority helps organize task urgency\n'
-                        '• Location coordinates will be set automatically',
+                        AppLocalizations.of(context).taskInformationDescription,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.info,
                         ),
@@ -304,9 +490,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              'Create Task',
-                              style: TextStyle(
+                          : Text(
+                              AppLocalizations.of(context).createTask,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -322,40 +508,28 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
   }
 
-  Color _getPriorityColor(String priority) {
-    switch (priority) {
-      case 'High':
-        return AppColors.error;
-      case 'Medium':
-        return AppColors.warning;
-      case 'Low':
-        return AppColors.success;
-      default:
-        return AppColors.textSecondary;
-    }
-  }
-
-  int _getPrioritySeverity(String priority) {
-    switch (priority) {
-      case 'High':
-        return 5;
-      case 'Medium':
-        return 3;
-      case 'Low':
-        return 1;
-      default:
-        return 3;
-    }
-  }
-
-  void _handleCreateTask() {
+  Future<void> _handleCreateTask() async {
     if (_formKey.currentState!.validate()) {
+      // Validate and geocode address if provided
+      if (_addressController.text.trim().isNotEmpty) {
+        final isValid = await _validateAndGeocodeAddress();
+        if (!isValid) {
+          return;
+        }
+      } else {
+        // No address provided, use default coordinates
+        setState(() {
+          _latitude = 0.0;
+          _longitude = 0.0;
+        });
+      }
+
       final authState = context.read<AuthBloc>().state;
-      
+
       if (authState is! AuthAuthenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('You must be logged in to create tasks'),
+            content: Text(AppLocalizations.of(context).youMustBeLoggedInToCreateTasks),
             backgroundColor: AppColors.error,
           ),
         );
@@ -366,21 +540,21 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       final user = authState.user;
       final teamId = user.teamId ?? 'default_team';
       final teamName = 'Default Team';
-      final assignedTo = _assignedToController.text.trim().isEmpty 
-          ? user.id 
+      final assignedTo = _assignedToController.text.trim().isEmpty
+          ? user.id
           : _assignedToController.text.trim();
-      
+
       context.read<TaskBloc>().add(
         CreateTaskRequested(
           taskName: _titleController.text.trim(),
-          taskSeverity: _getPrioritySeverity(_selectedPriority),
+          taskSeverity: _selectedPriority,
           taskDescription: _descriptionController.text.trim(),
           taskCompleted: _taskCompleted,
           assignedTo: assignedTo,
           teamName: teamName,
           teamId: teamId,
-          latitude: 0.0,
-          longitude: 0.0,
+          latitude: _latitude ?? 0.0,
+          longitude: _longitude ?? 0.0,
           createdBy: user.id,
         ),
       );

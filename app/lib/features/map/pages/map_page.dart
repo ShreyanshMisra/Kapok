@@ -11,6 +11,7 @@ import '../models/map_camera_state.dart';
 import '../widgets/mapbox_map_view.dart';
 import '../web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../web/mapbox_web_controller.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Map page showing interactive map with live, location-based offline map functionality
 /// It orchestrates a continuous cycle of "current location → live snapshot → offline cache refresh"
@@ -108,6 +109,8 @@ class _MapPageState extends State<MapPage> {
         elevation: 0,
         foregroundColor: AppColors.surface,
         title: const Text('Map'),
+        title: Text(AppLocalizations.of(context).map),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.storage),
@@ -449,6 +452,8 @@ class MapStatusCard extends StatelessWidget {
             ],
           ],
         ),
+      body: Center(
+        child: Text(AppLocalizations.of(context).mapPageToBeImplemented),
       ),
     );
   }

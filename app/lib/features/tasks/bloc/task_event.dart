@@ -140,3 +140,45 @@ class AssignTaskRequested extends TaskEvent {
   @override
   List<Object> get props => [taskId, userId];
 }
+
+/// Load tasks for user's teams (permission-aware)
+class LoadTasksForUserTeamsRequested extends TaskEvent {
+  final List<String> teamIds;
+
+  const LoadTasksForUserTeamsRequested({required this.teamIds});
+
+  @override
+  List<Object> get props => [teamIds];
+}
+
+/// Edit task request
+class EditTaskRequested extends TaskEvent {
+  final String taskId;
+  final String userId;
+  final String? taskName;
+  final int? taskSeverity;
+  final String? taskDescription;
+  final bool? taskCompleted;
+  final String? assignedTo;
+
+  const EditTaskRequested({
+    required this.taskId,
+    required this.userId,
+    this.taskName,
+    this.taskSeverity,
+    this.taskDescription,
+    this.taskCompleted,
+    this.assignedTo,
+  });
+
+  @override
+  List<Object?> get props => [
+    taskId,
+    userId,
+    taskName,
+    taskSeverity,
+    taskDescription,
+    taskCompleted,
+    assignedTo,
+  ];
+}

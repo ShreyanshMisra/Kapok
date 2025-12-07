@@ -6,6 +6,7 @@ import 'core/services/geolocation_service.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/network_checker.dart';
 import 'core/constants/mapbox_constants.dart';
+import 'core/services/sync_service.dart';
 
 // Data sources
 import 'data/sources/firebase_source.dart';
@@ -41,6 +42,7 @@ Future<void> initializeDependencies() async {
   );
   sl.registerLazySingleton<HiveService>(() => HiveService.instance);
   sl.registerLazySingleton<NetworkChecker>(() => NetworkChecker.instance);
+  sl.registerLazySingleton<SyncService>(() => SyncService.instance);
 
   // Data sources
   sl.registerLazySingleton<FirebaseSource>(() => FirebaseSource());
@@ -131,6 +133,12 @@ Future<void> initializeCoreServices() async {
 
     // Initialize other services as needed
     // Note: GeolocationService and NetworkChecker don't need explicit initialization
+    // Initialize Sync Service
+    await sl<SyncService>().initialize();
+
+    // Initialize other services as needed
+    // Note: GeolocationService and NetworkChecker don't need explicit initialization
+
   } catch (e) {
     throw Exception('Failed to initialize core services: $e');
   }
