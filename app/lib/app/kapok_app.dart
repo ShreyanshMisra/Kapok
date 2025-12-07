@@ -153,15 +153,15 @@ class KapokApp extends StatelessWidget {
                         body: Center(child: CircularProgressIndicator()),
                       );
                     } else if (state is AuthAuthenticated) {
-                       return const HomePage();
+                      return const HomePage();
                     } else {
                       // Show a temporary screen while redirect happens
                       return const Scaffold(
-                      body: Center(child: Text('Redirecting to login...')),
-                    );
-                  }
-                },
-              ),
+                        body: Center(child: Text('Redirecting to login...')),
+                      );
+                    }
+                  },
+                ),
               ),
             );
           },
