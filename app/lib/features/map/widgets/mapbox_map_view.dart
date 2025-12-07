@@ -7,7 +7,8 @@ import '../models/map_camera_state.dart';
 import '../web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../web/mapbox_web_controller.dart';
 
-const _mapboxStyleUri = 'mapbox://styles/${MapboxConstants.defaultStyleId}';
+String get _mapboxStyleUri =>
+    'mapbox://styles/${MapboxConstants.defaultStyleId}';
 
 /// Simple wrapper so web/mobile share a common interface.
 typedef MapCameraCallback = void Function(MapCameraState state);
