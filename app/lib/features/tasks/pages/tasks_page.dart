@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/kapok_loading.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
 import '../bloc/task_bloc.dart';
@@ -44,9 +45,7 @@ class _TasksPageState extends State<TasksPage> {
       body: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state is TaskLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
+            return const KapokLoading();
           } else if (state is TasksLoaded) {
             if (state.tasks.isEmpty) {
               return _buildEmptyState();
@@ -58,9 +57,7 @@ class _TasksPageState extends State<TasksPage> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               context.read<TaskBloc>().add(const LoadTasksRequested());
             });
-            return Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
+            return const KapokLoading();
           }
 
           return _buildEmptyState();

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/roots_loading_animation.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -168,13 +169,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         child: state is AuthLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
+                            ? const RootsLoadingAnimation(
+                                size: 20,
+                                color: Colors.white,
                               )
                             : Text(
                                 AppLocalizations.of(context).signIn,

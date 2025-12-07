@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/kapok_loading.dart';
 import '../../../data/models/team_model.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_state.dart';
@@ -48,7 +49,7 @@ class _TeamsPageState extends State<TeamsPage> {
       body: BlocBuilder<TeamBloc, TeamState>(
         builder: (context, state) {
           if (state is TeamLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const KapokLoading();
           } else if (state is TeamError) {
             return Center(
               child: Column(

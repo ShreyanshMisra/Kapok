@@ -11,6 +11,7 @@ import '../features/auth/bloc/auth_state.dart';
 import '../features/teams/bloc/team_bloc.dart';
 import '../features/tasks/bloc/task_bloc.dart';
 import '../injection_container.dart';
+import '../core/widgets/kapok_loading.dart';
 import 'router.dart';
 import 'home_page.dart';
 
@@ -88,7 +89,8 @@ class KapokApp extends StatelessWidget {
                   builder: (context, state) {
                     if (state is AuthLoading) {
                       return const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
+                        backgroundColor: AppColors.background,
+                        body: KapokLoading(),
                       );
                     } else if (state is AuthAuthenticated) {
                        return const HomePage();

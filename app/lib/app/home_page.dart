@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kapok_app/features/auth/bloc/auth_event.dart';
 import '../core/constants/app_colors.dart';
 import '../core/localization/app_localizations.dart';
+import '../core/widgets/kapok_loading.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/map/pages/map_page.dart';
@@ -81,9 +82,8 @@ class _HomePageState extends State<HomePage> {
             Navigator.of(context).pushReplacementNamed('/login');
           });
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            backgroundColor: AppColors.background,
+            body: KapokLoading(),
           );
         }
       },
