@@ -85,6 +85,7 @@ class KapokApp extends StatelessWidget {
               ],
               supportedLocales: const [Locale('en'), Locale('es')],
               onGenerateRoute: AppRouter.generateRoute,
+              initialRoute: '/',
               builder: (context, child) {
                 return BlocListener<AuthBloc, AuthState>(
                   listenWhen: (previous, current) {

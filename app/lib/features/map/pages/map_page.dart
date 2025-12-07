@@ -229,7 +229,6 @@ class _MapPageState extends State<MapPage> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
         foregroundColor: AppColors.surface,
         title: Text(AppLocalizations.of(context).map),
         actions: [
