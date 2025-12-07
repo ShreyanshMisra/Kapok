@@ -108,9 +108,7 @@ class _MapPageState extends State<MapPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.surface,
-        title: const Text('Map'),
         title: Text(AppLocalizations.of(context).map),
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.storage),
@@ -452,8 +450,6 @@ class MapStatusCard extends StatelessWidget {
             ],
           ],
         ),
-      body: Center(
-        child: Text(AppLocalizations.of(context).mapPageToBeImplemented),
       ),
     );
   }

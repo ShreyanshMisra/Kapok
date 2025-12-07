@@ -14,11 +14,12 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).profile),
         elevation: 0,
         actions: [
@@ -66,6 +67,7 @@ class ProfilePage extends StatelessWidget {
 
   /// Build profile header
   Widget _buildProfileHeader(BuildContext context, user) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -77,12 +79,12 @@ class ProfilePage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
               child: Text(
                 user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                 style: TextStyle(
                   fontSize: 32,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -98,20 +100,20 @@ class ProfilePage extends StatelessWidget {
             Text(
               user.role,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 user.accountType,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -189,11 +191,11 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(AppLocalizations.of(context).email, user.email),
-            _buildInfoRow(AppLocalizations.of(context).accountType, user.accountType),
-            _buildInfoRow(AppLocalizations.of(context).role, user.role),
+            _buildInfoRow(context, AppLocalizations.of(context).email, user.email),
+            _buildInfoRow(context, AppLocalizations.of(context).accountType, user.accountType),
+            _buildInfoRow(context, AppLocalizations.of(context).role, user.role),
             if (user.teamId != null)
-              _buildInfoRow(AppLocalizations.of(context).teamId, user.teamId!),
+              _buildInfoRow(context, AppLocalizations.of(context).teamId, user.teamId!),
           ],
         ),
       ),
@@ -201,7 +203,8 @@ class ProfilePage extends StatelessWidget {
   }
 
   /// Build info row
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -211,17 +214,17 @@ class ProfilePage extends StatelessWidget {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

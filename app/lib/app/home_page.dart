@@ -34,8 +34,9 @@ class _HomePageState extends State<HomePage> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is AuthAuthenticated) {
+          final theme = Theme.of(context);
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: theme.scaffoldBackgroundColor,
             body: IndexedStack(
               index: _currentIndex,
               children: _pages,
@@ -48,9 +49,9 @@ class _HomePageState extends State<HomePage> {
                 });
               },
               type: BottomNavigationBarType.fixed,
-              backgroundColor: AppColors.surface,
-              selectedItemColor: AppColors.primary,
-              unselectedItemColor: AppColors.textSecondary,
+              backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+              selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
+              unselectedItemColor: theme.bottomNavigationBarTheme.unselectedItemColor,
               selectedLabelStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
@@ -92,6 +93,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Build floating action button based on current page
   Widget? _buildFloatingActionButton() {
+    final theme = Theme.of(context);
     switch (_currentIndex) {
       case 0: // Map page
         return FloatingActionButton(
@@ -99,8 +101,8 @@ class _HomePageState extends State<HomePage> {
             // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+          foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
       case 1: // Tasks page
@@ -109,8 +111,8 @@ class _HomePageState extends State<HomePage> {
             // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+          foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
       case 2: // Teams page
@@ -119,8 +121,8 @@ class _HomePageState extends State<HomePage> {
             // TODO: Navigate to create team page
             Navigator.of(context).pushNamed('/create-team');
           },
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+          foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.group_add),
         );
       default:
@@ -135,14 +137,15 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Drawer(
-      backgroundColor: AppColors.surface,
+      backgroundColor: theme.drawerTheme.backgroundColor,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: theme.colorScheme.primary,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,20 +153,20 @@ class AppDrawer extends StatelessWidget {
                 Icon(
                   Icons.volunteer_activism,
                   size: 48,
-                  color: AppColors.surface,
+                  color: theme.colorScheme.onPrimary,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   AppLocalizations.of(context).appName,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.surface,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   AppLocalizations.of(context).disasterReliefCoordination,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.surface.withOpacity(0.8),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary.withOpacity(0.8),
                   ),
                 ),
               ],

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/providers/theme_provider.dart';
 import '../../../app/router.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
@@ -19,15 +20,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = true;
   bool _locationEnabled = true;
-  String _selectedTheme = 'System';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).settings),
         elevation: 0,
       ),
@@ -47,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _notificationsEnabled = value;
                   });
                 },
-                activeThumbColor: AppColors.primary,
+                activeThumbColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -66,7 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _locationEnabled = value;
                   });
                 },
-                activeThumbColor: AppColors.primary,
+                activeThumbColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -99,16 +100,30 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildSection(
             AppLocalizations.of(context).appearance,
             [
-              ListTile(
-                title: Text(AppLocalizations.of(context).theme),
-                subtitle: Text(_selectedTheme == 'System' 
-                    ? AppLocalizations.of(context).system
-                    : _selectedTheme == 'Light'
-                        ? AppLocalizations.of(context).light
-                        : AppLocalizations.of(context).dark),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  _showThemeDialog();
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) {
+                  final currentMode = themeProvider.themeMode;
+                  String themeText;
+                  switch (currentMode) {
+                    case ThemeMode.light:
+                      themeText = AppLocalizations.of(context).light;
+                      break;
+                    case ThemeMode.dark:
+                      themeText = AppLocalizations.of(context).dark;
+                      break;
+                    case ThemeMode.system:
+                    default:
+                      themeText = AppLocalizations.of(context).system;
+                      break;
+                  }
+                  return ListTile(
+                    title: Text(AppLocalizations.of(context).theme),
+                    subtitle: Text(themeText),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      _showThemeDialog(context, themeProvider);
+                    },
+                  );
                 },
               ),
             ],
@@ -205,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -282,53 +297,60 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   /// Show theme selection dialog
-  void _showThemeDialog() {
+  void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
     final localizations = AppLocalizations.of(context);
+    final currentMode = themeProvider.themeMode;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(localizations.selectTheme),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioListTile<String>(
+            RadioListTile<ThemeMode>(
               title: Text(localizations.system),
-              value: 'System',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.of(context).pop();
+              value: ThemeMode.system,
+              groupValue: currentMode,
+              onChanged: (value) async {
+                if (value != null) {
+                  await themeProvider.changeThemeMode(value);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
               },
             ),
-            RadioListTile<String>(
+            RadioListTile<ThemeMode>(
               title: Text(localizations.light),
-              value: 'Light',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.of(context).pop();
+              value: ThemeMode.light,
+              groupValue: currentMode,
+              onChanged: (value) async {
+                if (value != null) {
+                  await themeProvider.changeThemeMode(value);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
               },
             ),
-            RadioListTile<String>(
+            RadioListTile<ThemeMode>(
               title: Text(localizations.dark),
-              value: 'Dark',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.of(context).pop();
+              value: ThemeMode.dark,
+              groupValue: currentMode,
+              onChanged: (value) async {
+                if (value != null) {
+                  await themeProvider.changeThemeMode(value);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
               },
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(localizations.cancel),
           ),
         ],
