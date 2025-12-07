@@ -18,6 +18,7 @@ firebase/functions/.env
 .idea/
 .DS_Store
 Thumbs.db
+.claude
 
 # Build and logs
 logs/
