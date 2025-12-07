@@ -28,10 +28,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -39,7 +40,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
         title: Text(AppLocalizations.of(context).resetPassword),
         titleTextStyle: TextStyle(
-          color: AppColors.primary,
+          color: theme.colorScheme.primary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
