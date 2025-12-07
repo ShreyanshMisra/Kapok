@@ -48,3 +48,7 @@ build/
 .dart_tool/
 .packages
 pubspec.lock
+
+# Environment variables
+.env
+*.env
