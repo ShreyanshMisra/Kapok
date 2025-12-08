@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -26,27 +27,9 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscureConfirmPassword = true;
   bool _tosAgreed = false;
   
-  String _selectedAccountType = 'TeamMember';
+  // Use enum values directly to ensure consistency
+  String _selectedAccountType = UserRole.teamMember.value; // 'teamMember'
   String _selectedRole = 'Other';
-
-  // Account types and roles
-  final List<String> _accountTypes = [
-    'TeamMember',
-    'TeamLeader',
-    'Admin',
-  ];
-
-  final List<String> _roles = [
-    'Medical',
-    'Engineering',
-    'Carpentry',
-    'Plumbing',
-    'Construction',
-    'Electrical',
-    'Supplies',
-    'Transportation',
-    'Other',
-  ];
 
   @override
   void dispose() {
@@ -150,10 +133,11 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     items: () {
                       final localizations = AppLocalizations.of(context);
+                      // Use enum values directly to ensure they match what UserRole.fromString expects
                       final accountTypes = [
-                        {'value': 'TeamMember', 'label': localizations.teamMember},
-                        {'value': 'TeamLeader', 'label': localizations.teamLeader},
-                        {'value': 'Admin', 'label': localizations.admin},
+                        {'value': UserRole.teamMember.value, 'label': localizations.teamMember},
+                        {'value': UserRole.teamLeader.value, 'label': localizations.teamLeader},
+                        {'value': UserRole.admin.value, 'label': localizations.admin},
                       ];
                       return accountTypes.map((Map<String, String> type) {
                         return DropdownMenuItem(
@@ -279,7 +263,7 @@ class _SignupPageState extends State<SignupPage> {
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       return ElevatedButton(
-                        onPressed: (state is AuthLoading || !_tosAgreed)
+                        onPressed: state is AuthLoading
                             ? null
                             : _handleSignUp,
                         style: ElevatedButton.styleFrom(

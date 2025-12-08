@@ -33,6 +33,7 @@ class MapboxWebController {
   bool _interactive = true;
   void Function(MapCameraState state)? onCameraIdle;
   VoidCallback? onMapReady;
+  void Function(double latitude, double longitude)? onDoubleClick;
 
   bool get interactive => _interactive;
   set interactive(bool value) {
@@ -118,6 +119,24 @@ class MapboxWebController {
       'zoomend',
       allowInterop((_) => _emitCamera()),
     ]);
+
+    // Add double-click handler if callback is provided
+    if (onDoubleClick != null) {
+      js_util.callMethod(_mapInstance!, 'on', [
+        'dblclick',
+        allowInterop((e) {
+          // Extract lat/lng from event
+          final lngLat = js_util.getProperty(e, 'lngLat');
+          if (lngLat != null) {
+            final lat = js_util.getProperty(lngLat, 'lat') as num?;
+            final lng = js_util.getProperty(lngLat, 'lng') as num?;
+            if (lat != null && lng != null) {
+              onDoubleClick!(lat.toDouble(), lng.toDouble());
+            }
+          }
+        }),
+      ]);
+    }
 
     // Update interaction settings if map already exists
     _updateInteractionSettings();

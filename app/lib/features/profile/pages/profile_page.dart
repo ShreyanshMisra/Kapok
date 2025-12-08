@@ -109,7 +109,7 @@ class ProfilePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                user.accountType,
+                user.userRole.displayName,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
@@ -190,7 +190,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildInfoRow(AppLocalizations.of(context).email, user.email),
-            _buildInfoRow(AppLocalizations.of(context).accountType, user.accountType),
+            _buildInfoRow(AppLocalizations.of(context).accountType, user.userRole.displayName),
             _buildInfoRow(AppLocalizations.of(context).role, user.role),
             if (user.teamId != null)
               _buildInfoRow(AppLocalizations.of(context).teamId, user.teamId!),

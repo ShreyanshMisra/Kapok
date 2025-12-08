@@ -22,11 +22,17 @@ class AuthLoading extends AuthState {
 /// Authenticated state
 class AuthAuthenticated extends AuthState {
   final UserModel user;
+  final bool needsOnboarding; // True if user needs to select role or complete setup
+  final bool isNewSignup; // True if this is a newly created account
 
-  const AuthAuthenticated({required this.user});
+  const AuthAuthenticated({
+    required this.user,
+    this.needsOnboarding = false,
+    this.isNewSignup = false,
+  });
 
   @override
-  List<Object> get props => [user];
+  List<Object> get props => [user, needsOnboarding, isNewSignup];
 }
 
 /// Unauthenticated state

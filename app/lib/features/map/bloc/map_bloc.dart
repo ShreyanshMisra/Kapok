@@ -20,6 +20,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<OfflineBubbleRefreshRequested>(_onRefreshRequested);
     on<OfflineBubbleProgressReported>(_onProgressReported);
     on<OfflineBubbleDownloadCompleted>(_onDownloadCompleted);
+    on<MapReset>(_onMapReset);
   }
 
   final MapRepository mapRepository;
@@ -200,6 +201,17 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       const Duration(minutes: 5),
       (_) => add(const OfflineBubbleRefreshRequested()),
     );
+  }
+
+  /// Handle map reset (on logout)
+  Future<void> _onMapReset(MapReset event, Emitter<MapState> emit) async {
+    Logger.task('Resetting map state');
+    _refreshTimer?.cancel();
+    _progressSubscription?.cancel();
+    _activeRegion = null;
+    _lastCamera = null;
+    _lastRefresh = null;
+    emit(const MapLoading());
   }
 
   @override

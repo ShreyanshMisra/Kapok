@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../../../app/router.dart';
 import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_event.dart';
 import '../../auth/bloc/auth_state.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
+import '../../../data/models/team_model.dart';
+import 'package:flutter/services.dart';
 
 /// Create team page for team leaders
 class CreateTeamPage extends StatefulWidget {
@@ -32,6 +36,24 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Verify user role before showing form
+    final authState = context.watch<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      final userRole = authState.user.userRole;
+      if (userRole != UserRole.teamLeader && userRole != UserRole.admin) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Only team leaders and admins can create teams'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          Navigator.of(context).pop();
+        });
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -50,17 +72,25 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               ),
             );
           } else if (state is TeamCreated) {
-            final localizations = AppLocalizations.of(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(localizations.teamCreatedSuccessfullyWithCode
-                    .replaceAll('{teamName}', state.team.name)
-                    .replaceAll('{teamCode}', state.team.teamCode)),
-                backgroundColor: AppColors.success,
-                duration: const Duration(seconds: 5),
-              ),
+            // Update AuthBloc with new teamId
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              context.read<AuthBloc>().add(
+                ProfileUpdateRequested(
+                  user: authState.user.copyWith(
+                    teamId: state.team.id,
+                    updatedAt: DateTime.now(),
+                  ),
+                ),
+              );
+            }
+            
+            // Show success dialog with team code
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => _TeamCreatedDialog(team: state.team),
             );
-            Navigator.of(context).pop();
           }
         },
         child: SingleChildScrollView(
@@ -119,7 +149,8 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                 // Description field
                 TextFormField(
                   controller: _descriptionController,
-                  maxLines: 3,
+                  maxLines: 5,
+                  maxLength: 200,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context).descriptionOptional,
                     hintText: AppLocalizations.of(context).briefDescriptionOfTheTeamsPurpose,
@@ -241,9 +272,96 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
         CreateTeamRequested(
           name: _teamNameController.text.trim(),
           leaderId: currentUserId,
-          description: _descriptionController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty 
+              ? null 
+              : _descriptionController.text.trim(),
         ),
       );
     }
+  }
+}
+
+/// Dialog shown after team creation with team code
+class _TeamCreatedDialog extends StatelessWidget {
+  final TeamModel team;
+
+  const _TeamCreatedDialog({required this.team});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text(
+        'Team Created Successfully!',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Team Name: ${team.teamName}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Team Code:',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.primary),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    team.teamCode,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: team.teamCode));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Team code copied!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Share this code with your team members',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushReplacementNamed('/home');
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.surface,
+          ),
+          child: const Text('OK'),
+        ),
+      ],
+    );
   }
 }
