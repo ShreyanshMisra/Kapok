@@ -368,21 +368,43 @@ class _SignupPageState extends State<SignupPage> {
                   const Text('Terms of Service'),
                 ],
               ),
-              content: SingleChildScrollView(
+              content: SizedBox(
+                width: double.maxFinite,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Please read and agree to the following terms:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Need to add terms and conditions\n',
-                      style: TextStyle(fontSize: 13, height: 1.5),
+                    // Terms content in a scrollable container
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 300),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.textSecondary.withOpacity(0.3),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.background,
+                      ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          TermsOfService.content,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
+                    // Checkbox for agreement
                     Row(
                       children: [
                         Checkbox(
@@ -403,7 +425,10 @@ class _SignupPageState extends State<SignupPage> {
                             },
                             child: const Text(
                               'I have read and agree to the Terms of Service',
-                              style: TextStyle(fontSize: 13),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
