@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
 import '../../../features/auth/bloc/auth_event.dart';
@@ -51,19 +52,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('Edit Profile'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(AppLocalizations.of(context).editProfile),
         elevation: 0,
         actions: [
           TextButton(
             onPressed: _handleSave,
-            child: const Text(
-              'Save',
-              style: TextStyle(
+            child: Text(
+              AppLocalizations.of(context).save,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -82,8 +84,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             );
           } else if (state is ProfileUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Profile updated successfully!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).profileUpdatedSuccessfully),
                 backgroundColor: AppColors.success,
               ),
             );
@@ -105,7 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Full Name',
+                    labelText: AppLocalizations.of(context).fullName,
                     prefixIcon: const Icon(Icons.person_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -123,7 +125,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 DropdownButtonFormField<String>(
                   initialValue: _selectedRole,
                   decoration: InputDecoration(
-                    labelText: 'Role',
+                    labelText: AppLocalizations.of(context).role,
                     prefixIcon: const Icon(Icons.work_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -133,12 +135,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       borderSide: BorderSide(color: AppColors.primary),
                     ),
                   ),
-                  items: _roles.map((role) {
-                    return DropdownMenuItem(
-                      value: role,
-                      child: Text(role),
-                    );
-                  }).toList(),
+                    items: () {
+                      final localizations = AppLocalizations.of(context);
+                      final roles = [
+                        {'value': 'Medical', 'label': localizations.medical},
+                        {'value': 'Engineering', 'label': localizations.engineering},
+                        {'value': 'Carpentry', 'label': localizations.carpentry},
+                        {'value': 'Plumbing', 'label': localizations.plumbing},
+                        {'value': 'Construction', 'label': localizations.construction},
+                        {'value': 'Electrical', 'label': localizations.electrical},
+                        {'value': 'Supplies', 'label': localizations.supplies},
+                        {'value': 'Transportation', 'label': localizations.transportation},
+                        {'value': 'Other', 'label': localizations.other},
+                      ];
+                      return roles.map((Map<String, String> role) {
+                        return DropdownMenuItem(
+                          value: role['value'],
+                          child: Text(role['label']!),
+                        );
+                      }).toList();
+                    }(),
                   onChanged: (value) {
                     setState(() {
                       _selectedRole = value!;
@@ -169,9 +185,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              'Save Changes',
-                              style: TextStyle(
+                          : Text(
+                              AppLocalizations.of(context).saveChanges,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -228,8 +244,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   onPressed: () {
                     // TODO: Implement profile picture change
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Profile picture change not implemented yet'),
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context).profilePictureChangeNotImplementedYet),
                       ),
                     );
                   },
@@ -240,7 +256,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Tap to change profile picture',
+          AppLocalizations.of(context).tapToChangeProfilePicture,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
           ),

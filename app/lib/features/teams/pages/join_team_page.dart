@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../app/router.dart';
 import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_event.dart';
 import '../../auth/bloc/auth_state.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/enums/user_role.dart';
 
 /// Join team page for entering team codes
 class JoinTeamPage extends StatefulWidget {
@@ -28,12 +31,30 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Verify user role before showing form
+    final authState = context.watch<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      if (authState.user.userRole != UserRole.teamMember) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Only team members can join teams'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          Navigator.of(context).pop();
+        });
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+    }
+
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('Join Team'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(AppLocalizations.of(context).joinTeam),
         elevation: 0,
       ),
       body: BlocListener<TeamBloc, TeamState>(
@@ -46,13 +67,40 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
               ),
             );
           } else if (state is TeamJoined) {
+            // Update AuthBloc with new teamId (silently, without triggering navigation)
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              // Update user profile with new teamId
+              final updatedUser = authState.user.copyWith(
+                teamId: state.team.id,
+                updatedAt: DateTime.now(),
+              );
+
+              // Update AuthBloc state directly without triggering navigation
+              context.read<AuthBloc>().add(
+                ProfileUpdateRequested(user: updatedUser),
+              );
+            }
+
+            final localizations = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Successfully joined team "${state.team.name}"!'),
+                content: Text(
+                  localizations.successfullyJoinedTeam.replaceAll(
+                    '{teamName}',
+                    state.team.teamName,
+                  ),
+                ),
                 backgroundColor: AppColors.success,
+                duration: const Duration(seconds: 3),
               ),
             );
-            Navigator.of(context).pop();
+
+            // Navigate to teams page instead of just popping
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRouter.teams,
+              (route) => route.settings.name == AppRouter.home || route.isFirst,
+            );
           }
         },
         child: SingleChildScrollView(
@@ -63,15 +111,11 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                Icon(
-                  Icons.group_add,
-                  size: 80,
-                  color: AppColors.primary,
-                ),
+                Icon(Icons.group_add, size: 80, color: AppColors.primary),
                 const SizedBox(height: 24),
-                
+
                 Text(
-                  'Join a Team',
+                  AppLocalizations.of(context).joinATeam,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -79,23 +123,27 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                
+
                 Text(
-                  'Enter the team code provided by your team leader',
+                  AppLocalizations.of(
+                    context,
+                  ).enterTheTeamCodeProvidedByYourTeamLeader,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Team code field
                 TextFormField(
                   controller: _teamCodeController,
                   textCapitalization: TextCapitalization.characters,
                   decoration: InputDecoration(
-                    labelText: 'Team Code',
-                    hintText: 'Enter 6-character team code',
+                    labelText: AppLocalizations.of(context).teamCode,
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).enter6CharacterTeamCode,
                     prefixIcon: const Icon(Icons.vpn_key_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -107,34 +155,37 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a team code';
+                      return AppLocalizations.of(context).pleaseEnterATeamCode;
                     }
                     if (value.length != 6) {
-                      return 'Team code must be 6 characters';
+                      return AppLocalizations.of(
+                        context,
+                      ).teamCodeMustBe6Characters;
                     }
                     return null;
                   },
                   onChanged: (value) {
                     // Auto-format to uppercase
                     if (value != value.toUpperCase()) {
-                      _teamCodeController.value = _teamCodeController.value.copyWith(
-                        text: value.toUpperCase(),
-                        selection: TextSelection.collapsed(offset: value.length),
-                      );
+                      _teamCodeController.value = _teamCodeController.value
+                          .copyWith(
+                            text: value.toUpperCase(),
+                            selection: TextSelection.collapsed(
+                              offset: value.length,
+                            ),
+                          );
                     }
                   },
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Info card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.info.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.info.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: AppColors.info.withOpacity(0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,33 +199,34 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'How to get a team code',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppColors.info,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            AppLocalizations.of(context).howToGetATeamCode,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: AppColors.info,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Ask your team leader to provide you with a 6-character team code. This code allows you to join their team and participate in disaster relief coordination.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.info,
-                        ),
+                        AppLocalizations.of(
+                          context,
+                        ).howToGetATeamCodeDescription,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppColors.info),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Join team button
                 BlocBuilder<TeamBloc, TeamState>(
                   builder: (context, state) {
                     return ElevatedButton(
-                      onPressed: state is TeamLoading
-                          ? null
-                          : _handleJoinTeam,
+                      onPressed: state is TeamLoading ? null : _handleJoinTeam,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.surface,
@@ -189,12 +241,14 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
-                          : const Text(
-                              'Join Team',
-                              style: TextStyle(
+                          : Text(
+                              AppLocalizations.of(context).joinTeam,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -203,7 +257,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Alternative actions
                 TextButton(
                   onPressed: () {
@@ -211,7 +265,9 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                     Navigator.of(context).pushNamed('/create-team');
                   },
                   child: Text(
-                    'Don\'t have a team code? Create a new team',
+                    AppLocalizations.of(
+                      context,
+                    ).dontHaveATeamCodeCreateANewTeam,
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -230,20 +286,22 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
   void _handleJoinTeam() {
     if (_formKey.currentState!.validate()) {
       final authState = context.read<AuthBloc>().state;
-      
+
       if (authState is! AuthAuthenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('You must be logged in to join teams'),
+            content: Text(
+              AppLocalizations.of(context).youMustBeLoggedInToJoinTeams,
+            ),
             backgroundColor: AppColors.error,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
         return;
       }
-      
+
       final currentUserId = authState.user.id;
-      
+
       context.read<TeamBloc>().add(
         JoinTeamRequested(
           teamCode: _teamCodeController.text.trim().toUpperCase(),

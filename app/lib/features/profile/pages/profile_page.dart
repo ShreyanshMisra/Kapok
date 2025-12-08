@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../app/router.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
 import '../../../features/auth/bloc/auth_state.dart';
@@ -13,12 +14,13 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('Profile'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(AppLocalizations.of(context).profile),
         elevation: 0,
         actions: [
           IconButton(
@@ -54,8 +56,8 @@ class ProfilePage extends StatelessWidget {
               ),
             );
           } else {
-            return const Center(
-              child: Text('User not authenticated'),
+            return Center(
+              child: Text(AppLocalizations.of(context).userNotAuthenticated),
             );
           }
         },
@@ -65,6 +67,7 @@ class ProfilePage extends StatelessWidget {
 
   /// Build profile header
   Widget _buildProfileHeader(BuildContext context, user) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -76,12 +79,12 @@ class ProfilePage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
               child: Text(
                 user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                 style: TextStyle(
                   fontSize: 32,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -97,20 +100,20 @@ class ProfilePage extends StatelessWidget {
             Text(
               user.role,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                user.accountType,
+                user.userRole.displayName,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -132,7 +135,7 @@ class ProfilePage extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.edit),
-            title: const Text('Edit Profile'),
+            title: Text(AppLocalizations.of(context).editProfile),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -145,7 +148,7 @@ class ProfilePage extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(AppLocalizations.of(context).settings),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -158,7 +161,7 @@ class ProfilePage extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
+            title: Text(AppLocalizations.of(context).about),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).pushNamed(AppRouter.about);
@@ -182,17 +185,17 @@ class ProfilePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Account Information',
+              AppLocalizations.of(context).accountInformation,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Email', user.email),
-            _buildInfoRow('Account Type', user.accountType),
-            _buildInfoRow('Role', user.role),
+            _buildInfoRow(context, AppLocalizations.of(context).email, user.email),
+            _buildInfoRow(context, AppLocalizations.of(context).accountType, user.userRole.displayName),
+            _buildInfoRow(context, AppLocalizations.of(context).role, user.role),
             if (user.teamId != null)
-              _buildInfoRow('Team ID', user.teamId!),
+              _buildInfoRow(context, AppLocalizations.of(context).teamId, user.teamId!),
           ],
         ),
       ),
@@ -200,7 +203,8 @@ class ProfilePage extends StatelessWidget {
   }
 
   /// Build info row
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -210,17 +214,17 @@ class ProfilePage extends StatelessWidget {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

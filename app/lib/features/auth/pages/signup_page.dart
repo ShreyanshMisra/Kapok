@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/terms_of_service.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -26,27 +27,9 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscureConfirmPassword = true;
   bool _tosAgreed = false;
   
-  String _selectedAccountType = 'TeamMember';
+  // Use enum values directly to ensure consistency
+  String _selectedAccountType = UserRole.teamMember.value; // 'teamMember'
   String _selectedRole = 'Other';
-
-  // Account types and roles
-  final List<String> _accountTypes = [
-    'TeamMember',
-    'TeamLeader',
-    'Admin',
-  ];
-
-  final List<String> _roles = [
-    'Medical',
-    'Engineering',
-    'Carpentry',
-    'Plumbing',
-    'Construction',
-    'Electrical',
-    'Supplies',
-    'Transportation',
-    'Other',
-  ];
 
   @override
   void dispose() {
@@ -59,18 +42,19 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Create Account'),
+        title: Text(AppLocalizations.of(context).createAccount),
         titleTextStyle: TextStyle(
-          color: AppColors.primary,
+          color: theme.colorScheme.primary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
@@ -101,7 +85,7 @@ class _SignupPageState extends State<SignupPage> {
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: 'Full Name',
+                      labelText: AppLocalizations.of(context).fullName,
                       prefixIcon: const Icon(Icons.person_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -120,7 +104,7 @@ class _SignupPageState extends State<SignupPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: AppLocalizations.of(context).email,
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -138,7 +122,7 @@ class _SignupPageState extends State<SignupPage> {
                   DropdownButtonFormField<String>(
                     initialValue: _selectedAccountType,
                     decoration: InputDecoration(
-                      labelText: 'Account Type',
+                      labelText: AppLocalizations.of(context).accountType,
                       prefixIcon: const Icon(Icons.group_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -148,12 +132,21 @@ class _SignupPageState extends State<SignupPage> {
                         borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
-                    items: _accountTypes.map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
+                    items: () {
+                      final localizations = AppLocalizations.of(context);
+                      // Use enum values directly to ensure they match what UserRole.fromString expects
+                      final accountTypes = [
+                        {'value': UserRole.teamMember.value, 'label': localizations.teamMember},
+                        {'value': UserRole.teamLeader.value, 'label': localizations.teamLeader},
+                        {'value': UserRole.admin.value, 'label': localizations.admin},
+                      ];
+                      return accountTypes.map((Map<String, String> type) {
+                        return DropdownMenuItem(
+                          value: type['value'],
+                          child: Text(type['label']!),
+                        );
+                      }).toList();
+                    }(),
                     onChanged: (value) {
                       setState(() {
                         _selectedAccountType = value!;
@@ -166,7 +159,7 @@ class _SignupPageState extends State<SignupPage> {
                   DropdownButtonFormField<String>(
                     initialValue: _selectedRole,
                     decoration: InputDecoration(
-                      labelText: 'Role',
+                      labelText: AppLocalizations.of(context).role,
                       prefixIcon: const Icon(Icons.work_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -176,12 +169,26 @@ class _SignupPageState extends State<SignupPage> {
                         borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
-                    items: _roles.map((role) {
-                      return DropdownMenuItem(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
+                    items: () {
+                      final localizations = AppLocalizations.of(context);
+                      final roles = [
+                        {'value': 'Medical', 'label': localizations.medical},
+                        {'value': 'Engineering', 'label': localizations.engineering},
+                        {'value': 'Carpentry', 'label': localizations.carpentry},
+                        {'value': 'Plumbing', 'label': localizations.plumbing},
+                        {'value': 'Construction', 'label': localizations.construction},
+                        {'value': 'Electrical', 'label': localizations.electrical},
+                        {'value': 'Supplies', 'label': localizations.supplies},
+                        {'value': 'Transportation', 'label': localizations.transportation},
+                        {'value': 'Other', 'label': localizations.other},
+                      ];
+                      return roles.map((Map<String, String> role) {
+                        return DropdownMenuItem(
+                          value: role['value'],
+                          child: Text(role['label']!),
+                        );
+                      }).toList();
+                    }(),
                     onChanged: (value) {
                       setState(() {
                         _selectedRole = value!;
@@ -195,7 +202,7 @@ class _SignupPageState extends State<SignupPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: AppLocalizations.of(context).password,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -224,7 +231,7 @@ class _SignupPageState extends State<SignupPage> {
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: AppLocalizations.of(context).confirmPassword,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -246,7 +253,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     validator: (value) {
                       if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return AppLocalizations.of(context).passwordsDoNotMatch;
                       }
                       return null;
                     },
@@ -257,7 +264,7 @@ class _SignupPageState extends State<SignupPage> {
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       return ElevatedButton(
-                        onPressed: (state is AuthLoading || !_tosAgreed)
+                        onPressed: state is AuthLoading
                             ? null
                             : _handleSignUp,
                         style: ElevatedButton.styleFrom(
@@ -277,9 +284,9 @@ class _SignupPageState extends State<SignupPage> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                            : const Text(
-                                'Create Account',
-                                style: TextStyle(
+                            : Text(
+                                AppLocalizations.of(context).createAccount,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -306,7 +313,7 @@ class _SignupPageState extends State<SignupPage> {
                   
                   // Terms and conditions
                   Text(
-                    'By creating an account, you agree to our Terms of Service and Privacy Policy.',
+                    AppLocalizations.of(context).byCreatingAnAccountYouAgreeToOurTermsOfServiceAndPrivacyPolicy,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),

@@ -4,6 +4,7 @@ import '../core/constants/app_colors.dart';
 import '../features/auth/pages/login_page.dart';
 import '../features/auth/pages/signup_page.dart';
 import '../features/auth/pages/forgot_password_page.dart';
+import '../features/auth/pages/role_selection_page.dart';
 import '../features/teams/pages/teams_page.dart';
 import '../features/teams/pages/create_team_page.dart';
 import '../features/teams/pages/join_team_page.dart';
@@ -17,6 +18,8 @@ import '../features/tasks/pages/task_detail_page.dart';
 import '../features/tasks/pages/edit_task_page.dart';
 import '../features/map/pages/map_page.dart';
 import '../features/map/pages/location_picker_page.dart';
+import '../features/map/pages/map_test_page.dart';
+import '../features/map/pages/map_cache_page.dart';
 import 'home_page.dart';
 import 'about_page.dart';
 
@@ -25,6 +28,7 @@ class AppRouter {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String forgotPassword = '/forgot-password';
+  static const String roleSelection = '/role-selection';
   static const String home = '/home';
   static const String about = '/about';
   static const String teams = '/teams';
@@ -40,9 +44,19 @@ class AppRouter {
   static const String editTask = '/edit-task';
   static const String map = '/map';
   static const String locationPicker = '/location-picker';
+  static const String mapTest = '/map-test';
+  static const String mapCache = '/map-cache';
 
   /// Generate routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
+    // Handle root path - show login page
+    if (settings.name == null || settings.name == '/') {
+      return MaterialPageRoute(
+        builder: (_) => const LoginPage(),
+        settings: settings,
+      );
+    }
+
     switch (settings.name) {
       case login:
         return MaterialPageRoute(
@@ -59,6 +73,12 @@ class AppRouter {
       case forgotPassword:
         return MaterialPageRoute(
           builder: (_) => const ForgotPasswordPage(),
+          settings: settings,
+        );
+      
+      case roleSelection:
+        return MaterialPageRoute(
+          builder: (_) => const RoleSelectionPage(),
           settings: settings,
         );
       
@@ -136,9 +156,12 @@ class AppRouter {
         );
       
       case taskDetail:
-        final task = settings.arguments;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (_) => TaskDetailPage(task: task),
+          builder: (_) => TaskDetailPage(
+            task: args['task'],
+            currentUserId: args['currentUserId'],
+          ),
           settings: settings,
         );
       
@@ -161,6 +184,18 @@ class AppRouter {
           settings: settings,
         );
       
+      case mapTest:
+        return MaterialPageRoute(
+          builder: (_) => const MapTestPage(),
+          settings: settings,
+        );
+
+      case mapCache:
+        return MaterialPageRoute(
+          builder: (_) => const MapCachePage(),
+          settings: settings,
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const NotFoundPage(),
@@ -181,11 +216,12 @@ class NotFoundPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: const Text('Page Not Found'),
         elevation: 0,
       ),
@@ -195,11 +231,7 @@ class NotFoundPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 80,
-                color: AppColors.error,
-              ),
+              Icon(Icons.error_outline, size: 80, color: AppColors.error),
               const SizedBox(height: 24),
               Text(
                 '404',
@@ -219,18 +251,17 @@ class NotFoundPage extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'The page you are looking for does not exist.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    AppRouter.home,
-                    (route) => false,
-                  );
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil(AppRouter.home, (route) => false);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

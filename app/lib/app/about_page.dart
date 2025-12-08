@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
+import '../core/localization/app_localizations.dart';
 
 /// About page with information about Kapok and NCTDR
 class AboutPage extends StatelessWidget {
@@ -7,12 +8,13 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('About'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(AppLocalizations.of(context).about),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -31,17 +33,17 @@ class AboutPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Kapok',
+                    AppLocalizations.of(context).appName,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: AppColors.primary,
+                      color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Disaster Relief Coordination App',
+                    AppLocalizations.of(context).appDescription,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -53,17 +55,17 @@ class AboutPage extends StatelessWidget {
             // Mission section
             _buildSection(
               context,
-              'Our Mission',
-              'Kapok is designed to help coordinate volunteers for disaster relief efforts. The app enables teams to work together efficiently during crisis situations by providing real-time task management, team coordination, and location-based services.',
+              AppLocalizations.of(context).ourMission,
+              AppLocalizations.of(context).ourMissionDescription,
               Icons.flag,
             ),
             const SizedBox(height: 24),
             
-            // NCTDR section
+            // A Fair Resolution, LLC section
             _buildSection(
               context,
-              'A Fair Resolution, LLC',
-              'A Fair Resolution, LLC is an organization that supports developing technology for conflict management. It works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
+              AppLocalizations.of(context).aFairResolutionLLC,
+              AppLocalizations.of(context).aFairResolutionLLCDescription,
               Icons.business,
             ),
             const SizedBox(height: 24),
@@ -71,14 +73,8 @@ class AboutPage extends StatelessWidget {
             // Features section
             _buildSection(
               context,
-              'Key Features',
-              '• Real-time task management and assignment\n'
-              '• Team creation and member coordination\n'
-              '• Location-based task mapping\n'
-              '• Offline-first functionality for remote areas\n'
-              '• Multi-language support (English & Spanish)\n'
-              '• Role-based access control\n'
-              '• Secure authentication and data protection',
+              AppLocalizations.of(context).keyFeatures,
+              AppLocalizations.of(context).keyFeaturesDescription,
               Icons.star,
             ),
             const SizedBox(height: 24),
@@ -86,8 +82,8 @@ class AboutPage extends StatelessWidget {
             // Technology section
             _buildSection(
               context,
-              'Technology',
-              'Kapok is built using modern mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work reliably even in areas with limited internet connectivity.',
+              AppLocalizations.of(context).technology,
+              AppLocalizations.of(context).technologyDescription,
               Icons.phone_android,
             ),
             const SizedBox(height: 24),
@@ -95,8 +91,8 @@ class AboutPage extends StatelessWidget {
             // Contact section
             _buildSection(
               context,
-              'Contact & Support',
-              'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
+              AppLocalizations.of(context).contactAndSupport,
+              AppLocalizations.of(context).contactAndSupportDescription,
               Icons.contact_support,
             ),
             const SizedBox(height: 32),
@@ -106,26 +102,26 @@ class AboutPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: theme.colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withOpacity(0.3),
                 ),
               ),
               child: Column(
                 children: [
                   Text(
-                    'Version 1.0.0',
+                    '${AppLocalizations.of(context).appVersionLabel} ${AppLocalizations.of(context).appVersion}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Built with ❤️ for disaster relief coordination',
+                    AppLocalizations.of(context).builtWithLove,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -137,8 +133,8 @@ class AboutPage extends StatelessWidget {
             // Legal section
             _buildSection(
               context,
-              'Legal',
-              'This application is developed for the organization A Fair Resolution, LLC. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
+              AppLocalizations.of(context).legal,
+              AppLocalizations.of(context).legalDescription,
               Icons.gavel,
             ),
           ],
@@ -154,6 +150,7 @@ class AboutPage extends StatelessWidget {
     String content,
     IconData icon,
   ) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,12 +159,12 @@ class AboutPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 icon,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
             ),
@@ -176,7 +173,7 @@ class AboutPage extends StatelessWidget {
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -187,7 +184,7 @@ class AboutPage extends StatelessWidget {
         Text(
           content,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: AppColors.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             height: 1.5,
           ),
         ),

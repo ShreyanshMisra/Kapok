@@ -22,3 +22,5 @@ Kapok is a mobile app (built with **Flutter** & **Firebase**) for coordinating v
 4. `flutter run`
 
 When prompted, select `2` to develop in Chrome, or alternatively choose the iOS Simulator / Android Emulator if you have them installed.
+
+We can also use `flutter run -d chrome`.  

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kapok_app/features/auth/bloc/auth_event.dart';
 import '../core/constants/app_colors.dart';
+import '../core/localization/app_localizations.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/map/pages/map_page.dart';
@@ -33,8 +34,9 @@ class _HomePageState extends State<HomePage> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is AuthAuthenticated) {
+          final theme = Theme.of(context);
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: theme.scaffoldBackgroundColor,
             body: IndexedStack(
               index: _currentIndex,
               children: _pages,
@@ -47,28 +49,28 @@ class _HomePageState extends State<HomePage> {
                 });
               },
               type: BottomNavigationBarType.fixed,
-              backgroundColor: AppColors.surface,
-              selectedItemColor: AppColors.primary,
-              unselectedItemColor: AppColors.textSecondary,
+              backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+              selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
+              unselectedItemColor: theme.bottomNavigationBarTheme.unselectedItemColor,
               selectedLabelStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
-              items: const [
+              items: [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.map),
-                  label: 'Map',
+                  icon: const Icon(Icons.map),
+                  label: AppLocalizations.of(context).map,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.assignment),
-                  label: 'Tasks',
+                  icon: const Icon(Icons.assignment),
+                  label: AppLocalizations.of(context).tasks,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.group),
-                  label: 'Teams',
+                  icon: const Icon(Icons.group),
+                  label: AppLocalizations.of(context).teams,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
+                  icon: const Icon(Icons.person),
+                  label: AppLocalizations.of(context).profile,
                 ),
               ],
             ),
@@ -91,6 +93,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Build floating action button based on current page
   Widget? _buildFloatingActionButton() {
+    final theme = Theme.of(context);
     switch (_currentIndex) {
       case 0: // Map page
         return FloatingActionButton(
@@ -98,8 +101,8 @@ class _HomePageState extends State<HomePage> {
             // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+          foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
       case 1: // Tasks page
@@ -108,8 +111,8 @@ class _HomePageState extends State<HomePage> {
             // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+          foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
       case 2: // Teams page
@@ -118,8 +121,8 @@ class _HomePageState extends State<HomePage> {
             // TODO: Navigate to create team page
             Navigator.of(context).pushNamed('/create-team');
           },
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.surface,
+          backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+          foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.group_add),
         );
       default:
@@ -134,14 +137,15 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Drawer(
-      backgroundColor: AppColors.surface,
+      backgroundColor: theme.drawerTheme.backgroundColor,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: theme.colorScheme.primary,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,20 +153,20 @@ class AppDrawer extends StatelessWidget {
                 Icon(
                   Icons.volunteer_activism,
                   size: 48,
-                  color: AppColors.surface,
+                  color: theme.colorScheme.onPrimary,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Kapok',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.surface,
+                  AppLocalizations.of(context).appName,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Disaster Relief Coordination',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.surface.withOpacity(0.8),
+                  AppLocalizations.of(context).disasterReliefCoordination,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary.withOpacity(0.8),
                   ),
                 ),
               ],
@@ -170,7 +174,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
+            title: Text(AppLocalizations.of(context).about),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
@@ -182,7 +186,7 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(AppLocalizations.of(context).settings),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).pushNamed('/settings');
@@ -191,7 +195,7 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Sign Out'),
+            title: Text(AppLocalizations.of(context).signOut),
             onTap: () {
               Navigator.of(context).pop();
               _showSignOutDialog(context);
@@ -204,15 +208,16 @@ class AppDrawer extends StatelessWidget {
 
   /// Show sign out confirmation dialog
   void _showSignOutDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(localizations.signOut),
+        content: Text(localizations.confirmSignOut),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -222,7 +227,7 @@ class AppDrawer extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
             ),
-            child: const Text('Sign Out'),
+            child: Text(localizations.signOut),
           ),
         ],
       ),

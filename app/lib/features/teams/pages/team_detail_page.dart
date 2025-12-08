@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/team_model.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/models/task_model.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../bloc/team_bloc.dart';
 import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
+import '../../tasks/bloc/task_bloc.dart';
+import '../../tasks/bloc/task_event.dart';
+import '../../tasks/bloc/task_state.dart';
+import '../../../app/router.dart';
 
-/// Team detail page showing team information and members
+/// Team detail page showing team information, members, and tasks
 class TeamDetailPage extends StatefulWidget {
   final TeamModel team;
 
@@ -21,98 +29,188 @@ class TeamDetailPage extends StatefulWidget {
 }
 
 class _TeamDetailPageState extends State<TeamDetailPage> {
+  final Map<String, bool> _expandedMembers = {};
+
   @override
   void initState() {
     super.initState();
-    // TODO: Load team members when page initializes
-    // context.read<TeamBloc>().add(LoadTeamMembers(widget.team.id));
+    // Load team members and tasks when page initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TeamBloc>().add(LoadTeamMembers(teamId: widget.team.id));
+      context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: Text(widget.team.name),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(widget.team.teamName),
         elevation: 0,
         actions: [
-          // TODO: Add team settings menu for team leaders
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'edit':
-                  _showEditTeamDialog();
-                  break;
-                case 'close':
-                  _showCloseTeamDialog();
-                  break;
-                case 'leave':
-                  _showLeaveTeamDialog();
-                  break;
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, authState) {
+              if (authState is AuthAuthenticated) {
+                final isLeader = authState.user.id == widget.team.leaderId;
+                final localizations = AppLocalizations.of(context);
+                
+                return PopupMenuButton<String>(
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        _showEditTeamDialog();
+                        break;
+                      case 'close':
+                        _showCloseTeamDialog();
+                        break;
+                      case 'delete':
+                        _showDeleteTeamDialog();
+                        break;
+                      case 'leave':
+                        _showLeaveTeamDialog();
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) {
+                    final items = <PopupMenuItem<String>>[];
+                    
+                    if (isLeader) {
+                      items.addAll([
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit),
+                              const SizedBox(width: 8),
+                              Text(localizations.editTeam),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'close',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.close),
+                              const SizedBox(width: 8),
+                              Text(localizations.closeTeam),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete, color: AppColors.error),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Delete Team',
+                                style: TextStyle(color: AppColors.error),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]);
+                    } else {
+                      items.add(
+                        PopupMenuItem(
+                          value: 'leave',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.exit_to_app),
+                              const SizedBox(width: 8),
+                              Text(localizations.leaveTeam),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    
+                    return items;
+                  },
+                );
               }
+              return const SizedBox.shrink();
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit),
-                    SizedBox(width: 8),
-                    Text('Edit Team'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'close',
-                child: Row(
-                  children: [
-                    Icon(Icons.close),
-                    SizedBox(width: 8),
-                    Text('Close Team'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'leave',
-                child: Row(
-                  children: [
-                    Icon(Icons.exit_to_app),
-                    SizedBox(width: 8),
-                    Text('Leave Team'),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),
-      body: BlocBuilder<TeamBloc, TeamState>(
-        builder: (context, state) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Team info card
-                _buildTeamInfoCard(),
-                const SizedBox(height: 16),
-                
-                // Team code card (for team leaders)
-                if (_isCurrentUserLeader()) _buildTeamCodeCard(),
-                if (_isCurrentUserLeader()) const SizedBox(height: 16),
-                
-                // Members section
-                _buildMembersSection(),
-                const SizedBox(height: 16),
-                
-                // Tasks section
-                _buildTasksSection(),
-              ],
-            ),
-          );
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<TeamBloc, TeamState>(
+            listener: (context, state) {
+              if (state is TeamError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              } else if (state is TeamDeleted) {
+                // Team was deleted, navigate back
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Team deleted successfully'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<TaskBloc, TaskState>(
+            listener: (context, state) {
+              if (state is TaskCreated) {
+                // Reload tasks when a new task is created
+                context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Task created successfully'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              } else if (state is TaskError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            context.read<TeamBloc>().add(LoadTeamMembers(teamId: widget.team.id));
+            context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
+          },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Team info card
+              _buildTeamInfoCard(),
+              const SizedBox(height: 16),
+              
+              // Team code card (for team leaders)
+              if (_isCurrentUserLeader()) _buildTeamCodeCard(),
+              if (_isCurrentUserLeader()) const SizedBox(height: 16),
+              
+              // Members section
+              _buildMembersSection(),
+              const SizedBox(height: 16),
+              
+              // Tasks section
+              _buildTasksSection(),
+            ],
+          ),
+        ),
+        ),
       ),
     );
   }
@@ -149,7 +247,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.team.name,
+                        widget.team.teamName,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -271,13 +369,13 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     onPressed: () {
                       // TODO: Copy team code to clipboard
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Team code copied to clipboard'),
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context).teamCodeCopiedToClipboard),
                         ),
                       );
                     },
                     icon: const Icon(Icons.copy),
-                    label: const Text('Copy Code'),
+                    label: Text(AppLocalizations.of(context).copyCode),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -287,7 +385,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       // TODO: Share team code
                     },
                     icon: const Icon(Icons.share),
-                    label: const Text('Share'),
+                    label: Text(AppLocalizations.of(context).share),
                   ),
                 ),
               ],
@@ -319,104 +417,261 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Team Members',
+                  AppLocalizations.of(context).teamMembers,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Spacer(),
-                if (_isCurrentUserLeader())
-                  TextButton.icon(
-                    onPressed: () {
-                      // TODO: Navigate to manage members page
-                    },
-                    icon: const Icon(Icons.manage_accounts),
-                    label: const Text('Manage'),
-                  ),
               ],
             ),
             const SizedBox(height: 12),
-            // TODO: Load and display team members
-            _buildMembersList(),
+            BlocBuilder<TeamBloc, TeamState>(
+              builder: (context, state) {
+                if (state is TeamLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (state is TeamMembersLoaded) {
+                  final members = state.members;
+                  if (members.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'No members found',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: members.map((member) => _buildExpandableMemberCard(member)).toList(),
+                  );
+                } else if (state is TeamError) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Error loading members: ${state.message}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    AppLocalizations.of(context).loading,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  /// Build members list
-  Widget _buildMembersList() {
-    // TODO: Replace with actual member data
-    final members = <UserModel>[]; // This should come from the BLoC state
+  /// Build expandable member card
+  Widget _buildExpandableMemberCard(UserModel member) {
+    final isLeader = member.id == widget.team.leaderId;
+    final isExpanded = _expandedMembers[member.id] ?? false;
     
-    if (members.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'Loading members...',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ExpansionTile(
+        leading: CircleAvatar(
+          backgroundColor: AppColors.primary.withOpacity(0.1),
+          child: Text(
+            member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      );
-    }
-    
-    return Column(
-      children: members.map((member) => _buildMemberTile(member)).toList(),
+        title: Text(
+          member.name,
+          style: TextStyle(
+            fontWeight: isLeader ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        subtitle: Text(
+          isLeader ? 'Team Leader' : member.userRole.displayName,
+          style: TextStyle(
+            color: isLeader ? AppColors.primary : AppColors.textSecondary,
+            fontSize: 12,
+          ),
+        ),
+        trailing: isLeader
+            ? Icon(Icons.star, color: AppColors.primary, size: 20)
+            : null,
+        initiallyExpanded: isExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() {
+            _expandedMembers[member.id] = expanded;
+          });
+        },
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Role
+                _buildInfoRow(Icons.person, 'Role', member.userRole.displayName),
+                const SizedBox(height: 8),
+                // Specialty
+                _buildInfoRow(Icons.work, 'Specialty', member.role),
+                const SizedBox(height: 8),
+                // Email
+                _buildInfoRow(Icons.email, 'Email', member.email),
+                const SizedBox(height: 16),
+                // Assigned Tasks
+                FutureBuilder<List<TaskModel>>(
+                  future: _getAssignedTasks(member.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final tasks = snapshot.data ?? [];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.assignment, size: 16, color: AppColors.primary),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Assigned Tasks (${tasks.length})',
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (tasks.isEmpty)
+                          Text(
+                            'No assigned tasks',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          )
+                        else
+                          ...tasks.map((task) => _buildTaskDropdownItem(task)),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Build member tile
-  Widget _buildMemberTile(UserModel member) {
-    final isLeader = member.id == widget.team.leaderId;
-    
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: AppColors.primary.withOpacity(0.1),
-        child: Text(
-          member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
-          style: TextStyle(
-            color: AppColors.primary,
+  /// Build info row
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.textSecondary),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.bold,
+            color: AppColors.textSecondary,
           ),
         ),
-      ),
-      title: Text(
-        member.name,
-        style: TextStyle(
-          fontWeight: isLeader ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(member.role),
-          if (isLeader)
-            Text(
-              'Team Leader',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textPrimary,
             ),
-        ],
-      ),
-      trailing: isLeader
-          ? Icon(
-              Icons.star,
-              color: AppColors.primary,
-              size: 20,
-            )
-          : _isCurrentUserLeader()
-              ? IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () {
-                    _showMemberOptions(member);
-                  },
-                )
-              : null,
+          ),
+        ),
+      ],
     );
+  }
+
+  /// Get assigned tasks for a user
+  Future<List<TaskModel>> _getAssignedTasks(String userId) async {
+    try {
+      final taskState = context.read<TaskBloc>().state;
+      if (taskState is TasksLoaded) {
+        return taskState.tasks.where((task) => task.assignedTo == userId).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Build task dropdown item
+  Widget _buildTaskDropdownItem(TaskModel task) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 4),
+      elevation: 0,
+      color: AppColors.background,
+      child: ListTile(
+        dense: true,
+        leading: Icon(
+          Icons.circle,
+          size: 8,
+          color: _getPriorityColor(task.priority),
+        ),
+        title: Text(
+          task.title,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        trailing: Icon(Icons.chevron_right, size: 16),
+        onTap: () {
+          Navigator.of(context).pushNamed(
+            AppRouter.taskDetail,
+            arguments: {'task': task, 'currentUserId': _getCurrentUserId()},
+          );
+        },
+      ),
+    );
+  }
+
+  Color _getPriorityColor(dynamic priority) {
+    if (priority is String) {
+      switch (priority.toLowerCase()) {
+        case 'high':
+          return AppColors.error;
+        case 'medium':
+          return AppColors.warning;
+        case 'low':
+          return AppColors.success;
+        default:
+          return AppColors.textSecondary;
+      }
+    }
+    // Handle TaskPriority enum
+    switch (priority.toString()) {
+      case 'TaskPriority.high':
+        return AppColors.error;
+      case 'TaskPriority.medium':
+        return AppColors.warning;
+      case 'TaskPriority.low':
+        return AppColors.success;
+      default:
+        return AppColors.textSecondary;
+    }
   }
 
   /// Build tasks section
@@ -440,7 +695,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Team Tasks',
+                  AppLocalizations.of(context).teamTasks,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -448,144 +703,61 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 const Spacer(),
                 TextButton.icon(
                   onPressed: () {
-                    // TODO: Navigate to team tasks page
+                    Navigator.of(context).pushNamed(
+                      AppRouter.createTask,
+                    );
                   },
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('View All'),
+                  icon: const Icon(Icons.add),
+                  label: Text(AppLocalizations.of(context).createTask),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            // TODO: Load and display recent team tasks
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Loading tasks...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Check if current user is the team leader
-  bool _isCurrentUserLeader() {
-    // TODO: Get current user ID from auth state
-    final currentUserId = 'current_user_id';
-    return currentUserId == widget.team.leaderId;
-  }
-
-  /// Show edit team dialog
-  void _showEditTeamDialog() {
-    // TODO: Implement edit team dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Team'),
-        content: const Text('Edit team functionality will be implemented here.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Show close team dialog
-  void _showCloseTeamDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Close Team'),
-        content: const Text(
-          'Are you sure you want to close this team? This action cannot be undone and all team members will be removed.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement close team
-              context.read<TeamBloc>().add(
-                CloseTeamRequested(
-                  teamId: widget.team.id,
-                  userId: 'current_user_id', // TODO: Get from auth state
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text('Close Team'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Show leave team dialog
-  void _showLeaveTeamDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Leave Team'),
-        content: const Text(
-          'Are you sure you want to leave this team? You will no longer have access to team tasks and information.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement leave team
-              context.read<TeamBloc>().add(
-                LeaveTeamRequested(
-                  teamId: widget.team.id,
-                  userId: 'current_user_id', // TODO: Get from auth state
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.warning,
-            ),
-            child: const Text('Leave Team'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Show member options menu
-  void _showMemberOptions(UserModel member) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person_remove),
-              title: const Text('Remove from Team'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _showRemoveMemberDialog(member);
+            BlocBuilder<TaskBloc, TaskState>(
+              builder: (context, state) {
+                if (state is TaskLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (state is TasksLoaded) {
+                  final tasks = state.tasks.where((t) => t.teamId == widget.team.id).toList();
+                  if (tasks.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'No tasks yet. Create one to get started!',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: tasks.map((task) => _buildTaskCard(task)).toList(),
+                  );
+                } else if (state is TaskError) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Error loading tasks: ${state.message}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    AppLocalizations.of(context).loading,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                );
               },
             ),
           ],
@@ -594,39 +766,321 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     );
   }
 
-  /// Show remove member dialog
-  void _showRemoveMemberDialog(UserModel member) {
+  /// Build task card
+  Widget _buildTaskCard(TaskModel task) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Icon(
+          Icons.circle,
+          size: 12,
+          color: _getPriorityColor(task.priority),
+        ),
+        title: Text(
+          task.title,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (task.description != null && task.description!.isNotEmpty)
+              Text(
+                task.description!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(task.status).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    task.status.value,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: _getStatusColor(task.status),
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: _getPriorityColor(task.priority).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    task.priority.value,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: _getPriorityColor(task.priority),
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.of(context).pushNamed(
+            AppRouter.taskDetail,
+            arguments: {'task': task, 'currentUserId': _getCurrentUserId()},
+          );
+        },
+      ),
+    );
+  }
+
+  Color _getStatusColor(dynamic status) {
+    if (status is String) {
+      switch (status.toLowerCase()) {
+        case 'completed':
+          return AppColors.success;
+        case 'inprogress':
+          return AppColors.info;
+        case 'pending':
+          return AppColors.textSecondary;
+        default:
+          return AppColors.textSecondary;
+      }
+    }
+    // Handle TaskStatus enum
+    switch (status.toString()) {
+      case 'TaskStatus.completed':
+        return AppColors.success;
+      case 'TaskStatus.inProgress':
+        return AppColors.info;
+      case 'TaskStatus.pending':
+        return AppColors.textSecondary;
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  /// Get current user ID
+  String _getCurrentUserId() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      return authState.user.id;
+    }
+    return '';
+  }
+
+  /// Check if current user is the team leader
+  bool _isCurrentUserLeader() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      return authState.user.id == widget.team.leaderId;
+    }
+    return false;
+  }
+
+  /// Show edit team dialog
+  void _showEditTeamDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Member'),
-        content: Text(
-          'Are you sure you want to remove ${member.name} from the team?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement remove member
-              context.read<TeamBloc>().add(
-                RemoveMemberRequested(
-                  teamId: widget.team.id,
-                  memberId: member.id,
-                  leaderId: 'current_user_id', // TODO: Get from auth state
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.editTeam),
+          content: Text(localizations.editTeamFunctionalityWillBeImplementedHere),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.save),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show close team dialog
+  void _showCloseTeamDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.closeTeam),
+          content: Text(localizations.confirmCloseTeam),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthAuthenticated) {
+                  context.read<TeamBloc>().add(
+                    CloseTeamRequested(
+                      teamId: widget.team.id,
+                      userId: authState.user.id,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+              ),
+              child: Text(localizations.closeTeam),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show delete team dialog
+  void _showDeleteTeamDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return BlocListener<TeamBloc, TeamState>(
+          listener: (context, state) {
+            if (state is TeamDeleted) {
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Go back to teams list
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Team deleted successfully'),
+                  backgroundColor: AppColors.success,
                 ),
               );
+            } else if (state is TeamError) {
+              Navigator.of(context).pop(); // Close dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to delete team: ${state.message}'),
+                  backgroundColor: AppColors.error,
+                  action: SnackBarAction(
+                    label: 'Retry',
+                    onPressed: () {
+                      final authState = context.read<AuthBloc>().state;
+                      if (authState is AuthAuthenticated) {
+                        context.read<TeamBloc>().add(
+                          DeleteTeamRequested(
+                            teamId: widget.team.id,
+                            userId: authState.user.id,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              );
+            }
+          },
+          child: BlocBuilder<TeamBloc, TeamState>(
+            builder: (context, state) {
+              final isLoading = state is TeamLoading;
+              
+              return AlertDialog(
+                title: const Text('Delete Team'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Are you sure you want to permanently delete this team? This action cannot be undone. All team members will be removed from the team.',
+                    ),
+                    if (isLoading) ...[
+                      const SizedBox(height: 16),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 8),
+                      const Text('Deleting team...'),
+                    ],
+                  ],
+                ),
+                actions: [
+                  if (!isLoading)
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                  ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            final authState = context.read<AuthBloc>().state;
+                            if (authState is AuthAuthenticated) {
+                              context.read<TeamBloc>().add(
+                                DeleteTeamRequested(
+                                  teamId: widget.team.id,
+                                  userId: authState.user.id,
+                                ),
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      disabledBackgroundColor: AppColors.error.withOpacity(0.5),
+                    ),
+                    child: const Text('Delete'),
+                  ),
+                ],
+              );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text('Remove'),
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  /// Show leave team dialog
+  void _showLeaveTeamDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.leaveTeam),
+          content: Text(localizations.confirmRemoveMember),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthAuthenticated) {
+                  context.read<TeamBloc>().add(
+                    LeaveTeamRequested(
+                      teamId: widget.team.id,
+                      userId: authState.user.id,
+                    ),
+                  );
+                  Navigator.of(context).pop(); // Go back to teams page
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.warning,
+              ),
+              child: Text(localizations.leaveTeam),
+            ),
+          ],
+        );
+      },
     );
   }
 }
