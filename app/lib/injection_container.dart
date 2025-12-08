@@ -7,6 +7,7 @@ import 'core/services/hive_service.dart';
 import 'core/services/network_checker.dart';
 import 'core/constants/mapbox_constants.dart';
 import 'core/services/sync_service.dart';
+import 'core/services/theme_service.dart';
 
 // Data sources
 import 'data/sources/firebase_source.dart';
@@ -43,6 +44,7 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<HiveService>(() => HiveService.instance);
   sl.registerLazySingleton<NetworkChecker>(() => NetworkChecker.instance);
   sl.registerLazySingleton<SyncService>(() => SyncService.instance);
+  sl.registerLazySingleton<ThemeService>(() => ThemeService.instance);
 
   // Data sources
   sl.registerLazySingleton<FirebaseSource>(() => FirebaseSource());
@@ -126,6 +128,9 @@ Future<void> initializeCoreServices() async {
 
     // Initialize Hive
     await sl<HiveService>().initialize();
+
+    // Initialize Theme Service (depends on Hive)
+    await sl<ThemeService>().initialize();
 
     // Initialize map cache and region repository
     await sl<OfflineMapCache>().initialize();

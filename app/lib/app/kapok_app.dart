@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import '../core/constants/app_colors.dart';
 import '../core/localization/app_localizations.dart';
 import '../core/providers/language_provider.dart';
 // import '../core/utils/logger.dart'; // Commented out - map logs disabled
+import '../core/providers/theme_provider.dart';
+import '../core/theme/app_theme.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_event.dart';
 import '../features/auth/bloc/auth_state.dart';
@@ -39,6 +40,13 @@ class KapokApp extends StatelessWidget {
         create: (_) => LanguageProvider(),
         child: Consumer<LanguageProvider>(
           builder: (context, languageProvider, _) {
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LanguageProvider()),
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ],
+        child: Consumer2<LanguageProvider, ThemeProvider>(
+          builder: (context, languageProvider, themeProvider, _) {
             return MaterialApp(
               key: ValueKey(languageProvider.currentLocale.languageCode),
               title: 'Kapok',
@@ -66,6 +74,9 @@ class KapokApp extends StatelessWidget {
                 ),
                 useMaterial3: true,
               ),
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeProvider.themeMode,
               localizationsDelegates: const [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
@@ -209,6 +220,19 @@ class KapokApp extends StatelessWidget {
                             );
                           }
                         }
+                  listener: (context, state) {
+                    // Use post-frame callback to ensure Navigator is available
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (state is AuthUnauthenticated) {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/login',
+                          (route) => false,
+                        );
+                      } else if (state is AuthAuthenticated) {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/home',
+                          (route) => false,
+                        );
                       }
                     });
                   },
@@ -220,6 +244,7 @@ class KapokApp extends StatelessWidget {
                   // Show loading only for initial auth check, not for profile updates
                   if (state is AuthLoading) {
                     // If we're loading but were previously authenticated, keep showing home
+                  if (state is AuthLoading) {
                     return const Scaffold(
                       body: Center(child: CircularProgressIndicator()),
                     );
@@ -237,6 +262,8 @@ class KapokApp extends StatelessWidget {
                       return const HomePage();
                     }
                     // Default to login page only if truly unauthenticated
+                  } else {
+                    // Default to login page for unauthenticated users
                     return const LoginPage();
                   }
                 },

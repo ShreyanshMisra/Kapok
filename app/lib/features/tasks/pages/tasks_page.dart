@@ -38,11 +38,12 @@ class _TasksPageState extends State<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).tasks),
         elevation: 0,
         actions: [
@@ -53,7 +54,7 @@ class _TasksPageState extends State<TasksPage> {
         builder: (context, state) {
           if (state is TaskLoading) {
             return Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: theme.colorScheme.primary),
             );
           } else if (state is TasksLoaded) {
             if (state.tasks.isEmpty) {
@@ -67,7 +68,7 @@ class _TasksPageState extends State<TasksPage> {
               _loadTasks();
             });
             return Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: theme.colorScheme.primary),
             );
           }
 
@@ -78,7 +79,8 @@ class _TasksPageState extends State<TasksPage> {
         onPressed: () {
           Navigator.of(context).pushNamed(AppRouter.createTask);
         },
-        backgroundColor: AppColors.primary,
+        backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
+        foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
         child: const Icon(Icons.add),
       ),
       //body: const Center(child: Text('Tasks page - To be implemented')),
@@ -86,6 +88,7 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -95,13 +98,13 @@ class _TasksPageState extends State<TasksPage> {
             Icon(
               Icons.task_outlined,
               size: 100,
-              color: AppColors.textSecondary.withOpacity(0.3),
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
             ),
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context).noTasksYet,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -111,6 +114,9 @@ class _TasksPageState extends State<TasksPage> {
               style: Theme.of(
                 context,
               ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -121,8 +127,8 @@ class _TasksPageState extends State<TasksPage> {
               icon: const Icon(Icons.add),
               label: Text(AppLocalizations.of(context).createTask),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.surface,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,

@@ -223,6 +223,55 @@ class _MapPageState extends State<MapPage> {
             }
 
             // Initial or error state
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: AppColors.surface,
+        title: Text(AppLocalizations.of(context).map),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.storage),
+            tooltip: 'View Cache',
+            onPressed: () {
+              Navigator.of(context).pushNamed('/map-cache');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () {
+              // TODO: Show map filters
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              // TODO: Navigate to tasks list view
+            },
+          ),
+        ],
+      ),
+      body: BlocConsumer<MapBloc, MapState>(
+        listener: (context, state) {
+          if (state is MapError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: ${state.message}'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          // Debug: Show current state
+          if (kDebugMode) {
+            print('[MAP_PAGE] Current state: ${state.runtimeType}');
+          }
+
+          if (state is MapLoading) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
