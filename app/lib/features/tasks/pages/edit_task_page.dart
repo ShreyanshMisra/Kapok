@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Edit task page for modifying existing tasks
 class EditTaskPage extends StatelessWidget {
@@ -9,16 +10,17 @@ class EditTaskPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('Edit Task'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(AppLocalizations.of(context).editTask),
         elevation: 0,
       ),
-      body: const Center(
-        child: Text('Edit Task page - To be implemented'),
+      body: Center(
+        child: Text(AppLocalizations.of(context).editTaskPageToBeImplemented),
       ),
     );
   }

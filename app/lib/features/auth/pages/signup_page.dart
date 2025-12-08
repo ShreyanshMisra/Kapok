@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -23,6 +24,7 @@ class _SignupPageState extends State<SignupPage> {
   
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _tosAgreed = false;
   
   String _selectedAccountType = 'TeamMember';
   String _selectedRole = 'Other';
@@ -57,18 +59,19 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Create Account'),
+        title: Text(AppLocalizations.of(context).createAccount),
         titleTextStyle: TextStyle(
-          color: AppColors.primary,
+          color: theme.colorScheme.primary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
@@ -99,7 +102,7 @@ class _SignupPageState extends State<SignupPage> {
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: 'Full Name',
+                      labelText: AppLocalizations.of(context).fullName,
                       prefixIcon: const Icon(Icons.person_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -118,7 +121,7 @@ class _SignupPageState extends State<SignupPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: AppLocalizations.of(context).email,
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -136,7 +139,7 @@ class _SignupPageState extends State<SignupPage> {
                   DropdownButtonFormField<String>(
                     initialValue: _selectedAccountType,
                     decoration: InputDecoration(
-                      labelText: 'Account Type',
+                      labelText: AppLocalizations.of(context).accountType,
                       prefixIcon: const Icon(Icons.group_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -146,12 +149,20 @@ class _SignupPageState extends State<SignupPage> {
                         borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
-                    items: _accountTypes.map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
+                    items: () {
+                      final localizations = AppLocalizations.of(context);
+                      final accountTypes = [
+                        {'value': 'TeamMember', 'label': localizations.teamMember},
+                        {'value': 'TeamLeader', 'label': localizations.teamLeader},
+                        {'value': 'Admin', 'label': localizations.admin},
+                      ];
+                      return accountTypes.map((Map<String, String> type) {
+                        return DropdownMenuItem(
+                          value: type['value'],
+                          child: Text(type['label']!),
+                        );
+                      }).toList();
+                    }(),
                     onChanged: (value) {
                       setState(() {
                         _selectedAccountType = value!;
@@ -164,7 +175,7 @@ class _SignupPageState extends State<SignupPage> {
                   DropdownButtonFormField<String>(
                     initialValue: _selectedRole,
                     decoration: InputDecoration(
-                      labelText: 'Role',
+                      labelText: AppLocalizations.of(context).role,
                       prefixIcon: const Icon(Icons.work_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -174,12 +185,26 @@ class _SignupPageState extends State<SignupPage> {
                         borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
-                    items: _roles.map((role) {
-                      return DropdownMenuItem(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
+                    items: () {
+                      final localizations = AppLocalizations.of(context);
+                      final roles = [
+                        {'value': 'Medical', 'label': localizations.medical},
+                        {'value': 'Engineering', 'label': localizations.engineering},
+                        {'value': 'Carpentry', 'label': localizations.carpentry},
+                        {'value': 'Plumbing', 'label': localizations.plumbing},
+                        {'value': 'Construction', 'label': localizations.construction},
+                        {'value': 'Electrical', 'label': localizations.electrical},
+                        {'value': 'Supplies', 'label': localizations.supplies},
+                        {'value': 'Transportation', 'label': localizations.transportation},
+                        {'value': 'Other', 'label': localizations.other},
+                      ];
+                      return roles.map((Map<String, String> role) {
+                        return DropdownMenuItem(
+                          value: role['value'],
+                          child: Text(role['label']!),
+                        );
+                      }).toList();
+                    }(),
                     onChanged: (value) {
                       setState(() {
                         _selectedRole = value!;
@@ -193,7 +218,7 @@ class _SignupPageState extends State<SignupPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: AppLocalizations.of(context).password,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -222,7 +247,7 @@ class _SignupPageState extends State<SignupPage> {
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: AppLocalizations.of(context).confirmPassword,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -244,7 +269,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     validator: (value) {
                       if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return AppLocalizations.of(context).passwordsDoNotMatch;
                       }
                       return null;
                     },
@@ -255,7 +280,7 @@ class _SignupPageState extends State<SignupPage> {
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       return ElevatedButton(
-                        onPressed: state is AuthLoading
+                        onPressed: (state is AuthLoading || !_tosAgreed)
                             ? null
                             : _handleSignUp,
                         style: ElevatedButton.styleFrom(
@@ -275,9 +300,9 @@ class _SignupPageState extends State<SignupPage> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                            : const Text(
-                                'Create Account',
-                                style: TextStyle(
+                            : Text(
+                                AppLocalizations.of(context).createAccount,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -287,9 +312,24 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   const SizedBox(height: 24),
                   
+                  // Terms of Service button
+                  Center(
+                    child: TextButton(
+                      onPressed: _showTermsOfServiceDialog,
+                      child: Text(
+                        'View Terms of Service',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          decoration: TextDecoration.underline,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
                   // Terms and conditions
                   Text(
-                    'By creating an account, you agree to our Terms of Service and Privacy Policy.',
+                    AppLocalizations.of(context).byCreatingAnAccountYouAgreeToOurTermsOfServiceAndPrivacyPolicy,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -307,6 +347,15 @@ class _SignupPageState extends State<SignupPage> {
   /// Handle sign up form submission
   void _handleSignUp() {
     if (_formKey.currentState!.validate()) {
+      if (!_tosAgreed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please agree to the Terms of Service to continue.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
       context.read<AuthBloc>().add(
         SignUpRequested(
           email: _emailController.text.trim(),
@@ -317,5 +366,105 @@ class _SignupPageState extends State<SignupPage> {
         ),
       );
     }
+  }
+
+  /// Show Terms of Service dialog
+  void _showTermsOfServiceDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        bool agreed = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.description, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  const Text('Terms of Service'),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Please read and agree to the following terms:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Need to add terms and conditions\n',
+                      style: TextStyle(fontSize: 13, height: 1.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: agreed,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              agreed = value ?? false;
+                            });
+                          },
+                          activeColor: AppColors.primary,
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setDialogState(() {
+                                agreed = !agreed;
+                              });
+                            },
+                            child: const Text(
+                              'I have read and agree to the Terms of Service',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: agreed
+                      ? () {
+                          Navigator.of(dialogContext).pop();
+                          setState(() {
+                            _tosAgreed = true;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Terms of Service accepted'),
+                              backgroundColor: AppColors.primary,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
+                  ),
+                  child: const Text('I Agree'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }

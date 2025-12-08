@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/providers/language_provider.dart';
+import '../../../core/providers/theme_provider.dart';
+import '../../../app/router.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_event.dart';
 
 /// Settings page for app configuration
 class SettingsPage extends StatefulWidget {
@@ -12,17 +20,16 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = true;
   bool _locationEnabled = true;
-  String _selectedLanguage = 'English';
-  String _selectedTheme = 'System';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: const Text('Settings'),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        title: Text(AppLocalizations.of(context).settings),
         elevation: 0,
       ),
       body: ListView(
@@ -30,18 +37,18 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           // Notifications section
           _buildSection(
-            'Notifications',
+            AppLocalizations.of(context).notifications,
             [
               SwitchListTile(
-                title: const Text('Push Notifications'),
-                subtitle: const Text('Receive notifications for new tasks and updates'),
+                title: Text(AppLocalizations.of(context).notifications),
+                subtitle: Text(AppLocalizations.of(context).receiveNotificationsForNewTasksAndUpdates),
                 value: _notificationsEnabled,
                 onChanged: (value) {
                   setState(() {
                     _notificationsEnabled = value;
                   });
                 },
-                activeThumbColor: AppColors.primary,
+                activeThumbColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -49,18 +56,18 @@ class _SettingsPageState extends State<SettingsPage> {
           
           // Location section
           _buildSection(
-            'Location',
+            AppLocalizations.of(context).location,
             [
               SwitchListTile(
-                title: const Text('Location Services'),
-                subtitle: const Text('Allow app to access your location for task mapping'),
+                title: Text(AppLocalizations.of(context).locationServices),
+                subtitle: Text(AppLocalizations.of(context).allowAppToAccessYourLocationForTaskMapping),
                 value: _locationEnabled,
                 onChanged: (value) {
                   setState(() {
                     _locationEnabled = value;
                   });
                 },
-                activeThumbColor: AppColors.primary,
+                activeThumbColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -68,14 +75,21 @@ class _SettingsPageState extends State<SettingsPage> {
           
           // Language section
           _buildSection(
-            'Language',
+            AppLocalizations.of(context).language,
             [
-              ListTile(
-                title: const Text('Language'),
-                subtitle: Text(_selectedLanguage),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  _showLanguageDialog();
+              Consumer<LanguageProvider>(
+                builder: (context, languageProvider, _) {
+                  final currentLocale = languageProvider.currentLocale;
+                  final languageName = languageProvider.getLanguageName(currentLocale);
+                  final localizations = AppLocalizations.of(context);
+                  return ListTile(
+                    title: Text(localizations.language),
+                    subtitle: Text(languageName),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      _showLanguageDialog(context, languageProvider);
+                    },
+                  );
                 },
               ),
             ],
@@ -84,14 +98,32 @@ class _SettingsPageState extends State<SettingsPage> {
           
           // Theme section
           _buildSection(
-            'Appearance',
+            AppLocalizations.of(context).appearance,
             [
-              ListTile(
-                title: const Text('Theme'),
-                subtitle: Text(_selectedTheme),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  _showThemeDialog();
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) {
+                  final currentMode = themeProvider.themeMode;
+                  String themeText;
+                  switch (currentMode) {
+                    case ThemeMode.light:
+                      themeText = AppLocalizations.of(context).light;
+                      break;
+                    case ThemeMode.dark:
+                      themeText = AppLocalizations.of(context).dark;
+                      break;
+                    case ThemeMode.system:
+                    default:
+                      themeText = AppLocalizations.of(context).system;
+                      break;
+                  }
+                  return ListTile(
+                    title: Text(AppLocalizations.of(context).theme),
+                    subtitle: Text(themeText),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      _showThemeDialog(context, themeProvider);
+                    },
+                  );
                 },
               ),
             ],
@@ -100,19 +132,19 @@ class _SettingsPageState extends State<SettingsPage> {
           
           // Data section
           _buildSection(
-            'Data',
+            AppLocalizations.of(context).data,
             [
               ListTile(
-                title: const Text('Clear Cache'),
-                subtitle: const Text('Clear locally stored data'),
+                title: Text(AppLocalizations.of(context).clearCache),
+                subtitle: Text(AppLocalizations.of(context).clearLocallyStoredData),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   _showClearCacheDialog();
                 },
               ),
               ListTile(
-                title: const Text('Export Data'),
-                subtitle: const Text('Export your tasks and team data'),
+                title: Text(AppLocalizations.of(context).exportData),
+                subtitle: Text(AppLocalizations.of(context).exportYourTasksAndTeamData),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   _showExportDataDialog();
@@ -124,22 +156,22 @@ class _SettingsPageState extends State<SettingsPage> {
           
           // About section
           _buildSection(
-            'About',
+            AppLocalizations.of(context).about,
             [
               ListTile(
-                title: const Text('App Version'),
-                subtitle: const Text('1.0.0'),
+                title: Text(AppLocalizations.of(context).appVersionLabel),
+                subtitle: Text(AppLocalizations.of(context).appVersion),
                 onTap: () {},
               ),
               ListTile(
-                title: const Text('Privacy Policy'),
+                title: Text(AppLocalizations.of(context).privacyPolicy),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   _showPrivacyPolicy();
                 },
               ),
               ListTile(
-                title: const Text('Terms of Service'),
+                title: Text(AppLocalizations.of(context).termsOfService),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   _showTermsOfService();
@@ -147,6 +179,26 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
+          const SizedBox(height: 24),
+          
+          // Sign Out button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showSignOutDialog(),
+              icon: const Icon(Icons.logout),
+              label: Text(AppLocalizations.of(context).signOut),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -168,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -179,96 +231,127 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   /// Show language selection dialog
-  void _showLanguageDialog() {
+  void _showLanguageDialog(BuildContext context, LanguageProvider languageProvider) {
+    final currentLocale = languageProvider.currentLocale;
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<String>(
-              title: const Text('English'),
-              value: 'English',
-              groupValue: _selectedLanguage,
-              onChanged: (value) {
-                setState(() {
-                  _selectedLanguage = value!;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text('Español'),
-              value: 'Español',
-              groupValue: _selectedLanguage,
-              onChanged: (value) {
-                setState(() {
-                  _selectedLanguage = value!;
-                });
-                Navigator.of(context).pop();
-              },
+      builder: (context) {
+        final dialogLocalizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text('${dialogLocalizations.language}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<Locale>(
+                title: Text(dialogLocalizations.english),
+                value: const Locale('en'),
+                groupValue: currentLocale,
+                onChanged: (value) async {
+                  if (value != null) {
+                    await languageProvider.changeLanguage(value);
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      final newLocalizations = AppLocalizations.of(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${newLocalizations.language} ${newLocalizations.english.toLowerCase()}'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              RadioListTile<Locale>(
+                title: Text(dialogLocalizations.spanish),
+                value: const Locale('es'),
+                groupValue: currentLocale,
+                onChanged: (value) async {
+                  if (value != null) {
+                    await languageProvider.changeLanguage(value);
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      final newLocalizations = AppLocalizations.of(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${newLocalizations.language} ${newLocalizations.spanish.toLowerCase()}'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(dialogLocalizations.close),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   /// Show theme selection dialog
-  void _showThemeDialog() {
+  void _showThemeDialog(BuildContext context, ThemeProvider themeProvider) {
+    final localizations = AppLocalizations.of(context);
+    final currentMode = themeProvider.themeMode;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Theme'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.selectTheme),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioListTile<String>(
-              title: const Text('System'),
-              value: 'System',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.of(context).pop();
+            RadioListTile<ThemeMode>(
+              title: Text(localizations.system),
+              value: ThemeMode.system,
+              groupValue: currentMode,
+              onChanged: (value) async {
+                if (value != null) {
+                  await themeProvider.changeThemeMode(value);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
               },
             ),
-            RadioListTile<String>(
-              title: const Text('Light'),
-              value: 'Light',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.of(context).pop();
+            RadioListTile<ThemeMode>(
+              title: Text(localizations.light),
+              value: ThemeMode.light,
+              groupValue: currentMode,
+              onChanged: (value) async {
+                if (value != null) {
+                  await themeProvider.changeThemeMode(value);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
               },
             ),
-            RadioListTile<String>(
-              title: const Text('Dark'),
-              value: 'Dark',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.of(context).pop();
+            RadioListTile<ThemeMode>(
+              title: Text(localizations.dark),
+              value: ThemeMode.dark,
+              groupValue: currentMode,
+              onChanged: (value) async {
+                if (value != null) {
+                  await themeProvider.changeThemeMode(value);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                }
               },
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(localizations.cancel),
           ),
         ],
       ),
@@ -277,32 +360,33 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Show clear cache dialog
   void _showClearCacheDialog() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Cache'),
-        content: const Text(
-          'This will clear all locally stored data. You will need to sign in again.',
+        title: Text(localizations.clearCache),
+        content: Text(
+          localizations.thisWillClearAllLocallyStoredDataYouWillNeedToSignInAgain,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               // TODO: Implement clear cache
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Cache cleared successfully'),
+                SnackBar(
+                  content: Text(localizations.cacheClearedSuccessfully),
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.warning,
             ),
-            child: const Text('Clear'),
+            child: Text(localizations.clear),
           ),
         ],
       ),
@@ -311,29 +395,30 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Show export data dialog
   void _showExportDataDialog() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export Data'),
-        content: const Text(
-          'This will export your tasks and team data to a file.',
+        title: Text(localizations.exportData),
+        content: Text(
+          localizations.thisWillExportYourTasksAndTeamDataToAFile,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               // TODO: Implement data export
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data export not implemented yet'),
+                SnackBar(
+                  content: Text(localizations.dataExportNotImplementedYet),
                 ),
               );
             },
-            child: const Text('Export'),
+            child: Text(localizations.export),
           ),
         ],
       ),
@@ -342,10 +427,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Show privacy policy
   void _showPrivacyPolicy() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Privacy Policy'),
+        title: Text(localizations.privacyPolicy),
         content: const SingleChildScrollView(
           child: Text(
             'Privacy Policy content will be implemented here. This will include information about how we collect, use, and protect your data.',
@@ -354,7 +440,7 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(localizations.close),
           ),
         ],
       ),
@@ -363,10 +449,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Show terms of service
   void _showTermsOfService() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Terms of Service'),
+        title: Text(localizations.termsOfService),
         content: const SingleChildScrollView(
           child: Text(
             'Terms of Service content will be implemented here. This will include the terms and conditions for using the Kapok app.',
@@ -375,7 +462,39 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(localizations.close),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show sign out confirmation dialog
+  void _showSignOutDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.signOut),
+        content: Text(localizations.confirmSignOut),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(localizations.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.read<AuthBloc>().add(const SignOutRequested());
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRouter.login,
+                (route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: Text(localizations.signOut),
           ),
         ],
       ),

@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import '../core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../core/localization/app_localizations.dart';
+import '../core/providers/language_provider.dart';
+import '../core/providers/theme_provider.dart';
+import '../core/theme/app_theme.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_event.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/teams/bloc/team_bloc.dart';
 import '../features/tasks/bloc/task_bloc.dart';
+import '../features/map/bloc/map_bloc.dart';
 import '../injection_container.dart';
+import '../features/auth/pages/login_page.dart';
 import 'router.dart';
 import 'home_page.dart';
 
@@ -21,75 +27,73 @@ class KapokApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
           create: (context) => sl<AuthBloc>()..add(const AuthCheckRequested()),
         ),
-        BlocProvider<TeamBloc>(
-          create: (context) => sl<TeamBloc>(),
-        ),
-        BlocProvider<TaskBloc>(
-          create: (context) => sl<TaskBloc>(),
-        ),
+        BlocProvider<TeamBloc>(create: (context) => sl<TeamBloc>()),
+        BlocProvider<TaskBloc>(create: (context) => sl<TaskBloc>()),
+        BlocProvider<MapBloc>(create: (context) => sl<MapBloc>()),
       ],
-      child: MaterialApp(
-        title: 'Kapok',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: MaterialColor(
-            AppColors.primary.value,
-            <int, Color>{
-              50: AppColors.primary.withOpacity(0.1),
-              100: AppColors.primary.withOpacity(0.2),
-              200: AppColors.primary.withOpacity(0.3),
-              300: AppColors.primary.withOpacity(0.4),
-              400: AppColors.primary.withOpacity(0.5),
-              500: AppColors.primary,
-              600: AppColors.primaryDark,
-              700: AppColors.primaryDark,
-              800: AppColors.primaryDark,
-              900: AppColors.primaryDark,
-            },
-          ),
-          scaffoldBackgroundColor: AppColors.background,
-          appBarTheme: AppBarTheme(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.surface,
-            elevation: 0,
-          ),
-          useMaterial3: true,
-        ),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LanguageProvider()),
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('es'),
-        ],
-        onGenerateRoute: AppRouter.generateRoute,
-        home: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is AuthUnauthenticated) {
-              Navigator.pushReplacementNamed(context, '/login');
-            } 
-            else if (state is AuthAuthenticated) {
-                Navigator.pushReplacementNamed(context, '/home');
-            }
-          },
-          child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
+        child: Consumer2<LanguageProvider, ThemeProvider>(
+          builder: (context, languageProvider, themeProvider, _) {
+            return MaterialApp(
+              key: ValueKey(languageProvider.currentLocale.languageCode),
+              title: 'Kapok',
+              debugShowCheckedModeBanner: false,
+              locale: languageProvider.currentLocale,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeProvider.themeMode,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en'),
+                Locale('es'),
+              ],
+              onGenerateRoute: AppRouter.generateRoute,
+              builder: (context, child) {
+                return BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    // Use post-frame callback to ensure Navigator is available
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (state is AuthUnauthenticated) {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/login',
+                          (route) => false,
+                        );
+                      } else if (state is AuthAuthenticated) {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/home',
+                          (route) => false,
+                        );
+                      }
+                    });
+                  },
+                  child: child ?? const SizedBox.shrink(),
                 );
-              } else if (state is AuthAuthenticated) {
-                 return const HomePage();
-              } else {
-                // Show a temporary screen while redirect happens
-                return const Scaffold(
-                body: Center(child: Text('Redirecting to login...')),
-              );
-            }
+              },
+              home: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthLoading) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  } else if (state is AuthAuthenticated) {
+                    return const HomePage();
+                  } else {
+                    // Default to login page for unauthenticated users
+                    return const LoginPage();
+                  }
+                },
+              ),
+            );
           },
-        ),
         ),
       ),
     );

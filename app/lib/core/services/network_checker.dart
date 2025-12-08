@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:io' show InternetAddress;
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../error/exceptions.dart';
 import '../utils/logger.dart';
 
@@ -7,27 +8,45 @@ import '../utils/logger.dart';
 class NetworkChecker {
   static NetworkChecker? _instance;
   static NetworkChecker get instance => _instance ??= NetworkChecker._();
-  
+
   NetworkChecker._();
 
   final Connectivity _connectivity = Connectivity();
 
+  /// Test mode override: when set, forces offline mode for testing
+  bool? _testModeOverride;
+
+  /// Sets test mode override (null = use real network check, true = force offline, false = force online)
+  void setTestModeOverride(bool? override) {
+    _testModeOverride = override;
+    Logger.network('Test mode override set to: $override');
+  }
+
   /// Checks if device is connected to internet
   Future<bool> isConnected() async {
+    // Test mode override for offline testing
+    if (_testModeOverride != null) {
+      Logger.network(
+        'Using test mode override: ${_testModeOverride! ? "OFFLINE" : "ONLINE"}',
+      );
+      return !_testModeOverride!; // If override is true (offline), return false (not connected)
+    }
+
     try {
       Logger.network('Checking network connectivity');
-      
+
       // Check connectivity status
       final connectivityResults = await _connectivity.checkConnectivity();
-      
-      if (connectivityResults.isEmpty || connectivityResults.contains(ConnectivityResult.none)) {
+
+      if (connectivityResults.isEmpty ||
+          connectivityResults.contains(ConnectivityResult.none)) {
         Logger.network('No network connection');
         return false;
       }
-      
+
       // Try to reach a reliable host to confirm internet access
       final hasInternet = await _hasInternetAccess();
-      
+
       Logger.network('Network connected: $hasInternet');
       return hasInternet;
     } catch (e) {
@@ -37,7 +56,17 @@ class NetworkChecker {
   }
 
   /// Checks if device has internet access by pinging a reliable host
+  /// On web, we assume connectivity means internet access (browser handles DNS)
   Future<bool> _hasInternetAccess() async {
+    // On web, InternetAddress.lookup is not available
+    // If we have connectivity, assume internet access
+    if (kIsWeb) {
+      Logger.network(
+        'Web platform: assuming connectivity means internet access',
+      );
+      return true;
+    }
+
     try {
       final result = await InternetAddress.lookup('google.com');
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
@@ -52,7 +81,9 @@ class NetworkChecker {
     try {
       Logger.network('Getting connectivity status');
       final statusList = await _connectivity.checkConnectivity();
-      final status = statusList.isNotEmpty ? statusList.first : ConnectivityResult.none;
+      final status = statusList.isNotEmpty
+          ? statusList.first
+          : ConnectivityResult.none;
       Logger.network('Connectivity status: $status');
       return status;
     } catch (e) {
@@ -67,8 +98,9 @@ class NetworkChecker {
   /// Listens to connectivity changes
   Stream<ConnectivityResult> get connectivityStream {
     Logger.network('Starting connectivity stream');
-    return _connectivity.onConnectivityChanged.map((resultList) => 
-      resultList.isNotEmpty ? resultList.first : ConnectivityResult.none
+    return _connectivity.onConnectivityChanged.map(
+      (resultList) =>
+          resultList.isNotEmpty ? resultList.first : ConnectivityResult.none,
     );
   }
 
@@ -116,7 +148,7 @@ class NetworkChecker {
     try {
       final status = await getConnectivityStatus();
       String connectionType = 'Unknown';
-      
+
       switch (status) {
         case ConnectivityResult.wifi:
           connectionType = 'WiFi';
@@ -140,7 +172,7 @@ class NetworkChecker {
           connectionType = 'No Connection';
           break;
       }
-      
+
       Logger.network('Connection type: $connectionType');
       return connectionType;
     } catch (e) {
@@ -150,25 +182,30 @@ class NetworkChecker {
   }
 
   /// Waits for network connection
-  Future<void> waitForConnection({Duration timeout = const Duration(seconds: 30)}) async {
+  Future<void> waitForConnection({
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
     try {
-      Logger.network('Waiting for network connection (timeout: ${timeout.inSeconds}s)');
-      
+      Logger.network(
+        'Waiting for network connection (timeout: ${timeout.inSeconds}s)',
+      );
+
       final stopwatch = Stopwatch()..start();
-      
+
       while (stopwatch.elapsed < timeout) {
         if (await isConnected()) {
           Logger.network('Network connection established');
           return;
         }
-        
+
         // Wait 1 second before checking again
         await Future.delayed(const Duration(seconds: 1));
       }
-      
+
       Logger.network('Network connection timeout');
       throw NetworkException(
-        message: 'Network connection timeout after ${timeout.inSeconds} seconds',
+        message:
+            'Network connection timeout after ${timeout.inSeconds} seconds',
       );
     } catch (e) {
       Logger.network('Error waiting for network connection', error: e);
@@ -186,19 +223,25 @@ class NetworkChecker {
   Future<NetworkQuality> getNetworkQuality() async {
     try {
       Logger.network('Checking network quality');
-      
+
       if (!await isConnected()) {
         return NetworkQuality.none;
       }
-      
+
       final stopwatch = Stopwatch()..start();
-      
+
       try {
+        // On web, skip the lookup and assume good quality if connected
+        if (kIsWeb) {
+          stopwatch.stop();
+          return NetworkQuality.good; // Assume good quality on web
+        }
+
         await InternetAddress.lookup('google.com');
         stopwatch.stop();
-        
+
         final responseTime = stopwatch.elapsedMilliseconds;
-        
+
         if (responseTime < 100) {
           return NetworkQuality.excellent;
         } else if (responseTime < 300) {
@@ -221,7 +264,7 @@ class NetworkChecker {
   Future<NetworkSpeed> getNetworkSpeed() async {
     try {
       final quality = await getNetworkQuality();
-      
+
       switch (quality) {
         case NetworkQuality.excellent:
           return NetworkSpeed.fast;
@@ -244,9 +287,9 @@ class NetworkChecker {
   Future<bool> isNetworkSuitableForSync() async {
     try {
       final quality = await getNetworkQuality();
-      final isSuitable = quality == NetworkQuality.excellent || 
-                        quality == NetworkQuality.good;
-      
+      final isSuitable =
+          quality == NetworkQuality.excellent || quality == NetworkQuality.good;
+
       Logger.network('Network suitable for sync: $isSuitable');
       return isSuitable;
     } catch (e) {
@@ -262,7 +305,7 @@ class NetworkChecker {
       final connectionType = await getConnectionType();
       final quality = await getNetworkQuality();
       final speed = await getNetworkSpeed();
-      
+
       return NetworkStatus(
         isConnected: isConnected,
         connectionType: connectionType,
@@ -284,22 +327,10 @@ class NetworkChecker {
 }
 
 /// Network quality levels
-enum NetworkQuality {
-  none,
-  poor,
-  fair,
-  good,
-  excellent,
-}
+enum NetworkQuality { none, poor, fair, good, excellent }
 
 /// Network speed categories
-enum NetworkSpeed {
-  none,
-  verySlow,
-  slow,
-  medium,
-  fast,
-}
+enum NetworkSpeed { none, verySlow, slow, medium, fast }
 
 /// Network status information
 class NetworkStatus {

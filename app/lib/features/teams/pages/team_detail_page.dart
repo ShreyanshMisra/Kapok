@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/team_model.dart';
 import '../../../data/models/user_model.dart';
 import '../bloc/team_bloc.dart';
@@ -30,11 +31,12 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(widget.team.name),
         elevation: 0,
         actions: [
@@ -53,38 +55,41 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   break;
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit),
-                    SizedBox(width: 8),
-                    Text('Edit Team'),
-                  ],
+            itemBuilder: (context) {
+              final localizations = AppLocalizations.of(context);
+              return [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.edit),
+                      const SizedBox(width: 8),
+                      Text(localizations.editTeam),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'close',
-                child: Row(
-                  children: [
-                    Icon(Icons.close),
-                    SizedBox(width: 8),
-                    Text('Close Team'),
-                  ],
+                PopupMenuItem(
+                  value: 'close',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.close),
+                      const SizedBox(width: 8),
+                      Text(localizations.closeTeam),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'leave',
-                child: Row(
-                  children: [
-                    Icon(Icons.exit_to_app),
-                    SizedBox(width: 8),
-                    Text('Leave Team'),
-                  ],
+                PopupMenuItem(
+                  value: 'leave',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.exit_to_app),
+                      const SizedBox(width: 8),
+                      Text(localizations.leaveTeam),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ];
+            },
           ),
         ],
       ),
@@ -271,13 +276,13 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     onPressed: () {
                       // TODO: Copy team code to clipboard
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Team code copied to clipboard'),
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context).teamCodeCopiedToClipboard),
                         ),
                       );
                     },
                     icon: const Icon(Icons.copy),
-                    label: const Text('Copy Code'),
+                    label: Text(AppLocalizations.of(context).copyCode),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -287,7 +292,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       // TODO: Share team code
                     },
                     icon: const Icon(Icons.share),
-                    label: const Text('Share'),
+                    label: Text(AppLocalizations.of(context).share),
                   ),
                 ),
               ],
@@ -319,7 +324,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Team Members',
+                  AppLocalizations.of(context).teamMembers,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -331,7 +336,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       // TODO: Navigate to manage members page
                     },
                     icon: const Icon(Icons.manage_accounts),
-                    label: const Text('Manage'),
+                    label: Text(AppLocalizations.of(context).manage),
                   ),
               ],
             ),
@@ -353,7 +358,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
       return Container(
         padding: const EdgeInsets.all(16),
         child: Text(
-          'Loading members...',
+          AppLocalizations.of(context).loading,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -393,7 +398,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
           Text(member.role),
           if (isLeader)
             Text(
-              'Team Leader',
+              AppLocalizations.of(context).teamLeader,
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -440,7 +445,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Team Tasks',
+                  AppLocalizations.of(context).teamTasks,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -451,7 +456,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     // TODO: Navigate to team tasks page
                   },
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('View All'),
+                  label: Text(AppLocalizations.of(context).viewAll),
                 ),
               ],
             ),
@@ -460,7 +465,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             Container(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Loading tasks...',
+                AppLocalizations.of(context).loading,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -484,20 +489,23 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     // TODO: Implement edit team dialog
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Team'),
-        content: const Text('Edit team functionality will be implemented here.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.editTeam),
+          content: Text(localizations.editTeamFunctionalityWillBeImplementedHere),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.save),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -505,34 +513,35 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   void _showCloseTeamDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Close Team'),
-        content: const Text(
-          'Are you sure you want to close this team? This action cannot be undone and all team members will be removed.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement close team
-              context.read<TeamBloc>().add(
-                CloseTeamRequested(
-                  teamId: widget.team.id,
-                  userId: 'current_user_id', // TODO: Get from auth state
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.closeTeam),
+          content: Text(localizations.confirmCloseTeam),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
             ),
-            child: const Text('Close Team'),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: Implement close team
+                context.read<TeamBloc>().add(
+                  CloseTeamRequested(
+                    teamId: widget.team.id,
+                    userId: 'current_user_id', // TODO: Get from auth state
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+              ),
+              child: Text(localizations.closeTeam),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -540,34 +549,35 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   void _showLeaveTeamDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Leave Team'),
-        content: const Text(
-          'Are you sure you want to leave this team? You will no longer have access to team tasks and information.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement leave team
-              context.read<TeamBloc>().add(
-                LeaveTeamRequested(
-                  teamId: widget.team.id,
-                  userId: 'current_user_id', // TODO: Get from auth state
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.warning,
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.leaveTeam),
+          content: Text(localizations.confirmRemoveMember), // Using existing confirmation message
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
             ),
-            child: const Text('Leave Team'),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: Implement leave team
+                context.read<TeamBloc>().add(
+                  LeaveTeamRequested(
+                    teamId: widget.team.id,
+                    userId: 'current_user_id', // TODO: Get from auth state
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.warning,
+              ),
+              child: Text(localizations.leaveTeam),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -582,7 +592,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
           children: [
             ListTile(
               leading: const Icon(Icons.person_remove),
-              title: const Text('Remove from Team'),
+              title: Text(AppLocalizations.of(context).removeFromTeam),
               onTap: () {
                 Navigator.of(context).pop();
                 _showRemoveMemberDialog(member);
@@ -598,35 +608,36 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   void _showRemoveMemberDialog(UserModel member) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Member'),
-        content: Text(
-          'Are you sure you want to remove ${member.name} from the team?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement remove member
-              context.read<TeamBloc>().add(
-                RemoveMemberRequested(
-                  teamId: widget.team.id,
-                  memberId: member.id,
-                  leaderId: 'current_user_id', // TODO: Get from auth state
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+      builder: (context) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.removeMember),
+          content: Text(localizations.confirmRemoveMember),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
             ),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: Implement remove member
+                context.read<TeamBloc>().add(
+                  RemoveMemberRequested(
+                    teamId: widget.team.id,
+                    memberId: member.id,
+                    leaderId: 'current_user_id', // TODO: Get from auth state
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+              ),
+              child: Text(localizations.remove),
+            ),
+          ],
+        );
+      },
     );
   }
 }
