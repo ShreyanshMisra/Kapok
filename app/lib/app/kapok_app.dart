@@ -36,10 +36,6 @@ class KapokApp extends StatelessWidget {
         BlocProvider<TaskBloc>(create: (context) => sl<TaskBloc>()),
         BlocProvider<MapBloc>(create: (context) => sl<MapBloc>()),
       ],
-      child: ChangeNotifierProvider(
-        create: (_) => LanguageProvider(),
-        child: Consumer<LanguageProvider>(
-          builder: (context, languageProvider, _) {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => LanguageProvider()),
@@ -52,28 +48,6 @@ class KapokApp extends StatelessWidget {
               title: 'Kapok',
               debugShowCheckedModeBanner: false,
               locale: languageProvider.currentLocale,
-              theme: ThemeData(
-                primarySwatch:
-                    MaterialColor(AppColors.primary.value, <int, Color>{
-                      50: AppColors.primary.withOpacity(0.1),
-                      100: AppColors.primary.withOpacity(0.2),
-                      200: AppColors.primary.withOpacity(0.3),
-                      300: AppColors.primary.withOpacity(0.4),
-                      400: AppColors.primary.withOpacity(0.5),
-                      500: AppColors.primary,
-                      600: AppColors.primaryDark,
-                      700: AppColors.primaryDark,
-                      800: AppColors.primaryDark,
-                      900: AppColors.primaryDark,
-                    }),
-                scaffoldBackgroundColor: AppColors.background,
-                appBarTheme: AppBarTheme(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
-                  elevation: 0,
-                ),
-                useMaterial3: true,
-              ),
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: themeProvider.themeMode,
@@ -221,19 +195,6 @@ class KapokApp extends StatelessWidget {
                             );
                           }
                         }
-                  listener: (context, state) {
-                    // Use post-frame callback to ensure Navigator is available
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (state is AuthUnauthenticated) {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/login',
-                          (route) => false,
-                        );
-                      } else if (state is AuthAuthenticated) {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/home',
-                          (route) => false,
-                        );
                       }
                     });
                   },
@@ -242,9 +203,6 @@ class KapokApp extends StatelessWidget {
               },
               home: BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
-                  // Show loading only for initial auth check, not for profile updates
-                  if (state is AuthLoading) {
-                    // If we're loading but were previously authenticated, keep showing home
                   if (state is AuthLoading) {
                     return const Scaffold(
                       body: Center(child: CircularProgressIndicator()),
@@ -252,19 +210,9 @@ class KapokApp extends StatelessWidget {
                   } else if (state is AuthAuthenticated) {
                     return const HomePage();
                   } else if (state is AuthUnauthenticated) {
-                    // Only show login page if explicitly unauthenticated
                     return const LoginPage();
                   } else {
-                    // For AuthError or other states, check if we have a previous authenticated state
-                    // If so, keep showing HomePage to prevent navigation to login
-                    final authBloc = context.read<AuthBloc>();
-                    final currentState = authBloc.state;
-                    if (currentState is AuthAuthenticated) {
-                      return const HomePage();
-                    }
-                    // Default to login page only if truly unauthenticated
-                  } else {
-                    // Default to login page for unauthenticated users
+                    // For AuthError or other states, default to login
                     return const LoginPage();
                   }
                 },

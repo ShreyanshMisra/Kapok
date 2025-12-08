@@ -111,9 +111,6 @@ class _TasksPageState extends State<TasksPage> {
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).createYourFirstTaskToGetStarted,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),

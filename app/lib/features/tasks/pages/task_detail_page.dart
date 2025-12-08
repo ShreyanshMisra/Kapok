@@ -175,14 +175,11 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(
           _isEditing ? 'Edit Task' : AppLocalizations.of(context).taskDetails,
         ),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        foregroundColor: theme.appBarTheme.foregroundColor,
-        title: Text(AppLocalizations.of(context).taskDetails),
         elevation: 0,
         actions: [
           if (!_isEditing && canEdit)

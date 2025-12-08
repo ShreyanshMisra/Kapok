@@ -44,7 +44,6 @@ class _LoginPageState extends State<LoginPage> {
                   content: Text(state.message),
                   backgroundColor: AppColors.error,
                   duration: const Duration(seconds: 4),
-                  backgroundColor: AppColors.error, // Error color stays the same
                 ),
               );
             } else if (state is AuthAuthenticated) {

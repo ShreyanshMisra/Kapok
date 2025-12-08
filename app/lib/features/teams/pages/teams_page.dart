@@ -281,12 +281,6 @@ class _TeamsPageState extends State<TeamsPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(
-                context,
-              ).joinAnExistingTeamOrCreateANewOneToGetStarted,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               AppLocalizations.of(context).joinAnExistingTeamOrCreateANewOneToGetStarted,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
@@ -347,30 +341,6 @@ class _TeamsPageState extends State<TeamsPage> {
                 }
                 return const SizedBox.shrink();
               },
-                  },
-                  icon: const Icon(Icons.group_add),
-                  label: Text(AppLocalizations.of(context).joinTeam),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.secondary,
-                    foregroundColor: theme.colorScheme.onSecondary,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const CreateTeamPage(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context).createTeam),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ],
             ),
           ],
         ),

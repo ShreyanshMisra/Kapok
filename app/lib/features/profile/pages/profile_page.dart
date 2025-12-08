@@ -191,11 +191,8 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(AppLocalizations.of(context).email, user.email),
-            _buildInfoRow(AppLocalizations.of(context).accountType, user.userRole.displayName),
-            _buildInfoRow(AppLocalizations.of(context).role, user.role),
             _buildInfoRow(context, AppLocalizations.of(context).email, user.email),
-            _buildInfoRow(context, AppLocalizations.of(context).accountType, user.accountType),
+            _buildInfoRow(context, AppLocalizations.of(context).accountType, user.userRole.displayName),
             _buildInfoRow(context, AppLocalizations.of(context).role, user.role),
             if (user.teamId != null)
               _buildInfoRow(context, AppLocalizations.of(context).teamId, user.teamId!),

@@ -42,13 +42,6 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(16),
         children: [
           // Notifications section
-          _buildSection(AppLocalizations.of(context).notifications, [
-            SwitchListTile(
-              title: Text(AppLocalizations.of(context).notifications),
-              subtitle: Text(
-                AppLocalizations.of(
-                  context,
-                ).receiveNotificationsForNewTasksAndUpdates,
           _buildSection(
             AppLocalizations.of(context).notifications,
             [
@@ -63,25 +56,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 activeThumbColor: Theme.of(context).colorScheme.primary,
               ),
-              value: _notificationsEnabled,
-              onChanged: (value) {
-                setState(() {
-                  _notificationsEnabled = value;
-                });
-              },
-              activeThumbColor: AppColors.primary,
-            ),
-          ]),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Location section
-          _buildSection(AppLocalizations.of(context).location, [
-            SwitchListTile(
-              title: Text(AppLocalizations.of(context).locationServices),
-              subtitle: Text(
-                AppLocalizations.of(
-                  context,
-                ).allowAppToAccessYourLocationForTaskMapping,
           _buildSection(
             AppLocalizations.of(context).location,
             [
@@ -96,15 +75,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 activeThumbColor: Theme.of(context).colorScheme.primary,
               ),
-              value: _locationEnabled,
-              onChanged: (value) {
-                setState(() {
-                  _locationEnabled = value;
-                });
-              },
-              activeThumbColor: AppColors.primary,
-            ),
-          ]),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Language section
@@ -130,15 +102,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
 
           // Theme section
-          _buildSection(AppLocalizations.of(context).appearance, [
-            ListTile(
-              title: Text(AppLocalizations.of(context).theme),
-              subtitle: Text(
-                _selectedTheme == 'System'
-                    ? AppLocalizations.of(context).system
-                    : _selectedTheme == 'Light'
-                    ? AppLocalizations.of(context).light
-                    : AppLocalizations.of(context).dark,
           _buildSection(
             AppLocalizations.of(context).appearance,
             [
@@ -168,12 +131,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   );
                 },
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                _showThemeDialog();
-              },
-            ),
-          ]),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Data section

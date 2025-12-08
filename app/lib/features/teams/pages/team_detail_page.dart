@@ -47,12 +47,9 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: Text(widget.team.teamName),
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
-        title: Text(widget.team.name),
+        title: Text(widget.team.teamName),
         elevation: 0,
         actions: [
           BlocBuilder<AuthBloc, AuthState>(

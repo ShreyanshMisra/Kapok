@@ -7,20 +7,27 @@ class MapboxConstants {
   /// Get your token from: https://account.mapbox.com/access-tokens/
   /// Make sure to create a .env file in the app root directory
   static String get accessToken {
-    final token = dotenv.env['MAPBOX_ACCESS_TOKEN'];
-    if (token == null || token.isEmpty) {
-      throw Exception(
-        'MAPBOX_ACCESS_TOKEN not found in .env file. '
-        'Please create a .env file with your Mapbox access token. '
-        'See .env.example for reference.',
-      );
+    try {
+      final token = dotenv.env['MAPBOX_ACCESS_TOKEN'];
+      if (token == null || token.isEmpty) {
+        // Return a placeholder token if not found
+        // This prevents crashes but map won't work until proper token is set
+        return 'pk.mapbox_token_not_configured';
+      }
+      return token;
+    } catch (e) {
+      // If dotenv isn't loaded, return placeholder
+      return 'pk.mapbox_token_not_configured';
     }
-    return token;
   }
 
   /// Default Mapbox style ID - loaded from .env file or defaults to mapbox/streets-v11
   static String get defaultStyleId {
-    return dotenv.env['MAPBOX_STYLE_ID'] ?? 'mapbox/streets-v11';
+    try {
+      return dotenv.env['MAPBOX_STYLE_ID'] ?? 'mapbox/streets-v11';
+    } catch (e) {
+      return 'mapbox/streets-v11';
+    }
   }
 
   /// Private constructor to prevent instantiation
