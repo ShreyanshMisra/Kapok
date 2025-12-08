@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../data/models/user_model.dart';
 
 /// Authentication events
 abstract class AuthEvent extends Equatable {
@@ -27,7 +28,7 @@ class SignUpRequested extends AuthEvent {
   final String email;
   final String password;
   final String name;
-  final String accountType;
+  final String accountType; // Keep for backward compatibility, will be converted to UserRole
   final String role;
 
   const SignUpRequested({
@@ -64,14 +65,16 @@ class AuthCheckRequested extends AuthEvent {
 
 /// Update user profile
 class ProfileUpdateRequested extends AuthEvent {
-  final String name;
-  final String role;
+  final String? name;
+  final String? role;
+  final UserModel? user; // Optional: if provided, use this user model directly
 
   const ProfileUpdateRequested({
-    required this.name,
-    required this.role,
+    this.name,
+    this.role,
+    this.user,
   });
 
   @override
-  List<Object> get props => [name, role];
+  List<Object?> get props => [name, role, user];
 }

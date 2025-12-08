@@ -58,3 +58,8 @@ class OfflineBubbleDownloadCompleted extends MapEvent {
   @override
   List<Object> get props => [region];
 }
+
+/// Reset map state (on logout)
+class MapReset extends MapEvent {
+  const MapReset();
+}

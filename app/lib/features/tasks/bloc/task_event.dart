@@ -51,7 +51,12 @@ class CreateTaskRequested extends TaskEvent {
 
 /// Load tasks request
 class LoadTasksRequested extends TaskEvent {
-  const LoadTasksRequested();
+  final String? userId; // Optional: for admin check
+
+  const LoadTasksRequested({this.userId});
+
+  @override
+  List<Object?> get props => [userId];
 }
 
 /// Load tasks by team request
@@ -144,11 +149,15 @@ class AssignTaskRequested extends TaskEvent {
 /// Load tasks for user's teams (permission-aware)
 class LoadTasksForUserTeamsRequested extends TaskEvent {
   final List<String> teamIds;
+  final String? userId; // Optional: for admin check
 
-  const LoadTasksForUserTeamsRequested({required this.teamIds});
+  const LoadTasksForUserTeamsRequested({
+    required this.teamIds,
+    this.userId,
+  });
 
   @override
-  List<Object> get props => [teamIds];
+  List<Object?> get props => [teamIds, userId];
 }
 
 /// Edit task request
@@ -181,4 +190,9 @@ class EditTaskRequested extends TaskEvent {
     taskCompleted,
     assignedTo,
   ];
+}
+
+/// Reset task state (on logout)
+class TaskReset extends TaskEvent {
+  const TaskReset();
 }

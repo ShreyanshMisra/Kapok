@@ -24,6 +24,7 @@ class MapboxMapView extends StatefulWidget {
   final VoidCallback? onMapReady;
   final bool interactive;
   final void Function(MapboxWebController controller)? onControllerReady;
+  final void Function(double latitude, double longitude)? onDoubleClick;
 
   const MapboxMapView({
     super.key,
@@ -36,6 +37,7 @@ class MapboxMapView extends StatefulWidget {
     this.onMapReady,
     this.interactive = true,
     this.onControllerReady,
+    this.onDoubleClick,
   });
 
   @override
@@ -65,6 +67,10 @@ class _MapboxMapViewState extends State<MapboxMapView> {
           widget.onMapReady?.call();
           widget.onControllerReady?.call(_webController);
         };
+      // Set onDoubleClick separately as it's not a setter
+      if (widget.onDoubleClick != null) {
+        _webController.onDoubleClick = widget.onDoubleClick;
+      }
       _webController.interactive = widget.interactive;
       // Also call onControllerReady immediately if map already exists
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -82,6 +88,7 @@ class _MapboxMapViewState extends State<MapboxMapView> {
       _webController
         ..offlineBubble = widget.offlineBubble
         ..isOfflineMode = widget.isOfflineMode;
+      _webController.onDoubleClick = widget.onDoubleClick;
       _webController.interactive = widget.interactive;
       // Don't call setCenter here - it resets user's zoom/pan position
     }

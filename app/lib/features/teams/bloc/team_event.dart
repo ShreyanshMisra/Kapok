@@ -127,3 +127,22 @@ class LoadTeamMembers extends TeamEvent {
   @override
   List<Object> get props => [teamId];
 }
+
+/// Delete team request
+class DeleteTeamRequested extends TeamEvent {
+  final String teamId;
+  final String userId;
+
+  const DeleteTeamRequested({
+    required this.teamId,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [teamId, userId];
+}
+
+/// Reset team state (on logout)
+class TeamReset extends TeamEvent {
+  const TeamReset();
+}

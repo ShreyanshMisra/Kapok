@@ -4,6 +4,7 @@ import '../core/constants/app_colors.dart';
 import '../features/auth/pages/login_page.dart';
 import '../features/auth/pages/signup_page.dart';
 import '../features/auth/pages/forgot_password_page.dart';
+import '../features/auth/pages/role_selection_page.dart';
 import '../features/teams/pages/teams_page.dart';
 import '../features/teams/pages/create_team_page.dart';
 import '../features/teams/pages/join_team_page.dart';
@@ -27,6 +28,7 @@ class AppRouter {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String forgotPassword = '/forgot-password';
+  static const String roleSelection = '/role-selection';
   static const String home = '/home';
   static const String about = '/about';
   static const String teams = '/teams';
@@ -71,6 +73,12 @@ class AppRouter {
       case forgotPassword:
         return MaterialPageRoute(
           builder: (_) => const ForgotPasswordPage(),
+          settings: settings,
+        );
+      
+      case roleSelection:
+        return MaterialPageRoute(
+          builder: (_) => const RoleSelectionPage(),
           settings: settings,
         );
       

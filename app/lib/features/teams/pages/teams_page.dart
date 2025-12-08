@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../data/models/team_model.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../bloc/team_bloc.dart';
+import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
 import 'create_team_page.dart';
 import 'join_team_page.dart';
@@ -18,11 +22,44 @@ class TeamsPage extends StatefulWidget {
 }
 
 class _TeamsPageState extends State<TeamsPage> {
+  bool _hasInitialized = false;
+
   @override
   void initState() {
     super.initState();
-    // TODO: Load user teams when page initializes
-    // context.read<TeamBloc>().add(LoadUserTeams());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadTeams();
+        _hasInitialized = true;
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload teams when page becomes visible if state has no teams
+    if (_hasInitialized && mounted) {
+      final teamState = context.read<TeamBloc>().state;
+      // Only reload if state has no teams (TeamInitial or empty TeamLoaded)
+      if (teamState.teams.isEmpty &&
+          (teamState is TeamInitial ||
+              (teamState is TeamLoaded && teamState.teams.isEmpty))) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _loadTeams();
+          }
+        });
+      }
+    }
+  }
+
+  /// Load user teams
+  void _loadTeams() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<TeamBloc>().add(LoadUserTeams(userId: authState.user.id));
+    }
   }
 
   @override
@@ -36,75 +73,186 @@ class _TeamsPageState extends State<TeamsPage> {
         title: Text(AppLocalizations.of(context).myTeams),
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const CreateTeamPage()),
-              );
+          // Only show create team button for team leaders and admins
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, authState) {
+              if (authState is AuthAuthenticated) {
+                final userRole = authState.user.userRole;
+                if (userRole == UserRole.teamLeader ||
+                    userRole == UserRole.admin) {
+                  return IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const CreateTeamPage(),
+                        ),
+                      );
+                    },
+                    tooltip: AppLocalizations.of(context).createTeam,
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          // Join team button for team members (and others who can join)
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, authState) {
+              if (authState is AuthAuthenticated) {
+                final userRole = authState.user.userRole;
+                // Show join button for team members, or if user doesn't have a team yet
+                if (userRole == UserRole.teamMember ||
+                    (authState.user.teamId == null &&
+                        userRole != UserRole.admin)) {
+                  return IconButton(
+                    icon: const Icon(Icons.group_add),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const JoinTeamPage(),
+                        ),
+                      );
+                    },
+                    tooltip: AppLocalizations.of(context).joinTeam,
+                  );
+                }
+              }
+              return const SizedBox.shrink();
             },
           ),
         ],
       ),
-      body: BlocBuilder<TeamBloc, TeamState>(
-        builder: (context, state) {
-          if (state is TeamLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is TeamError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: AppColors.error),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context).errorLoadingTeams,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.message,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: Retry loading teams
-                      // context.read<TeamBloc>().add(LoadUserTeams());
-                    },
-                    child: Text(AppLocalizations.of(context).retry),
-                  ),
-                ],
-              ),
-            );
-          } else if (state is TeamLoaded) {
-            final teams = state.teams;
-
-            if (teams.isEmpty) {
-              return _buildEmptyState();
+      body: BlocListener<TeamBloc, TeamState>(
+        listener: (context, state) {
+          // When teams are joined/created, reload the list
+          if (state is TeamJoined || state is TeamCreated) {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              context.read<TeamBloc>().add(
+                LoadUserTeams(userId: authState.user.id),
+              );
+            }
+          }
+        },
+        child: BlocBuilder<TeamBloc, TeamState>(
+          builder: (context, state) {
+            // Loading state with no teams yet
+            if (state is TeamLoading &&
+                state.teams.isEmpty &&
+                !_hasInitialized) {
+              return const Center(child: CircularProgressIndicator());
             }
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                // TODO: Refresh teams
-                // context.read<TeamBloc>().add(LoadUserTeams());
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: teams.length,
-                itemBuilder: (context, index) {
-                  final team = teams[index];
-                  return _buildTeamCard(team);
-                },
-              ),
-            );
-          }
+            // Error state - show error but still display teams if available
+            if (state is TeamError) {
+              if (state.teams.isNotEmpty) {
+                // Show teams with error banner
+                return Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      color: AppColors.error.withOpacity(0.1),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: AppColors.error),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.message,
+                              style: TextStyle(color: AppColors.error),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          final authState = context.read<AuthBloc>().state;
+                          if (authState is AuthAuthenticated) {
+                            context.read<TeamBloc>().add(
+                              LoadUserTeams(userId: authState.user.id),
+                            );
+                          }
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: state.teams.length,
+                          itemBuilder: (context, index) {
+                            final team = state.teams[index];
+                            return _buildTeamCard(team);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
 
-          return _buildEmptyState();
-        },
+              // No teams, show full error state
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    Text(
+                      AppLocalizations.of(context).errorLoadingTeams,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.message,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        final authState = context.read<AuthBloc>().state;
+                        if (authState is AuthAuthenticated) {
+                          context.read<TeamBloc>().add(
+                            LoadUserTeams(userId: authState.user.id),
+                          );
+                        }
+                      },
+                      child: Text(AppLocalizations.of(context).retry),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // Any state with teams - show them
+            if (state.teams.isNotEmpty) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  final authState = context.read<AuthBloc>().state;
+                  if (authState is AuthAuthenticated) {
+                    context.read<TeamBloc>().add(
+                      LoadUserTeams(userId: authState.user.id),
+                    );
+                  }
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.teams.length,
+                  itemBuilder: (context, index) {
+                    final team = state.teams[index];
+                    return _buildTeamCard(team);
+                  },
+                ),
+              );
+            }
+
+            // Empty state - no teams
+            return _buildEmptyState();
+          },
+        ),
       ),
     );
   }
@@ -133,6 +281,12 @@ class _TeamsPageState extends State<TeamsPage> {
             ),
             const SizedBox(height: 16),
             Text(
+              AppLocalizations.of(
+                context,
+              ).joinAnExistingTeamOrCreateANewOneToGetStarted,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               AppLocalizations.of(context).joinAnExistingTeamOrCreateANewOneToGetStarted,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
@@ -140,16 +294,59 @@ class _TeamsPageState extends State<TeamsPage> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const JoinTeamPage(),
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                if (authState is AuthAuthenticated) {
+                  final userRole = authState.user.userRole;
+
+                  // Show different buttons based on role
+                  if (userRole == UserRole.teamMember) {
+                    // Team members can only join teams
+                    return ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const JoinTeamPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.group_add),
+                      label: Text(AppLocalizations.of(context).joinTeam),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.surface,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
                       ),
                     );
+                  } else if (userRole == UserRole.teamLeader ||
+                      userRole == UserRole.admin) {
+                    // Team leaders and admins can create teams
+                    return ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const CreateTeamPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: Text(AppLocalizations.of(context).createTeam),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.surface,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                      ),
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              },
                   },
                   icon: const Icon(Icons.group_add),
                   label: Text(AppLocalizations.of(context).joinTeam),
@@ -219,7 +416,7 @@ class _TeamsPageState extends State<TeamsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          team.name,
+                          team.teamName,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -244,7 +441,9 @@ class _TeamsPageState extends State<TeamsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  team.isActive ? AppLocalizations.of(context).active : AppLocalizations.of(context).inactive,
+                  team.isActive
+                      ? AppLocalizations.of(context).active
+                      : AppLocalizations.of(context).inactive,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: team.isActive ? AppColors.success : AppColors.error,
                     fontWeight: FontWeight.w600,

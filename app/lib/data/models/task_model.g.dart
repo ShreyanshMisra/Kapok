@@ -8,34 +8,56 @@ part of 'task_model.dart';
 
 TaskModel _$TaskModelFromJson(Map<String, dynamic> json) => TaskModel(
   id: json['id'] as String,
-  taskName: json['taskName'] as String,
-  taskSeverity: (json['taskSeverity'] as num).toInt(),
-  taskDescription: json['taskDescription'] as String,
-  taskCompleted: json['taskCompleted'] as bool,
-  assignedTo: json['assignedTo'] as String,
-  teamName: json['teamName'] as String,
-  teamId: json['teamId'] as String,
-  latitude: (json['latitude'] as num).toDouble(),
-  longitude: (json['longitude'] as num).toDouble(),
-  address: json['address'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  title: (json['title'] as String?) ?? (json['taskName'] as String?) ?? '',
+  description:
+      (json['description'] as String?) ?? (json['taskDescription'] as String?),
   createdBy: json['createdBy'] as String,
+  assignedTo: json['assignedTo'] as String?,
+  teamId: json['teamId'] as String,
+  geoLocation: json['geoLocation'] is GeoPoint
+      ? json['geoLocation'] as GeoPoint
+      : (json['geoLocation'] is Map
+            ? GeoPoint(
+                (json['geoLocation']['latitude'] as num).toDouble(),
+                (json['geoLocation']['longitude'] as num).toDouble(),
+              )
+            : GeoPoint(
+                (json['latitude'] as num?)?.toDouble() ?? 0.0,
+                (json['longitude'] as num?)?.toDouble() ?? 0.0,
+              )),
+  address: json['address'] as String?,
+  status: TaskStatus.fromString(json['status'] as String? ?? 'pending'),
+  priority: TaskPriority.fromString(json['priority'] as String? ?? 'medium'),
+  dueDate: json['dueDate'] == null
+      ? null
+      : DateTime.parse(json['dueDate'] as String),
+  createdAt: json['createdAt'] == null
+      ? DateTime.now()
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? DateTime.now()
+      : DateTime.parse(json['updatedAt'] as String),
+  completedAt: json['completedAt'] == null
+      ? null
+      : DateTime.parse(json['completedAt'] as String),
 );
 
 Map<String, dynamic> _$TaskModelToJson(TaskModel instance) => <String, dynamic>{
   'id': instance.id,
-  'taskName': instance.taskName,
-  'taskSeverity': instance.taskSeverity,
-  'taskDescription': instance.taskDescription,
-  'taskCompleted': instance.taskCompleted,
+  'title': instance.title,
+  'description': instance.description,
+  'createdBy': instance.createdBy,
   'assignedTo': instance.assignedTo,
-  'teamName': instance.teamName,
   'teamId': instance.teamId,
-  'latitude': instance.latitude,
-  'longitude': instance.longitude,
+  'geoLocation': {
+    'latitude': instance.geoLocation.latitude,
+    'longitude': instance.geoLocation.longitude,
+  },
   'address': instance.address,
+  'status': instance.status.value,
+  'priority': instance.priority.value,
+  'dueDate': instance.dueDate?.toIso8601String(),
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
-  'createdBy': instance.createdBy,
+  'completedAt': instance.completedAt?.toIso8601String(),
 };

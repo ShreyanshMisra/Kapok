@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import '../../core/error/exceptions.dart';
-import '../../core/utils/logger.dart';
+// import '../../core/utils/logger.dart'; // Commented out - map logs disabled
 import '../models/map_tile_model.dart';
 
 /// MapboxRemoteDataSource is responsible for hitting Mapbox's tile endpoints and respecting their offline terms.
@@ -33,18 +33,18 @@ class MapboxRemoteDataSource {
     int ratio = 2,
   }) async {
     try {
-      Logger.firebase('Fetching tile from Mapbox: z=$z, x=$x, y=$y');
+      // Logger.firebase('Fetching tile from Mapbox: z=$z, x=$x, y=$y'); // Commented out - map logs disabled
 
       // Mapbox Styles API tile URL format: /styles/v1/{style_id}/tiles/{z}/{x}/{y}@{ratio}x?access_token={token}
       // The format parameter is used for logging/identification, not in the URL path
       final url =
           '$_baseUrl/$styleId/tiles/$z/$x/$y@${ratio}x?access_token=$accessToken';
 
-      Logger.firebase('Mapbox URL: $url');
+      // Logger.firebase('Mapbox URL: $url'); // Commented out - map logs disabled
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode != 200) {
-        Logger.firebase('Failed to fetch tile: ${response.statusCode}');
+        // Logger.firebase('Failed to fetch tile: ${response.statusCode}'); // Commented out - map logs disabled
         throw DatabaseException(
           message: 'Failed to fetch tile from Mapbox: ${response.statusCode}',
         );
@@ -59,13 +59,13 @@ class MapboxRemoteDataSource {
         fetchedAt: DateTime.now(),
       );
 
-      Logger.firebase('Tile fetched successfully: ${tile.sizeInBytes} bytes');
+      // Logger.firebase('Tile fetched successfully: ${tile.sizeInBytes} bytes'); // Commented out - map logs disabled
       return tile;
     } catch (e) {
-      Logger.firebase(
-        'Error fetching tile from Mapbox: z=$z, x=$x, y=$y',
-        error: e,
-      );
+      // Logger.firebase(
+      //   'Error fetching tile from Mapbox: z=$z, x=$x, y=$y',
+      //   error: e,
+      // ); // Commented out - map logs disabled
       if (e is DatabaseException) {
         rethrow;
       }
@@ -96,10 +96,10 @@ class MapboxRemoteDataSource {
           onProgress(downloaded, tileCoords.length);
         }
       } catch (e) {
-        Logger.firebase(
-          'Error fetching tile: z=${coord.z}, x=${coord.x}, y=${coord.y}',
-          error: e,
-        );
+        // Logger.firebase(
+        //   'Error fetching tile: z=${coord.z}, x=${coord.x}, y=${coord.y}',
+        //   error: e,
+        // ); // Commented out - map logs disabled
         // Continue with other tiles even if one fails
       }
     }

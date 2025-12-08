@@ -4,7 +4,7 @@ import '../../core/error/exceptions.dart';
 import '../../core/services/network_checker.dart';
 import '../../core/services/geolocation_service.dart';
 import '../../core/services/firebase_service.dart';
-import '../../core/utils/logger.dart';
+// import '../../core/utils/logger.dart'; // Commented out - map logs disabled
 import '../models/map_tile_model.dart';
 import '../models/offline_map_region_model.dart';
 import '../sources/mapbox_remote_data_source.dart';
@@ -81,19 +81,19 @@ class MapRepositoryImpl implements MapRepository {
   @override
   Future<MapTile?> getTile(int z, int x, int y) async {
     try {
-      Logger.task('Getting tile: z=$z, x=$x, y=$y');
+      // Logger.task('Getting tile: z=$z, x=$x, y=$y'); // Commented out - map logs disabled
 
       // Always try persistent cache first (offline-first pattern)
       final cachedTile = await _offlineCache.getTile(z, x, y);
       if (cachedTile != null) {
-        Logger.task('Tile found in persistent cache');
+        // Logger.task('Tile found in persistent cache'); // Commented out - map logs disabled
         return cachedTile;
       }
 
       // Check in-memory live tiles cache (for tiles outside bubble during session)
       final key = '$z/$x/$y';
       if (_liveTilesCache.containsKey(key)) {
-        Logger.task('Tile found in live tiles cache');
+        // Logger.task('Tile found in live tiles cache'); // Commented out - map logs disabled
         return _liveTilesCache[key];
       }
 
@@ -115,15 +115,15 @@ class MapRepositoryImpl implements MapRepository {
                 networkQuality == NetworkQuality.poor) {
               // Throttle live halo requests on poor connections
               // In production, you could use a semaphore or rate limiter here
-              Logger.task(
-                'Throttling live halo tile request (poor connection)',
-              );
+              // Logger.task(
+              //   'Throttling live halo tile request (poor connection)',
+              // ); // Commented out - map logs disabled
             }
           }
 
-          Logger.task(
-            'Fetching tile from Mapbox (${isInBubble ? "bubble" : "live halo"})',
-          );
+          // Logger.task(
+          //   'Fetching tile from Mapbox (${isInBubble ? "bubble" : "live halo"})',
+          // ); // Commented out - map logs disabled
           final tile = await _mapboxDataSource.fetchTile(z, x, y);
 
           if (isInBubble) {
@@ -131,7 +131,7 @@ class MapRepositoryImpl implements MapRepository {
             // Hive lookup → Mapbox fetch → OfflineMapCache.putTile()
             // Save to Hive cache for offline use
             await _offlineCache.putTile(tile);
-            Logger.task('Tile fetched and cached successfully (inside bubble)');
+            // Logger.task('Tile fetched and cached successfully (inside bubble)'); // Commented out - map logs disabled
           } else {
             // Phase 2: Tiles outside bubble → live-only (like Google Maps)
             // Tiles outside the offline bubble are streamed live and not persisted,
@@ -146,22 +146,22 @@ class MapRepositoryImpl implements MapRepository {
               _liveTilesCache.remove(oldestKey);
             }
 
-            Logger.task('Tile fetched successfully (live halo, not persisted)');
+            // Logger.task('Tile fetched successfully (live halo, not persisted)'); // Commented out - map logs disabled
           }
 
           return tile;
         } catch (e) {
-          Logger.task('Failed to fetch tile from Mapbox', error: e);
+          // Logger.task('Failed to fetch tile from Mapbox', error: e); // Commented out - map logs disabled
           // Return null if fetch fails (will show placeholder in UI)
           return null;
         }
       } else {
         // Offline and not in cache - return null (UI will show placeholder)
-        Logger.task('Offline and tile not in cache');
+        // Logger.task('Offline and tile not in cache'); // Commented out - map logs disabled
         return null;
       }
     } catch (e) {
-      Logger.task('Error getting tile: z=$z, x=$x, y=$y', error: e);
+      // Logger.task('Error getting tile: z=$z, x=$x, y=$y', error: e); // Commented out - map logs disabled
       return null;
     }
   }
@@ -204,7 +204,7 @@ class MapRepositoryImpl implements MapRepository {
   /// Returns the number of tiles primed (for progress tracking)
   Future<int> _primeBubbleTiles(OfflineMapRegion region) async {
     try {
-      Logger.task('Phase 1: Priming bubble tiles for instant first frame');
+      // Logger.task('Phase 1: Priming bubble tiles for instant first frame'); // Commented out - map logs disabled
 
       // Calculate center tile at initial zoom (use zoomMax for highest detail)
       final centerTile = _latLonToTile(
@@ -238,15 +238,15 @@ class MapRepositoryImpl implements MapRepository {
 
         if (existingTile != null) {
           primedCount++;
-          Logger.task(
-            'Phase 1: Center tile primed (instant first frame ready)',
-          );
+          // Logger.task(
+          //   'Phase 1: Center tile primed (instant first frame ready)',
+          // ); // Commented out - map logs disabled
         }
       } catch (e) {
-        Logger.task(
-          'Error priming center tile: z=${region.zoomMax}, x=${centerTile.x}, y=${centerTile.y}',
-          error: e,
-        );
+        // Logger.task(
+        //   'Error priming center tile: z=${region.zoomMax}, x=${centerTile.x}, y=${centerTile.y}',
+        //   error: e,
+        // ); // Commented out - map logs disabled
       }
 
       // STEP 2: Prime tiny 3×3 ring around center (minimal for instant display)
@@ -286,21 +286,21 @@ class MapRepositoryImpl implements MapRepository {
               primedCount++;
             }
           } catch (e) {
-            Logger.task(
-              'Error priming tile: z=${region.zoomMax}, x=$x, y=$y',
-              error: e,
-            );
+            // Logger.task(
+            //   'Error priming tile: z=${region.zoomMax}, x=$x, y=$y',
+            //   error: e,
+            // ); // Commented out - map logs disabled
             // Continue with other tiles
           }
         }
       }
 
-      Logger.task(
-        'Phase 1 complete: $primedCount tiles primed (instant first frame ready)',
-      );
+      // Logger.task(
+      //   'Phase 1 complete: $primedCount tiles primed (instant first frame ready)',
+      // ); // Commented out - map logs disabled
       return primedCount;
     } catch (e) {
-      Logger.task('Error priming bubble tiles', error: e);
+      // Logger.task('Error priming bubble tiles', error: e); // Commented out - map logs disabled
       // Don't fail the entire operation if priming fails
       return 0;
     }
@@ -317,7 +317,7 @@ class MapRepositoryImpl implements MapRepository {
   @override
   Future<void> downloadRegion(OfflineMapRegion region) async {
     try {
-      Logger.task('Downloading region: ${region.id}');
+      // Logger.task('Downloading region: ${region.id}'); // Commented out - map logs disabled
 
       // Update region status to downloading
       final updatedRegion = region.copyWith(status: 'downloading');
@@ -333,7 +333,7 @@ class MapRepositoryImpl implements MapRepository {
       final tileCoords = _computeTileIndices(region);
       final totalTiles = tileCoords.length;
 
-      Logger.task('Region has $totalTiles tiles to download');
+      // Logger.task('Region has $totalTiles tiles to download'); // Commented out - map logs disabled
 
       // Update region with total tiles
       final regionWithTotal = updatedRegion.copyWith(totalTiles: totalTiles);
@@ -381,10 +381,10 @@ class MapRepositoryImpl implements MapRepository {
           );
           await _regionRepository.saveRegion(regionWithProgress);
         } catch (e) {
-          Logger.task(
-            'Error downloading tile: z=${coord.z}, x=${coord.x}, y=${coord.y}',
-            error: e,
-          );
+          // Logger.task(
+          //   'Error downloading tile: z=${coord.z}, x=${coord.x}, y=${coord.y}',
+          //   error: e,
+          // ); // Commented out - map logs disabled
           // Continue with other tiles
         }
       }
@@ -398,11 +398,11 @@ class MapRepositoryImpl implements MapRepository {
       await _regionRepository.saveRegion(completedRegion);
 
       _progressControllers[region.id]!.add(1.0);
-      Logger.task(
-        'Region download completed: $downloadedTiles/$totalTiles tiles',
-      );
+      // Logger.task(
+      //   'Region download completed: $downloadedTiles/$totalTiles tiles',
+      // ); // Commented out - map logs disabled
     } catch (e) {
-      Logger.task('Error downloading region: ${region.id}', error: e);
+      // Logger.task('Error downloading region: ${region.id}', error: e); // Commented out - map logs disabled
 
       // Update region status to failed
       final failedRegion = region.copyWith(status: 'failed');
@@ -424,7 +424,7 @@ class MapRepositoryImpl implements MapRepository {
     try {
       return await _regionRepository.getAllRegions();
     } catch (e) {
-      Logger.task('Error getting downloaded regions', error: e);
+      // Logger.task('Error getting downloaded regions', error: e); // Commented out - map logs disabled
       throw MapException(
         message: 'Failed to get downloaded regions',
         originalError: e,
@@ -435,7 +435,7 @@ class MapRepositoryImpl implements MapRepository {
   @override
   Future<void> deleteRegion(String regionId) async {
     try {
-      Logger.task('Deleting region: $regionId');
+      // Logger.task('Deleting region: $regionId'); // Commented out - map logs disabled
 
       // Get region to clear tiles
       final region = await _regionRepository.getRegion(regionId);
@@ -451,9 +451,9 @@ class MapRepositoryImpl implements MapRepository {
       _progressControllers[regionId]?.close();
       _progressControllers.remove(regionId);
 
-      Logger.task('Region deleted successfully');
+      // Logger.task('Region deleted successfully'); // Commented out - map logs disabled
     } catch (e) {
-      Logger.task('Error deleting region: $regionId', error: e);
+      // Logger.task('Error deleting region: $regionId', error: e); // Commented out - map logs disabled
       throw MapException(message: 'Failed to delete region', originalError: e);
     }
   }
@@ -511,7 +511,7 @@ class MapRepositoryImpl implements MapRepository {
     int zoomMax = 18,
   }) async {
     try {
-      Logger.task('Loading region for current location');
+      // Logger.task('Loading region for current location'); // Commented out - map logs disabled
 
       // Get current GPS position
       final position = await _geolocationService.getCurrentPosition();
@@ -570,10 +570,10 @@ class MapRepositoryImpl implements MapRepository {
           await _snapshotSource.saveSnapshot(userId, snapshot);
         } catch (e) {
           // Log error but don't fail the entire operation
-          Logger.task(
-            'Failed to save map snapshot to Firestore, continuing with download',
-            error: e,
-          );
+          // Logger.task(
+          //   'Failed to save map snapshot to Firestore, continuing with download',
+          //   error: e,
+          // ); // Commented out - map logs disabled
         }
       }
 
@@ -606,9 +606,9 @@ class MapRepositoryImpl implements MapRepository {
       // Phase 1 complete: Return immediately with bubble metadata
       // The UI can now build OfflineMapWidget and show the first frame instantly
       // Phase 2 (full download) continues in background via downloadRegion()
-      Logger.task(
-        'Phase 1 complete: Region ready for instant first frame ($primedCount tiles primed)',
-      );
+      // Logger.task(
+      //   'Phase 1 complete: Region ready for instant first frame ($primedCount tiles primed)',
+      // ); // Commented out - map logs disabled
 
       // Phase 2: Stream additional tiles live while the user interacts
       // Download the full region in background (but getTile will only persist tiles inside the bubble)
@@ -616,18 +616,18 @@ class MapRepositoryImpl implements MapRepository {
       // it will check _isTileInOfflineBubble() and only persist tiles inside the ~3 mile bubble
       // This runs asynchronously so it doesn't block the return
       downloadRegion(region).catchError((e) {
-        Logger.task('Phase 2: Error in background download', error: e);
+        // Logger.task('Phase 2: Error in background download', error: e); // Commented out - map logs disabled
         // Don't fail the operation - Phase 1 already succeeded
       });
 
-      Logger.task(
-        'Region loaded for current location: $regionId (Phase 1 complete, Phase 2 in progress)',
-      );
+      // Logger.task(
+      //   'Region loaded for current location: $regionId (Phase 1 complete, Phase 2 in progress)',
+      // ); // Commented out - map logs disabled
 
       // Return region and primed count for Phase 1 complete notification
       return (region: region, primedTiles: primedCount);
     } catch (e) {
-      Logger.task('Error loading region for current location', error: e);
+      // Logger.task('Error loading region for current location', error: e); // Commented out - map logs disabled
       throw MapException(
         message: 'Failed to load region for current location',
         originalError: e,

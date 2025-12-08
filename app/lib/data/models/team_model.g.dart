@@ -8,7 +8,7 @@ part of 'team_model.dart';
 
 TeamModel _$TeamModelFromJson(Map<String, dynamic> json) => TeamModel(
   id: json['id'] as String,
-  name: json['name'] as String,
+  teamName: (json['teamName'] as String?) ?? (json['name'] as String?) ?? '',
   leaderId: json['leaderId'] as String,
   teamCode: json['teamCode'] as String,
   memberIds: (json['memberIds'] as List<dynamic>)
@@ -22,7 +22,7 @@ TeamModel _$TeamModelFromJson(Map<String, dynamic> json) => TeamModel(
 
 Map<String, dynamic> _$TeamModelToJson(TeamModel instance) => <String, dynamic>{
   'id': instance.id,
-  'name': instance.name,
+  'teamName': instance.teamName,
   'leaderId': instance.leaderId,
   'teamCode': instance.teamCode,
   'memberIds': instance.memberIds,
