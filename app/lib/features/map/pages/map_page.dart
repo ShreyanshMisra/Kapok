@@ -116,9 +116,9 @@ class _MapPageState extends State<MapPage> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, authState) {
         if (authState is AuthUnauthenticated) {
-          Logger.task(
-            '[MAP_PAGE] AuthUnauthenticated detected - disposing map controller',
-          );
+          // Logger.task(
+          //   '[MAP_PAGE] AuthUnauthenticated detected - disposing map controller',
+          // );
           // Dispose map controller immediately when user logs out
           _mapController?.dispose();
           _mapController = null;
@@ -167,18 +167,16 @@ class _MapPageState extends State<MapPage> {
             // When MapReset is triggered, MapBloc emits MapLoading state
             // Dispose the map controller immediately to stop the map
             if (state is MapLoading && _mapController != null) {
-              Logger.task(
-                '[MAP_PAGE] MapReset detected - disposing map controller',
-              );
+              // Logger.task(
+              //   '[MAP_PAGE] MapReset detected - disposing map controller',
+              // );
               _mapController?.dispose();
               _mapController = null;
             }
           },
           builder: (context, state) {
-            // Debug: Show current state
-            if (kDebugMode) {
-              print('[MAP_PAGE] Current state: ${state.runtimeType}');
-            }
+            // Debug: Show current state (throttled to avoid spam)
+            // Removed frequent state logging - only log on state changes if needed
 
             if (state is MapLoading) {
               return Center(

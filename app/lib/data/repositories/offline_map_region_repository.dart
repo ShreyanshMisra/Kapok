@@ -42,11 +42,11 @@ class OfflineMapRegionRepository {
         await initialize();
       }
 
-      Logger.hive('Saving region: ${region.id}');
+      // Logger.hive('Saving region: ${region.id}'); // Commented out - map logs disabled
       await _regionsBox!.put(region.id, region.toJson());
-      Logger.hive('Region saved successfully');
+      // Logger.hive('Region saved successfully'); // Commented out - map logs disabled
     } catch (e) {
-      Logger.hive('Error saving region: ${region.id}', error: e);
+      // Logger.hive('Error saving region: ${region.id}', error: e); // Commented out - map logs disabled
       throw CacheException(message: 'Failed to save region', originalError: e);
     }
   }

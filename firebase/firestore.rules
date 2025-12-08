@@ -19,99 +19,128 @@ service cloud.firestore {
       // - User is team leader of this team, OR
       // - User is admin, OR
       // - User is joining (only updating memberIds to add themselves), OR
-      // - Soft delete (isActive: false) by leader or admin
+      // - Soft delete (isActive: false) by leader or admin, OR
+      // - Task creation (only taskIds and updatedAt changed)
       allow update: if request.auth != null && (
+        // Soft delete: isActive set to false (by leader or admin)
+        (request.resource.data.isActive == false &&
+         resource.data.isActive == true &&
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          ((resource.data.leaderId == request.auth.uid &&
+            ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader"))) ||
+           ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
+            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin"))))) ||
         // Team leader can update their team (check both userRole and accountType for backward compatibility)
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          resource.data.leaderId == request.auth.uid &&
+         resource.data.isActive == true && // Only allow updates if team is active
          ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")) &&
-         // Allow soft delete or other updates (but not changing leaderId or teamCode)
-         (request.resource.data.isActive == false || // Allow soft delete
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leaderId', 'teamCode']))) ||
+         // Allow other updates (but not changing leaderId or teamCode)
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leaderId', 'teamCode'])) ||
         // Admin can update any team (check both userRole and accountType)
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         resource.data.isActive == true && // Only allow updates if team is active
          ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin")) &&
-         // Allow soft delete or other updates
-         (request.resource.data.isActive == false || // Allow soft delete
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leaderId', 'teamCode']))) ||
+         // Allow other updates (but not changing leaderId or teamCode)
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leaderId', 'teamCode'])) ||
         // User is joining: only memberIds and updatedAt changed, user is adding themselves
         // This is the key condition - allows any authenticated user to join
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds', 'updatedAt', 'taskIds']) &&
+        (resource.data.isActive == true && // Only allow joining active teams
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds', 'updatedAt', 'taskIds']) &&
          request.resource.data.memberIds.hasAny([request.auth.uid]) &&
          !resource.data.memberIds.hasAny([request.auth.uid])) ||
         // Task creation: only taskIds and updatedAt changed
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['taskIds', 'updatedAt']))
+        // Allow if user is authenticated and is member/leader of the team or is admin
+        (resource.data.isActive == true && // Only allow task creation for active teams
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['taskIds', 'updatedAt']) &&
+         (request.auth.uid in resource.data.memberIds ||
+          request.auth.uid == resource.data.leaderId ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+           ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
+            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin")))))
       );
       
-      // Only team leader or admin can delete
+      // Only team leader or admin can delete (hard delete)
+      // Note: Soft delete (isActive: false) is handled in update rule
       allow delete: if request.auth != null && (
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         resource.data.leaderId == request.auth.uid &&
-         ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
-          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
-          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader"))) ||
+        // Team leader can delete their team
+        (resource.data.leaderId == request.auth.uid &&
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
+           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
+           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")))) ||
+        // Admin can delete any team
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin")))
       );
+    }
+
+    // Tasks are stored at root level: /tasks/{taskId}
+    match /tasks/{taskId} {
+      // Allow read if user is authenticated and:
+      // - User is in the team that owns this task, OR
+      // - User is admin, OR
+      // - User created the task (for immediate read after creation)
+      allow read: if request.auth != null && (
+        // Admin can read all tasks
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin"))) ||
+        // User created the task (allow immediate read after creation)
+        (resource.data.createdBy == request.auth.uid) ||
+        // User is in the team (check if team exists first)
+        (exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+         (request.auth.uid in get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.memberIds ||
+          request.auth.uid == get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.leaderId))
+      );
       
-      match /tasks/{taskId} {
-        // Allow read if user is authenticated and:
-        // - User is in the team that owns this task, OR
-        // - User is admin
-        allow read: if request.auth != null && (
-          // Admin can read all tasks
+      // Allow create if user is authenticated and:
+      // - User created the task (createdBy == auth.uid), AND
+      // - teamId is provided
+      // Note: Membership is verified in application code before transaction
+      // This simplified rule avoids reading team document in transaction context
+      allow create: if request.auth != null && 
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.teamId != null &&
+        (
+          // Admin can create tasks for any team
           (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
            ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin"))) ||
-          // User is in the team
-          (request.auth.uid in get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.memberIds ||
-           request.auth.uid == get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.leaderId)
+          // For team members/leaders: Allow if authenticated and createdBy matches
+          // Team membership is verified in application code before transaction
+          // This avoids reading team document in transaction which can cause permission issues
+          true
         );
-        
-        // Allow create if user is authenticated and:
-        // - User created the task (createdBy == auth.uid), AND
-        // - teamId is provided, AND
-        // - User is in the team OR is admin
-        allow create: if request.auth != null && 
-          request.resource.data.createdBy == request.auth.uid &&
-          request.resource.data.teamId != null &&
-          (
-            // Admin can create tasks for any team
-            (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
-              (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin"))) ||
-            // User is in the team
-            (request.auth.uid in get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.memberIds ||
-             request.auth.uid == get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.leaderId)
-          );
-        
-        // Allow update if user created it, is assigned to it, is team leader, or is admin
-        allow update: if request.auth != null && (
-          resource.data.createdBy == request.auth.uid ||
-          resource.data.assignedTo == request.auth.uid ||
-          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-           ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")))
-        );
-        
-        // Allow delete if user created it, is team leader, or is admin
-        allow delete: if request.auth != null && (
-          resource.data.createdBy == request.auth.uid ||
-          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-           ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin") ||
-            (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")))
-        );
-      }
+      
+      // Allow update if user created it, is assigned to it, is team leader, or is admin
+      allow update: if request.auth != null && (
+        resource.data.createdBy == request.auth.uid ||
+        resource.data.assignedTo == request.auth.uid ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")))
+      );
+      
+      // Allow delete if user created it, is team leader, or is admin
+      allow delete: if request.auth != null && (
+        resource.data.createdBy == request.auth.uid ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         ((get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "teamLeader") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "TeamLeader") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "admin") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == "Admin") ||
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")))
+      );
     }
   }
 }

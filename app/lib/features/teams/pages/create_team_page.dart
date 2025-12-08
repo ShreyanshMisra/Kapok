@@ -44,7 +44,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Only team leaders and admins can create teams'),
+              content: const Text(
+                'Only team leaders and admins can create teams',
+              ),
               backgroundColor: AppColors.error,
             ),
           );
@@ -72,24 +74,28 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               ),
             );
           } else if (state is TeamCreated) {
-            // Update AuthBloc with new teamId
-            final authState = context.read<AuthBloc>().state;
-            if (authState is AuthAuthenticated) {
-              context.read<AuthBloc>().add(
-                ProfileUpdateRequested(
-                  user: authState.user.copyWith(
-                    teamId: state.team.id,
-                    updatedAt: DateTime.now(),
-                  ),
-                ),
-              );
-            }
-            
-            // Show success dialog with team code
+            // Show success dialog with team code first
+            // This prevents AuthBloc navigation from interfering
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => _TeamCreatedDialog(team: state.team),
+              builder: (context) => _TeamCreatedDialog(
+                team: state.team,
+                onDismiss: () {
+                  // Update AuthBloc after dialog is dismissed to prevent navigation conflicts
+                  final authState = context.read<AuthBloc>().state;
+                  if (authState is AuthAuthenticated) {
+                    context.read<AuthBloc>().add(
+                      ProfileUpdateRequested(
+                        user: authState.user.copyWith(
+                          teamId: state.team.id,
+                          updatedAt: DateTime.now(),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
             );
           }
         },
@@ -101,13 +107,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                Icon(
-                  Icons.group_add,
-                  size: 80,
-                  color: AppColors.primary,
-                ),
+                Icon(Icons.group_add, size: 80, color: AppColors.primary),
                 const SizedBox(height: 24),
-                
+
                 Text(
                   AppLocalizations.of(context).createNewTeam,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -117,16 +119,18 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                
+
                 Text(
-                  AppLocalizations.of(context).setUpANewTeamForDisasterReliefCoordination,
+                  AppLocalizations.of(
+                    context,
+                  ).setUpANewTeamForDisasterReliefCoordination,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Team name field
                 TextFormField(
                   controller: _teamNameController,
@@ -145,7 +149,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   validator: Validators.validateName,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Description field
                 TextFormField(
                   controller: _descriptionController,
@@ -153,7 +157,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   maxLength: 200,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context).descriptionOptional,
-                    hintText: AppLocalizations.of(context).briefDescriptionOfTheTeamsPurpose,
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).briefDescriptionOfTheTeamsPurpose,
                     prefixIcon: const Icon(Icons.description_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -165,16 +171,14 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Info card
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.info.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.info.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: AppColors.info.withOpacity(0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,25 +193,28 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                           const SizedBox(width: 8),
                           Text(
                             AppLocalizations.of(context).teamLeaderBenefits,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppColors.info,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: AppColors.info,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        AppLocalizations.of(context).teamLeaderBenefitsDescription,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.info,
-                        ),
+                        AppLocalizations.of(
+                          context,
+                        ).teamLeaderBenefitsDescription,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppColors.info),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Create team button
                 BlocBuilder<TeamBloc, TeamState>(
                   builder: (context, state) {
@@ -229,7 +236,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : Text(
@@ -254,26 +263,28 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
   void _handleCreateTeam() {
     if (_formKey.currentState!.validate()) {
       final authState = context.read<AuthBloc>().state;
-      
+
       if (authState is! AuthAuthenticated) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).youMustBeLoggedInToCreateTeams),
+            content: Text(
+              AppLocalizations.of(context).youMustBeLoggedInToCreateTeams,
+            ),
             backgroundColor: AppColors.error,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
         return;
       }
-      
+
       final currentUserId = authState.user.id;
-      
+
       context.read<TeamBloc>().add(
         CreateTeamRequested(
           name: _teamNameController.text.trim(),
           leaderId: currentUserId,
-          description: _descriptionController.text.trim().isEmpty 
-              ? null 
+          description: _descriptionController.text.trim().isEmpty
+              ? null
               : _descriptionController.text.trim(),
         ),
       );
@@ -284,8 +295,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
 /// Dialog shown after team creation with team code
 class _TeamCreatedDialog extends StatelessWidget {
   final TeamModel team;
+  final VoidCallback? onDismiss;
 
-  const _TeamCreatedDialog({required this.team});
+  const _TeamCreatedDialog({required this.team, this.onDismiss});
 
   @override
   Widget build(BuildContext context) {
@@ -342,10 +354,7 @@ class _TeamCreatedDialog extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'Share this code with your team members',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -353,7 +362,18 @@ class _TeamCreatedDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             Navigator.of(context).pop();
-            Navigator.of(context).pushReplacementNamed('/home');
+            // Navigate to teams page first to show the newly created team
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/teams',
+              (route) => route.settings.name == '/home' || route.isFirst,
+            );
+            // Update AuthBloc AFTER navigation to prevent navigation conflicts
+            // Use a small delay to ensure navigation completes first
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (context.mounted) {
+                onDismiss?.call();
+              }
+            });
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,

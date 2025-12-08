@@ -1,6 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../core/error/exceptions.dart';
-import '../../core/utils/logger.dart';
+// import '../../core/utils/logger.dart'; // Commented out - map logs disabled
 import '../models/map_tile_model.dart';
 import '../models/offline_map_region_model.dart';
 
@@ -21,7 +21,7 @@ class OfflineMapCache {
   /// Initializes the cache by opening the Hive box
   Future<void> initialize() async {
     try {
-      Logger.hive('Initializing offline map cache');
+      // Logger.hive('Initializing offline map cache'); // Commented out - map logs disabled
 
       if (!Hive.isBoxOpen(_boxName)) {
         _tilesBox = await Hive.openBox(_boxName);
@@ -32,11 +32,11 @@ class OfflineMapCache {
       // Calculate current cache size
       _calculateCacheSize();
 
-      Logger.hive(
-        'Offline map cache initialized: ${_tilesBox!.length} tiles, ${_formatBytes(_currentCacheSizeBytes)}',
-      );
+      // Logger.hive(
+      //   'Offline map cache initialized: ${_tilesBox!.length} tiles, ${_formatBytes(_currentCacheSizeBytes)}',
+      // ); // Commented out - map logs disabled
     } catch (e) {
-      Logger.hive('Failed to initialize offline map cache', error: e);
+      // Logger.hive('Failed to initialize offline map cache', error: e); // Commented out - map logs disabled
       throw CacheException(
         message: 'Failed to initialize offline map cache',
         originalError: e,
@@ -56,16 +56,16 @@ class OfflineMapCache {
       final tileData = _tilesBox!.get(key);
 
       if (tileData == null) {
-        Logger.hive('Tile not found in cache: $key');
+        // Logger.hive('Tile not found in cache: $key'); // Commented out - map logs disabled
         return null;
       }
 
       // Deserialize tile from stored data
       final tile = MapTile.fromJson(Map<String, dynamic>.from(tileData));
-      Logger.hive('Tile retrieved from cache: $key');
+      // Logger.hive('Tile retrieved from cache: $key'); // Commented out - map logs disabled
       return tile;
     } catch (e) {
-      Logger.hive('Error getting tile from cache: z=$z, x=$x, y=$y', error: e);
+      // Logger.hive('Error getting tile from cache: z=$z, x=$x, y=$y', error: e); // Commented out - map logs disabled
       return null;
     }
   }
@@ -83,7 +83,7 @@ class OfflineMapCache {
 
       // Check cache size before adding
       if (_currentCacheSizeBytes + tile.sizeInBytes > maxCacheSizeBytes) {
-        Logger.hive('Cache size limit reached. Evicting old tiles...');
+        // Logger.hive('Cache size limit reached. Evicting old tiles...'); // Commented out - map logs disabled
         await _evictOldTiles(tile.sizeInBytes);
       }
 
@@ -91,11 +91,11 @@ class OfflineMapCache {
       await _tilesBox!.put(key, tile.toJson());
       _currentCacheSizeBytes += tile.sizeInBytes;
 
-      Logger.hive(
-        'Tile stored in cache: $key (${_formatBytes(tile.sizeInBytes)})',
-      );
+      // Logger.hive(
+      //   'Tile stored in cache: $key (${_formatBytes(tile.sizeInBytes)})',
+      // ); // Commented out - map logs disabled
     } catch (e) {
-      Logger.hive('Error storing tile in cache: ${tile.key}', error: e);
+      // Logger.hive('Error storing tile in cache: ${tile.key}', error: e); // Commented out - map logs disabled
       throw CacheException(
         message: 'Failed to store tile in cache',
         originalError: e,
@@ -115,9 +115,9 @@ class OfflineMapCache {
         await initialize();
       }
 
-      Logger.hive(
-        'Clearing tiles outside new bubble: old=${oldRegion.id}, new=${newRegion.id}',
-      );
+      // Logger.hive(
+      //   'Clearing tiles outside new bubble: old=${oldRegion.id}, new=${newRegion.id}',
+      // ); // Commented out - map logs disabled
 
       final keysToDelete = <String>[];
       int bytesFreed = 0;
@@ -169,14 +169,14 @@ class OfflineMapCache {
         _calculateCacheSize();
       }
 
-      Logger.hive(
-        'Tiles outside new bubble cleared: ${keysToDelete.length} tiles removed, ${_formatBytes(bytesFreed)} freed',
-      );
+      // Logger.hive(
+      //   'Tiles outside new bubble cleared: ${keysToDelete.length} tiles removed, ${_formatBytes(bytesFreed)} freed',
+      // ); // Commented out - map logs disabled
     } catch (e) {
-      Logger.hive(
-        'Error clearing tiles outside bubble: old=${oldRegion.id}, new=${newRegion.id}',
-        error: e,
-      );
+      // Logger.hive(
+      //   'Error clearing tiles outside bubble: old=${oldRegion.id}, new=${newRegion.id}',
+      //   error: e,
+      // ); // Commented out - map logs disabled
       throw CacheException(
         message: 'Failed to clear tiles outside bubble',
         originalError: e,
@@ -192,7 +192,7 @@ class OfflineMapCache {
         await initialize();
       }
 
-      Logger.hive('Clearing region: ${region.id}');
+      // Logger.hive('Clearing region: ${region.id}'); // Commented out - map logs disabled
 
       final keysToDelete = <String>[];
       int bytesFreed = 0;
@@ -240,11 +240,11 @@ class OfflineMapCache {
         _calculateCacheSize();
       }
 
-      Logger.hive(
-        'Region cleared: ${keysToDelete.length} tiles removed, ${_formatBytes(bytesFreed)} freed',
-      );
+      // Logger.hive(
+      //   'Region cleared: ${keysToDelete.length} tiles removed, ${_formatBytes(bytesFreed)} freed',
+      // ); // Commented out - map logs disabled
     } catch (e) {
-      Logger.hive('Error clearing region: ${region.id}', error: e);
+      // Logger.hive('Error clearing region: ${region.id}', error: e); // Commented out - map logs disabled
       throw CacheException(message: 'Failed to clear region', originalError: e);
     }
   }
@@ -256,12 +256,12 @@ class OfflineMapCache {
         await initialize();
       }
 
-      Logger.hive('Clearing all tiles from cache');
+      // Logger.hive('Clearing all tiles from cache'); // Commented out - map logs disabled
       await _tilesBox!.clear();
       _currentCacheSizeBytes = 0;
-      Logger.hive('All tiles cleared from cache');
+      // Logger.hive('All tiles cleared from cache'); // Commented out - map logs disabled
     } catch (e) {
-      Logger.hive('Error clearing all tiles', error: e);
+      // Logger.hive('Error clearing all tiles', error: e); // Commented out - map logs disabled
       throw CacheException(
         message: 'Failed to clear all tiles',
         originalError: e,
@@ -335,9 +335,9 @@ class OfflineMapCache {
       _currentCacheSizeBytes -= tile.sizeInBytes;
     }
 
-    Logger.hive(
-      'Evicted ${tiles.length} old tiles, freed ${_formatBytes(bytesFreed)}',
-    );
+    // Logger.hive(
+    //   'Evicted ${tiles.length} old tiles, freed ${_formatBytes(bytesFreed)}',
+    // ); // Commented out - map logs disabled
   }
 
   /// Formats bytes to human-readable string

@@ -7,7 +7,7 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 
-import '../../../core/utils/logger.dart';
+// import '../../../core/utils/logger.dart'; // Commented out - map logs disabled
 import '../../../data/models/offline_map_region_model.dart';
 import '../models/map_camera_state.dart';
 
@@ -180,7 +180,7 @@ class MapboxWebController {
         js_util.setProperty(touchZoomRotate, 'enabled', interactive);
       }
     } catch (e) {
-      Logger.task('Error updating interaction settings', error: e);
+      // Logger.task('Error updating interaction settings', error: e);
     }
   }
 
@@ -203,7 +203,7 @@ class MapboxWebController {
         zoom: zoom.toDouble(),
       );
     } catch (e) {
-      Logger.task('Error getting current camera', error: e);
+      // Logger.task('Error getting current camera', error: e);
       return null;
     }
   }
@@ -220,7 +220,7 @@ class MapboxWebController {
       final y = js_util.getProperty(point, 'y') as num? ?? 0;
       return Offset(x.toDouble(), y.toDouble());
     } catch (e) {
-      Logger.task('Error projecting lat/lon to screen', error: e);
+      // Logger.task('Error projecting lat/lon to screen', error: e);
       return null;
     }
   }
@@ -230,7 +230,7 @@ class MapboxWebController {
     final resource = resourceType?.toString() ?? '';
     final shouldBlock = isOfflineMode && _shouldBlockUrl(urlString, resource);
     if (shouldBlock) {
-      Logger.task('[MapboxWeb] Blocking remote tile: $urlString');
+      // Tile blocking logs commented out to reduce console noise
       return js_util.jsify({'url': 'data:,'});
     }
     return js_util.jsify({'url': urlString});

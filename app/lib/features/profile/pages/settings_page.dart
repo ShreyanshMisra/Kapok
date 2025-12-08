@@ -475,7 +475,12 @@ class _SettingsPageState extends State<SettingsPage> {
               }
               // Then sign out
               context.read<AuthBloc>().add(const SignOutRequested());
-              // Navigation will be handled by BlocListener in kapok_app.dart
+              // Navigate immediately to login page and close settings page
+              if (context.mounted) {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: Text(localizations.signOut),

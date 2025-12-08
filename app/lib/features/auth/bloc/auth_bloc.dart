@@ -184,7 +184,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(const AuthLoading());
+      // Don't emit AuthLoading for profile updates - keep user authenticated
+      // This prevents navigation issues when updating profile after team creation
       Logger.auth('Profile update requested');
       
       final currentState = state;
@@ -209,14 +210,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             (user.userRole == UserRole.teamMember && user.teamId == null) ||
             (user.role.isEmpty && user.userRole != UserRole.admin);
         
-        emit(AuthAuthenticated(user: user, needsOnboarding: needsOnboarding, isNewSignup: false));
+        // Emit new authenticated state without going through loading
+        // This prevents navigation issues
+        emit(AuthAuthenticated(
+          user: user,
+          needsOnboarding: needsOnboarding,
+          isNewSignup: false,
+        ));
         Logger.auth('Profile updated successfully');
       } else {
-        emit(const AuthError(message: 'User not authenticated'));
+        // If not authenticated, don't emit error - just log it
+        // This prevents navigation to login page
+        Logger.auth('Profile update skipped - user not authenticated');
       }
     } catch (e) {
       Logger.auth('Profile update failed', error: e);
-      emit(AuthError(message: e.toString()));
+      // Don't emit AuthError - keep user authenticated even if update fails
+      // This prevents navigation to login page
+      // The error is logged but user stays authenticated
+      final currentState = state;
+      if (currentState is AuthAuthenticated) {
+        // Keep the current authenticated state
+        emit(currentState);
+      }
     }
   }
 }

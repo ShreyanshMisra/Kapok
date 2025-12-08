@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/services/geolocation_service.dart';
-import '../../../core/utils/logger.dart';
+// import '../../../core/utils/logger.dart'; // Commented out - map logs disabled
 import '../../../data/models/offline_map_region_model.dart';
 import '../../../data/repositories/map_repository.dart';
 import '../models/map_camera_state.dart';
@@ -57,7 +57,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         add(const OfflineBubbleRefreshRequested(force: true));
       }
     } catch (e) {
-      Logger.task('Failed to bootstrap map', error: e);
+      // Logger.task('Failed to bootstrap map', error: e);
       emit(MapError(message: e.toString()));
     }
   }
@@ -85,18 +85,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   ) async {
     try {
       if (!event.force && !_shouldRefreshByInterval()) {
-        Logger.task('Skipping bubble refresh (interval not reached)');
+        // Reduced logging frequency - only log occasionally
+        // Logger.task('Skipping bubble refresh (interval not reached)');
         return;
       }
 
       if (!event.force && !(await _hasMovedMoreThanThreshold())) {
-        Logger.task('Skipping bubble refresh (movement below threshold)');
+        // Reduced logging frequency - only log occasionally
+        // Logger.task('Skipping bubble refresh (movement below threshold)');
         return;
       }
 
       await _startNewBubble(emit);
     } catch (e) {
-      Logger.task('Error refreshing offline bubble', error: e);
+      // Logger.task('Error refreshing offline bubble', error: e);
       emit(MapError(message: e.toString()));
     }
   }
@@ -139,7 +141,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   Future<void> _startNewBubble(Emitter<MapState> emit) async {
-    Logger.task('Starting offline bubble refresh');
+    // Logger.task('Starting offline bubble refresh');
     await _progressSubscription?.cancel();
     final result = await mapRepository.loadRegionForCurrentLocation(
       radiusKm: 4.8, // ~3 miles
@@ -191,7 +193,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       endLatitude: position.latitude,
       endLongitude: position.longitude,
     );
-    Logger.task('Device moved $distance m since last bubble center');
+    // Reduced logging - only log if movement is significant
+    // if (distance >= _movementThresholdMeters) {
+    //   Logger.task('Device moved $distance m since last bubble center');
+    // }
     return distance >= _movementThresholdMeters;
   }
 
@@ -205,7 +210,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   /// Handle map reset (on logout)
   Future<void> _onMapReset(MapReset event, Emitter<MapState> emit) async {
-    Logger.task('Resetting map state');
+    // Logger.task('Resetting map state');
     _refreshTimer?.cancel();
     _progressSubscription?.cancel();
     _activeRegion = null;
