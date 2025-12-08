@@ -23,6 +23,7 @@ class MapboxWebController {
   bool interactive = true;
   void Function(MapCameraState state)? onCameraIdle;
   VoidCallback? onMapReady;
+  void Function(double latitude, double longitude)? onDoubleClick;
 
   Widget buildView() {
     return const SizedBox.shrink();

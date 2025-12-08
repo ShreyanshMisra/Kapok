@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/network_checker.dart';
+import '../../../core/utils/logger.dart';
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
 import '../bloc/map_state.dart';
@@ -12,6 +13,8 @@ import '../widgets/mapbox_map_view.dart';
 import '../web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../web/mapbox_web_controller.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_state.dart';
 
 /// Map page showing interactive map with live, location-based offline map functionality
 /// It orchestrates a continuous cycle of "current location → live snapshot → offline cache refresh"
@@ -83,6 +86,14 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  @override
+  void dispose() {
+    // Dispose map controller when page is disposed (e.g., on logout)
+    _mapController?.dispose();
+    _mapController = null;
+    super.dispose();
+  }
+
   void _toggleTestOfflineMode() {
     setState(() {
       _testOfflineMode = !_testOfflineMode;
@@ -101,66 +112,154 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.surface,
-        title: Text(AppLocalizations.of(context).map),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.storage),
-            tooltip: 'View Cache',
-            onPressed: () {
-              Navigator.of(context).pushNamed('/map-cache');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: Show map filters
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: () {
-              // TODO: Navigate to tasks list view
-            },
-          ),
-        ],
-      ),
-      body: BlocConsumer<MapBloc, MapState>(
-        listener: (context, state) {
-          if (state is MapError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${state.message}'),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          // Debug: Show current state
-          if (kDebugMode) {
-            print('[MAP_PAGE] Current state: ${state.runtimeType}');
-          }
+    // Listen for auth state changes to dispose map on logout
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, authState) {
+        if (authState is AuthUnauthenticated) {
+          // Logger.task(
+          //   '[MAP_PAGE] AuthUnauthenticated detected - disposing map controller',
+          // );
+          // Dispose map controller immediately when user logs out
+          _mapController?.dispose();
+          _mapController = null;
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: AppColors.surface,
+          title: Text(AppLocalizations.of(context).map),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.storage),
+              tooltip: 'View Cache',
+              onPressed: () {
+                Navigator.of(context).pushNamed('/map-cache');
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.filter_list),
+              onPressed: () {
+                // TODO: Show map filters
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.list),
+              onPressed: () {
+                // TODO: Navigate to tasks list view
+              },
+            ),
+          ],
+        ),
+        body: BlocConsumer<MapBloc, MapState>(
+          listener: (context, state) {
+            if (state is MapError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error: ${state.message}'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+            // When MapReset is triggered, MapBloc emits MapLoading state
+            // Dispose the map controller immediately to stop the map
+            if (state is MapLoading && _mapController != null) {
+              // Logger.task(
+              //   '[MAP_PAGE] MapReset detected - disposing map controller',
+              // );
+              _mapController?.dispose();
+              _mapController = null;
+            }
+          },
+          builder: (context, state) {
+            // Debug: Show current state (throttled to avoid spam)
+            // Removed frequent state logging - only log on state changes if needed
 
-          if (state is MapLoading) {
+            if (state is MapLoading) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Loading region for current location...'),
+                    if (kDebugMode) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'State: LoadingRegion',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }
+
+            if (state is MapReady) {
+              return _buildInteractiveMap(
+                context,
+                region: state.region,
+                isOffline: state.isOfflineMode,
+                camera: state.lastCamera,
+                progressOverlay: null,
+              );
+            }
+
+            if (state is OfflineRegionUpdating) {
+              return _buildInteractiveMap(
+                context,
+                region: state.region,
+                isOffline: state.isOfflineMode,
+                camera: null,
+                progressOverlay: state.progress,
+              );
+            }
+
+            // Initial or error state
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(),
+                  Icon(
+                    state is MapError
+                        ? Icons.error_outline
+                        : Icons.map_outlined,
+                    size: 64,
+                    color: state is MapError
+                        ? AppColors.error
+                        : AppColors.textSecondary,
+                  ),
                   const SizedBox(height: 16),
-                  const Text('Loading region for current location...'),
+                  if (state is MapError) ...[
+                    Text(
+                      'ERROR: ${(state as MapError).message}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ] else ...[
+                    Text(
+                      'Map page - Waiting for region load',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                   if (kDebugMode) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'State: LoadingRegion',
+                      'State: ${state.runtimeType}',
                       style: TextStyle(
                         fontSize: 10,
                         color: AppColors.textSecondary,
@@ -168,92 +267,25 @@ class _MapPageState extends State<MapPage> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<MapBloc>().add(
+                        const OfflineBubbleRefreshRequested(force: true),
+                      );
+                    },
+                    icon: const Icon(Icons.location_on),
+                    label: const Text('Refresh Offline Region'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.surface,
+                    ),
+                  ),
                 ],
               ),
             );
-          }
-
-          if (state is MapReady) {
-            return _buildInteractiveMap(
-              context,
-              region: state.region,
-              isOffline: state.isOfflineMode,
-              camera: state.lastCamera,
-              progressOverlay: null,
-            );
-          }
-
-          if (state is OfflineRegionUpdating) {
-            return _buildInteractiveMap(
-              context,
-              region: state.region,
-              isOffline: state.isOfflineMode,
-              camera: null,
-              progressOverlay: state.progress,
-            );
-          }
-
-          // Initial or error state
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  state is MapError ? Icons.error_outline : Icons.map_outlined,
-                  size: 64,
-                  color: state is MapError
-                      ? AppColors.error
-                      : AppColors.textSecondary,
-                ),
-                const SizedBox(height: 16),
-                if (state is MapError) ...[
-                  Text(
-                    'ERROR: ${state.message}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.error,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ] else ...[
-                  Text(
-                    'Map page - Waiting for region load',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-                if (kDebugMode) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'State: ${state.runtimeType}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    context.read<MapBloc>().add(
-                      const OfflineBubbleRefreshRequested(force: true),
-                    );
-                  },
-                  icon: const Icon(Icons.location_on),
-                  label: const Text('Refresh Offline Region'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }

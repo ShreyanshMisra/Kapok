@@ -15,10 +15,7 @@ class HiveSource {
       Logger.hive('User saved successfully');
     } catch (e) {
       Logger.hive('Error saving user', error: e);
-      throw CacheException(
-        message: 'Failed to save user',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to save user', originalError: e);
     }
   }
 
@@ -32,10 +29,7 @@ class HiveSource {
       return null;
     } catch (e) {
       Logger.hive('Error getting user', error: e);
-      throw CacheException(
-        message: 'Failed to get user',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to get user', originalError: e);
     }
   }
 
@@ -46,10 +40,7 @@ class HiveSource {
       Logger.hive('User deleted successfully');
     } catch (e) {
       Logger.hive('Error deleting user', error: e);
-      throw CacheException(
-        message: 'Failed to delete user',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to delete user', originalError: e);
     }
   }
 
@@ -61,10 +52,7 @@ class HiveSource {
       Logger.hive('Team saved successfully');
     } catch (e) {
       Logger.hive('Error saving team', error: e);
-      throw CacheException(
-        message: 'Failed to save team',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to save team', originalError: e);
     }
   }
 
@@ -78,10 +66,7 @@ class HiveSource {
       return null;
     } catch (e) {
       Logger.hive('Error getting team', error: e);
-      throw CacheException(
-        message: 'Failed to get team',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to get team', originalError: e);
     }
   }
 
@@ -90,13 +75,34 @@ class HiveSource {
       Logger.hive('Getting teams for user: $userId');
       final teams = HiveService.instance.teamsBox.values
           .map((data) => TeamModel.fromJson(Map<String, dynamic>.from(data)))
-          .where((team) => team.memberIds.contains(userId))
+          .where(
+            (team) =>
+                team.memberIds.contains(userId) || team.leaderId == userId,
+          )
           .toList();
       return teams;
     } catch (e) {
       Logger.hive('Error getting user teams', error: e);
       throw CacheException(
         message: 'Failed to get user teams',
+        originalError: e,
+      );
+    }
+  }
+
+  /// Get all teams (for admin users)
+  Future<List<TeamModel>> getAllTeams() async {
+    try {
+      Logger.hive('Getting all teams');
+      final teams = HiveService.instance.teamsBox.values
+          .map((data) => TeamModel.fromJson(Map<String, dynamic>.from(data)))
+          .where((team) => team.isActive) // Only active teams
+          .toList();
+      return teams;
+    } catch (e) {
+      Logger.hive('Error getting all teams', error: e);
+      throw CacheException(
+        message: 'Failed to get all teams',
         originalError: e,
       );
     }
@@ -109,10 +115,7 @@ class HiveSource {
       Logger.hive('Team deleted successfully');
     } catch (e) {
       Logger.hive('Error deleting team', error: e);
-      throw CacheException(
-        message: 'Failed to delete team',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to delete team', originalError: e);
     }
   }
 
@@ -124,10 +127,7 @@ class HiveSource {
       Logger.hive('Task saved successfully');
     } catch (e) {
       Logger.hive('Error saving task', error: e);
-      throw CacheException(
-        message: 'Failed to save task',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to save task', originalError: e);
     }
   }
 
@@ -141,33 +141,29 @@ class HiveSource {
       return null;
     } catch (e) {
       Logger.hive('Error getting task', error: e);
-      throw CacheException(
-        message: 'Failed to get task',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to get task', originalError: e);
     }
   }
 
   Future<List<TaskModel>> getTasks() async {
     try {
       Logger.hive('Getting all tasks');
-      final tasks = HiveService.instance.getAllTasks()
+      final tasks = HiveService.instance
+          .getAllTasks()
           .map((data) => TaskModel.fromJson(data))
           .toList();
       return tasks;
     } catch (e) {
       Logger.hive('Error getting tasks', error: e);
-      throw CacheException(
-        message: 'Failed to get tasks',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to get tasks', originalError: e);
     }
   }
 
   Future<List<TaskModel>> getTasksByTeam(String teamId) async {
     try {
       Logger.hive('Getting tasks for team: $teamId');
-      final tasks = HiveService.instance.getTasksByTeam(teamId)
+      final tasks = HiveService.instance
+          .getTasksByTeam(teamId)
           .map((data) => TaskModel.fromJson(data))
           .toList();
       return tasks;
@@ -183,7 +179,8 @@ class HiveSource {
   Future<List<TaskModel>> getTasksByUser(String userId) async {
     try {
       Logger.hive('Getting tasks for user: $userId');
-      final tasks = HiveService.instance.getTasksByUser(userId)
+      final tasks = HiveService.instance
+          .getTasksByUser(userId)
           .map((data) => TaskModel.fromJson(data))
           .toList();
       return tasks;
@@ -203,10 +200,7 @@ class HiveSource {
       Logger.hive('Task deleted successfully');
     } catch (e) {
       Logger.hive('Error deleting task', error: e);
-      throw CacheException(
-        message: 'Failed to delete task',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to delete task', originalError: e);
     }
   }
 
@@ -220,10 +214,7 @@ class HiveSource {
       Logger.hive('Tasks cached successfully');
     } catch (e) {
       Logger.hive('Error caching tasks', error: e);
-      throw CacheException(
-        message: 'Failed to cache tasks',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to cache tasks', originalError: e);
     }
   }
 
@@ -236,10 +227,7 @@ class HiveSource {
       Logger.hive('Teams cached successfully');
     } catch (e) {
       Logger.hive('Error caching teams', error: e);
-      throw CacheException(
-        message: 'Failed to cache teams',
-        originalError: e,
-      );
+      throw CacheException(message: 'Failed to cache teams', originalError: e);
     }
   }
 

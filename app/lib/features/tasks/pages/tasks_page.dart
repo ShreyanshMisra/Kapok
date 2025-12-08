@@ -22,7 +22,18 @@ class _TasksPageState extends State<TasksPage> {
   @override
   void initState() {
     super.initState();
-    context.read<TaskBloc>().add(const LoadTasksRequested());
+    _loadTasks();
+  }
+
+  void _loadTasks() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<TaskBloc>().add(
+        LoadTasksRequested(userId: authState.user.id),
+      );
+    } else {
+      context.read<TaskBloc>().add(const LoadTasksRequested());
+    }
   }
 
   @override
@@ -36,12 +47,7 @@ class _TasksPageState extends State<TasksPage> {
         title: Text(AppLocalizations.of(context).tasks),
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<TaskBloc>().add(const LoadTasksRequested());
-            },
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadTasks),
         ],
       ),
       body: BlocBuilder<TaskBloc, TaskState>(
@@ -59,7 +65,7 @@ class _TasksPageState extends State<TasksPage> {
             return _buildErrorState(state.message);
           } else if (state is TaskCreated) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.read<TaskBloc>().add(const LoadTasksRequested());
+              _loadTasks();
             });
             return Center(
               child: CircularProgressIndicator(color: theme.colorScheme.primary),
@@ -159,7 +165,7 @@ class _TasksPageState extends State<TasksPage> {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<TaskBloc>().add(const LoadTasksRequested());
+                _loadTasks();
               },
               icon: const Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context).retry),
@@ -207,10 +213,7 @@ class _TasksPageState extends State<TasksPage> {
 
           final result = await Navigator.of(context).pushNamed(
             AppRouter.taskDetail,
-            arguments: {
-              'task': task,
-              'currentUserId': currentUserId,
-            },
+            arguments: {'task': task, 'currentUserId': currentUserId},
           );
 
           // Reload tasks if task was updated
@@ -278,7 +281,7 @@ class _TasksPageState extends State<TasksPage> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    task.teamName,
+                    'Team: ${task.teamId}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -303,7 +306,7 @@ class _TasksPageState extends State<TasksPage> {
                 children: [
                   _buildStatusChip(task.taskCompleted),
                   const SizedBox(width: 8),
-                  if (task.assignedTo.isNotEmpty)
+                  if (task.assignedTo != null && task.assignedTo!.isNotEmpty)
                     Expanded(
                       child: Row(
                         children: [
@@ -316,9 +319,8 @@ class _TasksPageState extends State<TasksPage> {
                           Expanded(
                             child: Text(
                               '${AppLocalizations.of(context).assignedToLabel}: ${task.assignedTo}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.textSecondary),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

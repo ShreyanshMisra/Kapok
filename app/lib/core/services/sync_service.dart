@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../data/models/task_model.dart';
 import '../../data/models/team_model.dart';
@@ -23,6 +24,17 @@ class SyncService {
   Future<void> initialize() async {
     try {
       Logger.sync('Initializing SyncService');
+
+      // Check connectivity and sync immediately if online
+      final connectivityResults = await Connectivity().checkConnectivity();
+      final isConnected = !connectivityResults.contains(ConnectivityResult.none);
+      if (isConnected) {
+        Logger.sync('Device is online, syncing pending changes on startup');
+        // Delay slightly to ensure Firebase is fully initialized
+        Future.delayed(const Duration(seconds: 2), () async {
+          await syncPendingChanges();
+        });
+      }
 
       // Listen to connectivity changes
       _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
@@ -106,7 +118,26 @@ class SyncService {
         final taskData = syncData['data'] as Map<String, dynamic>?;
         if (taskData != null) {
           final task = TaskModel.fromJson(taskData);
+          // Use the repository's createTask method to ensure team is updated
+          // But we need to use firebase_source directly since we're in sync service
+          // The transaction will be handled by the repository if we call it
+          // For now, use firebase_source and manually update team
           await _firebaseSource.createTask(task);
+          
+          // Update team's taskIds array
+          try {
+            final firestore = FirebaseFirestore.instance;
+            final teamRef = firestore.collection('teams').doc(task.teamId);
+            await teamRef.update({
+              'taskIds': FieldValue.arrayUnion([task.id]),
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+            Logger.sync('Team updated with task ID: ${task.id}');
+          } catch (teamError) {
+            Logger.sync('Failed to update team with task ID', error: teamError);
+            // Don't fail the sync if team update fails - task is already created
+          }
+          
           Logger.sync('Successfully synced task creation: ${task.id}');
         }
       } else if (operation == 'update' || operation == 'update_task') {

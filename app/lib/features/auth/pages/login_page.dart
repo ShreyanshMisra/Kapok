@@ -42,12 +42,13 @@ class _LoginPageState extends State<LoginPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error, // Error color stays the same
+                  backgroundColor: AppColors.error,
+                  duration: const Duration(seconds: 4),
                 ),
               );
             } else if (state is AuthAuthenticated) {
-              // TODO: Navigate to home page
-              Navigator.of(context).pushReplacementNamed('/home');
+              // Navigation is handled by the app-level BlocListener in kapok_app.dart
+              // Don't navigate here to avoid conflicts
             }
           },
           child: SingleChildScrollView(
