@@ -57,6 +57,9 @@ dependencies:
   # JSON & Utility
   json_annotation: ^4.9.0
 
+  # File Sharing
+  share_plus: ^10.1.1
+
   # Translation
   translator: ^1.0.4
 

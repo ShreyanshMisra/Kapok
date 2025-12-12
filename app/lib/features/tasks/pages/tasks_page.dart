@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/enums/task_priority.dart';
+import '../../../core/enums/task_status.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
+import '../../teams/bloc/team_bloc.dart';
+import '../../teams/bloc/team_event.dart';
+import '../../teams/bloc/team_state.dart';
 import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
@@ -28,8 +33,9 @@ class _TasksPageState extends State<TasksPage> {
   void _loadTasks() {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
-      context.read<TaskBloc>().add(
-        LoadTasksRequested(userId: authState.user.id),
+      // Load user's teams first to get team IDs for task filtering
+      context.read<TeamBloc>().add(
+        LoadUserTeams(userId: authState.user.id),
       );
     } else {
       context.read<TaskBloc>().add(const LoadTasksRequested());
@@ -50,8 +56,48 @@ class _TasksPageState extends State<TasksPage> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadTasks),
         ],
       ),
-      body: BlocBuilder<TaskBloc, TaskState>(
-        builder: (context, state) {
+      body: MultiBlocListener(
+        listeners: [
+          // Listen for team loading to trigger task loading
+          BlocListener<TeamBloc, TeamState>(
+            listener: (context, teamState) {
+              // When teams are loaded, load tasks for those teams
+              if (teamState is TeamLoaded) {
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthAuthenticated) {
+                  final teamIds = teamState.teams.map((team) => team.id).toList();
+
+                  // Load tasks for user's teams (or all tasks if admin)
+                  context.read<TaskBloc>().add(
+                    LoadTasksForUserTeamsRequested(
+                      teamIds: teamIds,
+                      userId: authState.user.id,
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+          // Listen for task deletion to trigger UI refresh
+          BlocListener<TaskBloc, TaskState>(
+            listener: (context, taskState) {
+              if (taskState is TaskDeleted) {
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Task deleted successfully'),
+                    backgroundColor: AppColors.success,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                // Reload tasks to update the list
+                _loadTasks();
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<TaskBloc, TaskState>(
+          builder: (context, state) {
           if (state is TaskLoading) {
             return Center(
               child: CircularProgressIndicator(color: theme.colorScheme.primary),
@@ -74,6 +120,7 @@ class _TasksPageState extends State<TasksPage> {
 
           return _buildEmptyState();
         },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -231,7 +278,7 @@ class _TasksPageState extends State<TasksPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      task.taskName,
+                      task.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,
@@ -239,12 +286,12 @@ class _TasksPageState extends State<TasksPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _buildPriorityBadge(task.taskSeverity),
+                  _buildPriorityBadge(task.priority),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                task.taskDescription,
+                task.description ?? '',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -304,7 +351,7 @@ class _TasksPageState extends State<TasksPage> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildStatusChip(task.taskCompleted),
+                  _buildStatusChip(task.status),
                   const SizedBox(width: 8),
                   if (task.assignedTo != null && task.assignedTo!.isNotEmpty)
                     Expanded(
@@ -336,20 +383,24 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
-  Widget _buildPriorityBadge(int severity) {
+  Widget _buildPriorityBadge(TaskPriority priority) {
     final localizations = AppLocalizations.of(context);
     Color color;
     String label;
 
-    if (severity >= 5) {
-      color = AppColors.error;
-      label = localizations.high;
-    } else if (severity >= 3) {
-      color = AppColors.warning;
-      label = localizations.medium;
-    } else {
-      color = AppColors.success;
-      label = localizations.low;
+    switch (priority) {
+      case TaskPriority.high:
+        color = AppColors.error;
+        label = localizations.high;
+        break;
+      case TaskPriority.medium:
+        color = AppColors.warning;
+        label = localizations.medium;
+        break;
+      case TaskPriority.low:
+        color = AppColors.success;
+        label = localizations.low;
+        break;
     }
 
     return Container(
@@ -377,8 +428,9 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
-  Widget _buildStatusChip(bool completed) {
+  Widget _buildStatusChip(TaskStatus status) {
     final localizations = AppLocalizations.of(context);
+    final bool completed = status == TaskStatus.completed;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(

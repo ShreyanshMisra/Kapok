@@ -5,13 +5,16 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
-import '../../../app/router.dart';
+import '../../../core/services/data_export_service.dart';
+import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../tasks/bloc/task_bloc.dart';
 import '../../tasks/bloc/task_event.dart';
+import '../../tasks/bloc/task_state.dart';
 import '../../map/bloc/map_bloc.dart';
 import '../../map/bloc/map_event.dart';
 
@@ -365,6 +368,91 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  /// Export disaster relief data
+  ///
+  /// Exports all tasks and teams to JSON file for emergency data portability.
+  /// Works entirely offline using cached data.
+  Future<void> _exportData() async {
+    final localizations = AppLocalizations.of(context);
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Get current user
+      final authState = context.read<AuthBloc>().state;
+      if (authState is! AuthAuthenticated) {
+        throw Exception('User not authenticated');
+      }
+
+      // Get tasks from TaskBloc
+      final taskState = context.read<TaskBloc>().state;
+      final tasks = taskState is TasksLoaded ? taskState.tasks : [];
+
+      // Get teams from TeamBloc
+      final teamState = context.read<TeamBloc>().state;
+      final teams = teamState.teams;
+
+      // Export data
+      final filePath = await DataExportService.instance.exportToJson(
+        tasks: List<TaskModel>.from(tasks),
+        teams: teams,
+        currentUser: authState.user,
+      );
+
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      // Show success and ask to share
+      if (mounted) {
+        final shouldShare = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(localizations.exportSuccessful),
+            content: Text(
+              '${localizations.dataExportedSuccessfully}\n\n'
+              '${localizations.exportedItemsCount(tasks.length, teams.length)}\n\n'
+              '${localizations.wouldYouLikeToShareTheFile}',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(localizations.notNow),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(localizations.share),
+              ),
+            ],
+          ),
+        );
+
+        // Share if requested
+        if (shouldShare == true) {
+          await DataExportService.instance.shareExportedFile(filePath);
+        }
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      // Show error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${localizations.exportFailed}: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
   /// Show clear cache dialog
   void _showClearCacheDialog() {
     final localizations = AppLocalizations.of(context);
@@ -411,14 +499,9 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Text(localizations.cancel),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // TODO: Implement data export
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(localizations.dataExportNotImplementedYet),
-                ),
-              );
+              await _exportData();
             },
             child: Text(localizations.export),
           ),

@@ -202,6 +202,25 @@ class AppLocalizations {
   String get confirmCloseTeam => _getString('confirmCloseTeam');
   String get confirmRemoveMember => _getString('confirmRemoveMember');
 
+  // Terms of Service
+  String get viewTermsOfService => _getString('viewTermsOfService');
+  String get iAgree => _getString('iAgree');
+  String get pleaseReadAndAgreeToTheFollowingTerms => _getString('pleaseReadAndAgreeToTheFollowingTerms');
+  String get iHaveReadAndAgreeToTheTermsOfService => _getString('iHaveReadAndAgreeToTheTermsOfService');
+  String get pleaseAgreeToTheTermsOfServiceToContinue => _getString('pleaseAgreeToTheTermsOfServiceToContinue');
+  String get termsOfServiceAccepted => _getString('termsOfServiceAccepted');
+
+  // Data Export
+  String get exportSuccessful => _getString('exportSuccessful');
+  String get dataExportedSuccessfully => _getString('dataExportedSuccessfully');
+  String get wouldYouLikeToShareTheFile => _getString('wouldYouLikeToShareTheFile');
+  String get notNow => _getString('notNow');
+  String get exportFailed => _getString('exportFailed');
+  String exportedItemsCount(int tasks, int teams) =>
+      _getString('exportedItemsCount')
+          .replaceAll('{tasks}', tasks.toString())
+          .replaceAll('{teams}', teams.toString());
+
   // Success Messages
   String get taskCreated => _getString('taskCreated');
   String get taskUpdated => _getString('taskUpdated');
@@ -483,7 +502,23 @@ class AppLocalizations {
         'confirmSignOut': 'Are you sure you want to sign out?',
         'confirmCloseTeam': 'Are you sure you want to close this team?',
         'confirmRemoveMember': 'Are you sure you want to remove this member?',
-        
+
+        // Terms of Service
+        'viewTermsOfService': 'View Terms of Service',
+        'iAgree': 'I Agree',
+        'pleaseReadAndAgreeToTheFollowingTerms': 'Please read and agree to the following terms:',
+        'iHaveReadAndAgreeToTheTermsOfService': 'I have read and agree to the Terms of Service',
+        'pleaseAgreeToTheTermsOfServiceToContinue': 'Please agree to the Terms of Service to continue.',
+        'termsOfServiceAccepted': 'Terms of Service accepted',
+
+        // Data Export
+        'exportSuccessful': 'Export Successful',
+        'dataExportedSuccessfully': 'Your disaster relief data has been exported successfully.',
+        'exportedItemsCount': 'Exported {tasks} tasks and {teams} teams',
+        'wouldYouLikeToShareTheFile': 'Would you like to share the export file now?',
+        'notNow': 'Not Now',
+        'exportFailed': 'Export Failed',
+
         // Success Messages
         'taskCreated': 'Task created successfully',
         'taskUpdated': 'Task updated successfully',
@@ -592,7 +627,6 @@ class AppLocalizations {
         'profilePictureChangeNotImplementedYet': 'Profile picture change not implemented yet',
         'profileUpdatedSuccessfully': 'Profile updated successfully!',
         'editTeam': 'Edit Team',
-        'closeTeam': 'Close Team',
         'leaveTeam': 'Leave Team',
         'teamCodeCopiedToClipboard': 'Team code copied to clipboard',
         'copyCode': 'Copy Code',
@@ -602,8 +636,6 @@ class AppLocalizations {
         'editTeamFunctionalityWillBeImplementedHere': 'Edit team functionality will be implemented here.',
         'remove': 'Remove',
         'removeFromTeam': 'Remove from Team',
-        'removeMember': 'Remove Member',
-        'editTask': 'Edit Task',
         'editTaskPageToBeImplemented': 'Edit Task page - To be implemented',
       },
       'es': {
@@ -765,7 +797,23 @@ class AppLocalizations {
         'confirmSignOut': '¿Estás seguro de que quieres cerrar sesión?',
         'confirmCloseTeam': '¿Estás seguro de que quieres cerrar este equipo?',
         'confirmRemoveMember': '¿Estás seguro de que quieres eliminar este miembro?',
-        
+
+        // Terms of Service
+        'viewTermsOfService': 'Ver Términos de Servicio',
+        'iAgree': 'Acepto',
+        'pleaseReadAndAgreeToTheFollowingTerms': 'Por favor lee y acepta los siguientes términos:',
+        'iHaveReadAndAgreeToTheTermsOfService': 'He leído y acepto los Términos de Servicio',
+        'pleaseAgreeToTheTermsOfServiceToContinue': 'Por favor acepta los Términos de Servicio para continuar.',
+        'termsOfServiceAccepted': 'Términos de Servicio aceptados',
+
+        // Data Export
+        'exportSuccessful': 'Exportación Exitosa',
+        'dataExportedSuccessfully': 'Sus datos de ayuda en desastres se han exportado exitosamente.',
+        'exportedItemsCount': '{tasks} tareas y {teams} equipos exportados',
+        'wouldYouLikeToShareTheFile': '¿Desea compartir el archivo de exportación ahora?',
+        'notNow': 'Ahora No',
+        'exportFailed': 'Exportación Fallida',
+
         // Success Messages
         'taskCreated': 'Tarea creada exitosamente',
         'taskUpdated': 'Tarea actualizada exitosamente',
@@ -874,7 +922,6 @@ class AppLocalizations {
         'profilePictureChangeNotImplementedYet': 'Cambio de foto de perfil aún no implementado',
         'profileUpdatedSuccessfully': '¡Perfil actualizado exitosamente!',
         'editTeam': 'Editar Equipo',
-        'closeTeam': 'Cerrar Equipo',
         'leaveTeam': 'Dejar Equipo',
         'teamCodeCopiedToClipboard': 'Código del equipo copiado al portapapeles',
         'copyCode': 'Copiar Código',
@@ -884,8 +931,6 @@ class AppLocalizations {
         'editTeamFunctionalityWillBeImplementedHere': 'La funcionalidad de editar equipo se implementará aquí.',
         'remove': 'Eliminar',
         'removeFromTeam': 'Eliminar del Equipo',
-        'removeMember': 'Eliminar Miembro',
-        'editTask': 'Editar Tarea',
         'editTaskPageToBeImplemented': 'Página de editar tarea - Por implementar',
       },
     };

@@ -3,27 +3,33 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/services/geolocation_service.dart';
-// import '../../../core/utils/logger.dart'; // Commented out - map logs disabled
+import '../../../core/utils/logger.dart';
 import '../../../data/models/offline_map_region_model.dart';
 import '../../../data/repositories/map_repository.dart';
+import '../../../data/repositories/task_repository.dart';
 import '../models/map_camera_state.dart';
 import 'map_event.dart';
 import 'map_state.dart';
 
 /// Coordinates Mapbox rendering with offline bubble management.
 class MapBloc extends Bloc<MapEvent, MapState> {
-  MapBloc({required MapRepository mapRepository})
-    : mapRepository = mapRepository,
-      super(const MapLoading()) {
+  MapBloc({
+    required MapRepository mapRepository,
+    required TaskRepository taskRepository,
+  })  : mapRepository = mapRepository,
+        _taskRepository = taskRepository,
+        super(const MapLoading()) {
     on<MapStarted>(_onMapStarted);
     on<MapCameraMoved>(_onCameraMoved);
     on<OfflineBubbleRefreshRequested>(_onRefreshRequested);
     on<OfflineBubbleProgressReported>(_onProgressReported);
     on<OfflineBubbleDownloadCompleted>(_onDownloadCompleted);
+    on<LoadTasksOnMap>(_onLoadTasksOnMap);
     on<MapReset>(_onMapReset);
   }
 
   final MapRepository mapRepository;
+  final TaskRepository _taskRepository;
   final GeolocationService _geolocationService = GeolocationService.instance;
 
   static const _movementThresholdMeters = 804.672; // ~0.5 mile
@@ -138,6 +144,37 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         lastCamera: _lastCamera,
       ),
     );
+  }
+
+  /// Handle load tasks on map
+  Future<void> _onLoadTasksOnMap(
+    LoadTasksOnMap event,
+    Emitter<MapState> emit,
+  ) async {
+    try {
+      Logger.task('Loading tasks for map: ${event.teamIds.length} teams');
+
+      // Load tasks for user's teams (or all if admin)
+      final tasks = await _taskRepository.getTasksForUserTeams(
+        event.teamIds,
+        userId: event.userId,
+      );
+
+      Logger.task('Loaded ${tasks.length} tasks for map');
+
+      final offline = await mapRepository.isOfflineMode();
+      emit(
+        MapWithTasks(
+          tasks: tasks,
+          region: _activeRegion,
+          isOfflineMode: offline,
+          lastCamera: _lastCamera,
+        ),
+      );
+    } catch (e) {
+      Logger.task('Error loading tasks for map', error: e);
+      emit(MapError(message: e.toString()));
+    }
   }
 
   Future<void> _startNewBubble(Emitter<MapState> emit) async {

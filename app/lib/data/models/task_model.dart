@@ -180,13 +180,16 @@ class TaskModel {
   double get longitude => geoLocation.longitude;
 
   // Backward compatibility getters for old field names
-  /// @deprecated Use title instead
+  // DEPRECATED: These exist only for migration compatibility and will be removed
+  // in a future version. Use the new field names (title, description, priority, status).
+
+  @Deprecated('Use title instead. This getter will be removed in version 2.0.0')
   String get taskName => title;
 
-  /// @deprecated Use description instead
+  @Deprecated('Use description instead. This getter will be removed in version 2.0.0')
   String get taskDescription => description ?? '';
 
-  /// @deprecated Use priority instead (returns 1-5 based on priority enum)
+  @Deprecated('Use priority enum instead. This getter will be removed in version 2.0.0')
   int get taskSeverity {
     switch (priority) {
       case TaskPriority.low:
@@ -198,7 +201,7 @@ class TaskModel {
     }
   }
 
-  /// @deprecated Use status instead
+  @Deprecated('Use status enum instead. This getter will be removed in version 2.0.0')
   bool get taskCompleted => status == TaskStatus.completed;
 
   /// Check if task is overdue

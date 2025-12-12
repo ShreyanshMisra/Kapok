@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kapok_app/core/constants/terms_of_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
@@ -301,7 +302,7 @@ class _SignupPageState extends State<SignupPage> {
                     child: TextButton(
                       onPressed: _showTermsOfServiceDialog,
                       child: Text(
-                        'View Terms of Service',
+                        AppLocalizations.of(context).viewTermsOfService,
                         style: TextStyle(
                           color: AppColors.primary,
                           decoration: TextDecoration.underline,
@@ -334,7 +335,7 @@ class _SignupPageState extends State<SignupPage> {
       if (!_tosAgreed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Please agree to the Terms of Service to continue.'),
+            content: Text(AppLocalizations.of(context).pleaseAgreeToTheTermsOfServiceToContinue),
             backgroundColor: AppColors.error,
           ),
         );
@@ -365,7 +366,7 @@ class _SignupPageState extends State<SignupPage> {
                 children: [
                   Icon(Icons.description, color: AppColors.primary),
                   const SizedBox(width: 8),
-                  const Text('Terms of Service'),
+                  Text(AppLocalizations.of(context).termsOfService),
                 ],
               ),
               content: SizedBox(
@@ -374,9 +375,9 @@ class _SignupPageState extends State<SignupPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Please read and agree to the following terms:',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context).pleaseReadAndAgreeToTheFollowingTerms,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -423,9 +424,9 @@ class _SignupPageState extends State<SignupPage> {
                                 agreed = !agreed;
                               });
                             },
-                            child: const Text(
-                              'I have read and agree to the Terms of Service',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context).iHaveReadAndAgreeToTheTermsOfService,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -443,7 +444,7 @@ class _SignupPageState extends State<SignupPage> {
                     Navigator.of(dialogContext).pop();
                   },
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context).cancel,
                     style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
@@ -456,7 +457,7 @@ class _SignupPageState extends State<SignupPage> {
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Terms of Service accepted'),
+                              content: Text(AppLocalizations.of(context).termsOfServiceAccepted),
                               backgroundColor: AppColors.primary,
                               duration: const Duration(seconds: 2),
                             ),
@@ -467,7 +468,7 @@ class _SignupPageState extends State<SignupPage> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.surface,
                   ),
-                  child: const Text('I Agree'),
+                  child: Text(AppLocalizations.of(context).iAgree),
                 ),
               ],
             );
