@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kapok_app/core/enums/task_priority.dart';
 import 'package:kapok_app/core/enums/task_status.dart';
@@ -15,9 +16,7 @@ void main() {
       status: TaskStatus.pending,
       assignedTo: 'user_123',
       teamId: 'team_456',
-      teamName: 'Medical Response Team',
-      latitude: 34.0522,
-      longitude: -118.2437,
+      geoLocation: GeoPoint(34.0522, -118.2437),
       createdAt: DateTime(2025, 1, 1),
       updatedAt: DateTime(2025, 1, 1),
       createdBy: 'leader_789',
@@ -115,7 +114,7 @@ void main() {
         priority: TaskPriority.low,
         status: TaskStatus.pending,
         teamId: 'team_123',
-        geoLocation: const GeoPoint(0, 0),
+        geoLocation: GeoPoint(0, 0),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         createdBy: 'user_123',
@@ -132,7 +131,7 @@ void main() {
         priority: TaskPriority.medium,
         status: TaskStatus.pending,
         teamId: 'team_123',
-        geoLocation: const GeoPoint(0, 0),
+        geoLocation: GeoPoint(0, 0),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         createdBy: 'user_123',

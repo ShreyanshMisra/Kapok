@@ -204,59 +204,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   /// Build profile picture section
+  /// Note: Profile pictures use name initials for simplicity and offline-reliability
+  /// Custom photo uploads intentionally deferred to avoid Firebase Storage dependency
   Widget _buildProfilePictureSection() {
     return Column(
       children: [
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
-              child: Text(
-                _nameController.text.isNotEmpty 
-                    ? _nameController.text[0].toUpperCase() 
-                    : '?',
-                style: TextStyle(
-                  fontSize: 40,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: AppColors.primary.withOpacity(0.1),
+          child: Text(
+            _nameController.text.isNotEmpty
+                ? _nameController.text[0].toUpperCase()
+                : '?',
+            style: TextStyle(
+              fontSize: 40,
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
             ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.surface,
-                    width: 2,
-                  ),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.camera_alt,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    // TODO: Implement profile picture change
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(AppLocalizations.of(context).profilePictureChangeNotImplementedYet),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 16),
         Text(
-          AppLocalizations.of(context).tapToChangeProfilePicture,
+          'Profile displays your name initial',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
           ),

@@ -107,6 +107,19 @@ class AppLocalizations {
   String get medium => _getString('medium');
   String get low => _getString('low');
   String get assignedToLabel => _getString('assignedToLabel');
+  String get pending => _getString('pending');
+
+  // Task Filtering
+  String get searchTasks => _getString('searchTasks');
+  String get allStatuses => _getString('allStatuses');
+  String get allPriorities => _getString('allPriorities');
+  String get unassignedTasks => _getString('unassignedTasks');
+  String get clearFilters => _getString('clearFilters');
+  String get filterByStatus => _getString('filterByStatus');
+  String get filterByPriority => _getString('filterByPriority');
+  String get filterByAssignment => _getString('filterByAssignment');
+  String get noTasksMatchFilters => _getString('noTasksMatchFilters');
+  String get tryAdjustingFilters => _getString('tryAdjustingFilters');
 
   // Task Severity Levels
   String get severity1 => _getString('severity1');
@@ -408,7 +421,20 @@ class AppLocalizations {
         'medium': 'Medium',
         'low': 'Low',
         'assignedToLabel': 'Assigned to',
-        
+        'pending': 'Pending',
+
+        // Task Filtering
+        'searchTasks': 'Search tasks...',
+        'allStatuses': 'All Statuses',
+        'allPriorities': 'All Priorities',
+        'unassignedTasks': 'Unassigned',
+        'clearFilters': 'Clear Filters',
+        'filterByStatus': 'Filter by Status',
+        'filterByPriority': 'Filter by Priority',
+        'filterByAssignment': 'Filter by Assignment',
+        'noTasksMatchFilters': 'No Tasks Match Filters',
+        'tryAdjustingFilters': 'Try adjusting your filters to see more results',
+
         // Task Severity Levels
         'severity1': 'Low (1)',
         'severity2': 'Low-Medium (2)',
@@ -703,7 +729,20 @@ class AppLocalizations {
         'medium': 'Media',
         'low': 'Baja',
         'assignedToLabel': 'Asignado a',
-        
+        'pending': 'Pendiente',
+
+        // Task Filtering
+        'searchTasks': 'Buscar tareas...',
+        'allStatuses': 'Todos los Estados',
+        'allPriorities': 'Todas las Prioridades',
+        'unassignedTasks': 'Sin Asignar',
+        'clearFilters': 'Limpiar Filtros',
+        'filterByStatus': 'Filtrar por Estado',
+        'filterByPriority': 'Filtrar por Prioridad',
+        'filterByAssignment': 'Filtrar por Asignación',
+        'noTasksMatchFilters': 'No Hay Tareas que Coincidan con los Filtros',
+        'tryAdjustingFilters': 'Intenta ajustar tus filtros para ver más resultados',
+
         // Task Severity Levels
         'severity1': 'Baja (1)',
         'severity2': 'Baja-Media (2)',

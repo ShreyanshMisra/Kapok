@@ -24,10 +24,23 @@ class TasksPage extends StatefulWidget {
 }
 
 class _TasksPageState extends State<TasksPage> {
+  // Filter state
+  TaskStatus? _selectedStatus;
+  TaskPriority? _selectedPriority;
+  String? _selectedAssignment; // 'me', 'unassigned', or null for all
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadTasks();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _loadTasks() {
@@ -39,6 +52,103 @@ class _TasksPageState extends State<TasksPage> {
       );
     } else {
       context.read<TaskBloc>().add(const LoadTasksRequested());
+    }
+  }
+
+  /// Filter tasks based on selected filters and search query
+  /// Works entirely offline using cached task data
+  List<TaskModel> _getFilteredTasks(List<TaskModel> tasks) {
+    final authState = context.read<AuthBloc>().state;
+    String? currentUserId;
+    if (authState is AuthAuthenticated) {
+      currentUserId = authState.user.id;
+    }
+
+    return tasks.where((task) {
+      // Filter by status
+      if (_selectedStatus != null && task.status != _selectedStatus) {
+        return false;
+      }
+
+      // Filter by priority
+      if (_selectedPriority != null && task.priority != _selectedPriority) {
+        return false;
+      }
+
+      // Filter by assignment
+      if (_selectedAssignment != null) {
+        if (_selectedAssignment == 'me') {
+          if (task.assignedTo != currentUserId) {
+            return false;
+          }
+        } else if (_selectedAssignment == 'unassigned') {
+          if (task.assignedTo != null && task.assignedTo!.isNotEmpty) {
+            return false;
+          }
+        }
+      }
+
+      // Filter by search query
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final titleMatch = task.title.toLowerCase().contains(query);
+        final descriptionMatch = task.description?.toLowerCase().contains(query) ?? false;
+        if (!titleMatch && !descriptionMatch) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedStatus = null;
+      _selectedPriority = null;
+      _selectedAssignment = null;
+      _searchQuery = '';
+      _searchController.clear();
+    });
+  }
+
+  bool get _hasActiveFilters {
+    return _selectedStatus != null ||
+        _selectedPriority != null ||
+        _selectedAssignment != null ||
+        _searchQuery.isNotEmpty;
+  }
+
+  /// Get user name from user ID using team members cache
+  /// Returns user name if found in team members, otherwise returns 'Unknown'
+  String _getUserName(String? userId) {
+    if (userId == null || userId.isEmpty) {
+      return AppLocalizations.of(context).unassignedTasks;
+    }
+
+    final teamState = context.read<TeamBloc>().state;
+    final member = teamState.members.firstWhere(
+      (m) => m.id == userId,
+      orElse: () => context.read<AuthBloc>().state is AuthAuthenticated &&
+              (context.read<AuthBloc>().state as AuthAuthenticated).user.id == userId
+          ? (context.read<AuthBloc>().state as AuthAuthenticated).user
+          : throw Exception('User not found'),
+    );
+
+    return member.name;
+  }
+
+  /// Get assignment display text with fallback
+  String _getAssignmentDisplay(String? assignedTo) {
+    if (assignedTo == null || assignedTo.isEmpty) {
+      return AppLocalizations.of(context).unassignedTasks;
+    }
+
+    try {
+      return _getUserName(assignedTo);
+    } catch (e) {
+      // Fallback to showing ID if user not found in cache
+      return assignedTo;
     }
   }
 
@@ -106,7 +216,16 @@ class _TasksPageState extends State<TasksPage> {
             if (state.tasks.isEmpty) {
               return _buildEmptyState();
             }
-            return _buildTaskList(state.tasks);
+            final filteredTasks = _getFilteredTasks(state.tasks);
+            return Column(
+              children: [
+                _buildFilterBar(),
+                if (filteredTasks.isEmpty && _hasActiveFilters)
+                  Expanded(child: _buildNoResultsState())
+                else
+                  Expanded(child: _buildTaskList(filteredTasks)),
+              ],
+            );
           } else if (state is TaskError) {
             return _buildErrorState(state.message);
           } else if (state is TaskCreated) {
@@ -131,6 +250,383 @@ class _TasksPageState extends State<TasksPage> {
         child: const Icon(Icons.add),
       ),
       //body: const Center(child: Text('Tasks page - To be implemented')),
+    );
+  }
+
+  Widget _buildFilterBar() {
+    final localizations = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search bar
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: localizations.searchTasks,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchQuery = '';
+                          _searchController.clear();
+                        });
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          // Filter chips
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              // Status filter
+              _buildFilterChip(
+                label: _selectedStatus == null
+                    ? localizations.allStatuses
+                    : _selectedStatus == TaskStatus.completed
+                        ? localizations.completed
+                        : localizations.pending,
+                icon: Icons.task_alt,
+                isSelected: _selectedStatus != null,
+                onTap: () => _showStatusFilterDialog(),
+              ),
+              // Priority filter
+              _buildFilterChip(
+                label: _selectedPriority == null
+                    ? localizations.allPriorities
+                    : _selectedPriority == TaskPriority.high
+                        ? localizations.high
+                        : _selectedPriority == TaskPriority.medium
+                            ? localizations.medium
+                            : localizations.low,
+                icon: Icons.flag,
+                isSelected: _selectedPriority != null,
+                onTap: () => _showPriorityFilterDialog(),
+              ),
+              // Assignment filter
+              _buildFilterChip(
+                label: _selectedAssignment == null
+                    ? localizations.allTasks
+                    : _selectedAssignment == 'me'
+                        ? localizations.myTasks
+                        : localizations.unassignedTasks,
+                icon: Icons.person,
+                isSelected: _selectedAssignment != null,
+                onTap: () => _showAssignmentFilterDialog(),
+              ),
+              // Clear filters button
+              if (_hasActiveFilters)
+                ActionChip(
+                  label: Text(localizations.clearFilters),
+                  avatar: const Icon(Icons.clear_all, size: 18),
+                  onPressed: _clearFilters,
+                  backgroundColor: AppColors.error.withOpacity(0.1),
+                  labelStyle: TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return FilterChip(
+      label: Text(label),
+      avatar: Icon(icon, size: 18),
+      selected: isSelected,
+      onSelected: (_) => onTap(),
+      backgroundColor: Colors.grey.shade100,
+      selectedColor: AppColors.primary.withOpacity(0.2),
+      checkmarkColor: AppColors.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+  }
+
+  void _showStatusFilterDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.filterByStatus),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(localizations.allStatuses),
+              leading: Radio<TaskStatus?>(
+                value: null,
+                groupValue: _selectedStatus,
+                onChanged: (value) {
+                  setState(() => _selectedStatus = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedStatus = null);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.pending),
+              leading: Radio<TaskStatus?>(
+                value: TaskStatus.pending,
+                groupValue: _selectedStatus,
+                onChanged: (value) {
+                  setState(() => _selectedStatus = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedStatus = TaskStatus.pending);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.completed),
+              leading: Radio<TaskStatus?>(
+                value: TaskStatus.completed,
+                groupValue: _selectedStatus,
+                onChanged: (value) {
+                  setState(() => _selectedStatus = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedStatus = TaskStatus.completed);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPriorityFilterDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.filterByPriority),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(localizations.allPriorities),
+              leading: Radio<TaskPriority?>(
+                value: null,
+                groupValue: _selectedPriority,
+                onChanged: (value) {
+                  setState(() => _selectedPriority = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedPriority = null);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.high),
+              leading: Radio<TaskPriority?>(
+                value: TaskPriority.high,
+                groupValue: _selectedPriority,
+                onChanged: (value) {
+                  setState(() => _selectedPriority = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedPriority = TaskPriority.high);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.medium),
+              leading: Radio<TaskPriority?>(
+                value: TaskPriority.medium,
+                groupValue: _selectedPriority,
+                onChanged: (value) {
+                  setState(() => _selectedPriority = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedPriority = TaskPriority.medium);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.low),
+              leading: Radio<TaskPriority?>(
+                value: TaskPriority.low,
+                groupValue: _selectedPriority,
+                onChanged: (value) {
+                  setState(() => _selectedPriority = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedPriority = TaskPriority.low);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAssignmentFilterDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.filterByAssignment),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(localizations.allTasks),
+              leading: Radio<String?>(
+                value: null,
+                groupValue: _selectedAssignment,
+                onChanged: (value) {
+                  setState(() => _selectedAssignment = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedAssignment = null);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.myTasks),
+              leading: Radio<String?>(
+                value: 'me',
+                groupValue: _selectedAssignment,
+                onChanged: (value) {
+                  setState(() => _selectedAssignment = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedAssignment = 'me');
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.unassignedTasks),
+              leading: Radio<String?>(
+                value: 'unassigned',
+                groupValue: _selectedAssignment,
+                onChanged: (value) {
+                  setState(() => _selectedAssignment = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedAssignment = 'unassigned');
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoResultsState() {
+    final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 80,
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              localizations.noTasksMatchFilters,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              localizations.tryAdjustingFilters,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: _clearFilters,
+              icon: const Icon(Icons.clear_all),
+              label: Text(localizations.clearFilters),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -365,7 +861,7 @@ class _TasksPageState extends State<TasksPage> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              '${AppLocalizations.of(context).assignedToLabel}: ${task.assignedTo}',
+                              '${AppLocalizations.of(context).assignedToLabel}: ${_getAssignmentDisplay(task.assignedTo)}',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppColors.textSecondary),
                               overflow: TextOverflow.ellipsis,

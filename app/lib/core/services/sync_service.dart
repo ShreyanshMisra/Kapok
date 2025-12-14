@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../data/models/task_model.dart';
 import '../../data/models/team_model.dart';
+import '../../data/models/user_model.dart';
 import '../../data/sources/firebase_source.dart';
 import '../../data/sources/hive_source.dart';
 import '../utils/logger.dart';
@@ -168,6 +169,90 @@ class SyncService {
           final team = TeamModel.fromJson(teamData);
           await _firebaseSource.updateTeam(team);
           Logger.sync('Successfully synced team update: ${team.id}');
+        }
+      } else if (operation == 'delete_team') {
+        final teamId = syncData['teamId'] as String?;
+        if (teamId != null) {
+          final firestore = FirebaseFirestore.instance;
+          final teamRef = firestore.collection('teams').doc(teamId);
+
+          // Mark team as inactive (soft delete)
+          await teamRef.update({
+            'isActive': false,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+
+          Logger.sync('Successfully synced team deletion: $teamId');
+        }
+      }
+      // Handle user profile operations
+      else if (operation == 'update_profile') {
+        final userData = syncData['data'] as Map<String, dynamic>?;
+        if (userData != null) {
+          final user = UserModel.fromJson(userData);
+          await _firebaseSource.updateUser(user);
+          Logger.sync('Successfully synced user profile update: ${user.id}');
+        }
+      }
+      // Handle team membership operations
+      else if (operation == 'join_team') {
+        final teamId = syncData['teamId'] as String?;
+        final userId = syncData['userId'] as String?;
+        if (teamId != null && userId != null) {
+          final firestore = FirebaseFirestore.instance;
+          final teamRef = firestore.collection('teams').doc(teamId);
+
+          await teamRef.update({
+            'memberIds': FieldValue.arrayUnion([userId]),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+
+          Logger.sync('Successfully synced team join: user $userId to team $teamId');
+        }
+      } else if (operation == 'leave_team') {
+        final teamId = syncData['teamId'] as String?;
+        final userId = syncData['userId'] as String?;
+        if (teamId != null && userId != null) {
+          final firestore = FirebaseFirestore.instance;
+          final teamRef = firestore.collection('teams').doc(teamId);
+
+          await teamRef.update({
+            'memberIds': FieldValue.arrayRemove([userId]),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+
+          Logger.sync('Successfully synced team leave: user $userId from team $teamId');
+        }
+      } else if (operation == 'remove_member') {
+        final teamId = syncData['teamId'] as String?;
+        final memberId = syncData['memberId'] as String?;
+        final leaderId = syncData['leaderId'] as String?;
+        if (teamId != null && memberId != null) {
+          final firestore = FirebaseFirestore.instance;
+          final teamRef = firestore.collection('teams').doc(teamId);
+
+          // Verify leader permissions (optional - can be server-side)
+          if (leaderId != null) {
+            final teamDoc = await teamRef.get();
+            if (teamDoc.exists && teamDoc.data()?['leaderId'] == leaderId) {
+              await teamRef.update({
+                'memberIds': FieldValue.arrayRemove([memberId]),
+                'updatedAt': FieldValue.serverTimestamp(),
+              });
+
+              Logger.sync('Successfully synced member removal: $memberId from team $teamId');
+            } else {
+              Logger.sync('Permission denied: user $leaderId is not team leader');
+            }
+          } else {
+            // If no leaderId provided, trust the queued operation
+            await teamRef.update({
+              'memberIds': FieldValue.arrayRemove([memberId]),
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+
+            Logger.sync('Successfully synced member removal: $memberId from team $teamId');
+          }
         }
       } else {
         Logger.sync('Unknown operation type: $operation');

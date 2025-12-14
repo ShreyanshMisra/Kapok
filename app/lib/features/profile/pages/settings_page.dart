@@ -27,7 +27,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _notificationsEnabled = true;
   bool _locationEnabled = true;
 
   @override
@@ -45,19 +44,21 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(16),
         children: [
           // Notifications section
+          // Note: Push notifications intentionally deferred pending infrastructure setup
           _buildSection(
             AppLocalizations.of(context).notifications,
             [
-              SwitchListTile(
+              ListTile(
+                leading: Icon(Icons.notifications_off, color: AppColors.textSecondary),
                 title: Text(AppLocalizations.of(context).notifications),
-                subtitle: Text(AppLocalizations.of(context).receiveNotificationsForNewTasksAndUpdates),
-                value: _notificationsEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _notificationsEnabled = value;
-                  });
-                },
-                activeThumbColor: Theme.of(context).colorScheme.primary,
+                subtitle: Text(
+                  'Push notifications will be enabled in a future update',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+                enabled: false,
               ),
             ],
           ),

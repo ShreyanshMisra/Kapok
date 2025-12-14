@@ -17,7 +17,6 @@ import '../features/tasks/pages/create_task_page.dart';
 import '../features/tasks/pages/task_detail_page.dart';
 import '../features/tasks/pages/edit_task_page.dart';
 import '../features/map/pages/map_page.dart';
-import '../features/map/pages/location_picker_page.dart';
 import '../features/map/pages/map_test_page.dart';
 import '../features/map/pages/map_cache_page.dart';
 import 'home_page.dart';
@@ -43,7 +42,6 @@ class AppRouter {
   static const String taskDetail = '/task-detail';
   static const String editTask = '/edit-task';
   static const String map = '/map';
-  static const String locationPicker = '/location-picker';
   static const String mapTest = '/map-test';
   static const String mapCache = '/map-cache';
 
@@ -177,13 +175,7 @@ class AppRouter {
           builder: (_) => const MapPage(),
           settings: settings,
         );
-      
-      case locationPicker:
-        return MaterialPageRoute(
-          builder: (_) => const LocationPickerPage(),
-          settings: settings,
-        );
-      
+
       case mapTest:
         return MaterialPageRoute(
           builder: (_) => const MapTestPage(),

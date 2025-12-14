@@ -153,16 +153,11 @@ class _MapPageState extends State<MapPage> {
                 Navigator.of(context).pushNamed('/map-cache');
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {
-                // TODO: Show map filters
-              },
-            ),
+            // Note: Map filters intentionally deferred - tasks already have filtering in TasksPage
             IconButton(
               icon: const Icon(Icons.list),
               onPressed: () {
-                // TODO: Navigate to tasks list view
+                Navigator.of(context).pushNamed(AppRouter.tasks);
               },
             ),
           ],

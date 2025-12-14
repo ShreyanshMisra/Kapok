@@ -29,7 +29,7 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-<string>We need your location to set task locations</string>
+	<string>Kapok needs your location to create and display disaster relief tasks on the map. This helps coordinate emergency response efforts by showing task locations to your team members.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
