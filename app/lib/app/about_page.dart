@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
 import '../core/localization/app_localizations.dart';
 
 /// About page with information about Kapok and NCTDR
@@ -150,7 +149,7 @@ class AboutPage extends StatelessWidget {
     String content,
     IconData icon,
   ) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

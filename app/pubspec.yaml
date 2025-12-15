@@ -19,6 +19,8 @@ dependencies:
   firebase_auth: ^6.1.1
   cloud_firestore: ^6.0.3
   firebase_storage: ^13.0.3
+  firebase_crashlytics: ^5.0.3
+  firebase_analytics: ^12.0.3
 
   # State Management
   flutter_bloc: ^9.0.0
@@ -57,8 +59,14 @@ dependencies:
   # JSON & Utility
   json_annotation: ^4.9.0
 
+  # File Sharing
+  share_plus: ^10.1.1
+
   # Translation
   translator: ^1.0.4
+
+  # URL Launcher (for feedback links)
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +80,7 @@ dev_dependencies:
   json_serializable: ^6.9.0
 
   # Launcher icons
-  flutter_launcher_icons: ^0.11.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter_launcher_icons:
   android: true

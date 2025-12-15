@@ -290,6 +290,14 @@ class AuthRepository {
       if (await _networkChecker.isConnected()) {
         // Update on Firebase
         await _firebaseSource.updateUser(updatedUser);
+      } else {
+        // Queue for sync when offline
+        await _hiveSource.queueForSync({
+          'operation': 'update_profile',
+          'data': updatedUser.toJson(),
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        Logger.auth('Profile update queued for sync (offline)');
       }
 
       // Always update local cache

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../../data/models/offline_map_region_model.dart';
+import '../../../data/models/task_model.dart';
 import '../models/map_camera_state.dart';
 
 /// Map states
@@ -44,6 +45,24 @@ class OfflineRegionUpdating extends MapState {
 
   @override
   List<Object> get props => [region, progress, isOfflineMode];
+}
+
+/// Map with tasks loaded (for displaying task pins)
+class MapWithTasks extends MapState {
+  final List<TaskModel> tasks;
+  final OfflineMapRegion? region;
+  final bool isOfflineMode;
+  final MapCameraState? lastCamera;
+
+  const MapWithTasks({
+    required this.tasks,
+    this.region,
+    this.isOfflineMode = false,
+    this.lastCamera,
+  });
+
+  @override
+  List<Object?> get props => [tasks, region, isOfflineMode, lastCamera];
 }
 
 /// Error state

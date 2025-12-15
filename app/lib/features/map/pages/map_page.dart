@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/network_checker.dart';
-import '../../../core/utils/logger.dart';
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
 import '../bloc/map_state.dart';
 import '../../../data/models/offline_map_region_model.dart';
+import '../../../data/models/task_model.dart';
 import '../models/map_camera_state.dart';
 import '../widgets/mapbox_map_view.dart';
 import '../web/mapbox_web_controller_stub.dart'
@@ -15,6 +15,10 @@ import '../web/mapbox_web_controller_stub.dart'
 import '../../../core/localization/app_localizations.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
+import '../../teams/bloc/team_bloc.dart';
+import '../../teams/bloc/team_event.dart';
+import '../../teams/bloc/team_state.dart';
+import '../../../app/router.dart';
 
 /// Map page showing interactive map with live, location-based offline map functionality
 /// It orchestrates a continuous cycle of "current location → live snapshot → offline cache refresh"
@@ -78,11 +82,19 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    // Load region for current location when page opens
+    // Load region and tasks when page opens
     // Use post-frame callback to ensure BlocProvider is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<MapBloc>().add(const MapStarted());
+
+      // Load user's teams to get team IDs for task filtering
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) {
+        context.read<TeamBloc>().add(
+          LoadUserTeams(userId: authState.user.id),
+        );
+      }
     });
   }
 
@@ -140,41 +152,61 @@ class _MapPageState extends State<MapPage> {
                 Navigator.of(context).pushNamed('/map-cache');
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {
-                // TODO: Show map filters
-              },
-            ),
+            // Note: Map filters intentionally deferred - tasks already have filtering in TasksPage
             IconButton(
               icon: const Icon(Icons.list),
               onPressed: () {
-                // TODO: Navigate to tasks list view
+                Navigator.of(context).pushNamed(AppRouter.tasks);
               },
             ),
           ],
         ),
-        body: BlocConsumer<MapBloc, MapState>(
-          listener: (context, state) {
-            if (state is MapError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error: ${state.message}'),
-                  backgroundColor: AppColors.error,
-                ),
-              );
-            }
-            // When MapReset is triggered, MapBloc emits MapLoading state
-            // Dispose the map controller immediately to stop the map
-            if (state is MapLoading && _mapController != null) {
-              // Logger.task(
-              //   '[MAP_PAGE] MapReset detected - disposing map controller',
-              // );
-              _mapController?.dispose();
-              _mapController = null;
-            }
-          },
-          builder: (context, state) {
+        body: MultiBlocListener(
+          listeners: [
+            // Listen for team loading to trigger task loading on map
+            BlocListener<TeamBloc, TeamState>(
+              listener: (context, teamState) {
+                if (teamState is TeamLoaded) {
+                  final authState = context.read<AuthBloc>().state;
+                  if (authState is AuthAuthenticated) {
+                    final teamIds = teamState.teams.map((team) => team.id).toList();
+
+                    // Load tasks for map display
+                    context.read<MapBloc>().add(
+                      LoadTasksOnMap(
+                        teamIds: teamIds,
+                        userId: authState.user.id,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+            // Listen for map errors
+            BlocListener<MapBloc, MapState>(
+              listener: (context, state) {
+                if (state is MapError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${state.message}'),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
+                }
+                // When MapReset is triggered, MapBloc emits MapLoading state
+                // Dispose the map controller immediately to stop the map
+                if (state is MapLoading && _mapController != null) {
+                  // Logger.task(
+                  //   '[MAP_PAGE] MapReset detected - disposing map controller',
+                  // );
+                  _mapController?.dispose();
+                  _mapController = null;
+                }
+              },
+            ),
+          ],
+          child: BlocBuilder<MapBloc, MapState>(
+            builder: (context, state) {
             // Debug: Show current state (throttled to avoid spam)
             // Removed frequent state logging - only log on state changes if needed
 
@@ -222,6 +254,17 @@ class _MapPageState extends State<MapPage> {
               );
             }
 
+            if (state is MapWithTasks) {
+              return _buildInteractiveMap(
+                context,
+                region: state.region,
+                isOffline: state.isOfflineMode,
+                camera: state.lastCamera,
+                progressOverlay: null,
+                tasks: state.tasks,
+              );
+            }
+
             // Initial or error state
             return Center(
               child: Column(
@@ -239,7 +282,7 @@ class _MapPageState extends State<MapPage> {
                   const SizedBox(height: 16),
                   if (state is MapError) ...[
                     Text(
-                      'ERROR: ${(state as MapError).message}',
+                      'ERROR: ${(state).message}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -285,6 +328,7 @@ class _MapPageState extends State<MapPage> {
               ),
             );
           },
+          ),
         ),
       ),
     );
@@ -292,18 +336,26 @@ class _MapPageState extends State<MapPage> {
 
   Widget _buildInteractiveMap(
     BuildContext context, {
-    required OfflineMapRegion region,
+    OfflineMapRegion? region,
     required bool isOffline,
     MapCameraState? camera,
     double? progressOverlay,
+    List<TaskModel>? tasks,
   }) {
+    // If no region is available yet, use a default location
     final initialCamera =
         camera ??
-        MapCameraState(
-          latitude: region.centerLat,
-          longitude: region.centerLon,
-          zoom: region.zoomMax.toDouble(),
-        );
+        (region != null
+            ? MapCameraState(
+                latitude: region.centerLat,
+                longitude: region.centerLon,
+                zoom: region.zoomMax.toDouble(),
+              )
+            : const MapCameraState(
+                latitude: 37.7749, // Default to San Francisco
+                longitude: -122.4194,
+                zoom: 13.0,
+              ));
     return SizedBox.expand(
       child: Stack(
         children: [
@@ -319,21 +371,28 @@ class _MapPageState extends State<MapPage> {
                   _currentCamera = cameraState;
                 });
                 // Update overlay circle when camera changes
-                _updateOverlayCircle(region);
+                if (region != null) {
+                  _updateOverlayCircle(region);
+                }
                 context.read<MapBloc>().add(MapCameraMoved(cameraState));
               },
               onControllerReady: (controller) {
                 _mapController = controller;
                 // Initial overlay calculation
-                _updateOverlayCircle(region);
+                if (region != null) {
+                  _updateOverlayCircle(region);
+                }
               },
             ),
           ),
+          // Task markers overlay
+          if (tasks != null && tasks.isNotEmpty && _mapController != null)
+            ...tasks.map((task) => _buildTaskMarker(task)),
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
             child: MapStatusCard(
-              regionName: region.name,
+              regionName: region?.name ?? 'Loading...',
               isOffline: isOffline || _testOfflineMode,
               progress: progressOverlay,
             ),
@@ -419,6 +478,287 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
     );
+  }
+
+  /// Build a task marker widget positioned on the map
+  Widget _buildTaskMarker(TaskModel task) {
+    if (_mapController == null) return const SizedBox.shrink();
+
+    // Project task location to screen coordinates
+    final screenPos = _mapController!.projectLatLonToScreen(
+      task.geoLocation.latitude,
+      task.geoLocation.longitude,
+    );
+
+    if (screenPos == null) return const SizedBox.shrink();
+
+    // Get color based on priority
+    Color markerColor;
+    IconData markerIcon;
+    String priorityLabel;
+
+    if (task.priority.value == 'high') {
+      markerColor = AppColors.error; // Red for high priority
+      markerIcon = Icons.warning;
+      priorityLabel = 'High Priority';
+    } else if (task.priority.value == 'medium') {
+      markerColor = AppColors.warning; // Orange for medium priority
+      markerIcon = Icons.info;
+      priorityLabel = 'Medium Priority';
+    } else {
+      markerColor = AppColors.success; // Green for low priority
+      markerIcon = Icons.check_circle;
+      priorityLabel = 'Low Priority';
+    }
+
+    // If completed, use gray
+    if (task.status.value == 'completed') {
+      markerColor = AppColors.textSecondary;
+      markerIcon = Icons.check_circle;
+      priorityLabel = 'Completed';
+    }
+
+    return Positioned(
+      left: screenPos.dx - 20, // Center the 40px pin
+      top: screenPos.dy - 50, // Position pin point at location
+      child: _MapPin(
+        task: task,
+        markerColor: markerColor,
+        markerIcon: markerIcon,
+        priorityLabel: priorityLabel,
+        onTap: () {
+          // Navigate to task detail
+          Navigator.of(context).pushNamed(
+            AppRouter.taskDetail,
+            arguments: {
+              'task': task,
+              'currentUserId': context.read<AuthBloc>().state is AuthAuthenticated
+                  ? (context.read<AuthBloc>().state as AuthAuthenticated).user.id
+                  : '',
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Custom map pin widget with hover effects and tooltip
+class _MapPin extends StatefulWidget {
+  final TaskModel task;
+  final Color markerColor;
+  final IconData markerIcon;
+  final String priorityLabel;
+  final VoidCallback onTap;
+
+  const _MapPin({
+    required this.task,
+    required this.markerColor,
+    required this.markerIcon,
+    required this.priorityLabel,
+    required this.onTap,
+  });
+
+  @override
+  State<_MapPin> createState() => _MapPinState();
+}
+
+class _MapPinState extends State<_MapPin> with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        _animationController.forward();
+      },
+      onExit: (_) {
+        setState(() => _isHovered = false);
+        _animationController.reverse();
+      },
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Tooltip on hover
+            if (_isHovered)
+              Positioned(
+                bottom: 55,
+                left: -60,
+                child: Container(
+                  width: 160,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.task.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'ID: ${widget.task.id.substring(widget.task.id.length - 8)}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[600],
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: widget.markerColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          widget.priorityLabel,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: widget.markerColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            // Pin marker
+            AnimatedBuilder(
+              animation: _scaleAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: child,
+                );
+              },
+              child: SizedBox(
+                width: 40,
+                height: 50,
+                child: CustomPaint(
+                  painter: _PinPainter(
+                    color: widget.markerColor,
+                    isHovered: _isHovered,
+                  ),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Icon(
+                        widget.markerIcon,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Custom painter for pin shape
+class _PinPainter extends CustomPainter {
+  final Color color;
+  final bool isHovered;
+
+  _PinPainter({required this.color, required this.isHovered});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = isHovered ? 3 : 2;
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.3)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+    final path = Path();
+    final radius = size.width / 2;
+    final center = Offset(size.width / 2, radius);
+
+    // Draw shadow
+    final shadowPath = Path();
+    shadowPath.addOval(Rect.fromCircle(center: center, radius: radius - 2));
+    shadowPath.moveTo(size.width / 2, size.height - 3);
+    shadowPath.lineTo(size.width / 2 - 5, radius * 1.6 - 3);
+    shadowPath.lineTo(size.width / 2 + 5, radius * 1.6 - 3);
+    shadowPath.close();
+    canvas.drawPath(shadowPath, shadowPaint);
+
+    // Draw circular top
+    path.addOval(Rect.fromCircle(center: center, radius: radius - 2));
+
+    // Draw pin point (triangle at bottom)
+    path.moveTo(size.width / 2, size.height);
+    path.lineTo(size.width / 2 - 6, radius * 1.6);
+    path.lineTo(size.width / 2 + 6, radius * 1.6);
+    path.close();
+
+    // Fill the pin
+    canvas.drawPath(path, paint);
+
+    // Draw border
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PinPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.isHovered != isHovered;
   }
 }
 

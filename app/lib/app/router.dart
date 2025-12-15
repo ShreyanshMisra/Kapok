@@ -17,9 +17,9 @@ import '../features/tasks/pages/create_task_page.dart';
 import '../features/tasks/pages/task_detail_page.dart';
 import '../features/tasks/pages/edit_task_page.dart';
 import '../features/map/pages/map_page.dart';
-import '../features/map/pages/location_picker_page.dart';
 import '../features/map/pages/map_test_page.dart';
 import '../features/map/pages/map_cache_page.dart';
+import '../features/onboarding/pages/onboarding_page.dart';
 import 'home_page.dart';
 import 'about_page.dart';
 
@@ -43,9 +43,9 @@ class AppRouter {
   static const String taskDetail = '/task-detail';
   static const String editTask = '/edit-task';
   static const String map = '/map';
-  static const String locationPicker = '/location-picker';
   static const String mapTest = '/map-test';
   static const String mapCache = '/map-cache';
+  static const String onboarding = '/onboarding';
 
   /// Generate routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -177,13 +177,7 @@ class AppRouter {
           builder: (_) => const MapPage(),
           settings: settings,
         );
-      
-      case locationPicker:
-        return MaterialPageRoute(
-          builder: (_) => const LocationPickerPage(),
-          settings: settings,
-        );
-      
+
       case mapTest:
         return MaterialPageRoute(
           builder: (_) => const MapTestPage(),
@@ -193,6 +187,15 @@ class AppRouter {
       case mapCache:
         return MaterialPageRoute(
           builder: (_) => const MapCachePage(),
+          settings: settings,
+        );
+
+      case onboarding:
+        final onComplete = settings.arguments as VoidCallback?;
+        return MaterialPageRoute(
+          builder: (_) => OnboardingPage(
+            onComplete: onComplete ?? () {},
+          ),
           settings: settings,
         );
 

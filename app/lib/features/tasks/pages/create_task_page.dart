@@ -687,7 +687,36 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                           ) {
                                             return DropdownMenuItem<String>(
                                               value: member.id,
-                                              child: Text(member.name),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      member.name,
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 2,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.primary.withOpacity(0.1),
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: Text(
+                                                      member.role,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: AppColors.primary,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             );
                                           }),
                                         ],

@@ -9,18 +9,23 @@ import 'package:kapok_app/features/map/bloc/map_event.dart';
 import 'package:kapok_app/features/map/bloc/map_state.dart';
 import 'package:kapok_app/data/models/offline_map_region_model.dart';
 import 'package:kapok_app/data/repositories/map_repository.dart';
+import 'package:kapok_app/data/repositories/task_repository.dart';
 
 class _MockMapRepository extends Mock implements MapRepository {}
+
+class _MockTaskRepository extends Mock implements TaskRepository {}
 
 void main() {
   late MapBloc bloc;
   late _MockMapRepository repository;
+  late _MockTaskRepository taskRepository;
   late OfflineMapRegion region;
   late StreamController<double> progressController;
 
   setUp(() {
     repository = _MockMapRepository();
-    bloc = MapBloc(mapRepository: repository);
+    taskRepository = _MockTaskRepository();
+    bloc = MapBloc(mapRepository: repository, taskRepository: taskRepository);
     region = OfflineMapRegion(
       id: 'region_1',
       centerLat: 10,
@@ -56,6 +61,7 @@ void main() {
     },
     act: (bloc) => bloc.add(const MapStarted()),
     expect: () => [
+      const MapLoading(),
       MapReady(region: region, isOfflineMode: false, lastCamera: null),
     ],
   );
@@ -85,6 +91,7 @@ void main() {
       progressController.add(1.0);
     },
     expect: () => [
+      const MapLoading(),
       MapReady(region: region, isOfflineMode: false, lastCamera: null),
       OfflineRegionUpdating(
         region: region,

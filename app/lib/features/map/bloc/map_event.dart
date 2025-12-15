@@ -59,6 +59,20 @@ class OfflineBubbleDownloadCompleted extends MapEvent {
   List<Object> get props => [region];
 }
 
+/// Load tasks to display on map
+class LoadTasksOnMap extends MapEvent {
+  final List<String> teamIds;
+  final String? userId;
+
+  const LoadTasksOnMap({
+    required this.teamIds,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [teamIds, userId];
+}
+
 /// Reset map state (on logout)
 class MapReset extends MapEvent {
   const MapReset();

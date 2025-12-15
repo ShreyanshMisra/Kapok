@@ -113,7 +113,10 @@ Future<void> initializeDependencies() async {
     () => TeamBloc(teamRepository: sl<TeamRepository>()),
   );
   sl.registerFactory<MapBloc>(
-    () => MapBloc(mapRepository: sl<MapRepository>()),
+    () => MapBloc(
+      mapRepository: sl<MapRepository>(),
+      taskRepository: sl<TaskRepository>(),
+    ),
   );
   // sl.registerFactory<ProfileBloc>(() => ProfileBloc(
   //    authRepository: sl<AuthRepository>(),

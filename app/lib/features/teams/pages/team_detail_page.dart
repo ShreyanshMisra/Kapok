@@ -574,6 +574,24 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     );
                   },
                 ),
+                // Remove member button (only for leaders, and can't remove themselves)
+                if (_isCurrentUserLeader() && !isLeader) ...[
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showRemoveMemberDialog(member),
+                      icon: const Icon(Icons.person_remove),
+                      label: Text(AppLocalizations.of(context).removeFromTeam),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -885,6 +903,55 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
       return authState.user.id == widget.team.leaderId;
     }
     return false;
+  }
+
+  /// Show remove member confirmation dialog
+  void _showRemoveMemberDialog(UserModel member) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final localizations = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(localizations.removeMember),
+          content: Text(
+            '${localizations.confirmRemoveMember}\n\n${member.name} will be removed from ${widget.team.teamName}.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthAuthenticated) {
+                  context.read<TeamBloc>().add(
+                    RemoveMemberRequested(
+                      teamId: widget.team.id,
+                      memberId: member.id,
+                      leaderId: authState.user.id,
+                    ),
+                  );
+                  // Show confirmation
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${member.name} removed from team'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(localizations.remove),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// Show edit team dialog

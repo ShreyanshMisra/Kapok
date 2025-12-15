@@ -504,6 +504,7 @@ class MapRepositoryImpl implements MapRepository {
   /// this bubble is live-loaded from Mapbox but not persisted to Hive.
   /// As the user moves, we slide the hot zone with them and purge tiles outside it so
   /// only the nearby area remains available offline.
+  @override
   Future<({OfflineMapRegion region, int primedTiles})>
   loadRegionForCurrentLocation({
     double radiusKm = 4.8, // ~3 miles bubble for instant offline view

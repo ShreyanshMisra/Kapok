@@ -70,10 +70,12 @@ class GeolocationService {
         );
       }
 
-      // Get current position
+      // Get current position using modern LocationSettings API
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
       
       Logger.location('Current position: ${position.latitude}, ${position.longitude}');

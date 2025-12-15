@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../../core/error/exceptions.dart';
 import '../../core/utils/logger.dart';
 import '../models/user_model.dart';
@@ -11,7 +10,6 @@ import '../models/task_model.dart';
 class FirebaseSource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // User operations
   Future<UserModel> createUser(UserModel user) async {

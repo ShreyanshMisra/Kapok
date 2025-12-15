@@ -8,6 +8,7 @@ import '../../../core/enums/task_status.dart';
 import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
+import '../../teams/bloc/team_bloc.dart';
 import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
@@ -73,6 +74,31 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           user.userRole.toString().contains('teamLeader');
     }
     return false;
+  }
+
+  /// Get assignment display text with user name
+  String get assignmentDisplay {
+    final assignedTo = widget.task.assignedTo;
+    if (assignedTo == null || assignedTo.isEmpty) {
+      return 'Unassigned';
+    }
+
+    try {
+      final teamState = context.read<TeamBloc>().state;
+      final member = teamState.members.firstWhere(
+        (m) => m.id == assignedTo,
+        orElse: () => throw Exception('User not found'),
+      );
+      return '${member.name} (${member.role})';
+    } catch (e) {
+      // Try current user
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated && authState.user.id == assignedTo) {
+        return '${authState.user.name} (${authState.user.role})';
+      }
+      // Fallback to showing ID if user not found in cache
+      return assignedTo;
+    }
   }
 
   /// Check if user can delete this task
@@ -497,8 +523,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
                           // Assigned To
                           TextFormField(
-                            initialValue:
-                                widget.task.assignedTo ?? 'Unassigned',
+                            initialValue: assignmentDisplay,
                             enabled: false,
                             decoration: InputDecoration(
                               labelText: 'Assigned To',
