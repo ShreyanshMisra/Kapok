@@ -19,6 +19,7 @@ import '../features/tasks/pages/edit_task_page.dart';
 import '../features/map/pages/map_page.dart';
 import '../features/map/pages/map_test_page.dart';
 import '../features/map/pages/map_cache_page.dart';
+import '../features/onboarding/pages/onboarding_page.dart';
 import 'home_page.dart';
 import 'about_page.dart';
 
@@ -44,6 +45,7 @@ class AppRouter {
   static const String map = '/map';
   static const String mapTest = '/map-test';
   static const String mapCache = '/map-cache';
+  static const String onboarding = '/onboarding';
 
   /// Generate routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -185,6 +187,15 @@ class AppRouter {
       case mapCache:
         return MaterialPageRoute(
           builder: (_) => const MapCachePage(),
+          settings: settings,
+        );
+
+      case onboarding:
+        final onComplete = settings.arguments as VoidCallback?;
+        return MaterialPageRoute(
+          builder: (_) => OnboardingPage(
+            onComplete: onComplete ?? () {},
+          ),
           settings: settings,
         );
 

@@ -6,8 +6,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kapok_app/injection_container.dart';
 import 'package:kapok_app/core/constants/mapbox_constants.dart';
+import 'package:kapok_app/core/services/analytics_service.dart';
 import 'firebase_options.dart';
-import 'app/kapok_app.dart';
+import 'features/splash/splash_wrapper.dart';
 
 Future<void> main() async {
   // Run the app in a zone to catch all errors
@@ -47,10 +48,15 @@ Future<void> main() async {
 
     await initializeDependencies();
     await initializeCoreServices();
+
+    // Initialize analytics service with privacy preferences
+    await AnalyticsService.instance.initialize();
+
     print("✅ Firebase initialized");
     print("✅ Crashlytics initialized");
+    print("✅ Analytics initialized");
 
-    runApp(const KapokApp());
+    runApp(const SplashWrapper());
   }, (error, stack) {
     // Catch errors that occur outside of Flutter
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);

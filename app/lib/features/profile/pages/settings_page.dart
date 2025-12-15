@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/data_export_service.dart';
 import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -28,6 +30,21 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
+  bool _analyticsEnabled = true;
+  bool _crashReportingEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacySettings();
+  }
+
+  void _loadPrivacySettings() {
+    setState(() {
+      _analyticsEnabled = AnalyticsService.instance.isAnalyticsEnabled;
+      _crashReportingEnabled = AnalyticsService.instance.isCrashReportingEnabled;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +177,65 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () {
                 _showExportDataDialog();
               },
+            ),
+          ]),
+          const SizedBox(height: 16),
+
+          // Privacy section
+          _buildSection('Privacy', [
+            SwitchListTile(
+              title: const Text('Analytics'),
+              subtitle: const Text(
+                'Help improve Kapok by sharing anonymous usage data',
+              ),
+              value: _analyticsEnabled,
+              onChanged: (value) async {
+                await AnalyticsService.instance.setAnalyticsEnabled(value);
+                setState(() {
+                  _analyticsEnabled = value;
+                });
+              },
+              activeThumbColor: Theme.of(context).colorScheme.primary,
+            ),
+            SwitchListTile(
+              title: const Text('Crash Reporting'),
+              subtitle: const Text(
+                'Automatically send crash reports to help fix issues',
+              ),
+              value: _crashReportingEnabled,
+              onChanged: (value) async {
+                await AnalyticsService.instance.setCrashReportingEnabled(value);
+                setState(() {
+                  _crashReportingEnabled = value;
+                });
+              },
+              activeThumbColor: Theme.of(context).colorScheme.primary,
+            ),
+          ]),
+          const SizedBox(height: 16),
+
+          // Feedback section
+          _buildSection('Feedback & Support', [
+            ListTile(
+              leading: const Icon(Icons.email_outlined),
+              title: const Text('Email Support'),
+              subtitle: const Text('Get help via email'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _launchEmail(),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('Report an Issue'),
+              subtitle: const Text('Report bugs on GitHub'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _launchGitHubIssues(),
+            ),
+            ListTile(
+              leading: const Icon(Icons.rate_review_outlined),
+              title: const Text('Send Feedback'),
+              subtitle: const Text('Share your thoughts and suggestions'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _showFeedbackDialog(),
             ),
           ]),
           const SizedBox(height: 16),
@@ -549,6 +625,139 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(localizations.close),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Launch email client for support
+  Future<void> _launchEmail() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'support@kapokapp.org',
+      queryParameters: {
+        'subject': 'Kapok App Support Request',
+        'body': 'Please describe your issue or question:\n\n'
+            '---\n'
+            'App Version: 1.0.0\n'
+            'Platform: ${Theme.of(context).platform.name}',
+      },
+    );
+
+    try {
+      if (await canLaunchUrl(emailUri)) {
+        await launchUrl(emailUri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open email client'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  /// Launch GitHub issues page
+  Future<void> _launchGitHubIssues() async {
+    final Uri githubUri = Uri.parse(
+      'https://github.com/ShreyanshMisra/Kapok/issues/new',
+    );
+
+    try {
+      if (await canLaunchUrl(githubUri)) {
+        await launchUrl(githubUri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open browser'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  /// Show feedback dialog
+  void _showFeedbackDialog() {
+    final TextEditingController feedbackController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Send Feedback'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'We appreciate your feedback! Let us know how we can improve Kapok.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: feedbackController,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                hintText: 'Enter your feedback here...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              // Send feedback via email
+              final feedback = feedbackController.text.trim();
+              if (feedback.isNotEmpty) {
+                final Uri emailUri = Uri(
+                  scheme: 'mailto',
+                  path: 'feedback@kapokapp.org',
+                  queryParameters: {
+                    'subject': 'Kapok App Feedback',
+                    'body': '$feedback\n\n'
+                        '---\n'
+                        'App Version: 1.0.0\n'
+                        'Platform: ${Theme.of(context).platform.name}',
+                  },
+                );
+
+                try {
+                  if (await canLaunchUrl(emailUri)) {
+                    await launchUrl(emailUri);
+                  }
+                } catch (e) {
+                  // Ignore errors
+                }
+              }
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Thank you for your feedback!'),
+                  ),
+                );
+              }
+            },
+            child: const Text('Send'),
           ),
         ],
       ),

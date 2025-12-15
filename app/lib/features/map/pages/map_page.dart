@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/network_checker.dart';
-import '../../../core/utils/logger.dart';
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
 import '../bloc/map_state.dart';
@@ -283,7 +282,7 @@ class _MapPageState extends State<MapPage> {
                   const SizedBox(height: 16),
                   if (state is MapError) ...[
                     Text(
-                      'ERROR: ${(state as MapError).message}',
+                      'ERROR: ${(state).message}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

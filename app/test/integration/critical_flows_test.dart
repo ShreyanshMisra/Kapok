@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kapok_app/core/enums/task_priority.dart';
 import 'package:kapok_app/core/enums/task_status.dart';
+import 'package:kapok_app/core/enums/user_role.dart';
 import 'package:kapok_app/data/models/task_model.dart';
 import 'package:kapok_app/data/models/team_model.dart';
 import 'package:kapok_app/data/models/user_model.dart';
@@ -17,28 +18,35 @@ import 'package:kapok_app/data/models/user_model.dart';
 void main() {
   group('Critical Flow 1: User Signup', () {
     test('creates user with required fields and valid role', () {
+      final now = DateTime.now();
       final user = UserModel(
         id: 'user_001',
         email: 'rescuer@disaster-relief.org',
         name: 'John Rescuer',
+        userRole: UserRole.teamMember,
         role: 'Medical',
-        createdAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
       expect(user.id, equals('user_001'));
       expect(user.email, equals('rescuer@disaster-relief.org'));
       expect(user.name, equals('John Rescuer'));
+      expect(user.userRole, equals(UserRole.teamMember));
       expect(user.role, equals('Medical'));
       expect(user.createdAt, isA<DateTime>());
     });
 
     test('user model serialization maintains data integrity', () {
+      final createdAt = DateTime(2025, 1, 1, 10, 0);
       final user = UserModel(
         id: 'user_002',
         email: 'engineer@relief.org',
         name: 'Jane Engineer',
+        userRole: UserRole.teamLeader,
         role: 'Engineering',
-        createdAt: DateTime(2025, 1, 1, 10, 0),
+        createdAt: createdAt,
+        updatedAt: createdAt,
       );
 
       final json = user.toJson();
@@ -47,12 +55,12 @@ void main() {
       expect(reconstructed.id, equals(user.id));
       expect(reconstructed.email, equals(user.email));
       expect(reconstructed.name, equals(user.name));
+      expect(reconstructed.userRole, equals(user.userRole));
       expect(reconstructed.role, equals(user.role));
-      expect(reconstructed.createdAt, equals(user.createdAt));
     });
 
-    test('supports all disaster relief roles', () {
-      final roles = [
+    test('supports all disaster relief specializations', () {
+      final specializations = [
         'Medical',
         'Engineering',
         'Carpentry',
@@ -64,54 +72,74 @@ void main() {
         'Other',
       ];
 
-      for (final role in roles) {
+      final now = DateTime.now();
+      for (final specialization in specializations) {
         final user = UserModel(
-          id: 'user_role_$role',
-          email: '$role@relief.org',
-          name: '$role Specialist',
-          role: role,
-          createdAt: DateTime.now(),
+          id: 'user_role_$specialization',
+          email: '$specialization@relief.org',
+          name: '$specialization Specialist',
+          userRole: UserRole.teamMember,
+          role: specialization,
+          createdAt: now,
+          updatedAt: now,
         );
 
-        expect(user.role, equals(role));
+        expect(user.role, equals(specialization));
+      }
+    });
+
+    test('supports all user roles', () {
+      final now = DateTime.now();
+      for (final userRole in UserRole.values) {
+        final user = UserModel(
+          id: 'user_${userRole.value}',
+          email: '${userRole.value}@relief.org',
+          name: '${userRole.displayName} User',
+          userRole: userRole,
+          role: 'Medical',
+          createdAt: now,
+          updatedAt: now,
+        );
+
+        expect(user.userRole, equals(userRole));
       }
     });
   });
 
   group('Critical Flow 2: Team Creation', () {
     test('creates team with leader and generates join code', () {
+      final now = DateTime.now();
       final team = TeamModel(
         id: 'team_001',
-        name: 'Hurricane Response Team Alpha',
+        teamName: 'Hurricane Response Team Alpha',
+        leaderId: 'user_001',
+        teamCode: 'HRT2025',
+        memberIds: ['user_001'],
         description: 'Primary medical response for affected areas',
-        createdBy: 'user_001',
-        teamCode: 'HRT-2025-ALPHA',
-        members: ['user_001'],
-        leaders: ['user_001'],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
         isActive: true,
       );
 
       expect(team.id, equals('team_001'));
-      expect(team.name, equals('Hurricane Response Team Alpha'));
-      expect(team.teamCode, equals('HRT-2025-ALPHA'));
-      expect(team.members, contains('user_001'));
-      expect(team.leaders, contains('user_001'));
+      expect(team.teamName, equals('Hurricane Response Team Alpha'));
+      expect(team.teamCode, equals('HRT2025'));
+      expect(team.memberIds, contains('user_001'));
+      expect(team.leaderId, equals('user_001'));
       expect(team.isActive, isTrue);
     });
 
     test('team serialization preserves all fields', () {
+      final createdAt = DateTime(2025, 1, 1, 12, 0);
       final team = TeamModel(
         id: 'team_002',
-        name: 'Flood Relief Engineering',
+        teamName: 'Flood Relief Engineering',
+        leaderId: 'user_002',
+        teamCode: 'FRE001',
+        memberIds: ['user_002', 'user_003', 'user_004'],
         description: 'Infrastructure repair and assessment',
-        createdBy: 'user_002',
-        teamCode: 'FRE-2025-001',
-        members: ['user_002', 'user_003', 'user_004'],
-        leaders: ['user_002'],
-        createdAt: DateTime(2025, 1, 1, 12, 0),
-        updatedAt: DateTime(2025, 1, 1, 12, 0),
+        createdAt: createdAt,
+        updatedAt: createdAt,
         isActive: true,
       );
 
@@ -119,42 +147,66 @@ void main() {
       final reconstructed = TeamModel.fromJson(json);
 
       expect(reconstructed.id, equals(team.id));
-      expect(reconstructed.name, equals(team.name));
+      expect(reconstructed.teamName, equals(team.teamName));
       expect(reconstructed.teamCode, equals(team.teamCode));
-      expect(reconstructed.members.length, equals(3));
-      expect(reconstructed.members, containsAll(['user_002', 'user_003', 'user_004']));
-      expect(reconstructed.leaders, contains('user_002'));
+      expect(reconstructed.memberIds.length, equals(3));
+      expect(
+        reconstructed.memberIds,
+        containsAll(['user_002', 'user_003', 'user_004']),
+      );
+      expect(reconstructed.leaderId, equals('user_002'));
     });
 
     test('supports adding members to existing team', () {
+      final now = DateTime.now();
       final team = TeamModel(
         id: 'team_003',
-        name: 'Supply Distribution Network',
+        teamName: 'Supply Distribution Network',
+        leaderId: 'user_001',
+        teamCode: 'SDN001',
+        memberIds: ['user_001'],
         description: 'Coordinating supply distribution',
-        createdBy: 'user_001',
-        teamCode: 'SDN-2025-001',
-        members: ['user_001'],
-        leaders: ['user_001'],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
         isActive: true,
       );
 
       // Simulate adding a new member
-      final updatedMembers = [...team.members, 'user_005'];
+      final updatedMembers = [...team.memberIds, 'user_005'];
       final updatedTeam = team.copyWith(
-        members: updatedMembers,
+        memberIds: updatedMembers,
         updatedAt: DateTime.now(),
       );
 
-      expect(updatedTeam.members.length, equals(2));
-      expect(updatedTeam.members, contains('user_005'));
-      expect(updatedTeam.leaders, contains('user_001'));
+      expect(updatedTeam.memberIds.length, equals(2));
+      expect(updatedTeam.memberIds, contains('user_005'));
+      expect(updatedTeam.leaderId, equals('user_001'));
+    });
+
+    test('team leader can be identified', () {
+      final now = DateTime.now();
+      final team = TeamModel(
+        id: 'team_004',
+        teamName: 'Test Team',
+        leaderId: 'leader_123',
+        teamCode: 'TEST01',
+        memberIds: ['leader_123', 'member_456'],
+        createdAt: now,
+        updatedAt: now,
+        isActive: true,
+      );
+
+      expect(team.isLeader('leader_123'), isTrue);
+      expect(team.isLeader('member_456'), isFalse);
+      expect(team.isMember('leader_123'), isTrue);
+      expect(team.isMember('member_456'), isTrue);
+      expect(team.isMember('unknown_user'), isFalse);
     });
   });
 
   group('Critical Flow 3: Task Creation and Assignment', () {
     test('creates task with location and priority', () {
+      final now = DateTime.now();
       final task = TaskModel(
         id: 'task_001',
         title: 'Set up emergency medical tent',
@@ -166,9 +218,9 @@ void main() {
         address: '123 Main St, Los Angeles, CA',
         createdBy: 'user_001',
         assignedTo: 'user_003',
-        dueDate: DateTime.now().add(const Duration(hours: 2)),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        dueDate: now.add(const Duration(hours: 2)),
+        createdAt: now,
+        updatedAt: now,
       );
 
       expect(task.title, equals('Set up emergency medical tent'));
@@ -199,8 +251,11 @@ void main() {
       final highTask = baseTask.copyWith(priority: TaskPriority.high);
 
       // Using deprecated taskSeverity getter for backward compatibility
+      // ignore: deprecated_member_use_from_same_package
       expect(lowTask.taskSeverity, equals(2));
+      // ignore: deprecated_member_use_from_same_package
       expect(mediumTask.taskSeverity, equals(3));
+      // ignore: deprecated_member_use_from_same_package
       expect(highTask.taskSeverity, equals(4));
     });
 
@@ -220,7 +275,18 @@ void main() {
       );
 
       expect(task.status, equals(TaskStatus.pending));
+      // ignore: deprecated_member_use_from_same_package
       expect(task.taskCompleted, isFalse);
+
+      // Simulate status change to in progress
+      final inProgressTask = task.copyWith(
+        status: TaskStatus.inProgress,
+        updatedAt: DateTime.now(),
+      );
+
+      expect(inProgressTask.status, equals(TaskStatus.inProgress));
+      // ignore: deprecated_member_use_from_same_package
+      expect(inProgressTask.taskCompleted, isFalse);
 
       // Simulate status change to completed
       final completedTask = task.copyWith(
@@ -230,6 +296,7 @@ void main() {
       );
 
       expect(completedTask.status, equals(TaskStatus.completed));
+      // ignore: deprecated_member_use_from_same_package
       expect(completedTask.taskCompleted, isTrue);
       expect(completedTask.completedAt, isNotNull);
     });
@@ -295,13 +362,29 @@ void main() {
         updatedAt: now,
       );
 
+      final completedOverdueTask = TaskModel(
+        id: 'task_completed_overdue',
+        title: 'Completed overdue task',
+        priority: TaskPriority.high,
+        status: TaskStatus.completed,
+        teamId: 'team_001',
+        geoLocation: GeoPoint(0, 0),
+        createdBy: 'user_001',
+        dueDate: now.subtract(const Duration(hours: 1)),
+        completedAt: now,
+        createdAt: now.subtract(const Duration(days: 1)),
+        updatedAt: now,
+      );
+
       expect(overdueTask.isOverdue, isTrue);
       expect(futureTask.isOverdue, isFalse);
+      expect(completedOverdueTask.isOverdue, isFalse); // Completed tasks aren't overdue
     });
   });
 
   group('Critical Flow 4: Offline Data Handling', () {
     test('task model handles JSON serialization for offline storage', () {
+      final now = DateTime.now();
       final task = TaskModel(
         id: 'offline_task_001',
         title: 'Offline created task',
@@ -311,8 +394,8 @@ void main() {
         teamId: 'team_001',
         geoLocation: GeoPoint(37.7749, -122.4194), // San Francisco
         createdBy: 'user_001',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
       // Simulate offline storage: convert to JSON
@@ -339,16 +422,16 @@ void main() {
     });
 
     test('team model handles offline serialization', () {
+      final now = DateTime.now();
       final team = TeamModel(
         id: 'offline_team_001',
-        name: 'Offline Response Team',
+        teamName: 'Offline Response Team',
+        leaderId: 'user_001',
+        teamCode: 'OFF001',
+        memberIds: ['user_001', 'user_002'],
         description: 'Created during connectivity outage',
-        createdBy: 'user_001',
-        teamCode: 'OFFLINE-001',
-        members: ['user_001', 'user_002'],
-        leaders: ['user_001'],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
         isActive: true,
       );
 
@@ -356,19 +439,22 @@ void main() {
       final retrieved = TeamModel.fromJson(json);
 
       expect(retrieved.id, equals(team.id));
-      expect(retrieved.name, equals(team.name));
+      expect(retrieved.teamName, equals(team.teamName));
       expect(retrieved.teamCode, equals(team.teamCode));
-      expect(retrieved.members.length, equals(2));
+      expect(retrieved.memberIds.length, equals(2));
       expect(retrieved.isActive, isTrue);
     });
 
     test('user model handles offline serialization', () {
+      final now = DateTime.now();
       final user = UserModel(
         id: 'offline_user_001',
         email: 'offline@relief.org',
         name: 'Offline User',
+        userRole: UserRole.teamMember,
         role: 'Medical',
-        createdAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
       final json = user.toJson();
@@ -377,6 +463,7 @@ void main() {
       expect(retrieved.id, equals(user.id));
       expect(retrieved.email, equals(user.email));
       expect(retrieved.name, equals(user.name));
+      expect(retrieved.userRole, equals(user.userRole));
       expect(retrieved.role, equals(user.role));
     });
 
@@ -410,6 +497,7 @@ void main() {
 
   group('Data Integrity and Edge Cases', () {
     test('handles tasks with minimal required fields', () {
+      final now = DateTime.now();
       final minimalTask = TaskModel(
         id: 'minimal_001',
         title: 'Minimal task',
@@ -418,8 +506,8 @@ void main() {
         teamId: 'team_001',
         geoLocation: GeoPoint(0, 0),
         createdBy: 'user_001',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
       expect(minimalTask.id, isNotEmpty);
@@ -432,6 +520,7 @@ void main() {
     });
 
     test('handles tasks with all optional fields populated', () {
+      final now = DateTime.now();
       final fullTask = TaskModel(
         id: 'full_001',
         title: 'Comprehensive task',
@@ -443,10 +532,10 @@ void main() {
         address: '10 Downing St, London, UK',
         createdBy: 'user_001',
         assignedTo: 'user_002',
-        dueDate: DateTime.now().add(const Duration(days: 1)),
-        completedAt: DateTime.now(),
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        updatedAt: DateTime.now(),
+        dueDate: now.add(const Duration(days: 1)),
+        completedAt: now,
+        createdAt: now.subtract(const Duration(days: 2)),
+        updatedAt: now,
       );
 
       expect(fullTask.id, isNotEmpty);
@@ -460,6 +549,7 @@ void main() {
     });
 
     test('validates GeoPoint coordinates are within valid range', () {
+      final now = DateTime.now();
       // Valid coordinates
       final validTask = TaskModel(
         id: 'geo_valid',
@@ -469,14 +559,68 @@ void main() {
         teamId: 'team_001',
         geoLocation: GeoPoint(45.5017, -73.5673), // Montreal
         createdBy: 'user_001',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
       expect(validTask.latitude, greaterThanOrEqualTo(-90));
       expect(validTask.latitude, lessThanOrEqualTo(90));
       expect(validTask.longitude, greaterThanOrEqualTo(-180));
       expect(validTask.longitude, lessThanOrEqualTo(180));
+    });
+
+    test('copyWith preserves unmodified fields', () {
+      final now = DateTime.now();
+      final original = TaskModel(
+        id: 'copy_test',
+        title: 'Original title',
+        description: 'Original description',
+        priority: TaskPriority.medium,
+        status: TaskStatus.pending,
+        teamId: 'team_001',
+        geoLocation: GeoPoint(0, 0),
+        createdBy: 'user_001',
+        assignedTo: 'user_002',
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final modified = original.copyWith(title: 'Modified title');
+
+      expect(modified.title, equals('Modified title'));
+      expect(modified.description, equals(original.description));
+      expect(modified.priority, equals(original.priority));
+      expect(modified.status, equals(original.status));
+      expect(modified.assignedTo, equals(original.assignedTo));
+      expect(modified.createdBy, equals(original.createdBy));
+    });
+  });
+
+  group('Priority and Status Enums', () {
+    test('TaskPriority enum values', () {
+      expect(TaskPriority.low.value, equals('low'));
+      expect(TaskPriority.medium.value, equals('medium'));
+      expect(TaskPriority.high.value, equals('high'));
+    });
+
+    test('TaskStatus enum values', () {
+      expect(TaskStatus.pending.value, equals('pending'));
+      expect(TaskStatus.inProgress.value, equals('inProgress'));
+      expect(TaskStatus.completed.value, equals('completed'));
+    });
+
+    test('TaskPriority fromString parsing', () {
+      expect(TaskPriority.fromString('low'), equals(TaskPriority.low));
+      expect(TaskPriority.fromString('medium'), equals(TaskPriority.medium));
+      expect(TaskPriority.fromString('high'), equals(TaskPriority.high));
+      expect(TaskPriority.fromString('invalid'), equals(TaskPriority.medium)); // default
+    });
+
+    test('TaskStatus fromString parsing', () {
+      expect(TaskStatus.fromString('pending'), equals(TaskStatus.pending));
+      expect(TaskStatus.fromString('inProgress'), equals(TaskStatus.inProgress));
+      expect(TaskStatus.fromString('completed'), equals(TaskStatus.completed));
+      expect(TaskStatus.fromString('invalid'), equals(TaskStatus.pending)); // default
     });
   });
 }

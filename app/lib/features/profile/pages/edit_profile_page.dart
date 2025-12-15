@@ -23,17 +23,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String _selectedRole = 'Other';
 
   // Available roles
-  final List<String> _roles = [
-    'Medical',
-    'Engineering',
-    'Carpentry',
-    'Plumbing',
-    'Construction',
-    'Electrical',
-    'Supplies',
-    'Transportation',
-    'Other',
-  ];
 
   @override
   void initState() {
