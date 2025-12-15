@@ -1,6 +1,6 @@
 # Kapok
 
-**Kapok** is a mobile application for coordinating volunteer disaster relief teams. Built with Flutter and Firebase, it enables organizations to efficiently manage tasks, teams, and field operations during crisis response—even in areas with limited connectivity.
+**Kapok** is a mobile application for coordinating volunteer disaster relief teams. Built with Flutter and Firebase, it enables organizations to efficiently manage tasks, teams, and field operations during crisis response, even in areas with limited connectivity.
 
 Developed for the **National Center for Technology and Dispute Resolution (NCTDR)** at UMass Amherst, led by **Dr. Leah Wing**, Professor of Legal Studies. The application will be handed off to **A Fair Resolution, LLC** for deployment to **National Nurses United**.
 
