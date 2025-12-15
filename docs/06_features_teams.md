@@ -44,8 +44,11 @@ Main teams list view.
 - Team cards show name, member count, active status
 - Role-based action buttons in app bar:
   - Team Leaders/Admins: "Create Team" button
-  - Team Members: "Join Team" button
-- Empty state with contextual action based on user role
+  - Team Members/Team Leaders: "Join Team" button
+- Empty state with contextual action based on user role:
+  - Team Members: Join Team button
+  - Team Leaders: Create Team + Join Team buttons
+  - Admins: Create Team button
 - Pull-to-refresh support
 
 ### CreateTeamPage (`lib/features/teams/pages/create_team_page.dart`)

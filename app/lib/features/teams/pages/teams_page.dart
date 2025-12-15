@@ -96,15 +96,15 @@ class _TeamsPageState extends State<TeamsPage> {
               return const SizedBox.shrink();
             },
           ),
-          // Join team button for team members (and others who can join)
+          // Join team button for team members and team leaders (not admins)
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, authState) {
               if (authState is AuthAuthenticated) {
                 final userRole = authState.user.userRole;
-                // Show join button for team members, or if user doesn't have a team yet
+                // Show join button for team members and team leaders
+                // Admins don't need to join teams (they see all teams)
                 if (userRole == UserRole.teamMember ||
-                    (authState.user.teamId == null &&
-                        userRole != UserRole.admin)) {
+                    userRole == UserRole.teamLeader) {
                   return IconButton(
                     icon: const Icon(Icons.group_add),
                     onPressed: () {
@@ -315,9 +315,52 @@ class _TeamsPageState extends State<TeamsPage> {
                         ),
                       ),
                     );
-                  } else if (userRole == UserRole.teamLeader ||
-                      userRole == UserRole.admin) {
-                    // Team leaders and admins can create teams
+                  } else if (userRole == UserRole.teamLeader) {
+                    // Team leaders can create or join teams
+                    return Column(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CreateTeamPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.add),
+                          label: Text(AppLocalizations.of(context).createTeam),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.surface,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const JoinTeamPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.group_add),
+                          label: Text(AppLocalizations.of(context).joinTeam),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else if (userRole == UserRole.admin) {
+                    // Admins can create teams
                     return ElevatedButton.icon(
                       onPressed: () {
                         Navigator.of(context).push(
