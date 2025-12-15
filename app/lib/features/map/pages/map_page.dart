@@ -32,7 +32,6 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   bool _testOfflineMode = false;
   bool _showCacheOverlay = false;
-  MapCameraState? _currentCamera;
   MapboxWebController? _mapController;
 
   // Pre-computed overlay circle coordinates (in screen pixels)
@@ -368,7 +367,6 @@ class _MapPageState extends State<MapPage> {
               isOfflineMode: isOffline || _testOfflineMode,
               onCameraIdle: (cameraState) {
                 setState(() {
-                  _currentCamera = cameraState;
                 });
                 // Update overlay circle when camera changes
                 if (region != null) {
