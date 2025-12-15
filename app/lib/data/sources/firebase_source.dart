@@ -563,40 +563,33 @@ class FirebaseSource {
       Logger.firebase('User signed in successfully');
       return credential;
     } on FirebaseAuthException catch (e) {
-      Logger.firebase('Firebase auth error during sign in', error: e);
-      // Provide user-friendly error messages
-      String errorMessage;
-      switch (e.code) {
-        case 'user-not-found':
-          errorMessage = 'No account found with this email address.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Incorrect password. Please try again.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'Invalid email address.';
-          break;
-        case 'user-disabled':
-          errorMessage = 'This account has been disabled.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many failed attempts. Please try again later.';
-          break;
-        case 'operation-not-allowed':
-          errorMessage = 'Sign in is not allowed. Please contact support.';
-          break;
-        default:
-          errorMessage = e.message ?? 'Failed to sign in. Please try again.';
-      }
-      throw AuthException(
-        message: errorMessage,
-        code: e.code,
-        originalError: e,
-      );
+      Logger.firebase('Firebase auth error during sign in: ${e.code}', error: e);
+      throw _handleAuthError(e.code, e.message, e);
     } catch (e) {
       Logger.firebase('Error signing in user', error: e);
       if (e is AuthException) {
         rethrow;
+      }
+      // Try to extract error code from exception string for Firebase errors
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('user-not-found') ||
+          errorString.contains('no user record')) {
+        throw AuthException(
+          message: 'This email is not registered. Please sign up first.',
+          originalError: e,
+        );
+      } else if (errorString.contains('wrong-password') ||
+                 errorString.contains('invalid-credential') ||
+                 errorString.contains('invalid_login_credentials')) {
+        throw AuthException(
+          message: 'Invalid email or password. Please check your credentials and try again.',
+          originalError: e,
+        );
+      } else if (errorString.contains('invalid-email')) {
+        throw AuthException(
+          message: 'Invalid email address format.',
+          originalError: e,
+        );
       }
       throw AuthException(
         message: 'An unexpected error occurred. Please try again.',
@@ -654,4 +647,50 @@ class FirebaseSource {
   User? get currentUser => _auth.currentUser;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  /// Helper method to handle Firebase Auth errors with user-friendly messages
+  AuthException _handleAuthError(String? code, String? message, dynamic originalError) {
+    String errorMessage;
+    switch (code) {
+      case 'user-not-found':
+        errorMessage = 'This email is not registered. Please sign up first.';
+        break;
+      case 'wrong-password':
+        errorMessage = 'Incorrect password. Please try again.';
+        break;
+      case 'invalid-credential':
+        // Firebase newer SDK uses this instead of user-not-found/wrong-password
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        break;
+      case 'invalid-email':
+        errorMessage = 'Invalid email address format.';
+        break;
+      case 'user-disabled':
+        errorMessage = 'This account has been disabled.';
+        break;
+      case 'too-many-requests':
+        errorMessage = 'Too many failed attempts. Please try again later.';
+        break;
+      case 'operation-not-allowed':
+        errorMessage = 'Sign in is not allowed. Please contact support.';
+        break;
+      case 'INVALID_LOGIN_CREDENTIALS':
+        // Another variant of the error code
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        break;
+      case 'email-already-in-use':
+        errorMessage = 'This email is already registered. Please sign in instead.';
+        break;
+      case 'weak-password':
+        errorMessage = 'Password is too weak. Please use a stronger password.';
+        break;
+      default:
+        errorMessage = message ?? 'Failed to authenticate. Please try again.';
+    }
+    return AuthException(
+      message: errorMessage,
+      code: code,
+      originalError: originalError,
+    );
+  }
 }

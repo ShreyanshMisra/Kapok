@@ -482,7 +482,17 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   Widget _buildExpandableMemberCard(UserModel member) {
     final isLeader = member.id == widget.team.leaderId;
     final isExpanded = _expandedMembers[member.id] ?? false;
-    
+
+    // Determine display role for this team context
+    // If not the leader of THIS team, show as "Member" regardless of their account type
+    String displayRole;
+    if (isLeader) {
+      displayRole = 'Team Leader';
+    } else {
+      // Non-leaders are shown as "Member" in this team context
+      displayRole = 'Member';
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 1,
@@ -507,7 +517,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
           ),
         ),
         subtitle: Text(
-          isLeader ? 'Team Leader' : member.userRole.displayName,
+          displayRole,
           style: TextStyle(
             color: isLeader ? AppColors.primary : AppColors.textSecondary,
             fontSize: 12,
@@ -528,8 +538,11 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Role
-                _buildInfoRow(Icons.person, 'Role', member.userRole.displayName),
+                // Team Role (their role in THIS team)
+                _buildInfoRow(Icons.badge, 'Team Role', displayRole),
+                const SizedBox(height: 8),
+                // Account Type (their global account type)
+                _buildInfoRow(Icons.person, 'Account Type', member.userRole.displayName),
                 const SizedBox(height: 8),
                 // Specialty
                 _buildInfoRow(Icons.work, 'Specialty', member.role),

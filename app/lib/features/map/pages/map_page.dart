@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/network_checker.dart';
+import '../../../core/services/geolocation_service.dart';
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
 import '../bloc/map_state.dart';
@@ -12,6 +13,7 @@ import '../models/map_camera_state.dart';
 import '../widgets/mapbox_map_view.dart';
 import '../web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../web/mapbox_web_controller.dart';
+import '../mobile/mapbox_mobile_controller.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
@@ -32,19 +34,24 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   bool _testOfflineMode = false;
   bool _showCacheOverlay = false;
-  MapboxWebController? _mapController;
+  MapboxWebController? _webMapController;
+  MapboxMobileController? _mobileMapController;
+
+  // User's current location for initial map position
+  MapCameraState? _userLocationCamera;
 
   // Pre-computed overlay circle coordinates (in screen pixels)
   OverlayCircle? _overlayCircle;
 
+
   void _updateOverlayCircle(OfflineMapRegion region) async {
-    if (_mapController == null || !_showCacheOverlay) {
+    if (_webMapController == null || !_showCacheOverlay) {
       _overlayCircle = null;
       return;
     }
 
     // Project region center to screen coordinates
-    final centerScreen = _mapController!.projectLatLonToScreen(
+    final centerScreen = _webMapController!.projectLatLonToScreen(
       region.centerLat,
       region.centerLon,
     );
@@ -57,7 +64,7 @@ class _MapPageState extends State<MapPage> {
     // Calculate point 4.8km north of center for radius calculation
     final latDelta = 4.8 / 111.0; // 4.8 km in degrees
     final northLat = (region.centerLat + latDelta).clamp(-90.0, 90.0);
-    final northScreen = _mapController!.projectLatLonToScreen(
+    final northScreen = _webMapController!.projectLatLonToScreen(
       northLat,
       region.centerLon,
     );
@@ -81,7 +88,9 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    // Load region and tasks when page opens
+    // Load user location first, then initialize map
+    _loadUserLocation();
+
     // Use post-frame callback to ensure BlocProvider is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -97,11 +106,48 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  /// Load user's current location for initial map position
+  Future<void> _loadUserLocation() async {
+    try {
+      final geolocationService = GeolocationService.instance;
+
+      // Check and request permission if needed
+      final hasPermission = await geolocationService.hasLocationPermission();
+      if (!hasPermission) {
+        final permission = await geolocationService.requestLocationPermission();
+        // Check if permission was granted
+        final isGranted = permission.name == 'always' || permission.name == 'whileInUse';
+        if (!isGranted) {
+          // Fall back to default location if permission denied
+          return;
+        }
+      }
+
+      // Get current position
+      final position = await geolocationService.getCurrentPosition();
+
+      if (mounted) {
+        setState(() {
+          _userLocationCamera = MapCameraState(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            zoom: 15.0,
+          );
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading user location: $e');
+      // Fall back to default location on error
+    }
+  }
+
   @override
   void dispose() {
-    // Dispose map controller when page is disposed (e.g., on logout)
-    _mapController?.dispose();
-    _mapController = null;
+    // Dispose map controllers when page is disposed (e.g., on logout)
+    _webMapController?.dispose();
+    _webMapController = null;
+    _mobileMapController?.dispose();
+    _mobileMapController = null;
     super.dispose();
   }
 
@@ -127,12 +173,11 @@ class _MapPageState extends State<MapPage> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, authState) {
         if (authState is AuthUnauthenticated) {
-          // Logger.task(
-          //   '[MAP_PAGE] AuthUnauthenticated detected - disposing map controller',
-          // );
-          // Dispose map controller immediately when user logs out
-          _mapController?.dispose();
-          _mapController = null;
+          // Dispose map controllers immediately when user logs out
+          _webMapController?.dispose();
+          _webMapController = null;
+          _mobileMapController?.dispose();
+          _mobileMapController = null;
         }
       },
       child: Scaffold(
@@ -193,13 +238,12 @@ class _MapPageState extends State<MapPage> {
                   );
                 }
                 // When MapReset is triggered, MapBloc emits MapLoading state
-                // Dispose the map controller immediately to stop the map
-                if (state is MapLoading && _mapController != null) {
-                  // Logger.task(
-                  //   '[MAP_PAGE] MapReset detected - disposing map controller',
-                  // );
-                  _mapController?.dispose();
-                  _mapController = null;
+                // Dispose the map controllers immediately to stop the map
+                if (state is MapLoading && (_webMapController != null || _mobileMapController != null)) {
+                  _webMapController?.dispose();
+                  _webMapController = null;
+                  _mobileMapController?.dispose();
+                  _mobileMapController = null;
                 }
               },
             ),
@@ -341,9 +385,9 @@ class _MapPageState extends State<MapPage> {
     double? progressOverlay,
     List<TaskModel>? tasks,
   }) {
-    // If no region is available yet, use a default location
-    final initialCamera =
-        camera ??
+    // Priority: 1) provided camera, 2) user location, 3) region center, 4) default
+    final initialCamera = camera ??
+        _userLocationCamera ??
         (region != null
             ? MapCameraState(
                 latitude: region.centerLat,
@@ -351,10 +395,11 @@ class _MapPageState extends State<MapPage> {
                 zoom: region.zoomMax.toDouble(),
               )
             : const MapCameraState(
-                latitude: 37.7749, // Default to San Francisco
+                latitude: 37.7749, // Default fallback
                 longitude: -122.4194,
                 zoom: 13.0,
               ));
+
     return SizedBox.expand(
       child: Stack(
         children: [
@@ -365,26 +410,42 @@ class _MapPageState extends State<MapPage> {
               initialZoom: initialCamera.zoom,
               offlineBubble: region,
               isOfflineMode: isOffline || _testOfflineMode,
+              // Pass tasks for mobile native markers
+              tasks: tasks,
+              onTaskMarkerTap: (task) {
+                // Navigate to task detail
+                Navigator.of(context).pushNamed(
+                  AppRouter.taskDetail,
+                  arguments: {
+                    'task': task,
+                    'currentUserId': context.read<AuthBloc>().state is AuthAuthenticated
+                        ? (context.read<AuthBloc>().state as AuthAuthenticated).user.id
+                        : '',
+                  },
+                );
+              },
               onCameraIdle: (cameraState) {
-                setState(() {
-                });
-                // Update overlay circle when camera changes
-                if (region != null) {
+                setState(() {});
+                // Update overlay circle when camera changes (web only)
+                if (region != null && kIsWeb) {
                   _updateOverlayCircle(region);
                 }
                 context.read<MapBloc>().add(MapCameraMoved(cameraState));
               },
               onControllerReady: (controller) {
-                _mapController = controller;
-                // Initial overlay calculation
+                _webMapController = controller;
+                // Initial overlay calculation (web only)
                 if (region != null) {
                   _updateOverlayCircle(region);
                 }
               },
+              onMobileControllerReady: (controller) {
+                _mobileMapController = controller;
+              },
             ),
           ),
-          // Task markers overlay
-          if (tasks != null && tasks.isNotEmpty && _mapController != null)
+          // Task markers overlay (web only - mobile uses native markers)
+          if (kIsWeb && tasks != null && tasks.isNotEmpty && _webMapController != null)
             ...tasks.map((task) => _buildTaskMarker(task)),
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
@@ -480,10 +541,10 @@ class _MapPageState extends State<MapPage> {
 
   /// Build a task marker widget positioned on the map
   Widget _buildTaskMarker(TaskModel task) {
-    if (_mapController == null) return const SizedBox.shrink();
+    if (_webMapController == null) return const SizedBox.shrink();
 
     // Project task location to screen coordinates
-    final screenPos = _mapController!.projectLatLonToScreen(
+    final screenPos = _webMapController!.projectLatLonToScreen(
       task.geoLocation.latitude,
       task.geoLocation.longitude,
     );

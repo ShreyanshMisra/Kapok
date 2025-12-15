@@ -93,13 +93,13 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     validator: Validators.validateName,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Email field
                   TextFormField(
                     controller: _emailController,
@@ -112,13 +112,13 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     validator: Validators.validateEmail,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Account type dropdown
                   DropdownButtonFormField<String>(
                     initialValue: _selectedAccountType,
@@ -130,7 +130,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     items: () {
@@ -167,7 +167,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     items: () {
@@ -220,7 +220,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     validator: Validators.validatePassword,
@@ -249,7 +249,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: theme.colorScheme.primary),
                       ),
                     ),
                     validator: (value) {
@@ -269,8 +269,8 @@ class _SignupPageState extends State<SignupPage> {
                             ? null
                             : _handleSignUp,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.surface,
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -304,19 +304,19 @@ class _SignupPageState extends State<SignupPage> {
                       child: Text(
                         AppLocalizations.of(context).viewTermsOfService,
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: theme.colorScheme.primary,
                           decoration: TextDecoration.underline,
                           fontSize: 14,
                         ),
                       ),
                     ),
                   ),
-                  
+
                   // Terms and conditions
                   Text(
                     AppLocalizations.of(context).byCreatingAnAccountYouAgreeToOurTermsOfServiceAndPrivacyPolicy,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -359,14 +359,19 @@ class _SignupPageState extends State<SignupPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         bool agreed = false;
+        final dialogTheme = Theme.of(dialogContext);
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              backgroundColor: dialogTheme.dialogBackgroundColor,
               title: Row(
                 children: [
-                  Icon(Icons.description, color: AppColors.primary),
+                  Icon(Icons.description, color: dialogTheme.colorScheme.primary),
                   const SizedBox(width: 8),
-                  Text(AppLocalizations.of(context).termsOfService),
+                  Text(
+                    AppLocalizations.of(context).termsOfService,
+                    style: TextStyle(color: dialogTheme.colorScheme.onSurface),
+                  ),
                 ],
               ),
               content: SizedBox(
@@ -377,9 +382,10 @@ class _SignupPageState extends State<SignupPage> {
                   children: [
                     Text(
                       AppLocalizations.of(context).pleaseReadAndAgreeToTheFollowingTerms,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
+                        color: dialogTheme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -388,18 +394,19 @@ class _SignupPageState extends State<SignupPage> {
                       constraints: const BoxConstraints(maxHeight: 300),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: AppColors.textSecondary.withOpacity(0.3),
+                          color: dialogTheme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        color: AppColors.background,
+                        color: dialogTheme.colorScheme.surfaceContainerHighest,
                       ),
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(12),
                         child: Text(
                           TermsOfService.content,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             height: 1.6,
+                            color: dialogTheme.colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -415,7 +422,7 @@ class _SignupPageState extends State<SignupPage> {
                               agreed = value ?? false;
                             });
                           },
-                          activeColor: AppColors.primary,
+                          activeColor: dialogTheme.colorScheme.primary,
                         ),
                         Expanded(
                           child: GestureDetector(
@@ -426,9 +433,10 @@ class _SignupPageState extends State<SignupPage> {
                             },
                             child: Text(
                               AppLocalizations.of(context).iHaveReadAndAgreeToTheTermsOfService,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
+                                color: dialogTheme.colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -445,7 +453,7 @@ class _SignupPageState extends State<SignupPage> {
                   },
                   child: Text(
                     AppLocalizations.of(context).cancel,
-                    style: TextStyle(color: AppColors.textSecondary),
+                    style: TextStyle(color: dialogTheme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                 ),
                 ElevatedButton(
@@ -458,15 +466,15 @@ class _SignupPageState extends State<SignupPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(AppLocalizations.of(context).termsOfServiceAccepted),
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: dialogTheme.colorScheme.primary,
                               duration: const Duration(seconds: 2),
                             ),
                           );
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.surface,
+                    backgroundColor: dialogTheme.colorScheme.primary,
+                    foregroundColor: dialogTheme.colorScheme.onPrimary,
                   ),
                   child: Text(AppLocalizations.of(context).iAgree),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/offline_map_region_model.dart';
 import '../../../data/repositories/offline_map_region_repository.dart';
@@ -13,8 +14,8 @@ class MapCachePage extends StatefulWidget {
 }
 
 class _MapCachePageState extends State<MapCachePage> {
-  final OfflineMapRegionRepository _regionRepository =
-      OfflineMapRegionRepository();
+  // Use GetIt to get the singleton instance that's already initialized
+  late final OfflineMapRegionRepository _regionRepository;
   OfflineMapRegion? _latestRegion;
   List<OfflineMapRegion> _allRegions = [];
   bool _isLoading = true;
@@ -22,12 +23,17 @@ class _MapCachePageState extends State<MapCachePage> {
   @override
   void initState() {
     super.initState();
+    _regionRepository = GetIt.instance<OfflineMapRegionRepository>();
     _loadRegions();
   }
 
   Future<void> _loadRegions() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
     try {
+      // The singleton should already be initialized, but call initialize() to be safe
+      // (it checks if box is already open)
       await _regionRepository.initialize();
       _latestRegion = await _regionRepository.getLatestRegion();
       _allRegions = await _regionRepository.getAllRegions();

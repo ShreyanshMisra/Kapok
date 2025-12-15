@@ -32,14 +32,16 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
   @override
   Widget build(BuildContext context) {
     // Verify user role before showing form
+    // Team Members and Team Leaders can join teams
+    // Admins cannot join teams (they have access to all teams)
     final authState = context.watch<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
-      if (authState.user.userRole != UserRole.teamMember) {
+      if (authState.user.userRole == UserRole.admin) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Only team members can join teams'),
-              backgroundColor: AppColors.error,
+              content: const Text('Admins have access to all teams'),
+              backgroundColor: AppColors.info,
             ),
           );
           Navigator.of(context).pop();

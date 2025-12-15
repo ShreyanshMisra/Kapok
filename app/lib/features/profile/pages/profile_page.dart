@@ -193,8 +193,7 @@ class ProfilePage extends StatelessWidget {
             _buildInfoRow(context, AppLocalizations.of(context).email, user.email),
             _buildInfoRow(context, AppLocalizations.of(context).accountType, user.userRole.displayName),
             _buildInfoRow(context, AppLocalizations.of(context).role, user.role),
-            if (user.teamId != null)
-              _buildInfoRow(context, AppLocalizations.of(context).teamId, user.teamId!),
+            _buildInfoRow(context, AppLocalizations.of(context).userId, user.id),
           ],
         ),
       ),
