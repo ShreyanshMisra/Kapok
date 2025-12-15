@@ -346,18 +346,18 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 right: 16,
                 child: Card(
                   elevation: 4,
-                  color: AppColors.surface.withOpacity(0.95),
+                  color: theme.cardColor.withValues(alpha: 0.95),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline, color: AppColors.primary),
+                        Icon(Icons.info_outline, color: theme.colorScheme.primary),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Double-click on the map to select a location for your task',
                             style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textPrimary),
+                                ?.copyWith(color: theme.colorScheme.onSurface),
                           ),
                         ),
                       ],
@@ -375,13 +375,13 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 builder: (context, scrollController) {
                   return Container(
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: theme.colorScheme.surface,
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(20),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, -2),
                         ),
@@ -395,7 +395,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                           width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: AppColors.textSecondary.withOpacity(0.3),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -416,7 +416,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         .textTheme
                                         .headlineSmall
                                         ?.copyWith(
-                                          color: AppColors.primary,
+                                          color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.bold,
                                         ),
                                   ),
@@ -439,7 +439,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide(
-                                          color: AppColors.primary,
+                                          color: theme.colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -475,7 +475,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide(
-                                          color: AppColors.primary,
+                                          color: theme.colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -508,7 +508,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                               borderSide: BorderSide(
-                                                color: AppColors.primary,
+                                                color: theme.colorScheme.primary,
                                               ),
                                             ),
                                           ),
@@ -522,8 +522,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         onPressed: _validateAndGeocodeAddress,
                                         tooltip: 'Search address',
                                         style: IconButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
-                                          foregroundColor: AppColors.surface,
+                                          backgroundColor: theme.colorScheme.primary,
+                                          foregroundColor: theme.colorScheme.onPrimary,
                                         ),
                                       ),
                                     ],
@@ -535,7 +535,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         'Coordinates: ${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey[600],
+                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                         ),
                                       ),
                                     ),
@@ -578,7 +578,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                               12,
                                             ),
                                             borderSide: BorderSide(
-                                              color: AppColors.primary,
+                                              color: theme.colorScheme.primary,
                                             ),
                                           ),
                                         ),
@@ -623,13 +623,13 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         return Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: AppColors.background,
+                                            color: theme.colorScheme.surfaceContainerHighest,
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
                                             border: Border.all(
-                                              color: AppColors.textSecondary
-                                                  .withOpacity(0.3),
+                                              color: theme.colorScheme.outline
+                                                  .withValues(alpha: 0.3),
                                             ),
                                           ),
                                           child: Row(
@@ -637,7 +637,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                               Icon(
                                                 Icons.info_outline,
                                                 size: 16,
-                                                color: AppColors.textSecondary,
+                                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                               ),
                                               const SizedBox(width: 8),
                                               Text(
@@ -646,8 +646,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                                     .textTheme
                                                     .bodySmall
                                                     ?.copyWith(
-                                                      color: AppColors
-                                                          .textSecondary,
+                                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                                     ),
                                               ),
                                             ],
@@ -673,7 +672,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                               12,
                                             ),
                                             borderSide: BorderSide(
-                                              color: AppColors.primary,
+                                              color: theme.colorScheme.primary,
                                             ),
                                           ),
                                         ),
@@ -704,14 +703,14 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                                       vertical: 2,
                                                     ),
                                                     decoration: BoxDecoration(
-                                                      color: AppColors.primary.withOpacity(0.1),
+                                                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                                                       borderRadius: BorderRadius.circular(8),
                                                     ),
                                                     child: Text(
                                                       member.role,
                                                       style: TextStyle(
                                                         fontSize: 12,
-                                                        color: AppColors.primary,
+                                                        color: theme.colorScheme.primary,
                                                       ),
                                                     ),
                                                   ),
@@ -746,7 +745,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide(
-                                          color: AppColors.primary,
+                                          color: theme.colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -788,8 +787,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                             ? null
                                             : _handleCreateTask,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
-                                          foregroundColor: AppColors.surface,
+                                          backgroundColor: theme.colorScheme.primary,
+                                          foregroundColor: theme.colorScheme.onPrimary,
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 16,
                                           ),

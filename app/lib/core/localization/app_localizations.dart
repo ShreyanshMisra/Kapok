@@ -261,6 +261,7 @@ class AppLocalizations {
   String get userNotAuthenticated => _getString('userNotAuthenticated');
   String get accountInformation => _getString('accountInformation');
   String get teamId => _getString('teamId');
+  String get userId => _getString('userId');
   String get ourMission => _getString('ourMission');
   String get ourMissionDescription => _getString('ourMissionDescription');
   String get nctdrDescription => _getString('nctdrDescription');
@@ -572,6 +573,7 @@ class AppLocalizations {
         'userNotAuthenticated': 'User not authenticated',
         'accountInformation': 'Account Information',
         'teamId': 'Team ID',
+        'userId': 'User ID',
         'ourMission': 'Our Mission',
         'ourMissionDescription': 'Kapok is designed to help coordinate volunteers for disaster relief efforts. The app enables teams to work together efficiently during crisis situations by providing real-time task management, team coordination, and location-based services.',
         'nctdrDescription': 'The National Center for Technology and Dispute Resolution (NCTDR) is an organization that supports developing technology for conflict management. NCTDR works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
@@ -880,6 +882,7 @@ class AppLocalizations {
         'userNotAuthenticated': 'Usuario no autenticado',
         'accountInformation': 'Información de la Cuenta',
         'teamId': 'ID del Equipo',
+        'userId': 'ID de Usuario',
         'ourMission': 'Nuestra Misión',
         'ourMissionDescription': 'Kapok está diseñado para ayudar a coordinar voluntarios para esfuerzos de ayuda en desastres. La aplicación permite que los equipos trabajen juntos de manera eficiente durante situaciones de crisis al proporcionar gestión de tareas en tiempo real, coordinación de equipos y servicios basados en ubicación.',
         'nctdrDescription': 'El Centro Nacional de Tecnología y Resolución de Disputas (NCTDR) es una organización que apoya el desarrollo de tecnología para la gestión de conflictos. NCTDR trabaja para crear soluciones innovadoras que ayuden a las comunidades a resolver disputas y coordinar recursos durante tiempos desafiantes.',

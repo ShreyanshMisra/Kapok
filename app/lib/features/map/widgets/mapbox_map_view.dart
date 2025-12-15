@@ -3,15 +3,25 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/mapbox_constants.dart';
 import '../../../data/models/offline_map_region_model.dart';
+import '../../../data/models/task_model.dart';
 import '../models/map_camera_state.dart';
 import '../web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../web/mapbox_web_controller.dart';
+import '../mobile/mapbox_mobile_controller.dart';
 
 String get _mapboxStyleUri =>
     'mapbox://styles/${MapboxConstants.defaultStyleId}';
 
 /// Simple wrapper so web/mobile share a common interface.
 typedef MapCameraCallback = void Function(MapCameraState state);
+
+/// Abstract controller interface for platform-agnostic map operations
+abstract class MapController {
+  void setCenter(double lat, double lon, {double? zoom});
+  MapCameraState? getCurrentCamera();
+  Offset? projectLatLonToScreen(double lat, double lon);
+  void dispose();
+}
 
 /// A platform-aware Mapbox map view that delegates all rendering/gestures to Mapbox GL.
 class MapboxMapView extends StatefulWidget {
@@ -24,7 +34,10 @@ class MapboxMapView extends StatefulWidget {
   final VoidCallback? onMapReady;
   final bool interactive;
   final void Function(MapboxWebController controller)? onControllerReady;
+  final void Function(MapboxMobileController controller)? onMobileControllerReady;
   final void Function(double latitude, double longitude)? onDoubleClick;
+  final List<TaskModel>? tasks;
+  final void Function(TaskModel task)? onTaskMarkerTap;
 
   const MapboxMapView({
     super.key,
@@ -37,7 +50,10 @@ class MapboxMapView extends StatefulWidget {
     this.onMapReady,
     this.interactive = true,
     this.onControllerReady,
+    this.onMobileControllerReady,
     this.onDoubleClick,
+    this.tasks,
+    this.onTaskMarkerTap,
   });
 
   @override
@@ -45,78 +61,120 @@ class MapboxMapView extends StatefulWidget {
 }
 
 class _MapboxMapViewState extends State<MapboxMapView> {
-  late final MapboxWebController _webController = MapboxWebController.create(
-    accessToken: MapboxConstants.accessToken,
-    styleUri: _mapboxStyleUri,
-  );
+  // Web controller (only used on web)
+  MapboxWebController? _webController;
+
+  // Mobile controller (only used on mobile)
+  MapboxMobileController? _mobileController;
 
   @override
   void initState() {
     super.initState();
     if (kIsWeb) {
-      _webController
-        ..offlineBubble = widget.offlineBubble
-        ..isOfflineMode = widget.isOfflineMode
-        ..initialCamera = MapCameraState(
-          latitude: widget.initialLatitude,
-          longitude: widget.initialLongitude,
-          zoom: widget.initialZoom,
-        )
-        ..onCameraIdle = widget.onCameraIdle
-        ..onMapReady = () {
-          widget.onMapReady?.call();
-          widget.onControllerReady?.call(_webController);
-        };
-      // Set onDoubleClick separately as it's not a setter
-      if (widget.onDoubleClick != null) {
-        _webController.onDoubleClick = widget.onDoubleClick;
-      }
-      _webController.interactive = widget.interactive;
-      // Also call onControllerReady immediately if map already exists
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.onControllerReady?.call(_webController);
-      });
+      _initWebController();
+    } else {
+      _initMobileController();
     }
+  }
+
+  void _initWebController() {
+    _webController = MapboxWebController.create(
+      accessToken: MapboxConstants.accessToken,
+      styleUri: _mapboxStyleUri,
+    );
+    _webController!
+      ..offlineBubble = widget.offlineBubble
+      ..isOfflineMode = widget.isOfflineMode
+      ..initialCamera = MapCameraState(
+        latitude: widget.initialLatitude,
+        longitude: widget.initialLongitude,
+        zoom: widget.initialZoom,
+      )
+      ..onCameraIdle = widget.onCameraIdle
+      ..onMapReady = () {
+        widget.onMapReady?.call();
+        widget.onControllerReady?.call(_webController!);
+      };
+    if (widget.onDoubleClick != null) {
+      _webController!.onDoubleClick = widget.onDoubleClick;
+    }
+    _webController!.interactive = widget.interactive;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onControllerReady?.call(_webController!);
+    });
+  }
+
+  void _initMobileController() {
+    _mobileController = MapboxMobileController.create(
+      accessToken: MapboxConstants.accessToken,
+      styleUri: _mapboxStyleUri,
+    );
+    _mobileController!
+      ..initialCamera = MapCameraState(
+        latitude: widget.initialLatitude,
+        longitude: widget.initialLongitude,
+        zoom: widget.initialZoom,
+      )
+      ..offlineBubble = widget.offlineBubble
+      ..isOfflineMode = widget.isOfflineMode
+      ..onCameraIdle = widget.onCameraIdle
+      ..onMapReady = () {
+        widget.onMapReady?.call();
+        widget.onMobileControllerReady?.call(_mobileController!);
+        // Update task markers if provided
+        if (widget.tasks != null && widget.tasks!.isNotEmpty) {
+          _mobileController!.updateTaskMarkers(widget.tasks!);
+        }
+      }
+      ..onDoubleClick = widget.onDoubleClick
+      ..onTaskMarkerTap = widget.onTaskMarkerTap
+      ..interactive = widget.interactive;
   }
 
   @override
   void didUpdateWidget(covariant MapboxMapView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (kIsWeb) {
-      // Only update bubble and offline mode, don't reset camera position
-      // This allows user to zoom/pan freely
-      _webController
+    if (kIsWeb && _webController != null) {
+      _webController!
         ..offlineBubble = widget.offlineBubble
         ..isOfflineMode = widget.isOfflineMode;
-      _webController.onDoubleClick = widget.onDoubleClick;
-      _webController.interactive = widget.interactive;
-      // Don't call setCenter here - it resets user's zoom/pan position
+      _webController!.onDoubleClick = widget.onDoubleClick;
+      _webController!.interactive = widget.interactive;
+    } else if (!kIsWeb && _mobileController != null) {
+      _mobileController!
+        ..offlineBubble = widget.offlineBubble
+        ..isOfflineMode = widget.isOfflineMode
+        ..interactive = widget.interactive
+        ..onDoubleClick = widget.onDoubleClick
+        ..onTaskMarkerTap = widget.onTaskMarkerTap;
+
+      // Update task markers if they changed
+      if (widget.tasks != oldWidget.tasks && widget.tasks != null) {
+        _mobileController!.updateTaskMarkers(widget.tasks!);
+      }
     }
   }
 
   @override
   void dispose() {
-    if (kIsWeb) {
-      _webController.dispose();
-    }
+    _webController?.dispose();
+    _mobileController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      return _webController.buildView();
+      return _webController!.buildView();
     }
 
-    return Container(
-      color: Colors.black,
-      alignment: Alignment.center,
-      child: const Text(
-        'Mapbox mobile view coming soon.\n'
-        'Web version remains fully interactive.',
-        textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white70),
-      ),
+    // Mobile: Use native Mapbox Maps SDK
+    return _mobileController!.buildView(
+      onMapTap: widget.onDoubleClick != null
+          ? (context) {
+              // Handle double-tap detection manually if needed
+            }
+          : null,
     );
   }
 }
