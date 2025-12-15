@@ -1,6 +1,8 @@
 # Kapok
 
-<img width="4096" height="4096" alt="kapok_icon" src="https://github.com/user-attachments/assets/e744cb33-858e-4d11-b096-c7836504bee8" />
+
+<img width="500" height="500" alt="kapok_icon" src="https://github.com/user-attachments/assets/e744cb33-858e-4d11-b096-c7836504bee8" />
+
 
 **Kapok** is a mobile application for coordinating volunteer disaster relief teams. Built with Flutter and Firebase, it enables organizations to efficiently manage tasks, teams, and field operations during crisis response, even in areas with limited connectivity.
 
