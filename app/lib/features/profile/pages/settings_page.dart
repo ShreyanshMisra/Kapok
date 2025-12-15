@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
@@ -138,8 +137,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       themeText = AppLocalizations.of(context).dark;
                       break;
                     case ThemeMode.system:
-                    default:
-                      themeText = AppLocalizations.of(context).system;
+                    themeText = AppLocalizations.of(context).system;
                       break;
                   }
                   return ListTile(
@@ -322,7 +320,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) {
         final dialogLocalizations = AppLocalizations.of(context);
         return AlertDialog(
-          title: Text('${dialogLocalizations.language}'),
+          title: Text(dialogLocalizations.language),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

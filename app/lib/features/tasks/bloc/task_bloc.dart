@@ -172,17 +172,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       final currentTask = await _taskRepository.getTask(event.taskId);
 
       // Convert old event structure to new TaskModel structure
-      final priority = event.taskSeverity != null
-          ? _convertSeverityToPriority(event.taskSeverity!)
-          : currentTask.priority;
-      final status = event.taskCompleted != null
-          ? (event.taskCompleted! ? TaskStatus.completed : TaskStatus.pending)
-          : currentTask.status;
+      final priority = _convertSeverityToPriority(event.taskSeverity);
+      final status = (event.taskCompleted ? TaskStatus.completed : TaskStatus.pending);
 
       final updatedTask = currentTask.copyWith(
-        title: event.taskName ?? currentTask.title,
-        description: event.taskDescription ?? currentTask.description,
-        assignedTo: event.assignedTo ?? currentTask.assignedTo,
+        title: event.taskName,
+        description: event.taskDescription,
+        assignedTo: event.assignedTo,
         status: status,
         priority: priority,
         updatedAt: DateTime.now(),
