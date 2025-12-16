@@ -41,6 +41,7 @@ class MapboxMobileController {
   MapboxMap? _mapboxMap;
   PointAnnotationManager? _taskAnnotationManager;
   final Map<String, TaskModel> _taskAnnotationMap = {};
+  bool _annotationListenerAdded = false;
 
   // User location tracking
   StreamSubscription<void>? _locationSubscription;
@@ -70,6 +71,18 @@ class MapboxMobileController {
 
     // Create annotation manager for task markers
     _taskAnnotationManager = await _mapboxMap!.annotations.createPointAnnotationManager();
+
+    // Set up tap listener for annotations ONCE during initialization
+    // The listener references _taskAnnotationMap which is updated when markers change
+    if (!_annotationListenerAdded && _taskAnnotationManager != null) {
+      _taskAnnotationManager!.addOnPointAnnotationClickListener(
+        _AnnotationClickListener(
+          taskAnnotationMap: _taskAnnotationMap,
+          onTaskTap: (task) => onTaskMarkerTap?.call(task),
+        ),
+      );
+      _annotationListenerAdded = true;
+    }
 
     // Set up interaction settings
     _updateInteractionSettings();
@@ -169,13 +182,8 @@ class MapboxMobileController {
       await _taskAnnotationManager!.deleteAll();
       _taskAnnotationMap.clear();
 
-      // Set up tap listener for annotations
-      _taskAnnotationManager!.addOnPointAnnotationClickListener(
-        _AnnotationClickListener(
-          taskAnnotationMap: _taskAnnotationMap,
-          onTaskTap: onTaskMarkerTap,
-        ),
-      );
+      // Note: The tap listener is set up once in _initializeMap()
+      // It references _taskAnnotationMap which we update below
 
       // Create new annotations for each task
       final annotationOptions = <PointAnnotationOptions>[];
@@ -258,6 +266,7 @@ class MapboxMobileController {
     _locationSubscription?.cancel();
     _taskAnnotationManager = null;
     _taskAnnotationMap.clear();
+    _annotationListenerAdded = false;
     _mapboxMap = null;
   }
 
