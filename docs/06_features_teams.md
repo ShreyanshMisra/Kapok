@@ -230,7 +230,7 @@ Teams are stored at `teams/{teamId}`:
 | Action | Who Can Perform |
 |--------|-----------------|
 | Create Team | Team Leaders, Admins |
-| Join Team | Team Members |
+| Join Team | Team Members, Team Leaders (as member) |
 | View Team | Any team member |
 | Edit Team | Team Leader, Admin |
 | Close Team | Team Leader, Admin |

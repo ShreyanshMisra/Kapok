@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/mapbox_constants.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/services/geocode_service.dart';
 import '../../../core/enums/task_priority.dart';
@@ -18,6 +19,7 @@ import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
 import '../../map/widgets/mapbox_map_view.dart';
 import '../../map/models/map_camera_state.dart';
+import '../../map/mobile/mapbox_mobile_controller.dart';
 import '../../map/web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../../map/web/mapbox_web_controller.dart';
 
@@ -36,20 +38,29 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   TaskPriority _selectedPriority = TaskPriority.medium;
   bool _isLoadingLocation = false;
+  bool _initialLocationLoaded = false; // Track if initial location fetch completed
   double? _latitude;
   double? _longitude;
   String? _selectedAddress;
   MapboxWebController? _mapController;
+  MapboxMobileController? _mobileMapController;
   MapCameraState? _currentCamera;
   bool _showTaskForm = false;
   String? _selectedTeamId;
   String? _selectedAssignedTo;
   List<TeamModel> _userTeams = [];
   List<UserModel> _teamMembers = [];
+  
+  // Initial map center (set once when location is determined)
+  late double _initialMapLatitude;
+  late double _initialMapLongitude;
 
   @override
   void initState() {
     super.initState();
+    // Initialize with fallback location first
+    _initialMapLatitude = MapboxConstants.defaultLatitude;
+    _initialMapLongitude = MapboxConstants.defaultLongitude;
     _getCurrentLocation();
     _loadUserTeams();
   }
@@ -82,85 +93,116 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     });
 
     try {
+      // Check if location services are enabled
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _useDefaultLocation('Location services are disabled');
+        return;
+      }
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Location permission denied')),
-            );
-          }
-          // Use default location if permission denied
-          _latitude = 0.0;
-          _longitude = 0.0;
+          _useDefaultLocation('Location permission denied');
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permission denied permanently'),
-            ),
-          );
-        }
-        // Use default location
-        _latitude = 0.0;
-        _longitude = 0.0;
+        _useDefaultLocation('Location permission denied permanently');
         return;
       }
 
+      // Get current position with timeout
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
 
-      setState(() {
-        _latitude = position.latitude;
-        _longitude = position.longitude;
-        _currentCamera = MapCameraState(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          zoom: 16.0,
-        );
-      });
-
-      // Center map on current location
-      if (_mapController != null) {
-        _mapController!.setCenter(
-          position.latitude,
-          position.longitude,
-          zoom: 16.0,
-        );
+      // Validate coordinates
+      if (position.latitude < -90 || position.latitude > 90 ||
+          position.longitude < -180 || position.longitude > 180) {
+        _useDefaultLocation('Invalid coordinates received');
+        return;
       }
 
-      // Reverse geocode to get address
-      try {
-        final address = await GeocodeService.instance.reverseGeocode(
-          position.latitude,
-          position.longitude,
+      if (mounted) {
+        setState(() {
+          _initialMapLatitude = position.latitude;
+          _initialMapLongitude = position.longitude;
+          _currentCamera = MapCameraState(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            zoom: 16.0,
+          );
+          _initialLocationLoaded = true;
+          _isLoadingLocation = false;
+        });
+      }
+
+      // Center map on current location if controller is ready
+      _centerMapOnLocation(position.latitude, position.longitude);
+
+      // Reverse geocode to get address (non-blocking)
+      _reverseGeocodeLocation(position.latitude, position.longitude);
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      _useDefaultLocation('Could not get current location');
+    }
+  }
+
+  /// Use default fallback location when current location is unavailable
+  void _useDefaultLocation(String reason) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$reason. Using default location.'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      setState(() {
+        _initialMapLatitude = MapboxConstants.defaultLatitude;
+        _initialMapLongitude = MapboxConstants.defaultLongitude;
+        _currentCamera = MapCameraState(
+          latitude: MapboxConstants.defaultLatitude,
+          longitude: MapboxConstants.defaultLongitude,
+          zoom: MapboxConstants.defaultZoom,
         );
+        _initialLocationLoaded = true;
+        _isLoadingLocation = false;
+      });
+    }
+  }
+
+  /// Center map on specified location
+  void _centerMapOnLocation(double latitude, double longitude) {
+    if (_mapController != null) {
+      _mapController!.setCenter(latitude, longitude, zoom: 16.0);
+    }
+    if (_mobileMapController != null) {
+      _mobileMapController!.setCenter(latitude, longitude, zoom: 16.0);
+    }
+  }
+
+  /// Reverse geocode location to get address (non-blocking)
+  Future<void> _reverseGeocodeLocation(double latitude, double longitude) async {
+    try {
+      final address = await GeocodeService.instance.reverseGeocode(
+        latitude,
+        longitude,
+      );
+      if (mounted) {
         setState(() {
           _selectedAddress = address;
           _addressController.text = address;
         });
-      } catch (e) {
-        // Geocoding failed, that's okay
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
-      }
-      // Use default location
-      _latitude = 0.0;
-      _longitude = 0.0;
-    } finally {
-      setState(() {
-        _isLoadingLocation = false;
-      });
+      // Geocoding failed, that's okay - user can still select location
+      debugPrint('Reverse geocoding failed: $e');
     }
   }
 
@@ -263,8 +305,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    final initialLat = _latitude ?? 0.0;
-    final initialLon = _longitude ?? 0.0;
+    // Use the stored initial map coordinates (set once at location load)
+    final initialLat = _initialMapLatitude;
+    final initialLon = _initialMapLongitude;
     final initialZoom = _currentCamera?.zoom ?? 16.0;
 
     final theme = Theme.of(context);
@@ -318,25 +361,54 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         child: Stack(
           children: [
             // Map view - full screen using Positioned.fill
-            Positioned.fill(
-              child: MapboxMapView(
-                initialLatitude: initialLat,
-                initialLongitude: initialLon,
-                initialZoom: initialZoom,
-                interactive: true,
-                onControllerReady: (controller) {
-                  setState(() {
-                    _mapController = controller;
-                  });
-                },
-                onDoubleClick: _handleMapDoubleClick,
-                onCameraIdle: (camera) {
-                  setState(() {
-                    _currentCamera = camera;
-                  });
-                },
+            // Show loading indicator while fetching initial location
+            if (!_initialLocationLoaded)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Color(0xFFE8F4F8),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text(
+                          'Fetching current location...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              Positioned.fill(
+                child: MapboxMapView(
+                  initialLatitude: initialLat,
+                  initialLongitude: initialLon,
+                  initialZoom: initialZoom,
+                  interactive: true,
+                  onControllerReady: (controller) {
+                    setState(() {
+                      _mapController = controller;
+                    });
+                  },
+                  onMobileControllerReady: (controller) {
+                    setState(() {
+                      _mobileMapController = controller;
+                    });
+                  },
+                  onDoubleClick: _handleMapDoubleClick,
+                  onCameraIdle: (camera) {
+                    setState(() {
+                      _currentCamera = camera;
+                    });
+                  },
+                ),
               ),
-            ),
 
             // Instructions overlay
             if (!_showTaskForm)

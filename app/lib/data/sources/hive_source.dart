@@ -162,17 +162,25 @@ class HiveSource {
   Future<List<TaskModel>> getTasksByTeam(String teamId) async {
     try {
       Logger.hive('Getting tasks for team: $teamId');
-      final tasks = HiveService.instance
-          .getTasksByTeam(teamId)
-          .map((data) => TaskModel.fromJson(data))
-          .toList();
+      final rawTasks = HiveService.instance.getTasksByTeam(teamId);
+      final tasks = <TaskModel>[];
+      
+      for (final data in rawTasks) {
+        try {
+          tasks.add(TaskModel.fromJson(data));
+        } catch (parseError) {
+          // Skip malformed task data, log the error but don't fail
+          Logger.hive('Warning: Failed to parse task data, skipping', error: parseError);
+        }
+      }
+      
+      Logger.hive('Got ${tasks.length} tasks for team $teamId');
       return tasks;
     } catch (e) {
-      Logger.hive('Error getting team tasks', error: e);
-      throw CacheException(
-        message: 'Failed to get team tasks',
-        originalError: e,
-      );
+      // Return empty list instead of throwing - this allows the UI to show "no tasks"
+      // rather than an error when cache is empty or not initialized
+      Logger.hive('Error getting team tasks, returning empty list', error: e);
+      return [];
     }
   }
 
