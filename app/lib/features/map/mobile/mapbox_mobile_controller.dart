@@ -1,10 +1,20 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../../../data/models/offline_map_region_model.dart';
 import '../../../data/models/task_model.dart';
 import '../models/map_camera_state.dart';
+
+/// Marker icon names for different priorities/states
+class _MarkerIcons {
+  static const String high = 'marker-high';
+  static const String medium = 'marker-medium';
+  static const String low = 'marker-low';
+  static const String completed = 'marker-completed';
+}
 
 /// Mobile-specific controller that uses the native Mapbox Maps SDK.
 class MapboxMobileController {
@@ -42,9 +52,16 @@ class MapboxMobileController {
   PointAnnotationManager? _taskAnnotationManager;
   final Map<String, TaskModel> _taskAnnotationMap = {};
   bool _annotationListenerAdded = false;
+  bool _markerImagesRegistered = false;
 
   // User location tracking
   StreamSubscription<void>? _locationSubscription;
+
+  // Marker colors for different priorities
+  static const Color _highPriorityColor = Color(0xFFE53935); // Red
+  static const Color _mediumPriorityColor = Color(0xFFFB8C00); // Orange
+  static const Color _lowPriorityColor = Color(0xFF43A047); // Green
+  static const Color _completedColor = Color(0xFF808080); // Gray
 
   /// Sets the MapboxMap instance from the widget callback
   void setMapboxMap(MapboxMap map) {
@@ -68,6 +85,9 @@ class MapboxMobileController {
 
     // Enable user location display
     await _enableUserLocationDisplay();
+
+    // Register custom marker images for task pins
+    await _registerMarkerImages();
 
     // Create annotation manager for task markers
     _taskAnnotationManager = await _mapboxMap!.annotations.createPointAnnotationManager();
@@ -105,6 +125,156 @@ class MapboxMobileController {
       ));
     } catch (e) {
       debugPrint('Error enabling user location display: $e');
+    }
+  }
+
+  /// Register custom marker images with the map style
+  Future<void> _registerMarkerImages() async {
+    if (_mapboxMap == null || _markerImagesRegistered) return;
+
+    try {
+      // Create and register marker images for each priority
+      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.warning);
+      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.error_outline);
+      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.check_circle);
+      await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle);
+      
+      _markerImagesRegistered = true;
+      debugPrint('Marker images registered successfully');
+    } catch (e) {
+      debugPrint('Error registering marker images: $e');
+    }
+  }
+
+  /// Create a marker image with the specified color and icon, then add it to the map
+  Future<void> _addMarkerImage(String name, Color color, IconData icon) async {
+    if (_mapboxMap == null) return;
+
+    try {
+      final imageData = await _createMarkerImageData(color, icon);
+      if (imageData != null) {
+        // Add image to map style using MbxImage
+        final mbxImage = MbxImage(
+          width: 64,
+          height: 80,
+          data: imageData,
+        );
+        await _mapboxMap!.style.addStyleImage(
+          name,
+          2.0, // pixel ratio for retina displays
+          mbxImage,
+          false, // sdf (signed distance field) - false for regular images
+          [], // stretch X ranges
+          [], // stretch Y ranges
+          null, // content insets
+        );
+      }
+    } catch (e) {
+      debugPrint('Error adding marker image $name: $e');
+    }
+  }
+
+  /// Create marker image data as bytes
+  Future<Uint8List?> _createMarkerImageData(Color color, IconData icon) async {
+    try {
+      // Create a picture recorder to draw the marker
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      
+      const width = 64.0;
+      const height = 80.0;
+      const pinRadius = 28.0;
+      const pinCenterY = 28.0;
+      
+      // Draw shadow
+      final shadowPaint = Paint()
+        ..color = Colors.black.withOpacity(0.3)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      
+      // Shadow for circle
+      canvas.drawCircle(
+        const Offset(width / 2 + 2, pinCenterY + 2),
+        pinRadius - 2,
+        shadowPaint,
+      );
+      
+      // Shadow for pin point
+      final shadowPath = Path()
+        ..moveTo(width / 2 + 2, height - 2)
+        ..lineTo(width / 2 - 8 + 2, pinCenterY + pinRadius * 0.7 + 2)
+        ..lineTo(width / 2 + 8 + 2, pinCenterY + pinRadius * 0.7 + 2)
+        ..close();
+      canvas.drawPath(shadowPath, shadowPaint);
+      
+      // Draw white border/background
+      final borderPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+      
+      canvas.drawCircle(
+        const Offset(width / 2, pinCenterY),
+        pinRadius,
+        borderPaint,
+      );
+      
+      // Draw pin point with white background
+      final pinPath = Path()
+        ..moveTo(width / 2, height - 4)
+        ..lineTo(width / 2 - 10, pinCenterY + pinRadius * 0.7)
+        ..lineTo(width / 2 + 10, pinCenterY + pinRadius * 0.7)
+        ..close();
+      canvas.drawPath(pinPath, borderPaint);
+      
+      // Draw colored circle
+      final colorPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+      
+      canvas.drawCircle(
+        const Offset(width / 2, pinCenterY),
+        pinRadius - 3,
+        colorPaint,
+      );
+      
+      // Draw colored pin point
+      final colorPinPath = Path()
+        ..moveTo(width / 2, height - 7)
+        ..lineTo(width / 2 - 7, pinCenterY + pinRadius * 0.65)
+        ..lineTo(width / 2 + 7, pinCenterY + pinRadius * 0.65)
+        ..close();
+      canvas.drawPath(colorPinPath, colorPaint);
+      
+      // Draw icon in center
+      final iconPainter = TextPainter(
+        text: TextSpan(
+          text: String.fromCharCode(icon.codePoint),
+          style: TextStyle(
+            fontSize: 24,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+            color: Colors.white,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      iconPainter.layout();
+      iconPainter.paint(
+        canvas,
+        Offset(
+          (width - iconPainter.width) / 2,
+          pinCenterY - iconPainter.height / 2,
+        ),
+      );
+      
+      // Convert to image
+      final picture = recorder.endRecording();
+      final image = await picture.toImage(width.toInt(), height.toInt());
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      debugPrint('Error creating marker image: $e');
+      return null;
     }
   }
 
@@ -177,6 +347,11 @@ class MapboxMobileController {
   Future<void> updateTaskMarkers(List<TaskModel> tasks) async {
     if (_mapboxMap == null || _taskAnnotationManager == null) return;
 
+    // Ensure marker images are registered before adding markers
+    if (!_markerImagesRegistered) {
+      await _registerMarkerImages();
+    }
+
     try {
       // Clear existing annotations
       await _taskAnnotationManager!.deleteAll();
@@ -189,21 +364,22 @@ class MapboxMobileController {
       final annotationOptions = <PointAnnotationOptions>[];
 
       for (final task in tasks) {
-        // Determine icon color based on priority/status
-        int iconColor;
+        // Determine icon and text color based on priority/status
         String iconImage;
+        int textColor;
+        
         if (task.status.value == 'completed') {
-          iconColor = 0xFF808080; // Gray
-          iconImage = 'marker'; // Default marker
+          iconImage = _MarkerIcons.completed;
+          textColor = 0xFF808080; // Gray
         } else if (task.priority.value == 'high') {
-          iconColor = 0xFFE53935; // Red
-          iconImage = 'marker'; // Default marker
+          iconImage = _MarkerIcons.high;
+          textColor = 0xFFE53935; // Red
         } else if (task.priority.value == 'medium') {
-          iconColor = 0xFFFB8C00; // Orange
-          iconImage = 'marker'; // Default marker
+          iconImage = _MarkerIcons.medium;
+          textColor = 0xFFFB8C00; // Orange
         } else {
-          iconColor = 0xFF43A047; // Green
-          iconImage = 'marker'; // Default marker
+          iconImage = _MarkerIcons.low;
+          textColor = 0xFF43A047; // Green
         }
 
         annotationOptions.add(PointAnnotationOptions(
@@ -214,17 +390,17 @@ class MapboxMobileController {
             ),
           ),
           iconImage: iconImage,
-          iconSize: 1.5,
-          iconColor: iconColor,
+          iconSize: 0.6, // Scale down the 64x80 image
+          iconAnchor: IconAnchor.BOTTOM, // Anchor at bottom of pin
           textField: task.title.length > 20
               ? '${task.title.substring(0, 17)}...'
               : task.title,
-          textSize: 12.0,
-          textOffset: [0.0, 2.0],
+          textSize: 11.0,
+          textOffset: [0.0, 0.5], // Position text below the pin
           textAnchor: TextAnchor.TOP,
-          textColor: iconColor,
+          textColor: textColor,
           textHaloColor: 0xFFFFFFFF,
-          textHaloWidth: 1.5,
+          textHaloWidth: 2.0,
         ));
       }
 
@@ -238,6 +414,8 @@ class MapboxMobileController {
             _taskAnnotationMap[annotation.id] = tasks[i];
           }
         }
+        
+        debugPrint('Added ${annotations.length} task markers to map');
       }
     } catch (e) {
       debugPrint('Error updating task markers: $e');

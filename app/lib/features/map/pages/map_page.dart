@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/mapbox_constants.dart';
 import '../../../core/services/network_checker.dart';
 import '../../../core/services/geolocation_service.dart';
 import '../bloc/map_bloc.dart';
@@ -385,7 +386,7 @@ class _MapPageState extends State<MapPage> {
     double? progressOverlay,
     List<TaskModel>? tasks,
   }) {
-    // Priority: 1) provided camera, 2) user location, 3) region center, 4) default
+    // Priority: 1) provided camera, 2) user location, 3) region center, 4) default (UMass Amherst)
     final initialCamera = camera ??
         _userLocationCamera ??
         (region != null
@@ -394,10 +395,10 @@ class _MapPageState extends State<MapPage> {
                 longitude: region.centerLon,
                 zoom: region.zoomMax.toDouble(),
               )
-            : const MapCameraState(
-                latitude: 37.7749, // Default fallback
-                longitude: -122.4194,
-                zoom: 13.0,
+            : MapCameraState(
+                latitude: MapboxConstants.defaultLatitude,
+                longitude: MapboxConstants.defaultLongitude,
+                zoom: MapboxConstants.defaultZoom,
               ));
 
     return SizedBox.expand(

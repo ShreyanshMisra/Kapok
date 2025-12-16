@@ -3,6 +3,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Mapbox API configuration constants
 /// Reads from environment variables via .env file
 class MapboxConstants {
+  /// Default fallback location (UMass Amherst campus center)
+  /// Used when user location cannot be determined
+  static const double defaultLatitude = 42.3912;
+  static const double defaultLongitude = -72.5267;
+  static const double defaultZoom = 15.0;
+
   /// Validate that all required environment variables are configured
   /// Call this on app startup to fail loudly if configuration is missing
   static void validateConfiguration() {
