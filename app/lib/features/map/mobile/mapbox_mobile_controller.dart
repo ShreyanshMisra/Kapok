@@ -169,20 +169,33 @@ class MapboxMobileController {
       await _taskAnnotationManager!.deleteAll();
       _taskAnnotationMap.clear();
 
+      // Set up tap listener for annotations
+      _taskAnnotationManager!.addOnPointAnnotationClickListener(
+        _AnnotationClickListener(
+          taskAnnotationMap: _taskAnnotationMap,
+          onTaskTap: onTaskMarkerTap,
+        ),
+      );
+
       // Create new annotations for each task
       final annotationOptions = <PointAnnotationOptions>[];
 
       for (final task in tasks) {
-        // Determine text color based on priority/status
-        int textColor;
+        // Determine icon color based on priority/status
+        int iconColor;
+        String iconImage;
         if (task.status.value == 'completed') {
-          textColor = 0xFF808080; // Gray
+          iconColor = 0xFF808080; // Gray
+          iconImage = 'marker'; // Default marker
         } else if (task.priority.value == 'high') {
-          textColor = 0xFFE53935; // Red
+          iconColor = 0xFFE53935; // Red
+          iconImage = 'marker'; // Default marker
         } else if (task.priority.value == 'medium') {
-          textColor = 0xFFFB8C00; // Orange
+          iconColor = 0xFFFB8C00; // Orange
+          iconImage = 'marker'; // Default marker
         } else {
-          textColor = 0xFF43A047; // Green
+          iconColor = 0xFF43A047; // Green
+          iconImage = 'marker'; // Default marker
         }
 
         annotationOptions.add(PointAnnotationOptions(
@@ -192,16 +205,18 @@ class MapboxMobileController {
               task.geoLocation.latitude,
             ),
           ),
+          iconImage: iconImage,
           iconSize: 1.5,
+          iconColor: iconColor,
           textField: task.title.length > 20
               ? '${task.title.substring(0, 17)}...'
               : task.title,
           textSize: 12.0,
-          textOffset: [0, 2.0],
+          textOffset: [0.0, 2.0],
           textAnchor: TextAnchor.TOP,
-          textColor: textColor,
+          textColor: iconColor,
           textHaloColor: 0xFFFFFFFF,
-          textHaloWidth: 1.0,
+          textHaloWidth: 1.5,
         ));
       }
 
@@ -210,8 +225,10 @@ class MapboxMobileController {
 
         // Map annotation IDs to tasks for tap handling
         for (int i = 0; i < annotations.length && i < tasks.length; i++) {
-          // Use index-based key for consistent mapping
-          _taskAnnotationMap['task_$i'] = tasks[i];
+          final annotation = annotations[i];
+          if (annotation != null) {
+            _taskAnnotationMap[annotation.id] = tasks[i];
+          }
         }
       }
     } catch (e) {
@@ -243,6 +260,11 @@ class MapboxMobileController {
     _taskAnnotationMap.clear();
     _mapboxMap = null;
   }
+
+  // Track last tap time for double-tap detection
+  DateTime? _lastTapTime;
+  Point? _lastTapPoint;
+  static const _doubleTapThresholdMs = 300;
 
   /// Builds the native MapWidget
   Widget buildView({
@@ -279,7 +301,55 @@ class MapboxMobileController {
           onCameraIdle?.call(currentCamera);
         }
       },
-      onTapListener: onMapTap,
+      onTapListener: (context) {
+        // Check for double-tap to trigger onDoubleClick
+        final now = DateTime.now();
+        final point = context.point;
+        
+        if (_lastTapTime != null && _lastTapPoint != null) {
+          final timeDiff = now.difference(_lastTapTime!).inMilliseconds;
+          if (timeDiff < _doubleTapThresholdMs) {
+            // Double-tap detected - use the first tap's coordinates
+            final lat = _lastTapPoint!.coordinates.lat.toDouble();
+            final lon = _lastTapPoint!.coordinates.lng.toDouble();
+            onDoubleClick?.call(lat, lon);
+            _lastTapTime = null;
+            _lastTapPoint = null;
+            return;
+          }
+        }
+        
+        _lastTapTime = now;
+        _lastTapPoint = point;
+        
+        // Call the original onMapTap if provided
+        onMapTap?.call(context);
+      },
+      onLongTapListener: (context) {
+        // Also support long-press as an alternative to double-tap
+        final lat = context.point.coordinates.lat.toDouble();
+        final lon = context.point.coordinates.lng.toDouble();
+        onDoubleClick?.call(lat, lon);
+      },
     );
+  }
+}
+
+/// Listener for annotation clicks to handle task marker taps
+class _AnnotationClickListener extends OnPointAnnotationClickListener {
+  final Map<String, TaskModel> taskAnnotationMap;
+  final void Function(TaskModel task)? onTaskTap;
+
+  _AnnotationClickListener({
+    required this.taskAnnotationMap,
+    required this.onTaskTap,
+  });
+
+  @override
+  void onPointAnnotationClick(PointAnnotation annotation) {
+    final task = taskAnnotationMap[annotation.id];
+    if (task != null && onTaskTap != null) {
+      onTaskTap!(task);
+    }
   }
 }

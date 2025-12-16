@@ -169,12 +169,7 @@ class _MapboxMapViewState extends State<MapboxMapView> {
     }
 
     // Mobile: Use native Mapbox Maps SDK
-    return _mobileController!.buildView(
-      onMapTap: widget.onDoubleClick != null
-          ? (context) {
-              // Handle double-tap detection manually if needed
-            }
-          : null,
-    );
+    // Double-tap and long-press are now handled internally by MapboxMobileController
+    return _mobileController!.buildView();
   }
 }
