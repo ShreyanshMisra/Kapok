@@ -977,25 +977,19 @@ class TaskRepository {
     } catch (e) {
       // Instead of throwing, return empty list and log the error
       // This prevents the UI from showing an error when there are simply no tasks
-      Logger.task('Error getting tasks for user teams', error: e);
-      Logger.task('Error: $e');
-      Logger.task('Returning empty list to allow UI to render');
+      Logger.task('Error getting tasks for user teams, returning empty list', error: e);
       return [];
     }
   }
 
   /// Get tasks from local cache for specific teams
+  /// Note: HiveSource.getTasksByTeam returns empty list on error, so no try-catch needed
   Future<List<TaskModel>> _getLocalTasksForTeams(List<String> teamIds) async {
     final List<TaskModel> allTasks = [];
 
     for (final teamId in teamIds) {
-      try {
-        final teamTasks = await _hiveSource.getTasksByTeam(teamId);
-        allTasks.addAll(teamTasks);
-      } catch (e) {
-        // Log the error but continue loading tasks from other teams
-        Logger.task('Warning: Failed to load tasks for team $teamId, skipping', error: e);
-      }
+      final teamTasks = await _hiveSource.getTasksByTeam(teamId);
+      allTasks.addAll(teamTasks);
     }
 
     Logger.task('Loaded ${allTasks.length} tasks from local cache');
