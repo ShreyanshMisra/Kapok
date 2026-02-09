@@ -37,58 +37,17 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Static Kapok logo
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/images/kapok_icon.png',
-                  width: 150,
-                  height: 150,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    // Fallback to icon if image fails to load
-                    return Icon(
-                      Icons.nature,
-                      size: 80,
-                      color: AppColors.primary,
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            // App name
-            const Text(
-              'KAPOK',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 4,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Tagline
-            const Text(
-              'Disaster Relief Coordination',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-                letterSpacing: 1,
-              ),
+            // Kapok icon with tagline wordmark
+            Image.asset(
+              'assets/images/icon_tagline/Kapok_Icon_Dark_Tagline_Wordmark.png',
+              width: 250,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.nature,
+                  size: 80,
+                  color: Colors.white,
+                );
+              },
             ),
             const SizedBox(height: 48),
             // Simple loading indicator

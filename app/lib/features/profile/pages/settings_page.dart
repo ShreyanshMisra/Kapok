@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
-import '../../../core/services/analytics_service.dart';
-import '../../../core/services/data_export_service.dart';
-import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
-import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../tasks/bloc/task_bloc.dart';
 import '../../tasks/bloc/task_event.dart';
-import '../../tasks/bloc/task_state.dart';
 import '../../map/bloc/map_bloc.dart';
 import '../../map/bloc/map_event.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Settings page for app configuration
 class SettingsPage extends StatefulWidget {
@@ -29,21 +24,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
-  bool _analyticsEnabled = true;
-  bool _crashReportingEnabled = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPrivacySettings();
-  }
-
-  void _loadPrivacySettings() {
-    setState(() {
-      _analyticsEnabled = AnalyticsService.instance.isAnalyticsEnabled;
-      _crashReportingEnabled = AnalyticsService.instance.isCrashReportingEnabled;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +34,9 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).settings),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -167,14 +149,16 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              title: Text(AppLocalizations.of(context).exportData),
-              subtitle: Text(
-                AppLocalizations.of(context).exportYourTasksAndTeamData,
+              title: Text(
+                AppLocalizations.of(context).exportData,
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                _showExportDataDialog();
-              },
+              subtitle: Text(
+                'Export will be enabled in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              trailing: Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              enabled: false,
             ),
           ]),
           const SizedBox(height: 16),
@@ -182,32 +166,28 @@ class _SettingsPageState extends State<SettingsPage> {
           // Privacy section
           _buildSection('Privacy', [
             SwitchListTile(
-              title: const Text('Analytics'),
-              subtitle: const Text(
-                'Help improve Kapok by sharing anonymous usage data',
+              title: Text(
+                'Analytics',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              value: _analyticsEnabled,
-              onChanged: (value) async {
-                await AnalyticsService.instance.setAnalyticsEnabled(value);
-                setState(() {
-                  _analyticsEnabled = value;
-                });
-              },
-              activeThumbColor: Theme.of(context).colorScheme.primary,
+              subtitle: Text(
+                'Analytics will be enabled in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              value: false,
+              onChanged: null,
             ),
             SwitchListTile(
-              title: const Text('Crash Reporting'),
-              subtitle: const Text(
-                'Automatically send crash reports to help fix issues',
+              title: Text(
+                'Crash Reporting',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              value: _crashReportingEnabled,
-              onChanged: (value) async {
-                await AnalyticsService.instance.setCrashReportingEnabled(value);
-                setState(() {
-                  _crashReportingEnabled = value;
-                });
-              },
-              activeThumbColor: Theme.of(context).colorScheme.primary,
+              subtitle: Text(
+                'Crash reporting will be enabled in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              value: false,
+              onChanged: null,
             ),
           ]),
           const SizedBox(height: 16),
@@ -215,25 +195,40 @@ class _SettingsPageState extends State<SettingsPage> {
           // Feedback section
           _buildSection('Feedback & Support', [
             ListTile(
-              leading: const Icon(Icons.email_outlined),
-              title: const Text('Email Support'),
-              subtitle: const Text('Get help via email'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _launchEmail(),
+              leading: Icon(Icons.email_outlined, color: AppColors.textSecondary),
+              title: Text(
+                'Email Support',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+              subtitle: Text(
+                'Support will be available in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              enabled: false,
             ),
             ListTile(
-              leading: const Icon(Icons.bug_report_outlined),
-              title: const Text('Report an Issue'),
-              subtitle: const Text('Report bugs on GitHub'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _launchGitHubIssues(),
+              leading: Icon(Icons.bug_report_outlined, color: AppColors.textSecondary),
+              title: Text(
+                'Report an Issue',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+              subtitle: Text(
+                'Issue reporting will be available in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              enabled: false,
             ),
             ListTile(
-              leading: const Icon(Icons.rate_review_outlined),
-              title: const Text('Send Feedback'),
-              subtitle: const Text('Share your thoughts and suggestions'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showFeedbackDialog(),
+              leading: Icon(Icons.rate_review_outlined, color: AppColors.textSecondary),
+              title: Text(
+                'Send Feedback',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+              subtitle: Text(
+                'Feedback will be available in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              enabled: false,
             ),
           ]),
           const SizedBox(height: 16),
@@ -268,9 +263,9 @@ class _SettingsPageState extends State<SettingsPage> {
             child: ElevatedButton.icon(
               onPressed: () => _showSignOutDialog(),
               icon: const Icon(Icons.logout),
-              label: Text(AppLocalizations.of(context).signOut),
+              label: Text(AppLocalizations.of(context).signOut.toUpperCase()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -443,91 +438,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Export disaster relief data
-  ///
-  /// Exports all tasks and teams to JSON file for emergency data portability.
-  /// Works entirely offline using cached data.
-  Future<void> _exportData() async {
-    final localizations = AppLocalizations.of(context);
-
-    // Show loading indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      // Get current user
-      final authState = context.read<AuthBloc>().state;
-      if (authState is! AuthAuthenticated) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get tasks from TaskBloc
-      final taskState = context.read<TaskBloc>().state;
-      final tasks = taskState is TasksLoaded ? taskState.tasks : [];
-
-      // Get teams from TeamBloc
-      final teamState = context.read<TeamBloc>().state;
-      final teams = teamState.teams;
-
-      // Export data
-      final filePath = await DataExportService.instance.exportToJson(
-        tasks: List<TaskModel>.from(tasks),
-        teams: teams,
-        currentUser: authState.user,
-      );
-
-      // Close loading dialog
-      if (mounted) Navigator.of(context).pop();
-
-      // Show success and ask to share
-      if (mounted) {
-        final shouldShare = await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            title: Text(localizations.exportSuccessful),
-            content: Text(
-              '${localizations.dataExportedSuccessfully}\n\n'
-              '${localizations.exportedItemsCount(tasks.length, teams.length)}\n\n'
-              '${localizations.wouldYouLikeToShareTheFile}',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(localizations.notNow),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(localizations.share),
-              ),
-            ],
-          ),
-        );
-
-        // Share if requested
-        if (shouldShare == true) {
-          await DataExportService.instance.shareExportedFile(filePath);
-        }
-      }
-    } catch (e) {
-      // Close loading dialog
-      if (mounted) Navigator.of(context).pop();
-
-      // Show error
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${localizations.exportFailed}: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    }
-  }
-
   /// Show clear cache dialog
   void _showClearCacheDialog() {
     final localizations = AppLocalizations.of(context);
@@ -552,33 +462,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.warning),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(localizations.clear),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Show export data dialog
-  void _showExportDataDialog() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.exportData),
-        content: Text(localizations.thisWillExportYourTasksAndTeamDataToAFile),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(localizations.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _exportData();
-            },
-            child: Text(localizations.export),
           ),
         ],
       ),
@@ -629,139 +514,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Launch email client for support
-  Future<void> _launchEmail() async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: 'support@kapokapp.org',
-      queryParameters: {
-        'subject': 'Kapok App Support Request',
-        'body': 'Please describe your issue or question:\n\n'
-            '---\n'
-            'App Version: 1.0.0\n'
-            'Platform: ${Theme.of(context).platform.name}',
-      },
-    );
-
-    try {
-      if (await canLaunchUrl(emailUri)) {
-        await launchUrl(emailUri);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open email client'),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
-  }
-
-  /// Launch GitHub issues page
-  Future<void> _launchGitHubIssues() async {
-    final Uri githubUri = Uri.parse(
-      'https://github.com/ShreyanshMisra/Kapok/issues/new',
-    );
-
-    try {
-      if (await canLaunchUrl(githubUri)) {
-        await launchUrl(githubUri, mode: LaunchMode.externalApplication);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open browser'),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
-  }
-
-  /// Show feedback dialog
-  void _showFeedbackDialog() {
-    final TextEditingController feedbackController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Send Feedback'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'We appreciate your feedback! Let us know how we can improve Kapok.',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: feedbackController,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                hintText: 'Enter your feedback here...',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              // Send feedback via email
-              final feedback = feedbackController.text.trim();
-              if (feedback.isNotEmpty) {
-                final Uri emailUri = Uri(
-                  scheme: 'mailto',
-                  path: 'feedback@kapokapp.org',
-                  queryParameters: {
-                    'subject': 'Kapok App Feedback',
-                    'body': '$feedback\n\n'
-                        '---\n'
-                        'App Version: 1.0.0\n'
-                        'Platform: ${Theme.of(context).platform.name}',
-                  },
-                );
-
-                try {
-                  if (await canLaunchUrl(emailUri)) {
-                    await launchUrl(emailUri);
-                  }
-                } catch (e) {
-                  // Ignore errors
-                }
-              }
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Thank you for your feedback!'),
-                  ),
-                );
-              }
-            },
-            child: const Text('Send'),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// Show sign out confirmation dialog
   void _showSignOutDialog() {
     final localizations = AppLocalizations.of(context);
@@ -795,8 +547,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ).pushNamedAndRemoveUntil('/login', (route) => false);
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text(localizations.signOut),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(localizations.signOut.toUpperCase()),
           ),
         ],
       ),

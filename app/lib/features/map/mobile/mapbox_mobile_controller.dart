@@ -40,6 +40,7 @@ class MapboxMobileController {
   void Function(MapCameraState state)? onCameraIdle;
   VoidCallback? onMapReady;
   void Function(double latitude, double longitude)? onDoubleClick;
+  void Function(double latitude, double longitude)? onTap;
   void Function(TaskModel task)? onTaskMarkerTap;
 
   bool get interactive => _interactive;
@@ -58,9 +59,9 @@ class MapboxMobileController {
   StreamSubscription<void>? _locationSubscription;
 
   // Marker colors for different priorities
-  static const Color _highPriorityColor = Color(0xFFE53935); // Red
-  static const Color _mediumPriorityColor = Color(0xFFFB8C00); // Orange
-  static const Color _lowPriorityColor = Color(0xFF43A047); // Green
+  static const Color _highPriorityColor = Color(0xFF013576); // Kapok blue
+  static const Color _mediumPriorityColor = Color(0xFF013576); // Kapok blue
+  static const Color _lowPriorityColor = Color(0xFF013576); // Kapok blue
   static const Color _completedColor = Color(0xFF808080); // Gray
 
   /// Sets the MapboxMap instance from the widget callback
@@ -133,11 +134,11 @@ class MapboxMobileController {
     if (_mapboxMap == null || _markerImagesRegistered) return;
 
     try {
-      // Create and register marker images for each priority
-      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.warning);
-      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.error_outline);
-      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.check_circle);
-      await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle);
+      // Create and register marker images for each priority with star counts
+      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.star, starCount: 3);
+      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.star, starCount: 2);
+      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.star, starCount: 1);
+      await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle, starCount: 0);
       
       _markerImagesRegistered = true;
       debugPrint('Marker images registered successfully');
@@ -147,11 +148,11 @@ class MapboxMobileController {
   }
 
   /// Create a marker image with the specified color and icon, then add it to the map
-  Future<void> _addMarkerImage(String name, Color color, IconData icon) async {
+  Future<void> _addMarkerImage(String name, Color color, IconData icon, {int starCount = 0}) async {
     if (_mapboxMap == null) return;
 
     try {
-      final imageData = await _createMarkerImageData(color, icon);
+      final imageData = await _createMarkerImageData(color, icon, starCount: starCount);
       if (imageData != null) {
         // Add image to map style using MbxImage
         final mbxImage = MbxImage(
@@ -175,7 +176,7 @@ class MapboxMobileController {
   }
 
   /// Create marker image data as bytes
-  Future<Uint8List?> _createMarkerImageData(Color color, IconData icon) async {
+  Future<Uint8List?> _createMarkerImageData(Color color, IconData icon, {int starCount = 0}) async {
     try {
       // Create a picture recorder to draw the marker
       final recorder = ui.PictureRecorder();
@@ -244,27 +245,51 @@ class MapboxMobileController {
         ..close();
       canvas.drawPath(colorPinPath, colorPaint);
       
-      // Draw icon in center
-      final iconPainter = TextPainter(
-        text: TextSpan(
-          text: String.fromCharCode(icon.codePoint),
-          style: TextStyle(
-            fontSize: 24,
-            fontFamily: icon.fontFamily,
-            package: icon.fontPackage,
-            color: Colors.white,
+      // Draw icon or stars in center
+      if (starCount > 0) {
+        // Draw star characters for priority level
+        final starPainter = TextPainter(
+          text: TextSpan(
+            text: '★' * starCount,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              height: 1,
+            ),
           ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      iconPainter.layout();
-      iconPainter.paint(
-        canvas,
-        Offset(
-          (width - iconPainter.width) / 2,
-          pinCenterY - iconPainter.height / 2,
-        ),
-      );
+          textDirection: TextDirection.ltr,
+        );
+        starPainter.layout();
+        starPainter.paint(
+          canvas,
+          Offset(
+            (width - starPainter.width) / 2,
+            pinCenterY - starPainter.height / 2,
+          ),
+        );
+      } else {
+        final iconPainter = TextPainter(
+          text: TextSpan(
+            text: String.fromCharCode(icon.codePoint),
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: icon.fontFamily,
+              package: icon.fontPackage,
+              color: Colors.white,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        iconPainter.layout();
+        iconPainter.paint(
+          canvas,
+          Offset(
+            (width - iconPainter.width) / 2,
+            pinCenterY - iconPainter.height / 2,
+          ),
+        );
+      }
       
       // Convert to image
       final picture = recorder.endRecording();
@@ -289,6 +314,11 @@ class MapboxMobileController {
       ),
       MapAnimationOptions(duration: 500),
     );
+  }
+
+  /// Fly to a specific location with animation
+  Future<void> flyTo(double lat, double lon, double zoom) async {
+    await setCenter(lat, lon, zoom: zoom);
   }
 
   /// Fly to the user's current location
@@ -441,6 +471,7 @@ class MapboxMobileController {
   }
 
   void dispose() {
+    _pendingSingleTapTimer?.cancel();
     _locationSubscription?.cancel();
     _taskAnnotationManager = null;
     _taskAnnotationMap.clear();
@@ -451,6 +482,7 @@ class MapboxMobileController {
   // Track last tap time for double-tap detection
   DateTime? _lastTapTime;
   Point? _lastTapPoint;
+  Timer? _pendingSingleTapTimer;
   static const _doubleTapThresholdMs = 300;
 
   /// Builds the native MapWidget
@@ -492,11 +524,13 @@ class MapboxMobileController {
         // Check for double-tap to trigger onDoubleClick
         final now = DateTime.now();
         final point = context.point;
-        
+
         if (_lastTapTime != null && _lastTapPoint != null) {
           final timeDiff = now.difference(_lastTapTime!).inMilliseconds;
           if (timeDiff < _doubleTapThresholdMs) {
-            // Double-tap detected - use the first tap's coordinates
+            // Double-tap detected - cancel pending single-tap and fire double-click
+            _pendingSingleTapTimer?.cancel();
+            _pendingSingleTapTimer = null;
             final lat = _lastTapPoint!.coordinates.lat.toDouble();
             final lon = _lastTapPoint!.coordinates.lng.toDouble();
             onDoubleClick?.call(lat, lon);
@@ -505,12 +539,21 @@ class MapboxMobileController {
             return;
           }
         }
-        
+
         _lastTapTime = now;
         _lastTapPoint = point;
-        
-        // Call the original onMapTap if provided
-        onMapTap?.call(context);
+
+        // Schedule single-tap callback after threshold if no second tap occurs
+        _pendingSingleTapTimer?.cancel();
+        final tapLat = point.coordinates.lat.toDouble();
+        final tapLon = point.coordinates.lng.toDouble();
+        _pendingSingleTapTimer = Timer(
+          const Duration(milliseconds: _doubleTapThresholdMs),
+          () {
+            onTap?.call(tapLat, tapLon);
+            onMapTap?.call(context);
+          },
+        );
       },
       onLongTapListener: (context) {
         // Also support long-press as an alternative to double-tap

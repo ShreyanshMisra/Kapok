@@ -159,7 +159,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     Emitter<TeamState> emit,
   ) async {
     try {
-      emit(const TeamLoading());
+      emit(TeamLoading(teams: state.teams, members: state.members));
       Logger.team('Leaving team: ${event.teamId}');
 
       await _teamRepository.leaveTeam(
@@ -172,7 +172,11 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('User left team successfully');
     } catch (e) {
       Logger.team('Error leaving team', error: e);
-      emit(TeamError(message: e.toString()));
+      emit(TeamError(
+        message: e.toString(),
+        teams: state.teams,
+        members: state.members,
+      ));
     }
   }
 

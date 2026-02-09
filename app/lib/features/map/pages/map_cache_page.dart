@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../data/models/offline_map_region_model.dart';
 import '../../../data/repositories/offline_map_region_repository.dart';
 import '../widgets/mapbox_map_view.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Cache Page displays information about cached offline map regions
 class MapCachePage extends StatefulWidget {
@@ -64,7 +65,9 @@ class _MapCachePageState extends State<MapCachePage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: const Text('Offline Map Cache'),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -140,7 +143,7 @@ class _MapCachePageState extends State<MapCachePage> {
                   // All regions list
                   if (_allRegions.length > 1) ...[
                     Text(
-                      'All Cached Regions (${_allRegions.length})',
+                      'All Saved Regions (${_allRegions.length})',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

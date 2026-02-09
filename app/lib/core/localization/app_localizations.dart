@@ -121,6 +121,26 @@ class AppLocalizations {
   String get noTasksMatchFilters => _getString('noTasksMatchFilters');
   String get tryAdjustingFilters => _getString('tryAdjustingFilters');
 
+  // Task Category
+  String get taskCategory => _getString('taskCategory');
+  String get allCategories => _getString('allCategories');
+  String get filterByCategory => _getString('filterByCategory');
+  String get category => _getString('category');
+
+  // Date Filter
+  String get filterByDate => _getString('filterByDate');
+  String get allDates => _getString('allDates');
+  String get pastDay => _getString('pastDay');
+  String get pastWeek => _getString('pastWeek');
+  String get customDateRange => _getString('customDateRange');
+  String get selectDateRange => _getString('selectDateRange');
+
+  // Priority Stars
+  String get inProgress => _getString('inProgress');
+  String get oneStar => _getString('oneStar');
+  String get twoStars => _getString('twoStars');
+  String get threeStars => _getString('threeStars');
+
   // Task Severity Levels
   String get severity1 => _getString('severity1');
   String get severity2 => _getString('severity2');
@@ -267,6 +287,10 @@ class AppLocalizations {
   String get nctdrDescription => _getString('nctdrDescription');
   String get aFairResolutionLLC => _getString('aFairResolutionLLC');
   String get aFairResolutionLLCDescription => _getString('aFairResolutionLLCDescription');
+  String get kapokIcon => _getString('kapokIcon');
+  String get kapokIconDescription => _getString('kapokIconDescription');
+  String get diggingDeeperTechRoots => _getString('diggingDeeperTechRoots');
+  String get diggingDeeperTechRootsDescription => _getString('diggingDeeperTechRootsDescription');
   String get keyFeatures => _getString('keyFeatures');
   String get keyFeaturesDescription => _getString('keyFeaturesDescription');
   String get technology => _getString('technology');
@@ -436,6 +460,26 @@ class AppLocalizations {
         'noTasksMatchFilters': 'No Tasks Match Filters',
         'tryAdjustingFilters': 'Try adjusting your filters to see more results',
 
+        // Task Category
+        'taskCategory': 'Task Category',
+        'allCategories': 'All Categories',
+        'filterByCategory': 'Filter by Category',
+        'category': 'Category',
+
+        // Date Filter
+        'filterByDate': 'Filter by Date',
+        'allDates': 'All Dates',
+        'pastDay': 'Past Day',
+        'pastWeek': 'Past Week',
+        'customDateRange': 'Custom Date Range',
+        'selectDateRange': 'Select Date Range',
+
+        // Priority Stars
+        'oneStar': '1 Star',
+        'twoStars': '2 Stars',
+        'threeStars': '3 Stars',
+        'inProgress': 'In Progress',
+
         // Task Severity Levels
         'severity1': 'Low (1)',
         'severity2': 'Low-Medium (2)',
@@ -578,16 +622,20 @@ class AppLocalizations {
         'ourMissionDescription': 'Kapok is designed to help coordinate volunteers for disaster relief efforts. The app enables teams to work together efficiently during crisis situations by providing real-time task management, team coordination, and location-based services.',
         'nctdrDescription': 'The National Center for Technology and Dispute Resolution (NCTDR) is an organization that supports developing technology for conflict management. NCTDR works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
         'keyFeatures': 'Key Features',
-        'keyFeaturesDescription': '• Real-time task management and assignment\n• Team creation and member coordination\n• Location-based task mapping\n• Offline-first functionality for remote areas\n• Multi-language support (English & Spanish)\n• Role-based access control\n• Secure authentication and data protection',
+        'keyFeaturesDescription': '• Real-time task management and assignment\n• Team creation and member coordination\n• Location-based task mapping\n• Offline-first functionality for remote areas\n• Bilingual support (English and Spanish)\n• Role-based access control\n• Secure authentication (end-to-end encrypted) and data protection',
         'technology': 'Technology',
-        'technologyDescription': 'Kapok is built using modern mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work reliably even in areas with limited internet connectivity.',
+        'technologyDescription': 'Kapok is built using mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work reliably even in areas with limited internet connectivity.',
         'contactAndSupport': 'Contact & Support',
         'contactAndSupportDescription': 'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
         'builtWithLove': 'Built with ❤️ for disaster relief coordination',
         'legal': 'Legal',
-        'legalDescription': 'This application is developed for the organization A Fair Resolution, LLC. All rights reserved. The app is designed to assist in disaster relief coordination and should be used responsibly.',
+        'legalDescription': 'Kapok is owned by A Fair Resolution, LLC. All rights reserved. Kapok is designed to assist in disaster relief coordination and should be used responsibly.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
-        'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization that supports developing technology for conflict management. It works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
+        'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization dedicated to dispute prevention and resolution. It works to create innovative solutions that help communities prevent and resolve disputes and coordinate resources during challenging times.',
+        'kapokIcon': 'Kapok Icon',
+        'kapokIconDescription': 'Kapok\'s icon is a stylized representation of the kapok tree, known for its resilience and ability to thrive in challenging environments. The design reflects the app\'s mission to support disaster relief coordination in even the most difficult conditions.',
+        'diggingDeeperTechRoots': 'Digging Deeper: Tech Roots',
+        'diggingDeeperTechRootsDescription': 'Kapok\'s technology roots run deep, combining mobile development with cloud-based services to create a robust and reliable platform. The app leverages Flutter for cross-platform compatibility, Firebase for real-time data synchronization, and Mapbox for precise location services.',
         'myTeams': 'My Teams',
         'errorLoadingTeams': 'Error loading teams',
         'createNewTask': 'Create New Task',
@@ -634,7 +682,7 @@ class AppLocalizations {
         'enterTeamName': 'Enter team name',
         'descriptionOptional': 'Description (Optional)',
         'briefDescriptionOfTheTeamsPurpose': 'Brief description of the team\'s purpose',
-        'teamLeaderBenefits': 'Team Leader Benefits',
+        'teamLeaderBenefits': 'Team Leader Functionalities',
         'teamLeaderBenefitsDescription': '• Generate team codes for members to join\n• View and manage all team tasks\n• Assign tasks to team members\n• Edit task priorities and completion status\n• Manage team members',
         'teamCreatedSuccessfullyWithCode': 'Team "{teamName}" created successfully! Team code: {teamCode}',
         'youMustBeLoggedInToCreateTeams': 'You must be logged in to create teams',
@@ -744,6 +792,26 @@ class AppLocalizations {
         'filterByAssignment': 'Filtrar por Asignación',
         'noTasksMatchFilters': 'No Hay Tareas que Coincidan con los Filtros',
         'tryAdjustingFilters': 'Intenta ajustar tus filtros para ver más resultados',
+
+        // Task Category
+        'taskCategory': 'Categoría de Tarea',
+        'allCategories': 'Todas las Categorías',
+        'filterByCategory': 'Filtrar por Categoría',
+        'category': 'Categoría',
+
+        // Date Filter
+        'filterByDate': 'Filtrar por Fecha',
+        'allDates': 'Todas las Fechas',
+        'pastDay': 'Último Día',
+        'pastWeek': 'Última Semana',
+        'customDateRange': 'Rango de Fechas Personalizado',
+        'selectDateRange': 'Seleccionar Rango de Fechas',
+
+        // Priority Stars
+        'oneStar': '1 Estrella',
+        'twoStars': '2 Estrellas',
+        'threeStars': '3 Estrellas',
+        'inProgress': 'En Progreso',
 
         // Task Severity Levels
         'severity1': 'Baja (1)',
@@ -887,16 +955,20 @@ class AppLocalizations {
         'ourMissionDescription': 'Kapok está diseñado para ayudar a coordinar voluntarios para esfuerzos de ayuda en desastres. La aplicación permite que los equipos trabajen juntos de manera eficiente durante situaciones de crisis al proporcionar gestión de tareas en tiempo real, coordinación de equipos y servicios basados en ubicación.',
         'nctdrDescription': 'El Centro Nacional de Tecnología y Resolución de Disputas (NCTDR) es una organización que apoya el desarrollo de tecnología para la gestión de conflictos. NCTDR trabaja para crear soluciones innovadoras que ayuden a las comunidades a resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'keyFeatures': 'Características Clave',
-        'keyFeaturesDescription': '• Gestión y asignación de tareas en tiempo real\n• Creación de equipos y coordinación de miembros\n• Mapeo de tareas basado en ubicación\n• Funcionalidad sin conexión para áreas remotas\n• Soporte multiidioma (Inglés y Español)\n• Control de acceso basado en roles\n• Autenticación segura y protección de datos',
+        'keyFeaturesDescription': '• Gestión y asignación de tareas en tiempo real\n• Creación de equipos y coordinación de miembros\n• Mapeo de tareas basado en ubicación\n• Funcionalidad sin conexión para áreas remotas\n• Soporte bilingüe (Inglés y Español)\n• Control de acceso basado en roles\n• Autenticación segura (cifrado de extremo a extremo) y protección de datos',
         'technology': 'Tecnología',
-        'technologyDescription': 'Kapok está construido usando tecnologías móviles modernas incluyendo Flutter para desarrollo multiplataforma, Firebase para servicios backend, y Mapbox para servicios de ubicación. La aplicación está diseñada para funcionar de manera confiable incluso en áreas con conectividad limitada a internet.',
+        'technologyDescription': 'Kapok está construido usando tecnologías móviles incluyendo Flutter para desarrollo multiplataforma, Firebase para servicios backend, y Mapbox para servicios de ubicación. La aplicación está diseñada para funcionar de manera confiable incluso en áreas con conectividad limitada a internet.',
         'contactAndSupport': 'Contacto y Soporte',
         'contactAndSupportDescription': 'Para soporte técnico, solicitudes de funciones o consultas generales, por favor contacte a A Fair Resolution, LLC.',
         'builtWithLove': 'Construido con ❤️ para coordinación de ayuda en desastres',
         'legal': 'Legal',
-        'legalDescription': 'Esta aplicación está desarrollada para la organización A Fair Resolution, LLC. Todos los derechos reservados. La aplicación está diseñada para asistir en la coordinación de ayuda en desastres y debe usarse de manera responsable.',
+        'legalDescription': 'Kapok es propiedad de A Fair Resolution, LLC. Todos los derechos reservados. Kapok está diseñado para asistir en la coordinación de ayuda en desastres y debe usarse de manera responsable.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
-        'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización que apoya el desarrollo de tecnología para la gestión de conflictos. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a resolver disputas y coordinar recursos durante tiempos desafiantes.',
+        'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización dedicada a la prevención y resolución de disputas. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a prevenir y resolver disputas y coordinar recursos durante tiempos desafiantes.',
+        'kapokIcon': 'Icono de Kapok',
+        'kapokIconDescription': 'El icono de Kapok es una representación estilizada del árbol kapok, conocido por su resistencia y capacidad para prosperar en entornos desafiantes. El diseño refleja la misión de la aplicación de apoyar la coordinación de ayuda en desastres incluso en las condiciones más difíciles.',
+        'diggingDeeperTechRoots': 'Profundizando: Raíces Tecnológicas',
+        'diggingDeeperTechRootsDescription': 'Las raíces tecnológicas de Kapok son profundas, combinando desarrollo móvil con servicios basados en la nube para crear una plataforma robusta y confiable. La aplicación aprovecha Flutter para compatibilidad multiplataforma, Firebase para sincronización de datos en tiempo real y Mapbox para servicios de ubicación precisos.',
         'myTeams': 'Mis Equipos',
         'errorLoadingTeams': 'Error al cargar equipos',
         'createNewTask': 'Crear Nueva Tarea',
@@ -943,7 +1015,7 @@ class AppLocalizations {
         'enterTeamName': 'Ingresa el nombre del equipo',
         'descriptionOptional': 'Descripción (Opcional)',
         'briefDescriptionOfTheTeamsPurpose': 'Breve descripción del propósito del equipo',
-        'teamLeaderBenefits': 'Beneficios del Líder de Equipo',
+        'teamLeaderBenefits': 'Funcionalidades del Líder de Equipo',
         'teamLeaderBenefitsDescription': '• Generar códigos de equipo para que los miembros se unan\n• Ver y gestionar todas las tareas del equipo\n• Asignar tareas a miembros del equipo\n• Editar prioridades de tareas y estado de finalización\n• Gestionar miembros del equipo',
         'teamCreatedSuccessfullyWithCode': '¡Equipo "{teamName}" creado exitosamente! Código del equipo: {teamCode}',
         'youMustBeLoggedInToCreateTeams': 'Debes iniciar sesión para crear equipos',

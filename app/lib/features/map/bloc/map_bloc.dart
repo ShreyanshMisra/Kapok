@@ -102,7 +102,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         return;
       }
 
-      await _startNewBubble(emit);
+      await _startNewBubble(emit, targetLat: event.targetLat, targetLon: event.targetLon);
     } catch (e) {
       // Logger.task('Error refreshing offline bubble', error: e);
       emit(MapError(message: e.toString()));
@@ -177,13 +177,15 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     }
   }
 
-  Future<void> _startNewBubble(Emitter<MapState> emit) async {
+  Future<void> _startNewBubble(Emitter<MapState> emit, {double? targetLat, double? targetLon}) async {
     // Logger.task('Starting offline bubble refresh');
     await _progressSubscription?.cancel();
     final result = await mapRepository.loadRegionForCurrentLocation(
       radiusKm: 4.8, // ~3 miles
       zoomMin: 13,
       zoomMax: 18,
+      targetLat: targetLat,
+      targetLon: targetLon,
     );
     _activeRegion = result.region;
     _lastRefresh = DateTime.now();

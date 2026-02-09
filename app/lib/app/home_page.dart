@@ -98,7 +98,6 @@ class _HomePageState extends State<HomePage> {
       case 0: // Map page
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
           backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
@@ -108,7 +107,6 @@ class _HomePageState extends State<HomePage> {
       case 1: // Tasks page
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
           backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
@@ -118,12 +116,11 @@ class _HomePageState extends State<HomePage> {
       case 2: // Teams page
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Navigate to create team page
-            Navigator.of(context).pushNamed('/create-team');
+            Navigator.of(context).pushNamed('/join-team');
           },
           backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
           foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
-          child: const Icon(Icons.group_add),
+          child: const Icon(Icons.person_add),
         );
       default:
         return null;
@@ -225,9 +222,9 @@ class AppDrawer extends StatelessWidget {
               context.read<AuthBloc>().add(SignOutRequested());
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: AppColors.primary,
             ),
-            child: Text(localizations.signOut),
+            child: Text(localizations.signOut.toUpperCase()),
           ),
         ],
       ),

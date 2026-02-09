@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/localization/app_localizations.dart';
+import '../core/widgets/kapok_logo.dart';
 
-/// About page with information about Kapok and NCTDR
+/// About page with information about Kapok and A Fair Resolution, LLC
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
@@ -14,6 +15,8 @@ class AboutPage extends StatelessWidget {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).about),
+        centerTitle: true,
+        actions: const [KapokLogo()],
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -21,36 +24,17 @@ class AboutPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header with icon tagline wordmark
             Center(
-              child: Column(
-                children: [
-                  Image.asset(
-                    'assets/images/kapok_icon.png',
-                    height: 120,
-                    width: 120,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context).appName,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context).appDescription,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              child: Image.asset(
+                theme.brightness == Brightness.dark
+                    ? 'assets/images/icon_tagline/Kapok_Icon_Dark_Tagline_Wordmark.png'
+                    : 'assets/images/icon_tagline/KapokIcon_Light_Tagline_Wordmark.png',
+                width: 220,
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // Mission section
             _buildSection(
               context,
@@ -59,7 +43,25 @@ class AboutPage extends StatelessWidget {
               Icons.flag,
             ),
             const SizedBox(height: 24),
-            
+
+            // Kapok Icon section
+            _buildSection(
+              context,
+              AppLocalizations.of(context).kapokIcon,
+              AppLocalizations.of(context).kapokIconDescription,
+              Icons.park,
+            ),
+            const SizedBox(height: 24),
+
+            // Digging Deeper: Tech Roots section
+            _buildSection(
+              context,
+              AppLocalizations.of(context).diggingDeeperTechRoots,
+              AppLocalizations.of(context).diggingDeeperTechRootsDescription,
+              Icons.memory,
+            ),
+            const SizedBox(height: 24),
+
             // A Fair Resolution, LLC section
             _buildSection(
               context,
@@ -68,7 +70,7 @@ class AboutPage extends StatelessWidget {
               Icons.business,
             ),
             const SizedBox(height: 24),
-            
+
             // Features section
             _buildSection(
               context,
@@ -77,7 +79,7 @@ class AboutPage extends StatelessWidget {
               Icons.star,
             ),
             const SizedBox(height: 24),
-            
+
             // Technology section
             _buildSection(
               context,
@@ -86,49 +88,7 @@ class AboutPage extends StatelessWidget {
               Icons.phone_android,
             ),
             const SizedBox(height: 24),
-            
-            // Contact section
-            _buildSection(
-              context,
-              AppLocalizations.of(context).contactAndSupport,
-              AppLocalizations.of(context).contactAndSupportDescription,
-              Icons.contact_support,
-            ),
-            const SizedBox(height: 32),
-            
-            // Version info
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    '${AppLocalizations.of(context).appVersionLabel} ${AppLocalizations.of(context).appVersion}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    AppLocalizations.of(context).builtWithLove,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            
+
             // Legal section
             _buildSection(
               context,

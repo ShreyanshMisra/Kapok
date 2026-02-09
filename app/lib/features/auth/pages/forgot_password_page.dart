@@ -6,6 +6,7 @@ import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Forgot password page for password reset
 class ForgotPasswordPage extends StatefulWidget {
@@ -35,10 +36,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        centerTitle: true,
         title: Text(AppLocalizations.of(context).resetPassword),
+        actions: const [KapokLogo()],
         titleTextStyle: TextStyle(
           color: theme.colorScheme.primary,
           fontSize: 20,
@@ -52,7 +55,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             } else if (state is PasswordResetSent) {
@@ -62,7 +65,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(AppLocalizations.of(context).passwordResetEmailSentTo.replaceAll('{email}', state.email)),
-                  backgroundColor: AppColors.success,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             }

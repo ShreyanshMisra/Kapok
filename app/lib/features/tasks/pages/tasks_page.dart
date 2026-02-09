@@ -15,6 +15,9 @@ import '../../teams/bloc/team_state.dart';
 import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
+import '../../../core/widgets/kapok_logo.dart';
+import '../../../core/widgets/priority_stars.dart';
+import '../../../core/enums/task_category.dart';
 
 class TasksPage extends StatefulWidget {
   const TasksPage({super.key});
@@ -27,6 +30,9 @@ class _TasksPageState extends State<TasksPage> {
   // Filter state
   TaskStatus? _selectedStatus;
   TaskPriority? _selectedPriority;
+  TaskCategory? _selectedCategory;
+  String? _selectedDateFilter; // 'pastWeek' or 'custom'
+  DateTimeRange? _customDateRange;
   String? _selectedAssignment; // 'me', 'unassigned', or null for all
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -88,6 +94,32 @@ class _TasksPageState extends State<TasksPage> {
         }
       }
 
+      // Filter by category
+      if (_selectedCategory != null && task.category != _selectedCategory) {
+        return false;
+      }
+
+      // Filter by date
+      if (_selectedDateFilter != null) {
+        final now = DateTime.now();
+        if (_selectedDateFilter == 'pastDay') {
+          final dayAgo = now.subtract(const Duration(days: 1));
+          if (task.createdAt.isBefore(dayAgo)) {
+            return false;
+          }
+        } else if (_selectedDateFilter == 'pastWeek') {
+          final weekAgo = now.subtract(const Duration(days: 7));
+          if (task.createdAt.isBefore(weekAgo)) {
+            return false;
+          }
+        } else if (_selectedDateFilter == 'custom' && _customDateRange != null) {
+          if (task.createdAt.isBefore(_customDateRange!.start) ||
+              task.createdAt.isAfter(_customDateRange!.end.add(const Duration(days: 1)))) {
+            return false;
+          }
+        }
+      }
+
       // Filter by search query
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
@@ -106,6 +138,9 @@ class _TasksPageState extends State<TasksPage> {
     setState(() {
       _selectedStatus = null;
       _selectedPriority = null;
+      _selectedCategory = null;
+      _selectedDateFilter = null;
+      _customDateRange = null;
       _selectedAssignment = null;
       _searchQuery = '';
       _searchController.clear();
@@ -115,6 +150,8 @@ class _TasksPageState extends State<TasksPage> {
   bool get _hasActiveFilters {
     return _selectedStatus != null ||
         _selectedPriority != null ||
+        _selectedCategory != null ||
+        _selectedDateFilter != null ||
         _selectedAssignment != null ||
         _searchQuery.isNotEmpty;
   }
@@ -161,9 +198,12 @@ class _TasksPageState extends State<TasksPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).tasks),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         elevation: 0,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadTasks),
+          const KapokLogo(),
         ],
       ),
       body: MultiBlocListener(
@@ -196,7 +236,7 @@ class _TasksPageState extends State<TasksPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Task deleted successfully'),
-                    backgroundColor: AppColors.success,
+                    backgroundColor: AppColors.primary,
                     duration: Duration(seconds: 2),
                   ),
                 );
@@ -315,7 +355,9 @@ class _TasksPageState extends State<TasksPage> {
                     ? localizations.allStatuses
                     : _selectedStatus == TaskStatus.completed
                         ? localizations.completed
-                        : localizations.pending,
+                        : _selectedStatus == TaskStatus.inProgress
+                            ? localizations.inProgress
+                            : localizations.pending,
                 icon: Icons.task_alt,
                 isSelected: _selectedStatus != null,
                 onTap: () => _showStatusFilterDialog(),
@@ -325,13 +367,35 @@ class _TasksPageState extends State<TasksPage> {
                 label: _selectedPriority == null
                     ? localizations.allPriorities
                     : _selectedPriority == TaskPriority.high
-                        ? localizations.high
+                        ? localizations.threeStars
                         : _selectedPriority == TaskPriority.medium
-                            ? localizations.medium
-                            : localizations.low,
+                            ? localizations.twoStars
+                            : localizations.oneStar,
                 icon: Icons.flag,
                 isSelected: _selectedPriority != null,
                 onTap: () => _showPriorityFilterDialog(),
+              ),
+              // Category filter
+              _buildFilterChip(
+                label: _selectedCategory == null
+                    ? localizations.allCategories
+                    : _selectedCategory!.displayName,
+                icon: Icons.category,
+                isSelected: _selectedCategory != null,
+                onTap: () => _showCategoryFilterDialog(),
+              ),
+              // Date filter
+              _buildFilterChip(
+                label: _selectedDateFilter == null
+                    ? localizations.allDates
+                    : _selectedDateFilter == 'pastDay'
+                        ? localizations.pastDay
+                        : _selectedDateFilter == 'pastWeek'
+                            ? localizations.pastWeek
+                            : localizations.customDateRange,
+                icon: Icons.calendar_today,
+                isSelected: _selectedDateFilter != null,
+                onTap: () => _showDateFilterDialog(),
               ),
               // Assignment filter
               _buildFilterChip(
@@ -424,6 +488,21 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
+              title: Text(localizations.inProgress),
+              leading: Radio<TaskStatus?>(
+                value: TaskStatus.inProgress,
+                groupValue: _selectedStatus,
+                onChanged: (value) {
+                  setState(() => _selectedStatus = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedStatus = TaskStatus.inProgress);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
               title: Text(localizations.completed),
               leading: Radio<TaskStatus?>(
                 value: TaskStatus.completed,
@@ -469,7 +548,7 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
-              title: Text(localizations.high),
+              title: Text(localizations.threeStars),
               leading: Radio<TaskPriority?>(
                 value: TaskPriority.high,
                 groupValue: _selectedPriority,
@@ -484,7 +563,7 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
-              title: Text(localizations.medium),
+              title: Text(localizations.twoStars),
               leading: Radio<TaskPriority?>(
                 value: TaskPriority.medium,
                 groupValue: _selectedPriority,
@@ -499,7 +578,7 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
-              title: Text(localizations.low),
+              title: Text(localizations.oneStar),
               leading: Radio<TaskPriority?>(
                 value: TaskPriority.low,
                 groupValue: _selectedPriority,
@@ -517,6 +596,168 @@ class _TasksPageState extends State<TasksPage> {
         ),
       ),
     );
+  }
+
+  void _showCategoryFilterDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.filterByCategory),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(localizations.allCategories),
+                leading: Radio<TaskCategory?>(
+                  value: null,
+                  groupValue: _selectedCategory,
+                  onChanged: (value) {
+                    setState(() => _selectedCategory = value);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                onTap: () {
+                  setState(() => _selectedCategory = null);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ...TaskCategory.values.map((category) => ListTile(
+                title: Text(category.displayName),
+                leading: Radio<TaskCategory?>(
+                  value: category,
+                  groupValue: _selectedCategory,
+                  onChanged: (value) {
+                    setState(() => _selectedCategory = value);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                onTap: () {
+                  setState(() => _selectedCategory = category);
+                  Navigator.of(context).pop();
+                },
+              )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDateFilterDialog() {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.filterByDate),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(localizations.allDates),
+              leading: Radio<String?>(
+                value: null,
+                groupValue: _selectedDateFilter,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedDateFilter = null;
+                    _customDateRange = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() {
+                  _selectedDateFilter = null;
+                  _customDateRange = null;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.pastDay),
+              leading: Radio<String?>(
+                value: 'pastDay',
+                groupValue: _selectedDateFilter,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedDateFilter = 'pastDay';
+                    _customDateRange = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() {
+                  _selectedDateFilter = 'pastDay';
+                  _customDateRange = null;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.pastWeek),
+              leading: Radio<String?>(
+                value: 'pastWeek',
+                groupValue: _selectedDateFilter,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedDateFilter = 'pastWeek';
+                    _customDateRange = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() {
+                  _selectedDateFilter = 'pastWeek';
+                  _customDateRange = null;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.customDateRange),
+              leading: Radio<String?>(
+                value: 'custom',
+                groupValue: _selectedDateFilter,
+                onChanged: (_) async {
+                  Navigator.of(context).pop();
+                  await _showDateRangePicker();
+                },
+              ),
+              onTap: () async {
+                Navigator.of(context).pop();
+                await _showDateRangePicker();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showDateRangePicker() async {
+    final localizations = AppLocalizations.of(context);
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: _customDateRange ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 30)),
+            end: now,
+          ),
+      helpText: localizations.selectDateRange,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDateFilter = 'custom';
+        _customDateRange = picked;
+      });
+    }
   }
 
   void _showAssignmentFilterDialog() {
@@ -774,7 +1015,7 @@ class _TasksPageState extends State<TasksPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      task.title,
+                      '${task.category.displayName}: ${task.title}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,
@@ -782,7 +1023,7 @@ class _TasksPageState extends State<TasksPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _buildPriorityBadge(task.priority),
+                  PriorityStars(priority: task.priority),
                 ],
               ),
               const SizedBox(height: 8),
@@ -879,78 +1120,33 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
-  Widget _buildPriorityBadge(TaskPriority priority) {
-    final localizations = AppLocalizations.of(context);
-    Color color;
-    String label;
-
-    switch (priority) {
-      case TaskPriority.high:
-        color = AppColors.error;
-        label = localizations.high;
-        break;
-      case TaskPriority.medium:
-        color = AppColors.warning;
-        label = localizations.medium;
-        break;
-      case TaskPriority.low:
-        color = AppColors.success;
-        label = localizations.low;
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.circle, size: 8, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Priority badge replaced by PriorityStars widget
 
   Widget _buildStatusChip(TaskStatus status) {
-    final localizations = AppLocalizations.of(context);
-    final bool completed = status == TaskStatus.completed;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: completed
-            ? AppColors.success.withOpacity(0.1)
-            : AppColors.info.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: completed ? AppColors.success : AppColors.info,
+          color: AppColors.primary,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            completed ? Icons.check_circle_outline : Icons.pending_outlined,
+            status == TaskStatus.completed
+                ? Icons.check_circle_outline
+                : Icons.pending_outlined,
             size: 16,
-            color: completed ? AppColors.success : AppColors.info,
+            color: AppColors.primary,
           ),
           const SizedBox(width: 4),
           Text(
-            completed ? localizations.completed : localizations.open,
+            status.displayName,
             style: TextStyle(
-              color: completed ? AppColors.success : AppColors.info,
+              color: AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),

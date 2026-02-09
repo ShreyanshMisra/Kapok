@@ -13,6 +13,7 @@ import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
 import '../../../data/models/team_model.dart';
 import 'package:flutter/services.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Create team page for team leaders
 class CreateTeamPage extends StatefulWidget {
@@ -47,7 +48,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               content: const Text(
                 'Only team leaders and admins can create teams',
               ),
-              backgroundColor: AppColors.error,
+              backgroundColor: AppColors.primary,
             ),
           );
           Navigator.of(context).pop();
@@ -63,7 +64,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).createTeam),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: BlocListener<TeamBloc, TeamState>(
         listener: (context, state) {
@@ -71,7 +74,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TeamCreated) {
@@ -116,17 +119,6 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  ).setUpANewTeamForDisasterReliefCoordination,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -271,7 +263,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToCreateTeams,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);

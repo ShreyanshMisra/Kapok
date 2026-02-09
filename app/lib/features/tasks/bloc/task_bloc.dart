@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/enums/task_category.dart';
 import '../../../core/enums/task_priority.dart';
 import '../../../core/enums/task_status.dart';
 import '../../../core/utils/logger.dart';
@@ -60,6 +61,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         address: null, // Will be reverse-geocoded if needed
         status: status,
         priority: priority,
+        category: TaskCategory.fromString(event.category),
         dueDate: null,
         createdAt: now,
         updatedAt: now,
@@ -213,6 +215,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         taskDescription: event.taskDescription,
         taskCompleted: event.taskCompleted,
         assignedTo: event.assignedTo,
+        category: event.category,
       );
 
       emit(TaskUpdated(task: task));

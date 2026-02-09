@@ -6,6 +6,7 @@ import '../../../core/utils/validators.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
 import '../../../features/auth/bloc/auth_event.dart';
 import '../../../features/auth/bloc/auth_state.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Edit profile page for updating user information
 class EditProfilePage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     // TODO: Initialize with current user data
-    _nameController.text = 'Current User Name';
+    _nameController.text = 'Full Name';
     _selectedRole = 'Other';
   }
 
@@ -48,6 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).editProfile),
+        centerTitle: true,
         elevation: 0,
         actions: [
           TextButton(
@@ -60,6 +62,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             ),
           ),
+          const KapokLogo(),
         ],
       ),
       body: BlocListener<AuthBloc, AuthState>(
@@ -68,14 +71,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is ProfileUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(AppLocalizations.of(context).profileUpdatedSuccessfully),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
               ),
             );
             Navigator.of(context).pop();
@@ -210,13 +213,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Profile displays your name initial',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
           ),
         ),
       ],

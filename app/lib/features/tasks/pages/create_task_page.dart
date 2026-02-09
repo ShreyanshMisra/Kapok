@@ -6,6 +6,7 @@ import '../../../core/constants/mapbox_constants.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/services/geocode_service.dart';
 import '../../../core/enums/task_priority.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../data/models/team_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../app/router.dart';
@@ -22,6 +23,9 @@ import '../../map/models/map_camera_state.dart';
 import '../../map/mobile/mapbox_mobile_controller.dart';
 import '../../map/web/mapbox_web_controller_stub.dart'
     if (dart.library.html) '../../map/web/mapbox_web_controller.dart';
+import '../../../core/widgets/kapok_logo.dart';
+import '../../../core/widgets/priority_stars.dart';
+import '../../../core/enums/task_category.dart';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({super.key});
@@ -37,6 +41,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   final _addressController = TextEditingController();
 
   TaskPriority _selectedPriority = TaskPriority.medium;
+  TaskCategory _selectedCategory = TaskCategory.other;
   bool _isLoadingLocation = false;
   bool _initialLocationLoaded = false; // Track if initial location fetch completed
   double? _latitude;
@@ -206,8 +211,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     }
   }
 
-  /// Handle double-click on map to set location
-  Future<void> _handleMapDoubleClick(double latitude, double longitude) async {
+  /// Handle tap on map to set location
+  Future<void> _handleMapTap(double latitude, double longitude) async {
     setState(() {
       _latitude = latitude;
       _longitude = longitude;
@@ -317,6 +322,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).createTask),
+        centerTitle: true,
         elevation: 0,
         actions: [
           if (_isLoadingLocation)
@@ -331,6 +337,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 ),
               ),
             ),
+          const KapokLogo(),
         ],
       ),
       body: BlocListener<TaskBloc, TaskState>(
@@ -343,7 +350,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TaskCreated) {
@@ -352,7 +359,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 content: Text(
                   'Task "${state.task.title}" created successfully',
                 ),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
               ),
             );
             Navigator.of(context).pop();
@@ -401,7 +408,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       _mobileMapController = controller;
                     });
                   },
-                  onDoubleClick: _handleMapDoubleClick,
+                  onTap: _handleMapTap,
                   onCameraIdle: (camera) {
                     setState(() {
                       _currentCamera = camera;
@@ -427,7 +434,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Double-click on the map to select a location for your task',
+                            'Tap on the map to select a location for your task',
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: theme.colorScheme.onSurface),
                           ),
@@ -688,7 +695,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     builder: (context, teamState) {
                                       if (teamState is TeamMembersLoaded &&
                                           _selectedTeamId != null) {
-                                        _teamMembers = teamState.members;
+                                        _teamMembers = List.of(teamState.members)
+                                          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
                                       }
 
                                       if (_selectedTeamId == null) {
@@ -726,6 +734,17 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         );
                                       }
 
+                                      // Filter members based on role
+                                      final currentAuthState = context.read<AuthBloc>().state;
+                                      final isTeamMember = currentAuthState is AuthAuthenticated &&
+                                          currentAuthState.user.userRole == UserRole.teamMember;
+                                      final currentUserId = currentAuthState is AuthAuthenticated
+                                          ? currentAuthState.user.id
+                                          : '';
+                                      final filteredMembers = isTeamMember
+                                          ? _teamMembers.where((m) => m.id == currentUserId).toList()
+                                          : _teamMembers;
+
                                       return DropdownButtonFormField<String>(
                                         value: _selectedAssignedTo,
                                         decoration: InputDecoration(
@@ -753,7 +772,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                             value: null,
                                             child: Text('Unassigned'),
                                           ),
-                                          ..._teamMembers.map((
+                                          ...filteredMembers.map((
                                             UserModel member,
                                           ) {
                                             return DropdownMenuItem<String>(
@@ -801,6 +820,50 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                   ),
                                   const SizedBox(height: 16),
 
+                                  // Category selector
+                                  DropdownButtonFormField<TaskCategory>(
+                                    value: _selectedCategory,
+                                    decoration: InputDecoration(
+                                      labelText: AppLocalizations.of(
+                                        context,
+                                      ).taskCategory,
+                                      prefixIcon: const Icon(
+                                        Icons.category_outlined,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
+                                    items: TaskCategory.values.map((
+                                      TaskCategory category,
+                                    ) {
+                                      return DropdownMenuItem<TaskCategory>(
+                                        value: category,
+                                        child: Text(category.displayName),
+                                      );
+                                    }).toList(),
+                                    onChanged: (TaskCategory? newValue) {
+                                      if (newValue != null) {
+                                        setState(() {
+                                          _selectedCategory = newValue;
+                                        });
+                                      }
+                                    },
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return AppLocalizations.of(context).taskCategory;
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+
                                   // Priority selector
                                   DropdownButtonFormField<TaskPriority>(
                                     value: _selectedPriority,
@@ -828,13 +891,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         value: priority,
                                         child: Row(
                                           children: [
-                                            Icon(
-                                              Icons.circle,
-                                              size: 12,
-                                              color: _getPriorityColor(
-                                                priority,
-                                              ),
-                                            ),
+                                            PriorityStars(priority: priority, size: 14),
                                             const SizedBox(width: 8),
                                             Text(priority.displayName),
                                           ],
@@ -910,16 +967,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
   }
 
-  Color _getPriorityColor(TaskPriority priority) {
-    switch (priority) {
-      case TaskPriority.low:
-        return const Color(0xFF4CAF50); // Green
-      case TaskPriority.medium:
-        return const Color(0xFFFFC107); // Amber
-      case TaskPriority.high:
-        return const Color(0xFFF44336); // Red
-    }
-  }
+  // Priority color replaced by PriorityStars widget
 
   Future<void> _handleCreateTask() async {
     if (_formKey.currentState!.validate()) {
@@ -930,7 +978,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             content: Text(
               'Please select a location on the map or enter an address',
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         return;
@@ -944,7 +992,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToCreateTasks,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
@@ -957,7 +1005,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Please select a team'),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         return;
@@ -997,6 +1045,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           latitude: _latitude!,
           longitude: _longitude!,
           createdBy: user.id,
+          category: _selectedCategory.value,
         ),
       );
 

@@ -6,6 +6,7 @@ import '../../../features/auth/bloc/auth_bloc.dart';
 import '../../../features/auth/bloc/auth_state.dart';
 import 'edit_profile_page.dart';
 import 'settings_page.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Profile page showing user information
 class ProfilePage extends StatelessWidget {
@@ -20,6 +21,8 @@ class ProfilePage extends StatelessWidget {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).profile),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         elevation: 0,
         actions: [
           IconButton(
@@ -32,6 +35,7 @@ class ProfilePage extends StatelessWidget {
               );
             },
           ),
+          const KapokLogo(),
         ],
       ),
       body: BlocBuilder<AuthBloc, AuthState>(

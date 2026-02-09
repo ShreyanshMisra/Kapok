@@ -6,7 +6,7 @@ Kapok Terms of Service Agreement
 
 Welcome to Kapok
 
-Kapok is a volunteer coordination platform designed to assist in organizing disaster relief efforts. Kapok is managed and operated by the National Center for Technology and Dispute Resolution ("NCTDR") and was developed in collaboration with BUILD UMass. By using Kapok, you agree to these Terms of Service ("Terms").
+Kapok is a volunteer coordination platform designed to assist in organizing disaster relief efforts. Kapok is owned by and developed under the auspices of A Fair Resolution, LLC. Volunteers built Kapok including in collaboration with A Fair Resolution, LLC. By using Kapok, you agree to these Terms of Service ("Terms"). Thank you to the dedicated volunteers involved in the Kapok project.
 
 1. Acceptance of Terms
 
@@ -25,7 +25,7 @@ Users agree to use Kapok solely for volunteer coordination in disaster relief se
 
 3. Disclaimer of Warranties
 
-Kapok is provided "as-is" and "as available," with no warranties of any kind. NCTDR and BUILD UMass disclaim any warranties, express or implied, including but not limited to the app's suitability for a specific purpose, functionality in offline environments, or non-infringement.
+Kapok is provided "as-is" and "as available," with no warranties of any kind. A Fair Resolution, LLC and its volunteers disclaim any warranties, express or implied, including but not limited to the app's suitability for a specific purpose, functionality in offline environments, or non-infringement.
 
 Kapok depends on external services like Firebase and MapBox; we do not guarantee continuous, uninterrupted, or secure access to the app. Users acknowledge that features like offline-first capabilities may be limited by external conditions or third-party service availability.
 
@@ -33,9 +33,9 @@ Kapok depends on external services like Firebase and MapBox; we do not guarantee
 
 To the fullest extent permitted by law:
 
-• NCTDR, BUILD UMass, and their affiliates are not liable for any direct, indirect, incidental, or consequential damages arising from your use or inability to use Kapok.
+\u2022 A Fair Resolution, LLC and its volunteers are not liable for any direct, indirect, incidental, or consequential damages arising from your use or inability to use Kapok.
 
-• Users accept responsibility for risks associated with volunteer coordination, including personal safety and task execution. Kapok is a coordination tool only and does not assume responsibility for outcomes related to user activities, decisions, or actions taken as a result of app use.
+\u2022 Users accept responsibility for risks associated with volunteer coordination, including personal safety and task execution. Kapok is a coordination tool only and does not assume responsibility for outcomes related to user activities, decisions, or actions taken as a result of app use.
 
 5. User Data and Privacy
 
@@ -43,22 +43,22 @@ To the fullest extent permitted by law:
 Kapok may collect data, including account information and task details, for operational purposes. Information is stored on Firebase, which adheres to privacy and security standards but may be subject to third-party risks.
 
 5.2 Offline Data
-Users understand and agree that data collected offline is stored locally on their device until an internet connection is available to synchronize it with our servers. NCTDR and BUILD UMass are not responsible for data loss or corruption during this synchronization process.
+Users understand and agree that data collected offline is stored locally on their device until an internet connection is available to synchronize it with our servers. A Fair Resolution, LLC is not responsible for data loss or corruption during this synchronization process.
 
 5.3 Personal Data Security
-NCTDR prioritizes data security; however, no method of transmission over the internet or electronic storage is 100% secure. Users acknowledge and accept the inherent security risks.
+A Fair Resolution, LLC prioritizes data security; however, no method of transmission over the internet or electronic storage is 100% secure. Users acknowledge and accept the inherent security risks.
 
 6. Intellectual Property
 
-All content, trademarks, and logos associated with Kapok, including but not limited to the Kapok tree logo, are the property of NCTDR. Users are granted a limited license to use the app for its intended purpose only.
+All content, trademarks, and logos associated with Kapok, including but not limited to the Kapok tree logo, are the property of A Fair Resolution, LLC. Users are granted a limited license to use the app for its intended purpose only.
 
 7. Modifications to Terms
 
-NCTDR may modify these Terms at any time. Continued use of Kapok following such changes constitutes acceptance of the updated Terms.
+A Fair Resolution, LLC may modify these Terms at any time. Continued use of Kapok following such changes constitutes acceptance of the updated Terms.
 
 8. Contact Us
 
-If you have any questions or concerns regarding these Terms, please contact the National Center for Technology and Dispute Resolution.
+If you have any questions or concerns regarding these Terms, please contact A Fair Resolution, LLC.
 ''';
 
   /// Private constructor to prevent instantiation

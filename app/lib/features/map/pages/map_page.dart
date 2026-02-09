@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/mapbox_constants.dart';
-import '../../../core/services/network_checker.dart';
+import '../../../core/enums/task_priority.dart';
 import '../../../core/services/geolocation_service.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
 import '../bloc/map_state.dart';
@@ -22,6 +24,7 @@ import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../teams/bloc/team_state.dart';
 import '../../../app/router.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Map page showing interactive map with live, location-based offline map functionality
 /// It orchestrates a continuous cycle of "current location → live snapshot → offline cache refresh"
@@ -33,58 +36,18 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  bool _testOfflineMode = false;
-  bool _showCacheOverlay = false;
   MapboxWebController? _webMapController;
   MapboxMobileController? _mobileMapController;
 
   // User's current location for initial map position
   MapCameraState? _userLocationCamera;
 
-  // Pre-computed overlay circle coordinates (in screen pixels)
-  OverlayCircle? _overlayCircle;
+  // Search state
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isSearching = false;
+  bool _showSearchResults = false;
 
-
-  void _updateOverlayCircle(OfflineMapRegion region) async {
-    if (_webMapController == null || !_showCacheOverlay) {
-      _overlayCircle = null;
-      return;
-    }
-
-    // Project region center to screen coordinates
-    final centerScreen = _webMapController!.projectLatLonToScreen(
-      region.centerLat,
-      region.centerLon,
-    );
-
-    if (centerScreen == null) {
-      _overlayCircle = null;
-      return;
-    }
-
-    // Calculate point 4.8km north of center for radius calculation
-    final latDelta = 4.8 / 111.0; // 4.8 km in degrees
-    final northLat = (region.centerLat + latDelta).clamp(-90.0, 90.0);
-    final northScreen = _webMapController!.projectLatLonToScreen(
-      northLat,
-      region.centerLon,
-    );
-
-    if (northScreen == null) {
-      _overlayCircle = null;
-      return;
-    }
-
-    // Calculate radius in pixels
-    final radiusPixels = (northScreen - centerScreen).distance;
-
-    setState(() {
-      _overlayCircle = OverlayCircle(
-        center: centerScreen,
-        radius: radiusPixels,
-      );
-    });
-  }
 
   @override
   void initState() {
@@ -142,6 +105,25 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  /// Fly to user's current location
+  void _goToCurrentLocation() async {
+    try {
+      final geolocationService = GeolocationService.instance;
+      final position = await geolocationService.getCurrentPosition();
+      _webMapController?.flyTo(position.latitude, position.longitude, 15.0);
+      _mobileMapController?.flyTo(position.latitude, position.longitude, 15.0);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not get current location: $e'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     // Dispose map controllers when page is disposed (e.g., on logout)
@@ -149,23 +131,8 @@ class _MapPageState extends State<MapPage> {
     _webMapController = null;
     _mobileMapController?.dispose();
     _mobileMapController = null;
+    _searchController.dispose();
     super.dispose();
-  }
-
-  void _toggleTestOfflineMode() {
-    setState(() {
-      _testOfflineMode = !_testOfflineMode;
-      NetworkChecker.instance.setTestModeOverride(
-        _testOfflineMode ? true : null,
-      );
-    });
-    // Refresh the map state to reflect offline mode change
-    final currentState = context.read<MapBloc>().state;
-    if (currentState is MapReady) {
-      context.read<MapBloc>().add(
-        const OfflineBubbleRefreshRequested(force: true),
-      );
-    }
   }
 
   @override
@@ -183,11 +150,12 @@ class _MapPageState extends State<MapPage> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           elevation: 0,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
+          automaticallyImplyLeading: false,
+          centerTitle: true,
           title: Text(AppLocalizations.of(context).map),
           actions: [
             IconButton(
@@ -197,13 +165,7 @@ class _MapPageState extends State<MapPage> {
                 Navigator.of(context).pushNamed('/map-cache');
               },
             ),
-            // Note: Map filters intentionally deferred - tasks already have filtering in TasksPage
-            IconButton(
-              icon: const Icon(Icons.list),
-              onPressed: () {
-                Navigator.of(context).pushNamed(AppRouter.tasks);
-              },
-            ),
+            const KapokLogo(),
           ],
         ),
         body: MultiBlocListener(
@@ -234,7 +196,7 @@ class _MapPageState extends State<MapPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Error: ${state.message}'),
-                      backgroundColor: AppColors.error,
+                      backgroundColor: AppColors.primary,
                     ),
                   );
                 }
@@ -378,6 +340,154 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+  Widget _buildSearchBar(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Card(
+          color: AppColors.surface.withValues(alpha: 0.95),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context).searchLocation,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchResults = [];
+                          _showSearchResults = false;
+                        });
+                      },
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+            onChanged: (value) {
+              if (value.length >= 3) {
+                _performSearch(value);
+              } else {
+                setState(() {
+                  _searchResults = [];
+                  _showSearchResults = false;
+                });
+              }
+            },
+            onSubmitted: (value) {
+              if (value.isNotEmpty) {
+                _performSearch(value);
+              }
+            },
+          ),
+        ),
+        if (_showSearchResults && _searchResults.isNotEmpty)
+          Card(
+            color: AppColors.surface,
+            elevation: 4,
+            margin: const EdgeInsets.only(top: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final result = _searchResults[index];
+                  return ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.location_on, size: 20),
+                    title: Text(
+                      result['place_name'] as String? ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    onTap: () => _selectSearchResult(result),
+                  );
+                },
+              ),
+            ),
+          ),
+        if (_isSearching)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: LinearProgressIndicator(),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _performSearch(String query) async {
+    setState(() => _isSearching = true);
+    try {
+      final token = MapboxConstants.accessToken;
+      final encodedQuery = Uri.encodeComponent(query);
+      final url = Uri.parse(
+        'https://api.mapbox.com/geocoding/v5/mapbox.places/$encodedQuery.json?access_token=$token&limit=5',
+      );
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final features = data['features'] as List<dynamic>? ?? [];
+        setState(() {
+          _searchResults = features.cast<Map<String, dynamic>>();
+          _showSearchResults = true;
+          _isSearching = false;
+        });
+      } else {
+        setState(() {
+          _isSearching = false;
+          _showSearchResults = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isSearching = false;
+        _showSearchResults = false;
+      });
+    }
+  }
+
+  void _selectSearchResult(Map<String, dynamic> result) {
+    final center = result['center'] as List<dynamic>?;
+    if (center != null && center.length >= 2) {
+      final lng = (center[0] as num).toDouble();
+      final lat = (center[1] as num).toDouble();
+
+      // Animate map to the location
+      _webMapController?.flyTo(lat, lng, 14.0);
+      _mobileMapController?.flyTo(lat, lng, 14.0);
+
+      // Trigger offline cache for the searched location
+      context.read<MapBloc>().add(
+        OfflineBubbleRefreshRequested(
+          force: true,
+          targetLat: lat,
+          targetLon: lng,
+        ),
+      );
+
+      setState(() {
+        _searchController.text = result['place_name'] as String? ?? '';
+        _searchResults = [];
+        _showSearchResults = false;
+      });
+    }
+  }
+
   Widget _buildInteractiveMap(
     BuildContext context, {
     OfflineMapRegion? region,
@@ -410,7 +520,7 @@ class _MapPageState extends State<MapPage> {
               initialLongitude: initialCamera.longitude,
               initialZoom: initialCamera.zoom,
               offlineBubble: region,
-              isOfflineMode: isOffline || _testOfflineMode,
+              isOfflineMode: isOffline,
               // Pass tasks for mobile native markers
               tasks: tasks,
               onTaskMarkerTap: (task) {
@@ -427,18 +537,10 @@ class _MapPageState extends State<MapPage> {
               },
               onCameraIdle: (cameraState) {
                 setState(() {});
-                // Update overlay circle when camera changes (web only)
-                if (region != null && kIsWeb) {
-                  _updateOverlayCircle(region);
-                }
                 context.read<MapBloc>().add(MapCameraMoved(cameraState));
               },
               onControllerReady: (controller) {
                 _webMapController = controller;
-                // Initial overlay calculation (web only)
-                if (region != null) {
-                  _updateOverlayCircle(region);
-                }
               },
               onMobileControllerReady: (controller) {
                 _mobileMapController = controller;
@@ -448,93 +550,30 @@ class _MapPageState extends State<MapPage> {
           // Task markers overlay (web only - mobile uses native markers)
           if (kIsWeb && tasks != null && tasks.isNotEmpty && _webMapController != null)
             ...tasks.map((task) => _buildTaskMarker(task)),
+          // Current location button
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
+            top: 16,
             left: 16,
-            child: MapStatusCard(
-              regionName: region?.name ?? 'Loading...',
-              isOffline: isOffline || _testOfflineMode,
-              progress: progressOverlay,
-            ),
-          ),
-          // Offline test controls
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            right: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Offline test toggle
-                Card(
-                  color: AppColors.surface.withOpacity(0.9),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _testOfflineMode ? Icons.cloud_off : Icons.cloud,
-                          size: 18,
-                          color: _testOfflineMode
-                              ? AppColors.warning
-                              : AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _testOfflineMode ? 'Test Offline' : 'Test Online',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        Switch(
-                          value: _testOfflineMode,
-                          onChanged: (_) => _toggleTestOfflineMode(),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Cache overlay toggle
-                Card(
-                  color: AppColors.surface.withOpacity(0.9),
-                  child: IconButton(
-                    icon: Icon(
-                      _showCacheOverlay ? Icons.layers : Icons.layers_outlined,
-                      color: AppColors.primary,
-                    ),
-                    tooltip: 'Show cached region overlay',
-                    onPressed: () {
-                      setState(() {
-                        _showCacheOverlay = !_showCacheOverlay;
-                      });
-                      // Update overlay when toggled
-                      if (_showCacheOverlay) {
-                        final currentState = context.read<MapBloc>().state;
-                        if (currentState is MapReady) {
-                          _updateOverlayCircle(currentState.region);
-                        } else if (currentState is OfflineRegionUpdating) {
-                          _updateOverlayCircle(currentState.region);
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Cached region overlay
-          if (_showCacheOverlay && _overlayCircle != null)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(
-                  painter: CachedRegionOverlayPainter(
-                    overlayCircle: _overlayCircle!,
-                    isOffline: isOffline || _testOfflineMode,
-                  ),
-                ),
+            child: Card(
+              color: AppColors.surface.withValues(alpha: 0.95),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.my_location, color: AppColors.primary),
+                tooltip: AppLocalizations.of(context).currentLocation,
+                onPressed: _goToCurrentLocation,
               ),
             ),
+          ),
+          // Location search bar
+          Positioned(
+            top: 16,
+            left: 64,
+            right: 16,
+            child: _buildSearchBar(context),
+          ),
         ],
       ),
     );
@@ -552,30 +591,34 @@ class _MapPageState extends State<MapPage> {
 
     if (screenPos == null) return const SizedBox.shrink();
 
-    // Get color based on priority
+    // Use blue for all priorities, gray for completed
     Color markerColor;
     IconData markerIcon;
     String priorityLabel;
+    int starCount;
 
-    if (task.priority.value == 'high') {
-      markerColor = AppColors.error; // Red for high priority
-      markerIcon = Icons.warning;
-      priorityLabel = 'High Priority';
-    } else if (task.priority.value == 'medium') {
-      markerColor = AppColors.warning; // Orange for medium priority
-      markerIcon = Icons.info;
-      priorityLabel = 'Medium Priority';
-    } else {
-      markerColor = AppColors.success; // Green for low priority
-      markerIcon = Icons.check_circle;
-      priorityLabel = 'Low Priority';
-    }
-
-    // If completed, use gray
     if (task.status.value == 'completed') {
       markerColor = AppColors.textSecondary;
       markerIcon = Icons.check_circle;
       priorityLabel = 'Completed';
+      starCount = 0;
+    } else {
+      markerColor = AppColors.primary;
+      markerIcon = Icons.star;
+      switch (task.priority) {
+        case TaskPriority.high:
+          priorityLabel = 'High Priority';
+          starCount = 3;
+          break;
+        case TaskPriority.medium:
+          priorityLabel = 'Medium Priority';
+          starCount = 2;
+          break;
+        case TaskPriority.low:
+          priorityLabel = 'Low Priority';
+          starCount = 1;
+          break;
+      }
     }
 
     return Positioned(
@@ -586,6 +629,7 @@ class _MapPageState extends State<MapPage> {
         markerColor: markerColor,
         markerIcon: markerIcon,
         priorityLabel: priorityLabel,
+        starCount: starCount,
         onTap: () {
           // Navigate to task detail
           Navigator.of(context).pushNamed(
@@ -609,6 +653,7 @@ class _MapPin extends StatefulWidget {
   final Color markerColor;
   final IconData markerIcon;
   final String priorityLabel;
+  final int starCount;
   final VoidCallback onTap;
 
   const _MapPin({
@@ -616,6 +661,7 @@ class _MapPin extends StatefulWidget {
     required this.markerColor,
     required this.markerIcon,
     required this.priorityLabel,
+    required this.starCount,
     required this.onTap,
   });
 
@@ -748,11 +794,21 @@ class _MapPinState extends State<_MapPin> with SingleTickerProviderStateMixin {
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: Icon(
-                        widget.markerIcon,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                      child: widget.starCount > 0
+                          ? Text(
+                              '★' * widget.starCount,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                height: 1,
+                              ),
+                            )
+                          : Icon(
+                              widget.markerIcon,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                     ),
                   ),
                 ),
@@ -822,167 +878,4 @@ class _PinPainter extends CustomPainter {
   }
 }
 
-class MapStatusCard extends StatelessWidget {
-  final String regionName;
-  final bool isOffline;
-  final double? progress;
 
-  const MapStatusCard({
-    required this.regionName,
-    required this.isOffline,
-    this.progress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.surface.withOpacity(0.9),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isOffline ? Icons.cloud_off : Icons.cloud_queue,
-                  size: 18,
-                  color: isOffline ? AppColors.warning : AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  regionName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            if (progress != null) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                width: 120,
-                child: LinearProgressIndicator(value: progress),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Refreshing ${(progress! * 100).toStringAsFixed(0)}%',
-                style: const TextStyle(fontSize: 11),
-              ),
-            ] else ...[
-              const SizedBox(height: 6),
-              Text(
-                isOffline ? 'Offline bubble active' : 'Live + offline bubble',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Pre-computed overlay circle coordinates
-class OverlayCircle {
-  final Offset center;
-  final double radius;
-
-  OverlayCircle({required this.center, required this.radius});
-}
-
-/// Custom painter to show cached region overlay on map
-/// Draws a circle representing the 3-mile radius cached region
-/// Uses pre-computed screen coordinates from Mapbox's native project() method
-class CachedRegionOverlayPainter extends CustomPainter {
-  final OverlayCircle overlayCircle;
-  final bool isOffline;
-
-  CachedRegionOverlayPainter({
-    required this.overlayCircle,
-    required this.isOffline,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centerScreen = overlayCircle.center;
-    final radiusPixels = overlayCircle.radius;
-
-    // Draw circle fill with radial gradient (transparent at center to semi-transparent at edge)
-    final fillPaint = Paint()
-      ..shader =
-          RadialGradient(
-            center: Alignment.center,
-            colors: [
-              (isOffline ? AppColors.warning : AppColors.primary).withOpacity(
-                0.0,
-              ),
-              (isOffline ? AppColors.warning : AppColors.primary).withOpacity(
-                0.15,
-              ),
-            ],
-            stops: const [0.0, 1.0],
-          ).createShader(
-            Rect.fromCircle(center: centerScreen, radius: radiusPixels),
-          )
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(centerScreen, radiusPixels, fillPaint);
-
-    // Draw circle border
-    final borderPaint = Paint()
-      ..color = isOffline ? AppColors.warning : AppColors.primary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    canvas.drawCircle(centerScreen, radiusPixels, borderPaint);
-
-    // Draw center marker
-    final centerPaint = Paint()
-      ..color = isOffline ? AppColors.warning : AppColors.primary
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(centerScreen, 6, centerPaint);
-    canvas.drawCircle(centerScreen, 6, borderPaint);
-
-    // Draw label
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: isOffline
-            ? 'OFFLINE - Cached Region (3 mi)'
-            : 'Cached Region - 3 mile radius',
-        style: TextStyle(
-          color: isOffline ? AppColors.warning : AppColors.primary,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          shadows: [
-            Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 2),
-          ],
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-
-    // Position label above the circle
-    final labelY = (centerScreen.dy - radiusPixels - textPainter.height - 8)
-        .clamp(10.0, size.height - textPainter.height - 10);
-    textPainter.paint(
-      canvas,
-      Offset((size.width - textPainter.width) / 2, labelY),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CachedRegionOverlayPainter oldDelegate) {
-    return oldDelegate.isOffline != isOffline ||
-        (oldDelegate.overlayCircle.center - overlayCircle.center).distance >
-            1.0 ||
-        (oldDelegate.overlayCircle.radius - overlayCircle.radius).abs() > 1.0;
-  }
-}

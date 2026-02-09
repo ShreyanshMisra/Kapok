@@ -36,6 +36,7 @@ class MapboxMapView extends StatefulWidget {
   final void Function(MapboxWebController controller)? onControllerReady;
   final void Function(MapboxMobileController controller)? onMobileControllerReady;
   final void Function(double latitude, double longitude)? onDoubleClick;
+  final void Function(double latitude, double longitude)? onTap;
   final List<TaskModel>? tasks;
   final void Function(TaskModel task)? onTaskMarkerTap;
 
@@ -52,6 +53,7 @@ class MapboxMapView extends StatefulWidget {
     this.onControllerReady,
     this.onMobileControllerReady,
     this.onDoubleClick,
+    this.onTap,
     this.tasks,
     this.onTaskMarkerTap,
   });
@@ -98,6 +100,9 @@ class _MapboxMapViewState extends State<MapboxMapView> {
     if (widget.onDoubleClick != null) {
       _webController!.onDoubleClick = widget.onDoubleClick;
     }
+    if (widget.onTap != null) {
+      _webController!.onTap = widget.onTap;
+    }
     _webController!.interactive = widget.interactive;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_webController!);
@@ -127,6 +132,7 @@ class _MapboxMapViewState extends State<MapboxMapView> {
         }
       }
       ..onDoubleClick = widget.onDoubleClick
+      ..onTap = widget.onTap
       ..onTaskMarkerTap = widget.onTaskMarkerTap
       ..interactive = widget.interactive;
   }
@@ -139,6 +145,7 @@ class _MapboxMapViewState extends State<MapboxMapView> {
         ..offlineBubble = widget.offlineBubble
         ..isOfflineMode = widget.isOfflineMode;
       _webController!.onDoubleClick = widget.onDoubleClick;
+      _webController!.onTap = widget.onTap;
       _webController!.interactive = widget.interactive;
     } else if (!kIsWeb && _mobileController != null) {
       _mobileController!
@@ -146,6 +153,7 @@ class _MapboxMapViewState extends State<MapboxMapView> {
         ..isOfflineMode = widget.isOfflineMode
         ..interactive = widget.interactive
         ..onDoubleClick = widget.onDoubleClick
+        ..onTap = widget.onTap
         ..onTaskMarkerTap = widget.onTaskMarkerTap;
 
       // Update task markers if they changed

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../../core/enums/task_status.dart';
 import '../../core/enums/task_priority.dart';
+import '../../core/enums/task_category.dart';
 
 part 'task_model.g.dart';
 
@@ -17,6 +18,7 @@ class TaskModel {
   final String? address; // Human-readable address, auto-reverse-geocoded
   final TaskStatus status; // Enum: Pending, InProgress, Completed
   final TaskPriority priority; // Enum: Low, Medium, High
+  final TaskCategory category; // Enum: Medical, Engineering, etc.
   final DateTime? dueDate; // Optional
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -33,6 +35,7 @@ class TaskModel {
     this.address,
     required this.status,
     required this.priority,
+    this.category = TaskCategory.other,
     this.dueDate,
     required this.createdAt,
     required this.updatedAt,
@@ -63,6 +66,13 @@ class TaskModel {
       ).value;
     }
 
+    // Convert category string to enum
+    if (jsonCopy['category'] is String) {
+      jsonCopy['category'] = TaskCategory.fromString(
+        jsonCopy['category'],
+      ).value;
+    }
+
     return _$TaskModelFromJson(jsonCopy);
   }
 
@@ -71,6 +81,7 @@ class TaskModel {
     // Convert enum to string for JSON
     json['status'] = status.value;
     json['priority'] = priority.value;
+    json['category'] = category.value;
     // Convert GeoPoint to map for JSON
     json['geoLocation'] = {
       'latitude': geoLocation.latitude,
@@ -114,6 +125,9 @@ class TaskModel {
       priority: TaskPriority.fromString(
         data['priority'] as String? ?? 'medium',
       ),
+      category: TaskCategory.fromString(
+        data['category'] as String? ?? 'other',
+      ),
       dueDate: (data['dueDate'] as Timestamp?)?.toDate(),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -132,6 +146,7 @@ class TaskModel {
       if (address != null) 'address': address,
       'status': status.value,
       'priority': priority.value,
+      'category': category.value,
       if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate!),
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -150,6 +165,7 @@ class TaskModel {
     String? address,
     TaskStatus? status,
     TaskPriority? priority,
+    TaskCategory? category,
     DateTime? dueDate,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -166,6 +182,7 @@ class TaskModel {
       address: address ?? this.address,
       status: status ?? this.status,
       priority: priority ?? this.priority,
+      category: category ?? this.category,
       dueDate: dueDate ?? this.dueDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

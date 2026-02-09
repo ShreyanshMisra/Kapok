@@ -8,6 +8,7 @@ import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Sign up page for user registration
 class SignupPage extends StatefulWidget {
@@ -48,12 +49,15 @@ class _SignupPageState extends State<SignupPage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        centerTitle: true,
         title: Text(AppLocalizations.of(context).createAccount),
+        actions: const [KapokLogo()],
         titleTextStyle: TextStyle(
           color: theme.colorScheme.primary,
           fontSize: 20,
@@ -67,7 +71,7 @@ class _SignupPageState extends State<SignupPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             } else if (state is AuthAuthenticated) {
@@ -336,7 +340,7 @@ class _SignupPageState extends State<SignupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context).pleaseAgreeToTheTermsOfServiceToContinue),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         return;

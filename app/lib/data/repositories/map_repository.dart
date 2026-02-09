@@ -33,7 +33,7 @@ abstract class MapRepository {
   /// and refreshes the offline cache so the map stays usable without network as they move.
   /// Returns the region and the number of tiles primed in Phase 1
   Future<({OfflineMapRegion region, int primedTiles})>
-  loadRegionForCurrentLocation({double radiusKm, int zoomMin, int zoomMax});
+  loadRegionForCurrentLocation({double radiusKm, int zoomMin, int zoomMax, double? targetLat, double? targetLon});
 
   /// Returns true when the app should operate in offline-only mode.
   Future<bool> isOfflineMode();
@@ -510,14 +510,23 @@ class MapRepositoryImpl implements MapRepository {
     double radiusKm = 4.8, // ~3 miles bubble for instant offline view
     int zoomMin = 13,
     int zoomMax = 18,
+    double? targetLat,
+    double? targetLon,
   }) async {
     try {
       // Logger.task('Loading region for current location'); // Commented out - map logs disabled
 
-      // Get current GPS position
-      final position = await _geolocationService.getCurrentPosition();
-      final centerLat = position.latitude;
-      final centerLon = position.longitude; // Fixed: was centerLng
+      // Use target coordinates if provided, otherwise get current GPS position
+      double centerLat;
+      double centerLon;
+      if (targetLat != null && targetLon != null) {
+        centerLat = targetLat;
+        centerLon = targetLon;
+      } else {
+        final position = await _geolocationService.getCurrentPosition();
+        centerLat = position.latitude;
+        centerLon = position.longitude;
+      }
 
       // Compute bounding box around the center point
       // Using approximate conversion: 1 degree latitude ≈ 111 km
@@ -584,16 +593,20 @@ class MapRepositoryImpl implements MapRepository {
       // Cache the region reference FIRST so getTile() can check bubble membership
       _currentOfflineBubble = region;
 
-      // Delete all old regions and clear tiles outside the new bubble
-      // Slide the hot offline bubble with the user: keep only one small, high-detail region cached at all times
+      // Save the new region FIRST so it persists between app restarts.
+      // Previously all old regions were deleted before the new one was saved,
+      // which meant _loadLatestRegionFromCache() found nothing on restart.
+      await _regionRepository.saveRegion(region);
+
+      // Clean up old regions: clear tiles outside the new bubble, then remove metadata
       final allRegions = await _regionRepository.getAllRegions();
       for (final oldRegion in allRegions) {
+        if (oldRegion.id == region.id) continue; // Skip the new region
         // Clear tiles that were in old region but are now outside the new bubble
-        // This keeps only the new bubble tiles cached
         await _offlineCache.clearOutside(region, oldRegion);
-        // Delete old region metadata
-        await _regionRepository.deleteRegion(oldRegion.id);
       }
+      // Delete old region metadata, keeping only the new region
+      await _regionRepository.deleteAllRegionsExcept(region.id);
 
       // Clear in-memory live tiles cache when refreshing bubble
       // The live halo tiles are ephemeral and don't need to persist across bubble changes
