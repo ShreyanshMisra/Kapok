@@ -48,7 +48,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               content: const Text(
                 'Only team leaders and admins can create teams',
               ),
-              backgroundColor: AppColors.error,
+              backgroundColor: AppColors.primary,
             ),
           );
           Navigator.of(context).pop();
@@ -74,7 +74,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TeamCreated) {
@@ -263,7 +263,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToCreateTeams,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);

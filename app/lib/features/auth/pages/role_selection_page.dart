@@ -29,7 +29,7 @@ class RoleSelectionPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             }
@@ -99,7 +99,7 @@ class RoleSelectionPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You must be logged in to select a role'),
-          backgroundColor: AppColors.error,
+          backgroundColor: AppColors.primary,
         ),
       );
       return;
@@ -112,7 +112,7 @@ class RoleSelectionPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No authenticated user found'),
-          backgroundColor: AppColors.error,
+          backgroundColor: AppColors.primary,
         ),
       );
       return;
@@ -170,7 +170,7 @@ class RoleSelectionPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error selecting role: ${e.toString()}'),
-          backgroundColor: AppColors.error,
+          backgroundColor: AppColors.primary,
         ),
       );
     }

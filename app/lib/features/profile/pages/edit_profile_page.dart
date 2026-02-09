@@ -71,14 +71,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is ProfileUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(AppLocalizations.of(context).profileUpdatedSuccessfully),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
               ),
             );
             Navigator.of(context).pop();

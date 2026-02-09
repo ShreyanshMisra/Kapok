@@ -52,7 +52,7 @@ class _SignupPageState extends State<SignupPage> {
         foregroundColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
@@ -71,7 +71,7 @@ class _SignupPageState extends State<SignupPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             } else if (state is AuthAuthenticated) {
@@ -340,7 +340,7 @@ class _SignupPageState extends State<SignupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context).pleaseAgreeToTheTermsOfServiceToContinue),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         return;

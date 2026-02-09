@@ -68,7 +68,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TeamJoined) {
@@ -96,7 +96,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                     state.team.teamName,
                   ),
                 ),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -281,7 +281,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToJoinTeams,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);

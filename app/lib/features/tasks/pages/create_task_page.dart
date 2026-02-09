@@ -350,7 +350,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TaskCreated) {
@@ -359,7 +359,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 content: Text(
                   'Task "${state.task.title}" created successfully',
                 ),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
               ),
             );
             Navigator.of(context).pop();
@@ -978,7 +978,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             content: Text(
               'Please select a location on the map or enter an address',
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         return;
@@ -992,7 +992,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToCreateTasks,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
@@ -1005,7 +1005,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Please select a team'),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
         return;

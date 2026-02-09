@@ -117,7 +117,7 @@ class _MapPageState extends State<MapPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Could not get current location: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.primary,
           ),
         );
       }
@@ -196,7 +196,7 @@ class _MapPageState extends State<MapPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Error: ${state.message}'),
-                      backgroundColor: AppColors.error,
+                      backgroundColor: AppColors.primary,
                     ),
                   );
                 }

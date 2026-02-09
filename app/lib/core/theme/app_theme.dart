@@ -133,6 +133,12 @@ class AppTheme {
         textColor: AppColors.textPrimary,
         iconColor: AppColors.textPrimary,
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentTextStyle: const TextStyle(color: Colors.white),
+      ),
     );
   }
 
@@ -265,6 +271,12 @@ class AppTheme {
       listTileTheme: const ListTileThemeData(
         textColor: Color(0xFFE0E0E0),
         iconColor: Color(0xFFE0E0E0),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentTextStyle: const TextStyle(color: Colors.white),
       ),
     );
   }

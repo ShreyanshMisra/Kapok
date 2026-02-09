@@ -236,7 +236,7 @@ class _TasksPageState extends State<TasksPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Task deleted successfully'),
-                    backgroundColor: AppColors.success,
+                    backgroundColor: AppColors.primary,
                     duration: Duration(seconds: 2),
                   ),
                 );

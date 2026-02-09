@@ -267,7 +267,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Task updated successfully'),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
               ),
             );
             Navigator.of(context).pop(true); // Return true to indicate update
@@ -275,7 +275,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Task deleted successfully'),
-                backgroundColor: AppColors.success,
+                backgroundColor: AppColors.primary,
               ),
             );
             Navigator.of(context).pop(true); // Return true to indicate deletion
@@ -283,7 +283,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
               ),
             );
           }

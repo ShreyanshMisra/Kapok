@@ -129,7 +129,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: AppColors.error,
+                    backgroundColor: AppColors.primary,
                   ),
                 );
               } else if (state is TeamDeleted) {
@@ -138,7 +138,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Team deleted successfully'),
-                    backgroundColor: AppColors.success,
+                    backgroundColor: AppColors.primary,
                   ),
                 );
               }
@@ -152,14 +152,14 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Task created successfully'),
-                    backgroundColor: AppColors.success,
+                    backgroundColor: AppColors.primary,
                   ),
                 );
               } else if (state is TaskError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: AppColors.error,
+                    backgroundColor: AppColors.primary,
                   ),
                 );
               }
@@ -873,7 +873,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('${member.name} removed from team'),
-                      backgroundColor: AppColors.success,
+                      backgroundColor: AppColors.primary,
                     ),
                   );
                 }
@@ -966,7 +966,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Team deleted successfully'),
-                  backgroundColor: AppColors.success,
+                  backgroundColor: AppColors.primary,
                 ),
               );
             } else if (state is TeamError) {
@@ -974,7 +974,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Failed to delete team: ${state.message}'),
-                  backgroundColor: AppColors.error,
+                  backgroundColor: AppColors.primary,
                   action: SnackBarAction(
                     label: 'Retry',
                     onPressed: () {
@@ -1080,7 +1080,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('You have left ${widget.team.teamName}'),
-                      backgroundColor: AppColors.success,
+                      backgroundColor: AppColors.primary,
                     ),
                   );
                 }

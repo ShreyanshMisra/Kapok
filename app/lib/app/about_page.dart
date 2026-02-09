@@ -24,32 +24,13 @@ class AboutPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header with icon tagline wordmark
             Center(
-              child: Column(
-                children: [
-                  Image.asset(
-                    'assets/images/kapok_icon.png',
-                    height: 120,
-                    width: 120,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context).appName,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context).appDescription,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              child: Image.asset(
+                theme.brightness == Brightness.dark
+                    ? 'assets/images/icon_tagline/Kapok_Icon_Dark_Tagline_Wordmark.png'
+                    : 'assets/images/icon_tagline/KapokIcon_Light_Tagline_Wordmark.png',
+                width: 220,
               ),
             ),
             const SizedBox(height: 32),
