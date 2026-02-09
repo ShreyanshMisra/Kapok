@@ -632,6 +632,14 @@ class TeamRepository {
         throw TeamException(message: 'Cannot leave team while offline');
       }
 
+      // Query tasks assigned to this user in this team BEFORE the transaction
+      // (Firestore transactions don't support queries)
+      final assignedTasksQuery = await _firestore
+          .collection('tasks')
+          .where('teamId', isEqualTo: teamId)
+          .where('assignedTo', isEqualTo: userId)
+          .get();
+
       // Use transaction for atomic update
       await _firestore.runTransaction((transaction) async {
         final teamDoc = await _firestore.collection('teams').doc(teamId).get();
@@ -663,6 +671,14 @@ class TeamRepository {
           'teamId': FieldValue.delete(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
+
+        // Unassign tasks that were assigned to the leaving member
+        for (final taskDoc in assignedTasksQuery.docs) {
+          transaction.update(taskDoc.reference, {
+            'assignedTo': FieldValue.delete(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
       });
 
       // Update local cache

@@ -23,6 +23,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
+    const AboutPage(),
     const MapPage(),
     const TasksPage(),
     const TeamsPage(),
@@ -56,6 +57,10 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w600,
               ),
               items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.info_outline),
+                  label: AppLocalizations.of(context).about,
+                ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.map),
                   label: AppLocalizations.of(context).map,
@@ -95,30 +100,27 @@ class _HomePageState extends State<HomePage> {
   Widget? _buildFloatingActionButton() {
     final theme = Theme.of(context);
     switch (_currentIndex) {
-      case 0: // Map page
+      case 1: // Map page
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
           backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
           foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
-      case 1: // Tasks page
+      case 2: // Tasks page
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Navigate to create task page
             Navigator.of(context).pushNamed('/create-task');
           },
           backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
           foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
-      case 2: // Teams page
+      case 3: // Teams page
         return FloatingActionButton(
           onPressed: () {
-            // TODO: Navigate to create team page
             Navigator.of(context).pushNamed('/create-team');
           },
           backgroundColor: theme.floatingActionButtonTheme.backgroundColor,
@@ -225,9 +227,9 @@ class AppDrawer extends StatelessWidget {
               context.read<AuthBloc>().add(SignOutRequested());
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: AppColors.primary,
             ),
-            child: Text(localizations.signOut),
+            child: Text(localizations.signOut.toUpperCase()),
           ),
         ],
       ),

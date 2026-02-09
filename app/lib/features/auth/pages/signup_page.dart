@@ -8,6 +8,7 @@ import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Sign up page for user registration
 class SignupPage extends StatefulWidget {
@@ -53,7 +54,9 @@ class _SignupPageState extends State<SignupPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        centerTitle: true,
         title: Text(AppLocalizations.of(context).createAccount),
+        actions: const [KapokLogo()],
         titleTextStyle: TextStyle(
           color: theme.colorScheme.primary,
           fontSize: 20,

@@ -40,6 +40,7 @@ class MapboxMobileController {
   void Function(MapCameraState state)? onCameraIdle;
   VoidCallback? onMapReady;
   void Function(double latitude, double longitude)? onDoubleClick;
+  void Function(double latitude, double longitude)? onTap;
   void Function(TaskModel task)? onTaskMarkerTap;
 
   bool get interactive => _interactive;
@@ -58,9 +59,9 @@ class MapboxMobileController {
   StreamSubscription<void>? _locationSubscription;
 
   // Marker colors for different priorities
-  static const Color _highPriorityColor = Color(0xFFE53935); // Red
-  static const Color _mediumPriorityColor = Color(0xFFFB8C00); // Orange
-  static const Color _lowPriorityColor = Color(0xFF43A047); // Green
+  static const Color _highPriorityColor = Color(0xFF013576); // Kapok blue
+  static const Color _mediumPriorityColor = Color(0xFF013576); // Kapok blue
+  static const Color _lowPriorityColor = Color(0xFF013576); // Kapok blue
   static const Color _completedColor = Color(0xFF808080); // Gray
 
   /// Sets the MapboxMap instance from the widget callback
@@ -134,9 +135,9 @@ class MapboxMobileController {
 
     try {
       // Create and register marker images for each priority
-      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.warning);
-      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.error_outline);
-      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.check_circle);
+      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.star);
+      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.star);
+      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.star);
       await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle);
       
       _markerImagesRegistered = true;
@@ -291,6 +292,11 @@ class MapboxMobileController {
     );
   }
 
+  /// Fly to a specific location with animation
+  Future<void> flyTo(double lat, double lon, double zoom) async {
+    await setCenter(lat, lon, zoom: zoom);
+  }
+
   /// Fly to the user's current location
   /// Uses the Geolocator service to get current position since MapboxMap doesn't expose puck position directly
   Future<void> flyToUserLocation({double zoom = 15, double? lat, double? lon}) async {
@@ -441,6 +447,7 @@ class MapboxMobileController {
   }
 
   void dispose() {
+    _pendingSingleTapTimer?.cancel();
     _locationSubscription?.cancel();
     _taskAnnotationManager = null;
     _taskAnnotationMap.clear();
@@ -451,6 +458,7 @@ class MapboxMobileController {
   // Track last tap time for double-tap detection
   DateTime? _lastTapTime;
   Point? _lastTapPoint;
+  Timer? _pendingSingleTapTimer;
   static const _doubleTapThresholdMs = 300;
 
   /// Builds the native MapWidget
@@ -492,11 +500,13 @@ class MapboxMobileController {
         // Check for double-tap to trigger onDoubleClick
         final now = DateTime.now();
         final point = context.point;
-        
+
         if (_lastTapTime != null && _lastTapPoint != null) {
           final timeDiff = now.difference(_lastTapTime!).inMilliseconds;
           if (timeDiff < _doubleTapThresholdMs) {
-            // Double-tap detected - use the first tap's coordinates
+            // Double-tap detected - cancel pending single-tap and fire double-click
+            _pendingSingleTapTimer?.cancel();
+            _pendingSingleTapTimer = null;
             final lat = _lastTapPoint!.coordinates.lat.toDouble();
             final lon = _lastTapPoint!.coordinates.lng.toDouble();
             onDoubleClick?.call(lat, lon);
@@ -505,12 +515,21 @@ class MapboxMobileController {
             return;
           }
         }
-        
+
         _lastTapTime = now;
         _lastTapPoint = point;
-        
-        // Call the original onMapTap if provided
-        onMapTap?.call(context);
+
+        // Schedule single-tap callback after threshold if no second tap occurs
+        _pendingSingleTapTimer?.cancel();
+        final tapLat = point.coordinates.lat.toDouble();
+        final tapLon = point.coordinates.lng.toDouble();
+        _pendingSingleTapTimer = Timer(
+          const Duration(milliseconds: _doubleTapThresholdMs),
+          () {
+            onTap?.call(tapLat, tapLon);
+            onMapTap?.call(context);
+          },
+        );
       },
       onLongTapListener: (context) {
         // Also support long-press as an alternative to double-tap

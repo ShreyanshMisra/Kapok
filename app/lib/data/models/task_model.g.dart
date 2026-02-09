@@ -28,6 +28,7 @@ TaskModel _$TaskModelFromJson(Map<String, dynamic> json) => TaskModel(
   address: json['address'] as String?,
   status: TaskStatus.fromString(json['status'] as String? ?? 'pending'),
   priority: TaskPriority.fromString(json['priority'] as String? ?? 'medium'),
+  category: TaskCategory.fromString(json['category'] as String? ?? 'other'),
   dueDate: json['dueDate'] == null
       ? null
       : DateTime.parse(json['dueDate'] as String),
@@ -56,6 +57,7 @@ Map<String, dynamic> _$TaskModelToJson(TaskModel instance) => <String, dynamic>{
   'address': instance.address,
   'status': instance.status.value,
   'priority': instance.priority.value,
+  'category': instance.category.value,
   'dueDate': instance.dueDate?.toIso8601String(),
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),

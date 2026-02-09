@@ -28,11 +28,17 @@ class MapCameraMoved extends MapEvent {
 /// Asks the repository to recompute/download the offline bubble.
 class OfflineBubbleRefreshRequested extends MapEvent {
   final bool force;
+  final double? targetLat;
+  final double? targetLon;
 
-  const OfflineBubbleRefreshRequested({this.force = false});
+  const OfflineBubbleRefreshRequested({
+    this.force = false,
+    this.targetLat,
+    this.targetLon,
+  });
 
   @override
-  List<Object> get props => [force];
+  List<Object?> get props => [force, targetLat, targetLon];
 }
 
 /// Streams progress updates from the repository download job.

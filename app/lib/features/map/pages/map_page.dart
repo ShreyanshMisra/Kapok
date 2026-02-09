@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/mapbox_constants.dart';
-import '../../../core/services/network_checker.dart';
+import '../../../core/enums/task_priority.dart';
 import '../../../core/services/geolocation_service.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
 import '../bloc/map_state.dart';
@@ -22,6 +24,7 @@ import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../teams/bloc/team_state.dart';
 import '../../../app/router.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Map page showing interactive map with live, location-based offline map functionality
 /// It orchestrates a continuous cycle of "current location → live snapshot → offline cache refresh"
@@ -33,7 +36,6 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  bool _testOfflineMode = false;
   bool _showCacheOverlay = false;
   MapboxWebController? _webMapController;
   MapboxMobileController? _mobileMapController;
@@ -43,6 +45,12 @@ class _MapPageState extends State<MapPage> {
 
   // Pre-computed overlay circle coordinates (in screen pixels)
   OverlayCircle? _overlayCircle;
+
+  // Search state
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isSearching = false;
+  bool _showSearchResults = false;
 
 
   void _updateOverlayCircle(OfflineMapRegion region) async {
@@ -149,23 +157,8 @@ class _MapPageState extends State<MapPage> {
     _webMapController = null;
     _mobileMapController?.dispose();
     _mobileMapController = null;
+    _searchController.dispose();
     super.dispose();
-  }
-
-  void _toggleTestOfflineMode() {
-    setState(() {
-      _testOfflineMode = !_testOfflineMode;
-      NetworkChecker.instance.setTestModeOverride(
-        _testOfflineMode ? true : null,
-      );
-    });
-    // Refresh the map state to reflect offline mode change
-    final currentState = context.read<MapBloc>().state;
-    if (currentState is MapReady) {
-      context.read<MapBloc>().add(
-        const OfflineBubbleRefreshRequested(force: true),
-      );
-    }
   }
 
   @override
@@ -188,6 +181,7 @@ class _MapPageState extends State<MapPage> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           foregroundColor: AppColors.surface,
+          centerTitle: true,
           title: Text(AppLocalizations.of(context).map),
           actions: [
             IconButton(
@@ -204,6 +198,7 @@ class _MapPageState extends State<MapPage> {
                 Navigator.of(context).pushNamed(AppRouter.tasks);
               },
             ),
+            const KapokLogo(),
           ],
         ),
         body: MultiBlocListener(
@@ -378,6 +373,153 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+  Widget _buildSearchBar(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Card(
+          color: AppColors.surface.withValues(alpha: 0.95),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context).searchLocation,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchResults = [];
+                          _showSearchResults = false;
+                        });
+                      },
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+            onChanged: (value) {
+              if (value.length >= 3) {
+                _performSearch(value);
+              } else {
+                setState(() {
+                  _searchResults = [];
+                  _showSearchResults = false;
+                });
+              }
+            },
+            onSubmitted: (value) {
+              if (value.isNotEmpty) {
+                _performSearch(value);
+              }
+            },
+          ),
+        ),
+        if (_showSearchResults && _searchResults.isNotEmpty)
+          Card(
+            color: AppColors.surface,
+            elevation: 4,
+            margin: const EdgeInsets.only(top: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final result = _searchResults[index];
+                  return ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.location_on, size: 20),
+                    title: Text(
+                      result['place_name'] as String? ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    onTap: () => _selectSearchResult(result),
+                  );
+                },
+              ),
+            ),
+          ),
+        if (_isSearching)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: LinearProgressIndicator(),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _performSearch(String query) async {
+    setState(() => _isSearching = true);
+    try {
+      final token = MapboxConstants.accessToken;
+      final encodedQuery = Uri.encodeComponent(query);
+      final url = Uri.parse(
+        'https://api.mapbox.com/geocoding/v5/mapbox.places/$encodedQuery.json?access_token=$token&limit=5',
+      );
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final features = data['features'] as List<dynamic>? ?? [];
+        setState(() {
+          _searchResults = features.cast<Map<String, dynamic>>();
+          _showSearchResults = true;
+          _isSearching = false;
+        });
+      } else {
+        setState(() {
+          _isSearching = false;
+          _showSearchResults = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isSearching = false;
+        _showSearchResults = false;
+      });
+    }
+  }
+
+  void _selectSearchResult(Map<String, dynamic> result) {
+    final center = result['center'] as List<dynamic>?;
+    if (center != null && center.length >= 2) {
+      final lng = (center[0] as num).toDouble();
+      final lat = (center[1] as num).toDouble();
+
+      // Animate map to the location
+      _webMapController?.flyTo(lat, lng, 14.0);
+      _mobileMapController?.flyTo(lat, lng, 14.0);
+
+      // Trigger offline cache for the searched location
+      context.read<MapBloc>().add(
+        OfflineBubbleRefreshRequested(
+          force: true,
+          targetLat: lat,
+          targetLon: lng,
+        ),
+      );
+
+      setState(() {
+        _searchController.text = result['place_name'] as String? ?? '';
+        _searchResults = [];
+        _showSearchResults = false;
+      });
+    }
+  }
+
   Widget _buildInteractiveMap(
     BuildContext context, {
     OfflineMapRegion? region,
@@ -410,7 +552,7 @@ class _MapPageState extends State<MapPage> {
               initialLongitude: initialCamera.longitude,
               initialZoom: initialCamera.zoom,
               offlineBubble: region,
-              isOfflineMode: isOffline || _testOfflineMode,
+              isOfflineMode: isOffline,
               // Pass tasks for mobile native markers
               tasks: tasks,
               onTaskMarkerTap: (task) {
@@ -448,79 +590,40 @@ class _MapPageState extends State<MapPage> {
           // Task markers overlay (web only - mobile uses native markers)
           if (kIsWeb && tasks != null && tasks.isNotEmpty && _webMapController != null)
             ...tasks.map((task) => _buildTaskMarker(task)),
+          // Location search bar
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
-            child: MapStatusCard(
-              regionName: region?.name ?? 'Loading...',
-              isOffline: isOffline || _testOfflineMode,
-              progress: progressOverlay,
-            ),
+            right: 60,
+            child: _buildSearchBar(context),
           ),
-          // Offline test controls
+          // Cache overlay toggle
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             right: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Offline test toggle
-                Card(
-                  color: AppColors.surface.withOpacity(0.9),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _testOfflineMode ? Icons.cloud_off : Icons.cloud,
-                          size: 18,
-                          color: _testOfflineMode
-                              ? AppColors.warning
-                              : AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _testOfflineMode ? 'Test Offline' : 'Test Online',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        Switch(
-                          value: _testOfflineMode,
-                          onChanged: (_) => _toggleTestOfflineMode(),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                        ),
-                      ],
-                    ),
-                  ),
+            child: Card(
+              color: AppColors.surface.withValues(alpha: 0.9),
+              child: IconButton(
+                icon: Icon(
+                  _showCacheOverlay ? Icons.layers : Icons.layers_outlined,
+                  color: AppColors.primary,
                 ),
-                const SizedBox(height: 8),
-                // Cache overlay toggle
-                Card(
-                  color: AppColors.surface.withOpacity(0.9),
-                  child: IconButton(
-                    icon: Icon(
-                      _showCacheOverlay ? Icons.layers : Icons.layers_outlined,
-                      color: AppColors.primary,
-                    ),
-                    tooltip: 'Show cached region overlay',
-                    onPressed: () {
-                      setState(() {
-                        _showCacheOverlay = !_showCacheOverlay;
-                      });
-                      // Update overlay when toggled
-                      if (_showCacheOverlay) {
-                        final currentState = context.read<MapBloc>().state;
-                        if (currentState is MapReady) {
-                          _updateOverlayCircle(currentState.region);
-                        } else if (currentState is OfflineRegionUpdating) {
-                          _updateOverlayCircle(currentState.region);
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ],
+                tooltip: 'Show cached region overlay',
+                onPressed: () {
+                  setState(() {
+                    _showCacheOverlay = !_showCacheOverlay;
+                  });
+                  // Update overlay when toggled
+                  if (_showCacheOverlay) {
+                    final currentState = context.read<MapBloc>().state;
+                    if (currentState is MapReady) {
+                      _updateOverlayCircle(currentState.region);
+                    } else if (currentState is OfflineRegionUpdating) {
+                      _updateOverlayCircle(currentState.region);
+                    }
+                  }
+                },
+              ),
             ),
           ),
           // Cached region overlay
@@ -530,7 +633,7 @@ class _MapPageState extends State<MapPage> {
                 child: CustomPaint(
                   painter: CachedRegionOverlayPainter(
                     overlayCircle: _overlayCircle!,
-                    isOffline: isOffline || _testOfflineMode,
+                    isOffline: isOffline,
                   ),
                 ),
               ),
@@ -552,30 +655,29 @@ class _MapPageState extends State<MapPage> {
 
     if (screenPos == null) return const SizedBox.shrink();
 
-    // Get color based on priority
+    // Use blue for all priorities, gray for completed
     Color markerColor;
     IconData markerIcon;
     String priorityLabel;
 
-    if (task.priority.value == 'high') {
-      markerColor = AppColors.error; // Red for high priority
-      markerIcon = Icons.warning;
-      priorityLabel = 'High Priority';
-    } else if (task.priority.value == 'medium') {
-      markerColor = AppColors.warning; // Orange for medium priority
-      markerIcon = Icons.info;
-      priorityLabel = 'Medium Priority';
-    } else {
-      markerColor = AppColors.success; // Green for low priority
-      markerIcon = Icons.check_circle;
-      priorityLabel = 'Low Priority';
-    }
-
-    // If completed, use gray
     if (task.status.value == 'completed') {
       markerColor = AppColors.textSecondary;
       markerIcon = Icons.check_circle;
       priorityLabel = 'Completed';
+    } else {
+      markerColor = AppColors.primary;
+      markerIcon = Icons.star;
+      switch (task.priority) {
+        case TaskPriority.high:
+          priorityLabel = 'High Priority';
+          break;
+        case TaskPriority.medium:
+          priorityLabel = 'Medium Priority';
+          break;
+        case TaskPriority.low:
+          priorityLabel = 'Low Priority';
+          break;
+      }
     }
 
     return Positioned(

@@ -12,6 +12,7 @@ import '../bloc/team_state.dart';
 import 'create_team_page.dart';
 import 'join_team_page.dart';
 import 'team_detail_page.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Teams page showing user's teams
 class TeamsPage extends StatefulWidget {
@@ -71,6 +72,9 @@ class _TeamsPageState extends State<TeamsPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).myTeams),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: const KapokLogo(),
         elevation: 0,
         actions: [
           // Only show create team button for team leaders and admins
@@ -121,6 +125,7 @@ class _TeamsPageState extends State<TeamsPage> {
               return const SizedBox.shrink();
             },
           ),
+          const KapokLogo(),
         ],
       ),
       body: BlocListener<TeamBloc, TeamState>(

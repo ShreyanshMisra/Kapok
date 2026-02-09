@@ -10,6 +10,7 @@ import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/enums/user_role.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Join team page for entering team codes
 class JoinTeamPage extends StatefulWidget {
@@ -57,7 +58,9 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).joinTeam),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: BlocListener<TeamBloc, TeamState>(
         listener: (context, state) {
@@ -259,23 +262,6 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Alternative actions
-                TextButton(
-                  onPressed: () {
-                    // TODO: Navigate to create team page
-                    Navigator.of(context).pushNamed('/create-team');
-                  },
-                  child: Text(
-                    AppLocalizations.of(
-                      context,
-                    ).dontHaveATeamCodeCreateANewTeam,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

@@ -24,12 +24,15 @@ class MapboxWebController {
   void Function(MapCameraState state)? onCameraIdle;
   VoidCallback? onMapReady;
   void Function(double latitude, double longitude)? onDoubleClick;
+  void Function(double latitude, double longitude)? onTap;
 
   Widget buildView() {
     return const SizedBox.shrink();
   }
 
   void setCenter(double lat, double lon, {double? zoom}) {}
+
+  void flyTo(double lat, double lon, double zoom) {}
 
   void dispose() {}
 

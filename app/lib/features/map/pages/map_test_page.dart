@@ -3,6 +3,7 @@ import 'package:kapok_app/core/constants/app_colors.dart';
 import 'package:kapok_app/data/models/offline_map_region_model.dart';
 import 'package:kapok_app/data/repositories/map_repository.dart';
 import 'package:kapok_app/injection_container.dart';
+import 'package:kapok_app/core/widgets/kapok_logo.dart';
 
 /// Test page to verify offline map functionality
 class MapTestPage extends StatefulWidget {
@@ -194,7 +195,9 @@ class _MapTestPageState extends State<MapTestPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: const Text('Offline Map Test'),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

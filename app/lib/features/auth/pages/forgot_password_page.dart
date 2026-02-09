@@ -6,6 +6,7 @@ import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Forgot password page for password reset
 class ForgotPasswordPage extends StatefulWidget {
@@ -38,7 +39,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        centerTitle: true,
         title: Text(AppLocalizations.of(context).resetPassword),
+        actions: const [KapokLogo()],
         titleTextStyle: TextStyle(
           color: theme.colorScheme.primary,
           fontSize: 20,

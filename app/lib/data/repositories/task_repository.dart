@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../core/enums/task_category.dart';
 import '../../core/enums/task_priority.dart';
 import '../../core/enums/task_status.dart';
 import '../../core/enums/user_role.dart';
@@ -1011,6 +1012,7 @@ class TaskRepository {
     String? taskDescription,
     bool? taskCompleted,
     String? assignedTo,
+    String? category,
   }) async {
     try {
       Logger.task('Editing task: $taskId by user: $userId');
@@ -1040,6 +1042,7 @@ class TaskRepository {
         assignedTo: assignedTo ?? currentTask.assignedTo,
         status: status,
         priority: priority,
+        category: category != null ? TaskCategory.fromString(category) : currentTask.category,
         updatedAt: DateTime.now(),
         completedAt: taskCompleted == true
             ? DateTime.now()

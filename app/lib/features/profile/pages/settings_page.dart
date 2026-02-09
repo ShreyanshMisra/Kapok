@@ -18,6 +18,7 @@ import '../../tasks/bloc/task_event.dart';
 import '../../tasks/bloc/task_state.dart';
 import '../../map/bloc/map_bloc.dart';
 import '../../map/bloc/map_event.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Settings page for app configuration
 class SettingsPage extends StatefulWidget {
@@ -54,7 +55,9 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).settings),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -167,14 +170,16 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              title: Text(AppLocalizations.of(context).exportData),
-              subtitle: Text(
-                AppLocalizations.of(context).exportYourTasksAndTeamData,
+              title: Text(
+                AppLocalizations.of(context).exportData,
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                _showExportDataDialog();
-              },
+              subtitle: Text(
+                'Export will be enabled in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              trailing: Icon(Icons.chevron_right, color: AppColors.textSecondary),
+              enabled: false,
             ),
           ]),
           const SizedBox(height: 16),
@@ -182,32 +187,28 @@ class _SettingsPageState extends State<SettingsPage> {
           // Privacy section
           _buildSection('Privacy', [
             SwitchListTile(
-              title: const Text('Analytics'),
-              subtitle: const Text(
-                'Help improve Kapok by sharing anonymous usage data',
+              title: Text(
+                'Analytics',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              value: _analyticsEnabled,
-              onChanged: (value) async {
-                await AnalyticsService.instance.setAnalyticsEnabled(value);
-                setState(() {
-                  _analyticsEnabled = value;
-                });
-              },
-              activeThumbColor: Theme.of(context).colorScheme.primary,
+              subtitle: Text(
+                'Analytics will be enabled in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              value: false,
+              onChanged: null,
             ),
             SwitchListTile(
-              title: const Text('Crash Reporting'),
-              subtitle: const Text(
-                'Automatically send crash reports to help fix issues',
+              title: Text(
+                'Crash Reporting',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              value: _crashReportingEnabled,
-              onChanged: (value) async {
-                await AnalyticsService.instance.setCrashReportingEnabled(value);
-                setState(() {
-                  _crashReportingEnabled = value;
-                });
-              },
-              activeThumbColor: Theme.of(context).colorScheme.primary,
+              subtitle: Text(
+                'Crash reporting will be enabled in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              value: false,
+              onChanged: null,
             ),
           ]),
           const SizedBox(height: 16),
@@ -215,25 +216,40 @@ class _SettingsPageState extends State<SettingsPage> {
           // Feedback section
           _buildSection('Feedback & Support', [
             ListTile(
-              leading: const Icon(Icons.email_outlined),
-              title: const Text('Email Support'),
-              subtitle: const Text('Get help via email'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _launchEmail(),
+              leading: Icon(Icons.email_outlined, color: AppColors.textSecondary),
+              title: Text(
+                'Email Support',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+              subtitle: Text(
+                'Support will be available in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              enabled: false,
             ),
             ListTile(
-              leading: const Icon(Icons.bug_report_outlined),
-              title: const Text('Report an Issue'),
-              subtitle: const Text('Report bugs on GitHub'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _launchGitHubIssues(),
+              leading: Icon(Icons.bug_report_outlined, color: AppColors.textSecondary),
+              title: Text(
+                'Report an Issue',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+              subtitle: Text(
+                'Issue reporting will be available in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              enabled: false,
             ),
             ListTile(
-              leading: const Icon(Icons.rate_review_outlined),
-              title: const Text('Send Feedback'),
-              subtitle: const Text('Share your thoughts and suggestions'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showFeedbackDialog(),
+              leading: Icon(Icons.rate_review_outlined, color: AppColors.textSecondary),
+              title: Text(
+                'Send Feedback',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+              subtitle: Text(
+                'Feedback will be available in a future update',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              enabled: false,
             ),
           ]),
           const SizedBox(height: 16),
@@ -268,9 +284,9 @@ class _SettingsPageState extends State<SettingsPage> {
             child: ElevatedButton.icon(
               onPressed: () => _showSignOutDialog(),
               icon: const Icon(Icons.logout),
-              label: Text(AppLocalizations.of(context).signOut),
+              label: Text(AppLocalizations.of(context).signOut.toUpperCase()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -552,7 +568,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.warning),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(localizations.clear),
           ),
         ],
@@ -795,8 +811,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ).pushNamedAndRemoveUntil('/login', (route) => false);
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text(localizations.signOut),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(localizations.signOut.toUpperCase()),
           ),
         ],
       ),

@@ -13,6 +13,7 @@ import '../bloc/team_event.dart';
 import '../bloc/team_state.dart';
 import '../../../data/models/team_model.dart';
 import 'package:flutter/services.dart';
+import '../../../core/widgets/kapok_logo.dart';
 
 /// Create team page for team leaders
 class CreateTeamPage extends StatefulWidget {
@@ -63,7 +64,9 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).createTeam),
+        centerTitle: true,
         elevation: 0,
+        actions: const [KapokLogo()],
       ),
       body: BlocListener<TeamBloc, TeamState>(
         listener: (context, state) {

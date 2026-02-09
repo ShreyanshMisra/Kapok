@@ -20,6 +20,7 @@ class CreateTaskRequested extends TaskEvent {
   final double latitude;
   final double longitude;
   final String createdBy;
+  final String category;
 
   const CreateTaskRequested({
     required this.taskName,
@@ -32,6 +33,7 @@ class CreateTaskRequested extends TaskEvent {
     required this.latitude,
     required this.longitude,
     required this.createdBy,
+    this.category = 'other',
   });
 
   @override
@@ -46,6 +48,7 @@ class CreateTaskRequested extends TaskEvent {
     latitude,
     longitude,
     createdBy,
+    category,
   ];
 }
 
@@ -169,6 +172,7 @@ class EditTaskRequested extends TaskEvent {
   final String? taskDescription;
   final bool? taskCompleted;
   final String? assignedTo;
+  final String? category;
 
   const EditTaskRequested({
     required this.taskId,
@@ -178,6 +182,7 @@ class EditTaskRequested extends TaskEvent {
     this.taskDescription,
     this.taskCompleted,
     this.assignedTo,
+    this.category,
   });
 
   @override
@@ -189,6 +194,7 @@ class EditTaskRequested extends TaskEvent {
     taskDescription,
     taskCompleted,
     assignedTo,
+    category,
   ];
 }
 

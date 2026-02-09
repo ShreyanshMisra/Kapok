@@ -34,6 +34,7 @@ class MapboxWebController {
   void Function(MapCameraState state)? onCameraIdle;
   VoidCallback? onMapReady;
   void Function(double latitude, double longitude)? onDoubleClick;
+  void Function(double latitude, double longitude)? onTap;
 
   bool get interactive => _interactive;
   set interactive(bool value) {
@@ -47,6 +48,7 @@ class MapboxWebController {
   html.DivElement? _container;
   Object? _mapInstance;
   bool _scriptsInjected = false;
+  Timer? _pendingTapTimer;
 
   /// Builds the HtmlElementView widget that hosts the Mapbox canvas.
   Widget buildView() {
@@ -68,7 +70,19 @@ class MapboxWebController {
     js_util.callMethod(_mapInstance!, 'jumpTo', [js_util.jsify(options)]);
   }
 
+  /// Fly to a specific location with animation
+  void flyTo(double lat, double lon, double zoom) {
+    if (_mapInstance == null) return;
+    final options = <String, dynamic>{
+      'center': {'lat': lat, 'lng': lon},
+      'zoom': zoom,
+      'duration': 1500,
+    };
+    js_util.callMethod(_mapInstance!, 'flyTo', [js_util.jsify(options)]);
+  }
+
   void dispose() {
+    _cancelPendingTap();
     if (_mapInstance != null) {
       js_util.callMethod(_mapInstance!, 'remove', const []);
       _mapInstance = null;
@@ -131,7 +145,25 @@ class MapboxWebController {
             final lat = js_util.getProperty(lngLat, 'lat') as num?;
             final lng = js_util.getProperty(lngLat, 'lng') as num?;
             if (lat != null && lng != null) {
+              _cancelPendingTap();
               onDoubleClick!(lat.toDouble(), lng.toDouble());
+            }
+          }
+        }),
+      ]);
+    }
+
+    // Add single-click handler with delay to distinguish from double-click
+    if (onTap != null) {
+      js_util.callMethod(_mapInstance!, 'on', [
+        'click',
+        allowInterop((e) {
+          final lngLat = js_util.getProperty(e, 'lngLat');
+          if (lngLat != null) {
+            final lat = js_util.getProperty(lngLat, 'lat') as num?;
+            final lng = js_util.getProperty(lngLat, 'lng') as num?;
+            if (lat != null && lng != null) {
+              _scheduleTap(lat.toDouble(), lng.toDouble());
             }
           }
         }),
@@ -140,6 +172,18 @@ class MapboxWebController {
 
     // Update interaction settings if map already exists
     _updateInteractionSettings();
+  }
+
+  void _cancelPendingTap() {
+    _pendingTapTimer?.cancel();
+    _pendingTapTimer = null;
+  }
+
+  void _scheduleTap(double lat, double lng) {
+    _cancelPendingTap();
+    _pendingTapTimer = Timer(const Duration(milliseconds: 300), () {
+      onTap?.call(lat, lng);
+    });
   }
 
   void _updateInteractionSettings() {

@@ -215,25 +215,41 @@ extension BuildContextExtensions on BuildContext {
   /// Checks if device is desktop
   bool get isDesktop => screenWidth >= 1200;
 
-  /// Shows snackbar
+  /// Shows snackbar with rounded, floating style
   void showSnackBar(String message, {Color? backgroundColor, Duration? duration}) {
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: backgroundColor ?? const Color(0xFF013576),
         duration: duration ?? const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
   /// Shows error snackbar
   void showErrorSnackBar(String message) {
-    showSnackBar(message, backgroundColor: Colors.red);
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   /// Shows success snackbar
   void showSuccessSnackBar(String message) {
-    showSnackBar(message, backgroundColor: Colors.green);
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   /// Navigates to route
