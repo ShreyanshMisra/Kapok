@@ -36,15 +36,11 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  bool _showCacheOverlay = false;
   MapboxWebController? _webMapController;
   MapboxMobileController? _mobileMapController;
 
   // User's current location for initial map position
   MapCameraState? _userLocationCamera;
-
-  // Pre-computed overlay circle coordinates (in screen pixels)
-  OverlayCircle? _overlayCircle;
 
   // Search state
   final TextEditingController _searchController = TextEditingController();
@@ -52,47 +48,6 @@ class _MapPageState extends State<MapPage> {
   bool _isSearching = false;
   bool _showSearchResults = false;
 
-
-  void _updateOverlayCircle(OfflineMapRegion region) async {
-    if (_webMapController == null || !_showCacheOverlay) {
-      _overlayCircle = null;
-      return;
-    }
-
-    // Project region center to screen coordinates
-    final centerScreen = _webMapController!.projectLatLonToScreen(
-      region.centerLat,
-      region.centerLon,
-    );
-
-    if (centerScreen == null) {
-      _overlayCircle = null;
-      return;
-    }
-
-    // Calculate point 4.8km north of center for radius calculation
-    final latDelta = 4.8 / 111.0; // 4.8 km in degrees
-    final northLat = (region.centerLat + latDelta).clamp(-90.0, 90.0);
-    final northScreen = _webMapController!.projectLatLonToScreen(
-      northLat,
-      region.centerLon,
-    );
-
-    if (northScreen == null) {
-      _overlayCircle = null;
-      return;
-    }
-
-    // Calculate radius in pixels
-    final radiusPixels = (northScreen - centerScreen).distance;
-
-    setState(() {
-      _overlayCircle = OverlayCircle(
-        center: centerScreen,
-        radius: radiusPixels,
-      );
-    });
-  }
 
   @override
   void initState() {
@@ -582,18 +537,10 @@ class _MapPageState extends State<MapPage> {
               },
               onCameraIdle: (cameraState) {
                 setState(() {});
-                // Update overlay circle when camera changes (web only)
-                if (region != null && kIsWeb) {
-                  _updateOverlayCircle(region);
-                }
                 context.read<MapBloc>().add(MapCameraMoved(cameraState));
               },
               onControllerReady: (controller) {
                 _webMapController = controller;
-                // Initial overlay calculation (web only)
-                if (region != null) {
-                  _updateOverlayCircle(region);
-                }
               },
               onMobileControllerReady: (controller) {
                 _mobileMapController = controller;
@@ -624,50 +571,9 @@ class _MapPageState extends State<MapPage> {
           Positioned(
             top: 16,
             left: 64,
-            right: 60,
+            right: 16,
             child: _buildSearchBar(context),
           ),
-          // Cache overlay toggle
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Card(
-              color: AppColors.surface.withValues(alpha: 0.9),
-              child: IconButton(
-                icon: Icon(
-                  _showCacheOverlay ? Icons.layers : Icons.layers_outlined,
-                  color: AppColors.primary,
-                ),
-                tooltip: 'Show cached region overlay',
-                onPressed: () {
-                  setState(() {
-                    _showCacheOverlay = !_showCacheOverlay;
-                  });
-                  // Update overlay when toggled
-                  if (_showCacheOverlay) {
-                    final currentState = context.read<MapBloc>().state;
-                    if (currentState is MapReady) {
-                      _updateOverlayCircle(currentState.region);
-                    } else if (currentState is OfflineRegionUpdating) {
-                      _updateOverlayCircle(currentState.region);
-                    }
-                  }
-                },
-              ),
-            ),
-          ),
-          // Cached region overlay
-          if (_showCacheOverlay && _overlayCircle != null)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(
-                  painter: CachedRegionOverlayPainter(
-                    overlayCircle: _overlayCircle!,
-                    isOffline: isOffline,
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -972,167 +878,4 @@ class _PinPainter extends CustomPainter {
   }
 }
 
-class MapStatusCard extends StatelessWidget {
-  final String regionName;
-  final bool isOffline;
-  final double? progress;
 
-  const MapStatusCard({
-    required this.regionName,
-    required this.isOffline,
-    this.progress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.surface.withOpacity(0.9),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isOffline ? Icons.cloud_off : Icons.cloud_queue,
-                  size: 18,
-                  color: isOffline ? AppColors.warning : AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  regionName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            if (progress != null) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                width: 120,
-                child: LinearProgressIndicator(value: progress),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Refreshing ${(progress! * 100).toStringAsFixed(0)}%',
-                style: const TextStyle(fontSize: 11),
-              ),
-            ] else ...[
-              const SizedBox(height: 6),
-              Text(
-                isOffline ? 'Offline bubble active' : 'Live + offline bubble',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Pre-computed overlay circle coordinates
-class OverlayCircle {
-  final Offset center;
-  final double radius;
-
-  OverlayCircle({required this.center, required this.radius});
-}
-
-/// Custom painter to show cached region overlay on map
-/// Draws a circle representing the 3-mile radius cached region
-/// Uses pre-computed screen coordinates from Mapbox's native project() method
-class CachedRegionOverlayPainter extends CustomPainter {
-  final OverlayCircle overlayCircle;
-  final bool isOffline;
-
-  CachedRegionOverlayPainter({
-    required this.overlayCircle,
-    required this.isOffline,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centerScreen = overlayCircle.center;
-    final radiusPixels = overlayCircle.radius;
-
-    // Draw circle fill with radial gradient (transparent at center to semi-transparent at edge)
-    final fillPaint = Paint()
-      ..shader =
-          RadialGradient(
-            center: Alignment.center,
-            colors: [
-              (isOffline ? AppColors.warning : AppColors.primary).withOpacity(
-                0.0,
-              ),
-              (isOffline ? AppColors.warning : AppColors.primary).withOpacity(
-                0.15,
-              ),
-            ],
-            stops: const [0.0, 1.0],
-          ).createShader(
-            Rect.fromCircle(center: centerScreen, radius: radiusPixels),
-          )
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(centerScreen, radiusPixels, fillPaint);
-
-    // Draw circle border
-    final borderPaint = Paint()
-      ..color = isOffline ? AppColors.warning : AppColors.primary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    canvas.drawCircle(centerScreen, radiusPixels, borderPaint);
-
-    // Draw center marker
-    final centerPaint = Paint()
-      ..color = isOffline ? AppColors.warning : AppColors.primary
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(centerScreen, 6, centerPaint);
-    canvas.drawCircle(centerScreen, 6, borderPaint);
-
-    // Draw label
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: isOffline
-            ? 'OFFLINE - Cached Region (3 mi)'
-            : 'Cached Region - 3 mile radius',
-        style: TextStyle(
-          color: isOffline ? AppColors.warning : AppColors.primary,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          shadows: [
-            Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 2),
-          ],
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-
-    // Position label above the circle
-    final labelY = (centerScreen.dy - radiusPixels - textPainter.height - 8)
-        .clamp(10.0, size.height - textPainter.height - 10);
-    textPainter.paint(
-      canvas,
-      Offset((size.width - textPainter.width) / 2, labelY),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CachedRegionOverlayPainter oldDelegate) {
-    return oldDelegate.isOffline != isOffline ||
-        (oldDelegate.overlayCircle.center - overlayCircle.center).distance >
-            1.0 ||
-        (oldDelegate.overlayCircle.radius - overlayCircle.radius).abs() > 1.0;
-  }
-}

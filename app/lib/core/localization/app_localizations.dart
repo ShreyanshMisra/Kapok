@@ -136,6 +136,7 @@ class AppLocalizations {
   String get selectDateRange => _getString('selectDateRange');
 
   // Priority Stars
+  String get inProgress => _getString('inProgress');
   String get oneStar => _getString('oneStar');
   String get twoStars => _getString('twoStars');
   String get threeStars => _getString('threeStars');
@@ -474,9 +475,10 @@ class AppLocalizations {
         'selectDateRange': 'Select Date Range',
 
         // Priority Stars
-        'oneStar': 'Low',
-        'twoStars': 'Medium',
-        'threeStars': 'High',
+        'oneStar': '1 Star',
+        'twoStars': '2 Stars',
+        'threeStars': '3 Stars',
+        'inProgress': 'In Progress',
 
         // Task Severity Levels
         'severity1': 'Low (1)',
@@ -806,9 +808,10 @@ class AppLocalizations {
         'selectDateRange': 'Seleccionar Rango de Fechas',
 
         // Priority Stars
-        'oneStar': 'Baja',
-        'twoStars': 'Media',
-        'threeStars': 'Alta',
+        'oneStar': '1 Estrella',
+        'twoStars': '2 Estrellas',
+        'threeStars': '3 Estrellas',
+        'inProgress': 'En Progreso',
 
         // Task Severity Levels
         'severity1': 'Baja (1)',

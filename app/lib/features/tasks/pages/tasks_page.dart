@@ -355,7 +355,9 @@ class _TasksPageState extends State<TasksPage> {
                     ? localizations.allStatuses
                     : _selectedStatus == TaskStatus.completed
                         ? localizations.completed
-                        : localizations.pending,
+                        : _selectedStatus == TaskStatus.inProgress
+                            ? localizations.inProgress
+                            : localizations.pending,
                 icon: Icons.task_alt,
                 isSelected: _selectedStatus != null,
                 onTap: () => _showStatusFilterDialog(),
@@ -365,10 +367,10 @@ class _TasksPageState extends State<TasksPage> {
                 label: _selectedPriority == null
                     ? localizations.allPriorities
                     : _selectedPriority == TaskPriority.high
-                        ? localizations.high
+                        ? localizations.threeStars
                         : _selectedPriority == TaskPriority.medium
-                            ? localizations.medium
-                            : localizations.low,
+                            ? localizations.twoStars
+                            : localizations.oneStar,
                 icon: Icons.flag,
                 isSelected: _selectedPriority != null,
                 onTap: () => _showPriorityFilterDialog(),
@@ -486,6 +488,21 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
+              title: Text(localizations.inProgress),
+              leading: Radio<TaskStatus?>(
+                value: TaskStatus.inProgress,
+                groupValue: _selectedStatus,
+                onChanged: (value) {
+                  setState(() => _selectedStatus = value);
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedStatus = TaskStatus.inProgress);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
               title: Text(localizations.completed),
               leading: Radio<TaskStatus?>(
                 value: TaskStatus.completed,
@@ -531,7 +548,7 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
-              title: Text(localizations.high),
+              title: Text(localizations.threeStars),
               leading: Radio<TaskPriority?>(
                 value: TaskPriority.high,
                 groupValue: _selectedPriority,
@@ -546,7 +563,7 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
-              title: Text(localizations.medium),
+              title: Text(localizations.twoStars),
               leading: Radio<TaskPriority?>(
                 value: TaskPriority.medium,
                 groupValue: _selectedPriority,
@@ -561,7 +578,7 @@ class _TasksPageState extends State<TasksPage> {
               },
             ),
             ListTile(
-              title: Text(localizations.low),
+              title: Text(localizations.oneStar),
               leading: Radio<TaskPriority?>(
                 value: TaskPriority.low,
                 groupValue: _selectedPriority,
@@ -1106,32 +1123,30 @@ class _TasksPageState extends State<TasksPage> {
   // Priority badge replaced by PriorityStars widget
 
   Widget _buildStatusChip(TaskStatus status) {
-    final localizations = AppLocalizations.of(context);
-    final bool completed = status == TaskStatus.completed;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: completed
-            ? AppColors.success.withOpacity(0.1)
-            : AppColors.info.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: completed ? AppColors.success : AppColors.info,
+          color: AppColors.primary,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            completed ? Icons.check_circle_outline : Icons.pending_outlined,
+            status == TaskStatus.completed
+                ? Icons.check_circle_outline
+                : Icons.pending_outlined,
             size: 16,
-            color: completed ? AppColors.success : AppColors.info,
+            color: AppColors.primary,
           ),
           const SizedBox(width: 4),
           Text(
-            completed ? localizations.completed : localizations.open,
+            status.displayName,
             style: TextStyle(
-              color: completed ? AppColors.success : AppColors.info,
+              color: AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),

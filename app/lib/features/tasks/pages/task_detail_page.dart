@@ -738,14 +738,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   // Priority color replaced by PriorityStars widget
 
   Color _getStatusColor(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.pending:
-        return AppColors.textSecondary;
-      case TaskStatus.inProgress:
-        return AppColors.info;
-      case TaskStatus.completed:
-        return AppColors.success;
-    }
+    return AppColors.primary;
   }
 }
 

@@ -49,6 +49,7 @@ class _SignupPageState extends State<SignupPage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

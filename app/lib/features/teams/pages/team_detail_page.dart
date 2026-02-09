@@ -795,7 +795,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    task.status.value,
+                    task.status.displayName,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: _getStatusColor(task.status),
                       fontSize: 10,
@@ -820,29 +820,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   }
 
   Color _getStatusColor(dynamic status) {
-    if (status is String) {
-      switch (status.toLowerCase()) {
-        case 'completed':
-          return AppColors.success;
-        case 'inprogress':
-          return AppColors.info;
-        case 'pending':
-          return AppColors.textSecondary;
-        default:
-          return AppColors.textSecondary;
-      }
-    }
-    // Handle TaskStatus enum
-    switch (status.toString()) {
-      case 'TaskStatus.completed':
-        return AppColors.success;
-      case 'TaskStatus.inProgress':
-        return AppColors.info;
-      case 'TaskStatus.pending':
-        return AppColors.textSecondary;
-      default:
-        return AppColors.textSecondary;
-    }
+    return AppColors.primary;
   }
 
   /// Get current user ID
