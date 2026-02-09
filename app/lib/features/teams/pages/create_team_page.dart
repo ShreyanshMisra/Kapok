@@ -122,17 +122,6 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
-
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  ).setUpANewTeamForDisasterReliefCoordination,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: 32),
 
                 // Team name field

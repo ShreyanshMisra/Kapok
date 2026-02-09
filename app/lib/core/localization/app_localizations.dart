@@ -130,6 +130,7 @@ class AppLocalizations {
   // Date Filter
   String get filterByDate => _getString('filterByDate');
   String get allDates => _getString('allDates');
+  String get pastDay => _getString('pastDay');
   String get pastWeek => _getString('pastWeek');
   String get customDateRange => _getString('customDateRange');
   String get selectDateRange => _getString('selectDateRange');
@@ -467,6 +468,7 @@ class AppLocalizations {
         // Date Filter
         'filterByDate': 'Filter by Date',
         'allDates': 'All Dates',
+        'pastDay': 'Past Day',
         'pastWeek': 'Past Week',
         'customDateRange': 'Custom Date Range',
         'selectDateRange': 'Select Date Range',
@@ -798,6 +800,7 @@ class AppLocalizations {
         // Date Filter
         'filterByDate': 'Filtrar por Fecha',
         'allDates': 'Todas las Fechas',
+        'pastDay': 'Último Día',
         'pastWeek': 'Última Semana',
         'customDateRange': 'Rango de Fechas Personalizado',
         'selectDateRange': 'Seleccionar Rango de Fechas',

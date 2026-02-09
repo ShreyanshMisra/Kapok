@@ -85,36 +85,15 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       items.addAll([
                         PopupMenuItem(
                           value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.edit),
-                              const SizedBox(width: 8),
-                              Text(localizations.editTeam),
-                            ],
-                          ),
+                          child: Text(localizations.editTeam),
                         ),
                         PopupMenuItem(
                           value: 'close',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.close),
-                              const SizedBox(width: 8),
-                              Text(localizations.closeTeam),
-                            ],
-                          ),
+                          child: Text(localizations.closeTeam),
                         ),
                         PopupMenuItem(
                           value: 'delete',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.delete, color: AppColors.error),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Delete Team',
-                                style: TextStyle(color: AppColors.error),
-                              ),
-                            ],
-                          ),
+                          child: Text('Delete Team'),
                         ),
                       ]);
                     } else {

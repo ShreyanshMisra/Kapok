@@ -150,6 +150,25 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  /// Fly to user's current location
+  void _goToCurrentLocation() async {
+    try {
+      final geolocationService = GeolocationService.instance;
+      final position = await geolocationService.getCurrentPosition();
+      _webMapController?.flyTo(position.latitude, position.longitude, 15.0);
+      _mobileMapController?.flyTo(position.latitude, position.longitude, 15.0);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not get current location: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     // Dispose map controllers when page is disposed (e.g., on logout)
@@ -176,11 +195,11 @@ class _MapPageState extends State<MapPage> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           elevation: 0,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
+          automaticallyImplyLeading: false,
           centerTitle: true,
           title: Text(AppLocalizations.of(context).map),
           actions: [
@@ -189,13 +208,6 @@ class _MapPageState extends State<MapPage> {
               tooltip: 'View Cache',
               onPressed: () {
                 Navigator.of(context).pushNamed('/map-cache');
-              },
-            ),
-            // Note: Map filters intentionally deferred - tasks already have filtering in TasksPage
-            IconButton(
-              icon: const Icon(Icons.list),
-              onPressed: () {
-                Navigator.of(context).pushNamed(AppRouter.tasks);
               },
             ),
             const KapokLogo(),
@@ -435,6 +447,7 @@ class _MapPageState extends State<MapPage> {
               constraints: const BoxConstraints(maxHeight: 200),
               child: ListView.builder(
                 shrinkWrap: true,
+                padding: EdgeInsets.zero,
                 itemCount: _searchResults.length,
                 itemBuilder: (context, index) {
                   final result = _searchResults[index];
@@ -590,16 +603,33 @@ class _MapPageState extends State<MapPage> {
           // Task markers overlay (web only - mobile uses native markers)
           if (kIsWeb && tasks != null && tasks.isNotEmpty && _webMapController != null)
             ...tasks.map((task) => _buildTaskMarker(task)),
+          // Current location button
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Card(
+              color: AppColors.surface.withValues(alpha: 0.95),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.my_location, color: AppColors.primary),
+                tooltip: AppLocalizations.of(context).currentLocation,
+                onPressed: _goToCurrentLocation,
+              ),
+            ),
+          ),
           // Location search bar
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            left: 16,
+            top: 16,
+            left: 64,
             right: 60,
             child: _buildSearchBar(context),
           ),
           // Cache overlay toggle
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
+            top: 16,
             right: 16,
             child: Card(
               color: AppColors.surface.withValues(alpha: 0.9),
@@ -659,23 +689,28 @@ class _MapPageState extends State<MapPage> {
     Color markerColor;
     IconData markerIcon;
     String priorityLabel;
+    int starCount;
 
     if (task.status.value == 'completed') {
       markerColor = AppColors.textSecondary;
       markerIcon = Icons.check_circle;
       priorityLabel = 'Completed';
+      starCount = 0;
     } else {
       markerColor = AppColors.primary;
       markerIcon = Icons.star;
       switch (task.priority) {
         case TaskPriority.high:
           priorityLabel = 'High Priority';
+          starCount = 3;
           break;
         case TaskPriority.medium:
           priorityLabel = 'Medium Priority';
+          starCount = 2;
           break;
         case TaskPriority.low:
           priorityLabel = 'Low Priority';
+          starCount = 1;
           break;
       }
     }
@@ -688,6 +723,7 @@ class _MapPageState extends State<MapPage> {
         markerColor: markerColor,
         markerIcon: markerIcon,
         priorityLabel: priorityLabel,
+        starCount: starCount,
         onTap: () {
           // Navigate to task detail
           Navigator.of(context).pushNamed(
@@ -711,6 +747,7 @@ class _MapPin extends StatefulWidget {
   final Color markerColor;
   final IconData markerIcon;
   final String priorityLabel;
+  final int starCount;
   final VoidCallback onTap;
 
   const _MapPin({
@@ -718,6 +755,7 @@ class _MapPin extends StatefulWidget {
     required this.markerColor,
     required this.markerIcon,
     required this.priorityLabel,
+    required this.starCount,
     required this.onTap,
   });
 
@@ -850,11 +888,21 @@ class _MapPinState extends State<_MapPin> with SingleTickerProviderStateMixin {
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: Icon(
-                        widget.markerIcon,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                      child: widget.starCount > 0
+                          ? Text(
+                              '★' * widget.starCount,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                height: 1,
+                              ),
+                            )
+                          : Icon(
+                              widget.markerIcon,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                     ),
                   ),
                 ),

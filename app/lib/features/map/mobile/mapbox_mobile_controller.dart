@@ -134,11 +134,11 @@ class MapboxMobileController {
     if (_mapboxMap == null || _markerImagesRegistered) return;
 
     try {
-      // Create and register marker images for each priority
-      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.star);
-      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.star);
-      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.star);
-      await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle);
+      // Create and register marker images for each priority with star counts
+      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.star, starCount: 3);
+      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.star, starCount: 2);
+      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.star, starCount: 1);
+      await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle, starCount: 0);
       
       _markerImagesRegistered = true;
       debugPrint('Marker images registered successfully');
@@ -148,11 +148,11 @@ class MapboxMobileController {
   }
 
   /// Create a marker image with the specified color and icon, then add it to the map
-  Future<void> _addMarkerImage(String name, Color color, IconData icon) async {
+  Future<void> _addMarkerImage(String name, Color color, IconData icon, {int starCount = 0}) async {
     if (_mapboxMap == null) return;
 
     try {
-      final imageData = await _createMarkerImageData(color, icon);
+      final imageData = await _createMarkerImageData(color, icon, starCount: starCount);
       if (imageData != null) {
         // Add image to map style using MbxImage
         final mbxImage = MbxImage(
@@ -176,7 +176,7 @@ class MapboxMobileController {
   }
 
   /// Create marker image data as bytes
-  Future<Uint8List?> _createMarkerImageData(Color color, IconData icon) async {
+  Future<Uint8List?> _createMarkerImageData(Color color, IconData icon, {int starCount = 0}) async {
     try {
       // Create a picture recorder to draw the marker
       final recorder = ui.PictureRecorder();
@@ -245,27 +245,51 @@ class MapboxMobileController {
         ..close();
       canvas.drawPath(colorPinPath, colorPaint);
       
-      // Draw icon in center
-      final iconPainter = TextPainter(
-        text: TextSpan(
-          text: String.fromCharCode(icon.codePoint),
-          style: TextStyle(
-            fontSize: 24,
-            fontFamily: icon.fontFamily,
-            package: icon.fontPackage,
-            color: Colors.white,
+      // Draw icon or stars in center
+      if (starCount > 0) {
+        // Draw star characters for priority level
+        final starPainter = TextPainter(
+          text: TextSpan(
+            text: '★' * starCount,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              height: 1,
+            ),
           ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      iconPainter.layout();
-      iconPainter.paint(
-        canvas,
-        Offset(
-          (width - iconPainter.width) / 2,
-          pinCenterY - iconPainter.height / 2,
-        ),
-      );
+          textDirection: TextDirection.ltr,
+        );
+        starPainter.layout();
+        starPainter.paint(
+          canvas,
+          Offset(
+            (width - starPainter.width) / 2,
+            pinCenterY - starPainter.height / 2,
+          ),
+        );
+      } else {
+        final iconPainter = TextPainter(
+          text: TextSpan(
+            text: String.fromCharCode(icon.codePoint),
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: icon.fontFamily,
+              package: icon.fontPackage,
+              color: Colors.white,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        iconPainter.layout();
+        iconPainter.paint(
+          canvas,
+          Offset(
+            (width - iconPainter.width) / 2,
+            pinCenterY - iconPainter.height / 2,
+          ),
+        );
+      }
       
       // Convert to image
       final picture = recorder.endRecording();

@@ -102,7 +102,12 @@ class _TasksPageState extends State<TasksPage> {
       // Filter by date
       if (_selectedDateFilter != null) {
         final now = DateTime.now();
-        if (_selectedDateFilter == 'pastWeek') {
+        if (_selectedDateFilter == 'pastDay') {
+          final dayAgo = now.subtract(const Duration(days: 1));
+          if (task.createdAt.isBefore(dayAgo)) {
+            return false;
+          }
+        } else if (_selectedDateFilter == 'pastWeek') {
           final weekAgo = now.subtract(const Duration(days: 7));
           if (task.createdAt.isBefore(weekAgo)) {
             return false;
@@ -381,9 +386,11 @@ class _TasksPageState extends State<TasksPage> {
               _buildFilterChip(
                 label: _selectedDateFilter == null
                     ? localizations.allDates
-                    : _selectedDateFilter == 'pastWeek'
-                        ? localizations.pastWeek
-                        : localizations.customDateRange,
+                    : _selectedDateFilter == 'pastDay'
+                        ? localizations.pastDay
+                        : _selectedDateFilter == 'pastWeek'
+                            ? localizations.pastWeek
+                            : localizations.customDateRange,
                 icon: Icons.calendar_today,
                 isSelected: _selectedDateFilter != null,
                 onTap: () => _showDateFilterDialog(),
@@ -646,6 +653,27 @@ class _TasksPageState extends State<TasksPage> {
               onTap: () {
                 setState(() {
                   _selectedDateFilter = null;
+                  _customDateRange = null;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(localizations.pastDay),
+              leading: Radio<String?>(
+                value: 'pastDay',
+                groupValue: _selectedDateFilter,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedDateFilter = 'pastDay';
+                    _customDateRange = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              onTap: () {
+                setState(() {
+                  _selectedDateFilter = 'pastDay';
                   _customDateRange = null;
                 });
                 Navigator.of(context).pop();

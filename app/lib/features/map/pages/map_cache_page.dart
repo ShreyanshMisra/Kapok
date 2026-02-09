@@ -143,7 +143,7 @@ class _MapCachePageState extends State<MapCachePage> {
                   // All regions list
                   if (_allRegions.length > 1) ...[
                     Text(
-                      'All Cached Regions (${_allRegions.length})',
+                      'All Saved Regions (${_allRegions.length})',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
