@@ -195,7 +195,6 @@ class _TasksPageState extends State<TasksPage> {
         title: Text(AppLocalizations.of(context).tasks),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        leading: const KapokLogo(),
         elevation: 0,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadTasks),

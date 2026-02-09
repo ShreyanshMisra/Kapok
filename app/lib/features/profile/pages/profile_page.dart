@@ -23,7 +23,6 @@ class ProfilePage extends StatelessWidget {
         title: Text(AppLocalizations.of(context).profile),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        leading: const KapokLogo(),
         elevation: 0,
         actions: [
           IconButton(

@@ -74,7 +74,6 @@ class _TeamsPageState extends State<TeamsPage> {
         title: Text(AppLocalizations.of(context).myTeams),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        leading: const KapokLogo(),
         elevation: 0,
         actions: [
           // Only show create team button for team leaders and admins

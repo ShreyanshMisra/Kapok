@@ -16,7 +16,6 @@ import '../../tasks/bloc/task_state.dart';
 import '../../../app/router.dart';
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
-import '../../../core/enums/task_category.dart';
 
 /// Team detail page showing team information, members, and tasks
 class TeamDetailPage extends StatefulWidget {

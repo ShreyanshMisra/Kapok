@@ -23,7 +23,6 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const AboutPage(),
     const MapPage(),
     const TasksPage(),
     const TeamsPage(),
@@ -57,10 +56,6 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w600,
               ),
               items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.info_outline),
-                  label: AppLocalizations.of(context).about,
-                ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.map),
                   label: AppLocalizations.of(context).map,
@@ -100,7 +95,7 @@ class _HomePageState extends State<HomePage> {
   Widget? _buildFloatingActionButton() {
     final theme = Theme.of(context);
     switch (_currentIndex) {
-      case 1: // Map page
+      case 0: // Map page
         return FloatingActionButton(
           onPressed: () {
             Navigator.of(context).pushNamed('/create-task');
@@ -109,7 +104,7 @@ class _HomePageState extends State<HomePage> {
           foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
-      case 2: // Tasks page
+      case 1: // Tasks page
         return FloatingActionButton(
           onPressed: () {
             Navigator.of(context).pushNamed('/create-task');
@@ -118,7 +113,7 @@ class _HomePageState extends State<HomePage> {
           foregroundColor: theme.floatingActionButtonTheme.foregroundColor,
           child: const Icon(Icons.add),
         );
-      case 3: // Teams page
+      case 2: // Teams page
         return FloatingActionButton(
           onPressed: () {
             Navigator.of(context).pushNamed('/create-team');

@@ -16,8 +16,6 @@ class AboutPage extends StatelessWidget {
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).about),
         centerTitle: true,
-        automaticallyImplyLeading: false,
-        leading: const KapokLogo(),
         actions: const [KapokLogo()],
         elevation: 0,
       ),
