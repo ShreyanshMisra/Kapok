@@ -7,6 +7,36 @@ import '../models/user_model.dart';
 import '../sources/firebase_source.dart';
 import '../sources/hive_source.dart';
 
+/// Converts a [FirebaseAuthException] code into a human-readable message.
+String _firebaseAuthMessage(FirebaseAuthException e) {
+  switch (e.code) {
+    case 'user-not-found':
+      return 'No account found with that email address.';
+    case 'wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'invalid-credential':
+      return 'Incorrect email or password. Please try again.';
+    case 'invalid-email':
+      return 'The email address is not valid.';
+    case 'user-disabled':
+      return 'This account has been disabled.';
+    case 'too-many-requests':
+      return 'Too many failed attempts. Please try again later.';
+    case 'network-request-failed':
+      return 'Network error. Please check your internet connection.';
+    case 'email-already-in-use':
+      return 'An account already exists with that email.';
+    case 'weak-password':
+      return 'Password is too weak. Use at least 6 characters.';
+    case 'requires-recent-login':
+      return 'Please sign out and sign back in, then try again.';
+    case 'operation-not-allowed':
+      return 'Email/password sign-in is not enabled.';
+    default:
+      return e.message ?? 'Authentication failed (${e.code}).';
+  }
+}
+
 /// Repository for authentication operations
 class AuthRepository {
   final FirebaseSource _firebaseSource;
@@ -99,7 +129,13 @@ class AuthRepository {
       if (e is AuthException) {
         rethrow;
       }
-      throw AuthException(message: 'Failed to sign in', originalError: e);
+      if (e is FirebaseAuthException) {
+        throw AuthException(
+          message: _firebaseAuthMessage(e),
+          originalError: e,
+        );
+      }
+      throw AuthException(message: 'Failed to sign in. Please try again.', originalError: e);
     }
   }
 
@@ -199,8 +235,14 @@ class AuthRepository {
       if (e is AuthException) {
         rethrow;
       }
+      if (e is FirebaseAuthException) {
+        throw AuthException(
+          message: _firebaseAuthMessage(e),
+          originalError: e,
+        );
+      }
       throw AuthException(
-        message: 'Failed to create account',
+        message: 'Failed to create account. Please try again.',
         originalError: e,
       );
     }
@@ -235,8 +277,14 @@ class AuthRepository {
       Logger.auth('Password reset email sent successfully');
     } catch (e) {
       Logger.auth('Error sending password reset email', error: e);
+      if (e is FirebaseAuthException) {
+        throw AuthException(
+          message: _firebaseAuthMessage(e),
+          originalError: e,
+        );
+      }
       throw AuthException(
-        message: 'Failed to send password reset email',
+        message: 'Failed to send password reset email.',
         originalError: e,
       );
     }

@@ -20,9 +20,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // Complete initialization after minimum display time
-    // Reduced from 3000ms to 1500ms since we no longer need animation time
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    // Minimum splash display time — short so startup feels snappy.
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         widget.onInitializationComplete();
       }

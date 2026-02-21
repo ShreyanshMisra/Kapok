@@ -58,11 +58,11 @@ class MapboxMobileController {
   // User location tracking
   StreamSubscription<void>? _locationSubscription;
 
-  // Marker colors for different priorities
-  static const Color _highPriorityColor = Color(0xFF013576); // Kapok blue
-  static const Color _mediumPriorityColor = Color(0xFF013576); // Kapok blue
-  static const Color _lowPriorityColor = Color(0xFF013576); // Kapok blue
-  static const Color _completedColor = Color(0xFF808080); // Gray
+  // Marker colors matching web priority colours
+  static const Color _highPriorityColor = Color(0xFFE53935);  // red
+  static const Color _mediumPriorityColor = Color(0xFFFFA000); // amber
+  static const Color _lowPriorityColor = Color(0xFF43A047);   // green
+  static const Color _completedColor = Color(0xFF808080);     // grey
 
   /// Sets the MapboxMap instance from the widget callback
   void setMapboxMap(MapboxMap map) {
@@ -400,16 +400,16 @@ class MapboxMobileController {
         
         if (task.status.value == 'completed') {
           iconImage = _MarkerIcons.completed;
-          textColor = 0xFF808080; // Gray
+          textColor = 0xFF808080; // grey
         } else if (task.priority.value == 'high') {
           iconImage = _MarkerIcons.high;
-          textColor = 0xFFE53935; // Red
+          textColor = 0xFFE53935; // red
         } else if (task.priority.value == 'medium') {
           iconImage = _MarkerIcons.medium;
-          textColor = 0xFFFB8C00; // Orange
+          textColor = 0xFFFFA000; // amber
         } else {
           iconImage = _MarkerIcons.low;
-          textColor = 0xFF43A047; // Green
+          textColor = 0xFF43A047; // green
         }
 
         annotationOptions.add(PointAnnotationOptions(

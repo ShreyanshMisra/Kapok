@@ -73,10 +73,10 @@ class _SignupPageState extends State<SignupPage> {
                   backgroundColor: AppColors.primary,
                 ),
               );
-            } else if (state is AuthAuthenticated) {
-              // TODO: Navigate to home page
-              Navigator.of(context).pushReplacementNamed('/home');
             }
+            // Navigation on AuthAuthenticated is handled entirely by the
+            // app-level BlocListener in kapok_app.dart, which routes new
+            // signups to create-team, join-team, or home based on role.
           },
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
