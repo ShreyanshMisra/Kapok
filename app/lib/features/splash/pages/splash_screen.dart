@@ -31,32 +31,35 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: isDark ? AppColors.primaryDark : AppColors.surface,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Kapok icon with tagline wordmark
             Image.asset(
-              'assets/images/icon_tagline/Kapok_Icon_Dark_Tagline_Wordmark.png',
+              isDark
+                  ? 'assets/images/icon_tagline/KapokIcon_Dark_Tagline_Wordmark.png'
+                  : 'assets/images/icon_tagline/Kapok_Icon_Light_Tagline_Wordmark.png',
               width: 250,
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
                   Icons.nature,
                   size: 80,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : AppColors.primary,
                 );
               },
             ),
             const SizedBox(height: 48),
-            // Simple loading indicator
-            const SizedBox(
+            SizedBox(
               width: 24,
               height: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isDark ? Colors.white70 : AppColors.primary.withOpacity(0.7),
+                ),
               ),
             ),
           ],

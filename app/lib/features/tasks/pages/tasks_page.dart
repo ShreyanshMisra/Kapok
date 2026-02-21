@@ -562,7 +562,7 @@ class _TasksPageState extends State<TasksPage> {
       selectedColor: AppColors.primary.withOpacity(0.2),
       checkmarkColor: AppColors.primary,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
     );
@@ -1063,6 +1063,7 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _buildErrorState(String message) {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -1073,17 +1074,15 @@ class _TasksPageState extends State<TasksPage> {
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context).errorLoadingTasks,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textPrimary,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+              style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -1095,7 +1094,7 @@ class _TasksPageState extends State<TasksPage> {
               label: Text(AppLocalizations.of(context).retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.surface,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,
@@ -1217,7 +1216,7 @@ class _TasksPageState extends State<TasksPage> {
           Text(
             '$title ($count)',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: isOverdue ? AppColors.error : AppColors.textPrimary,
+                  color: isOverdue ? AppColors.error : Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
           ),

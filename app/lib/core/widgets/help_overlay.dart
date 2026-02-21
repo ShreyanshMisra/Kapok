@@ -91,7 +91,7 @@ class HelpOverlay {
                             children: [
                               Text(tip.title, style: const TextStyle(fontWeight: FontWeight.w600)),
                               const SizedBox(height: 2),
-                              Text(tip.description, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                              Text(tip.description, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), fontSize: 13)),
                             ],
                           ),
                         ),

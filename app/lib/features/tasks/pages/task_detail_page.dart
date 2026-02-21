@@ -533,7 +533,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               child: Text(
                                 'Coordinates: ${widget.task.geoLocation.latitude.toStringAsFixed(6)}, ${widget.task.geoLocation.longitude.toStringAsFixed(6)}',
                                 style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppColors.textSecondary),
+                                    ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                               ),
                             ),
                           const SizedBox(height: 16),
@@ -691,7 +691,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                   style: _selectedDueDate != null
                                       ? null
                                       : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: AppColors.textSecondary,
+                                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                                         ),
                                 ),
                               ),
@@ -701,12 +701,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               padding: const EdgeInsets.only(top: 8),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.event, size: 20, color: AppColors.textSecondary),
-                                  const SizedBox(width: 8),
-                                  Text(
+                                Icon(Icons.event, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                                const SizedBox(width: 8),
+                                Text(
                                     '${AppLocalizations.of(context).dueDate}: ${DateFormat.yMd().format(widget.task.dueDate!)}',
                                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                                     ),
                                   ),
                                 ],
@@ -760,7 +760,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                             Icon(
                                               getRoleIcon(member.role),
                                               size: 16,
-                                              color: AppColors.textSecondary,
+                                              color: theme.colorScheme.onSurface.withOpacity(0.6),
                                             ),
                                             const SizedBox(width: 8),
                                             Expanded(
@@ -999,7 +999,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                     Container(
                       width: 2,
                       height: 30,
-                      color: AppColors.textSecondary.withValues(alpha: 0.3),
+                      color: theme.colorScheme.onSurface.withOpacity(0.18),
                     ),
                   ],
                 ),

@@ -76,12 +76,12 @@ class _SettingsPageState extends State<SettingsPage> {
             AppLocalizations.of(context).notifications,
             [
               ListTile(
-                leading: Icon(Icons.notifications_off, color: AppColors.textSecondary),
+                leading: Icon(Icons.notifications_off, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                 title: Text(AppLocalizations.of(context).notifications),
                 subtitle: Text(
                   'Push notifications will be enabled in a future update',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -174,7 +174,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 _lastSyncTimestamp != null
                     ? _formatTimestamp(_lastSyncTimestamp!)
                     : 'Never synced',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               trailing: _isSyncing
                   ? const SizedBox(
@@ -198,7 +198,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text(AppLocalizations.of(context).clearCache),
               subtitle: Text(
                 '~${_estimateStorageKB()} KB cached locally',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: _showClearCacheDialog,
@@ -211,11 +211,11 @@ class _SettingsPageState extends State<SettingsPage> {
             SwitchListTile(
               title: Text(
                 'Analytics',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
               ),
               subtitle: Text(
                 'Analytics will be enabled in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               value: false,
               onChanged: null,
@@ -223,11 +223,11 @@ class _SettingsPageState extends State<SettingsPage> {
             SwitchListTile(
               title: Text(
                 'Crash Reporting',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
               ),
               subtitle: Text(
                 'Crash reporting will be enabled in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               value: false,
               onChanged: null,
@@ -238,38 +238,38 @@ class _SettingsPageState extends State<SettingsPage> {
           // Feedback section
           _buildSection('Feedback & Support', [
             ListTile(
-              leading: Icon(Icons.email_outlined, color: AppColors.textSecondary),
+              leading: Icon(Icons.email_outlined, color: theme.colorScheme.onSurface.withOpacity(0.6)),
               title: Text(
                 'Email Support',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
               ),
               subtitle: Text(
                 'Support will be available in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               enabled: false,
             ),
             ListTile(
-              leading: Icon(Icons.bug_report_outlined, color: AppColors.textSecondary),
+              leading: Icon(Icons.bug_report_outlined, color: theme.colorScheme.onSurface.withOpacity(0.6)),
               title: Text(
                 'Report an Issue',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
               ),
               subtitle: Text(
                 'Issue reporting will be available in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               enabled: false,
             ),
             ListTile(
-              leading: Icon(Icons.rate_review_outlined, color: AppColors.textSecondary),
+              leading: Icon(Icons.rate_review_outlined, color: theme.colorScheme.onSurface.withOpacity(0.6)),
               title: Text(
                 'Send Feedback',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
               ),
               subtitle: Text(
                 'Feedback will be available in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               enabled: false,
             ),

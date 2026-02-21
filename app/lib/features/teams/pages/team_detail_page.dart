@@ -192,6 +192,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build team information card
   Widget _buildTeamInfoCard() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -231,7 +232,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       Text(
                         '${widget.team.memberIds.length} member${widget.team.memberIds.length != 1 ? 's' : ''}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -267,7 +268,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               Text(
                 widget.team.description!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
@@ -279,6 +280,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build team code card (for team leaders)
   Widget _buildTeamCodeCard() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -330,7 +332,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   Text(
                     'Share this code with team members',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -373,6 +375,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build members section
   Widget _buildMembersSection() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -417,7 +420,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       child: Text(
                         'No members found',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     );
@@ -441,7 +444,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   child: Text(
                     AppLocalizations.of(context).loading,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 );
@@ -527,6 +530,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build expandable member card
   Widget _buildExpandableMemberCard(UserModel member) {
+    final theme = Theme.of(context);
     final isLeader = member.id == widget.team.leaderId;
     final isExpanded = _expandedMembers[member.id] ?? false;
 
@@ -584,7 +588,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         subtitle: Text(
           displayRole,
           style: TextStyle(
-            color: isLeader ? AppColors.primary : AppColors.textSecondary,
+            color: isLeader ? AppColors.primary : theme.colorScheme.onSurface.withOpacity(0.6),
             fontSize: 12,
           ),
         ),
@@ -650,7 +654,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                           Text(
                             'No assigned tasks',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           )
                         else
@@ -698,22 +702,23 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build info row
   Widget _buildInfoRow(IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.6)),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textPrimary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -739,7 +744,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 4),
       elevation: 0,
-      color: AppColors.background,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: ListTile(
         dense: true,
         leading: PriorityStars(priority: task.priority, size: 12),
@@ -762,6 +767,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build tasks section
   Widget _buildTasksSection() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -816,7 +822,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       child: Text(
                         'No tasks yet. Create one to get started!',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     );
@@ -840,7 +846,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   child: Text(
                     AppLocalizations.of(context).loading,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 );

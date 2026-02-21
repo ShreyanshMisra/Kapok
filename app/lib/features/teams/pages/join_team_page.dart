@@ -134,7 +134,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                     context,
                   ).enterTheTeamCodeProvidedByYourTeamLeader,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                   textAlign: TextAlign.center,
                 ),

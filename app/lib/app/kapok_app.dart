@@ -19,8 +19,10 @@ import '../features/map/bloc/map_bloc.dart';
 import '../features/map/bloc/map_event.dart';
 import '../injection_container.dart';
 import '../features/auth/pages/login_page.dart';
+import '../core/services/first_login_service.dart';
 import 'router.dart';
 import 'home_page.dart';
+import 'about_page.dart';
 
 class KapokApp extends StatelessWidget {
   const KapokApp({super.key});
@@ -178,21 +180,29 @@ class KapokApp extends StatelessWidget {
                             );
                           }
                         } else {
-                          // Fully set up user - only navigate to home if:
-                          // 1. Not already on home
-                          // 2. Not on create-team or join-team pages (let them handle their own navigation)
                           final currentRoute = ModalRoute.of(
                             context,
                           )?.settings.name;
-                          // Don't navigate if we're on onboarding pages - they handle their own navigation
                           if (currentRoute != '/home' &&
+                              currentRoute != '/about' &&
                               currentRoute != '/create-team' &&
                               currentRoute != '/join-team' &&
                               currentRoute != '/role-selection') {
-                            navigator.pushNamedAndRemoveUntil(
-                              '/home',
-                              (route) => false,
-                            );
+                            final isFirstLogin = !FirstLoginService.instance
+                                .hasLoggedInBefore(state.user.id);
+                            if (isFirstLogin) {
+                              await FirstLoginService.instance
+                                  .markLoggedIn(state.user.id);
+                              navigator.pushNamedAndRemoveUntil(
+                                '/about',
+                                (route) => false,
+                              );
+                            } else {
+                              navigator.pushNamedAndRemoveUntil(
+                                '/home',
+                                (route) => false,
+                              );
+                            }
                           }
                         }
                       }
@@ -208,11 +218,13 @@ class KapokApp extends StatelessWidget {
                       body: Center(child: CircularProgressIndicator()),
                     );
                   } else if (state is AuthAuthenticated) {
+                    if (!FirstLoginService.instance.hasLoggedInBefore(state.user.id)) {
+                      return const AboutPage();
+                    }
                     return const HomePage();
                   } else if (state is AuthUnauthenticated) {
                     return const LoginPage();
                   } else {
-                    // For AuthError or other states, default to login
                     return const LoginPage();
                   }
                 },

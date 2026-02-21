@@ -206,7 +206,7 @@ class _MapTestPageState extends State<MapTestPage> {
           children: [
             // Status display
             Card(
-              color: AppColors.surface,
+              color: theme.colorScheme.surface,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(

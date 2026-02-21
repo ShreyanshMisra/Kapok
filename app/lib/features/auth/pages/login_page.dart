@@ -60,30 +60,21 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 60),
                   
-                  // Logo and title
-                  Image.asset(
-                    'assets/images/kapok_icon.png',
-                    height: 120,
-                    width: 120,
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  Text(
-                    AppLocalizations.of(context).appName,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+                  // Logo with tagline
+                  Center(
+                    child: Image.asset(
+                      theme.brightness == Brightness.dark
+                          ? 'assets/images/icon_tagline/KapokIcon_Dark_Tagline_Wordmark.png'
+                          : 'assets/images/icon_tagline/Kapok_Icon_Light_Tagline_Wordmark.png',
+                      width: 220,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/images/kapok_icon.png',
+                          height: 120,
+                          width: 120,
+                        );
+                      },
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  Text(
-                    AppLocalizations.of(context).disasterReliefCoordination,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
                   

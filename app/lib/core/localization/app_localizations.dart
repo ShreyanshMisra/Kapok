@@ -222,6 +222,7 @@ class AppLocalizations {
   String get privacyPolicy => _getString('privacyPolicy');
   String get termsOfService => _getString('termsOfService');
   String get close => _getString('close');
+  String get continueText => _getString('continueText');
   String get cancel => _getString('cancel');
   String get clear => _getString('clear');
   String get export => _getString('export');
@@ -607,6 +608,7 @@ class AppLocalizations {
         'privacyPolicy': 'Privacy Policy',
         'termsOfService': 'Terms of Service',
         'close': 'Close',
+        'continueText': 'Continue',
         'cancel': 'Cancel',
         'clear': 'Clear',
         'export': 'Export',
@@ -986,6 +988,7 @@ class AppLocalizations {
         'privacyPolicy': 'Política de Privacidad',
         'termsOfService': 'Términos de Servicio',
         'close': 'Cerrar',
+        'continueText': 'Continuar',
         'cancel': 'Cancelar',
         'clear': 'Limpiar',
         'export': 'Exportar',

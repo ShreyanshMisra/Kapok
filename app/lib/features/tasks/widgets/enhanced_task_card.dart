@@ -75,6 +75,7 @@ class EnhancedTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final loc = AppLocalizations.of(context);
     final statusColor = _getStatusColor();
     final descriptionPreview = (task.description ?? '').length > 50
@@ -112,10 +113,8 @@ class EnhancedTaskCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         task.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : AppColors.textPrimary,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 2,
@@ -154,8 +153,8 @@ class EnhancedTaskCard extends StatelessWidget {
                   children: [
                     Text(
                       task.category.displayName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -163,8 +162,8 @@ class EnhancedTaskCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       '${_getTimeInStatus()} in status',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 11,
                       ),
                     ),
@@ -174,8 +173,8 @@ class EnhancedTaskCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     descriptionPreview,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -185,13 +184,13 @@ class EnhancedTaskCard extends StatelessWidget {
                 // Footer: location, team, date, assignee
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+                    Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         locationText,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -202,23 +201,23 @@ class EnhancedTaskCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.group_outlined, size: 14, color: AppColors.textSecondary),
+                    Icon(Icons.group_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         teamDisplay,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
+                    Icon(Icons.access_time, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     const SizedBox(width: 4),
                     Text(
                       DateFormat('MMM d').format(task.createdAt),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -231,7 +230,7 @@ class EnhancedTaskCard extends StatelessWidget {
                       CircleAvatar(
                         radius: 12,
                         backgroundColor: AppColors.textDisabled,
-                        child: Icon(Icons.person_off, size: 14, color: AppColors.textSecondary),
+                        child: Icon(Icons.person_off, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                       ),
                       const SizedBox(width: 8),
                       if (canReassign && onQuickAssign != null)
@@ -251,8 +250,8 @@ class EnhancedTaskCard extends StatelessWidget {
                       else
                         Text(
                           loc.unassignedTasks,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
                     ] else ...[
@@ -272,8 +271,8 @@ class EnhancedTaskCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           assigneeDisplay,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -344,6 +343,7 @@ class EnhancedTaskCard extends StatelessWidget {
   }
 
   void _showPreviewSheet(BuildContext context, AppLocalizations loc) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -385,8 +385,8 @@ class EnhancedTaskCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Text(
                     '${task.category.displayName} • ${task.status.displayName}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],

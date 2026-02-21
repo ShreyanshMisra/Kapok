@@ -155,7 +155,7 @@ class _MapPageState extends State<MapPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           elevation: 0,
@@ -236,7 +236,7 @@ class _MapPageState extends State<MapPage> {
                         'State: LoadingRegion',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -289,7 +289,7 @@ class _MapPageState extends State<MapPage> {
                     size: 64,
                     color: state is MapError
                         ? AppColors.error
-                        : AppColors.textSecondary,
+                        : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
                   const SizedBox(height: 16),
                   if (state is MapError) ...[
@@ -307,7 +307,7 @@ class _MapPageState extends State<MapPage> {
                       'Map page - Waiting for region load',
                       style: TextStyle(
                         fontSize: 16,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -317,7 +317,7 @@ class _MapPageState extends State<MapPage> {
                       'State: ${state.runtimeType}',
                       style: TextStyle(
                         fontSize: 10,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -347,23 +347,29 @@ class _MapPageState extends State<MapPage> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final surfaceColor = theme.colorScheme.surface;
+    final onSurfaceColor = theme.colorScheme.onSurface;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Card(
-          color: AppColors.surface.withValues(alpha: 0.95),
+          color: surfaceColor.withOpacity(0.95),
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextField(
             controller: _searchController,
+            style: TextStyle(color: onSurfaceColor),
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context).searchLocation,
-              prefixIcon: const Icon(Icons.search),
+              hintStyle: TextStyle(color: onSurfaceColor.withOpacity(0.5)),
+              prefixIcon: Icon(Icons.search, color: onSurfaceColor.withOpacity(0.7)),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: Icon(Icons.clear, color: onSurfaceColor.withOpacity(0.7)),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
@@ -398,7 +404,7 @@ class _MapPageState extends State<MapPage> {
         ),
         if (_showSearchResults && _searchResults.isNotEmpty)
           Card(
-            color: AppColors.surface,
+            color: surfaceColor,
             elevation: 4,
             margin: const EdgeInsets.only(top: 4),
             shape: RoundedRectangleBorder(
@@ -414,12 +420,12 @@ class _MapPageState extends State<MapPage> {
                   final result = _searchResults[index];
                   return ListTile(
                     dense: true,
-                    leading: const Icon(Icons.location_on, size: 20),
+                    leading: Icon(Icons.location_on, size: 20, color: onSurfaceColor.withOpacity(0.7)),
                     title: Text(
                       result['place_name'] as String? ?? '',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: 13, color: onSurfaceColor),
                     ),
                     onTap: () => _selectSearchResult(result),
                   );
@@ -549,8 +555,8 @@ class _MapPageState extends State<MapPage> {
           Positioned(
             top: 16,
             left: 16,
-            child: Card(
-              color: AppColors.surface.withValues(alpha: 0.95),
+            child:             Card(
+              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -580,7 +586,7 @@ class _MapPageState extends State<MapPage> {
                   heroTag: 'map_filter_fab',
                   backgroundColor: (_filterStatus != null || _filterPriority != null)
                       ? AppColors.primary
-                      : AppColors.surface,
+                      : Theme.of(context).colorScheme.surface,
                   onPressed: () => _showMapFilterSheet(context),
                   tooltip: 'Filter markers',
                   child: Icon(
@@ -641,6 +647,7 @@ class _MapPageState extends State<MapPage> {
 
   /// Show task preview bottom sheet on marker tap
   void _showTaskPreview(BuildContext ctx, TaskModel task) {
+    final theme = Theme.of(ctx);
     final currentUserId = ctx.read<AuthBloc>().state is AuthAuthenticated
         ? (ctx.read<AuthBloc>().state as AuthAuthenticated).user.id
         : '';
@@ -721,13 +728,13 @@ class _MapPageState extends State<MapPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.event, size: 14, color: AppColors.textSecondary),
+                    Icon(Icons.event, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     const SizedBox(width: 4),
                     Text(
                       'Due ${task.dueDate!.year}-${task.dueDate!.month.toString().padLeft(2, '0')}-${task.dueDate!.day.toString().padLeft(2, '0')}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: task.isOverdue ? AppColors.error : AppColors.textSecondary,
+                        color: task.isOverdue ? AppColors.error : theme.colorScheme.onSurface.withOpacity(0.6),
                         fontWeight: task.isOverdue ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),

@@ -76,17 +76,17 @@ class _MapCachePageState extends State<MapCachePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.map_outlined,
                     size: 64,
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No cached regions',
                     style: TextStyle(
                       fontSize: 18,
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -94,7 +94,7 @@ class _MapCachePageState extends State<MapCachePage> {
                     'Download a region from the map page',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -125,7 +125,7 @@ class _MapCachePageState extends State<MapCachePage> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: theme.colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -142,13 +142,13 @@ class _MapCachePageState extends State<MapCachePage> {
                   const SizedBox(height: 16),
                   // All regions list
                   if (_allRegions.length > 1) ...[
-                    Text(
-                      'All Saved Regions (${_allRegions.length})',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+                      Text(
+                        'All Saved Regions (${_allRegions.length})',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
                     ),
                     const SizedBox(height: 8),
                     ..._allRegions.map(
@@ -164,7 +164,7 @@ class _MapCachePageState extends State<MapCachePage> {
                             '${region.downloadedTiles}/${region.totalTiles} tiles',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textSecondary,
+                              color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                         ),
@@ -203,6 +203,7 @@ class _MapCachePageState extends State<MapCachePage> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -214,12 +215,12 @@ class _MapCachePageState extends State<MapCachePage> {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ),
           Expanded(
-            child: Text(value, style: TextStyle(color: AppColors.textPrimary)),
+            child: Text(value, style: TextStyle(color: theme.colorScheme.onSurface)),
           ),
         ],
       ),
@@ -284,7 +285,7 @@ class _MapCachePageState extends State<MapCachePage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.9),
+                  color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -297,7 +298,7 @@ class _MapCachePageState extends State<MapCachePage> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

@@ -104,7 +104,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ? AppLocalizations.of(context).resetPasswordEmailSentDescription
                         : AppLocalizations.of(context).resetPasswordDescription,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -226,7 +226,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     Text(
                       AppLocalizations.of(context).resetPasswordHelpText,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                       textAlign: TextAlign.center,
                     ),

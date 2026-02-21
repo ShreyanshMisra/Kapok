@@ -111,6 +111,7 @@ flutter:
   assets:
     - assets/images/kapok_icon.png
     - assets/images/icons/
+    - assets/images/icon_tagline/
     - .env
 
   # Example custom font setup
