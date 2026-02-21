@@ -16,6 +16,7 @@ import '../../tasks/bloc/task_state.dart';
 import '../../../app/router.dart';
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
+import '../../../core/utils/role_icons.dart';
 
 /// Team detail page showing team information, members, and tasks
 class TeamDetailPage extends StatefulWidget {
@@ -133,7 +134,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   ),
                 );
               } else if (state is TeamDeleted) {
-                // Team was deleted, navigate back
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -147,7 +147,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
           BlocListener<TaskBloc, TaskState>(
             listener: (context, state) {
               if (state is TaskCreated) {
-                // Reload tasks when a new task is created
                 context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -171,28 +170,21 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             context.read<TeamBloc>().add(LoadTeamMembers(teamId: widget.team.id));
             context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
           },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Team info card
-              _buildTeamInfoCard(),
-              const SizedBox(height: 16),
-              
-              // Team code card (for team leaders)
-              if (_isCurrentUserLeader()) _buildTeamCodeCard(),
-              if (_isCurrentUserLeader()) const SizedBox(height: 16),
-              
-              // Members section
-              _buildMembersSection(),
-              const SizedBox(height: 16),
-              
-              // Tasks section
-              _buildTasksSection(),
-            ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTeamInfoCard(),
+                const SizedBox(height: 16),
+                if (_isCurrentUserLeader()) _buildTeamCodeCard(),
+                if (_isCurrentUserLeader()) const SizedBox(height: 16),
+                _buildMembersSection(),
+                const SizedBox(height: 16),
+                _buildTasksSection(),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -461,30 +453,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     );
   }
 
-  /// Get icon for a specialty role
-  IconData _getRoleIcon(String role) {
-    switch (role.toLowerCase()) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'engineering':
-        return Icons.engineering;
-      case 'carpentry':
-        return Icons.handyman;
-      case 'plumbing':
-        return Icons.plumbing;
-      case 'construction':
-        return Icons.construction;
-      case 'electrical':
-        return Icons.electrical_services;
-      case 'supplies':
-        return Icons.inventory;
-      case 'transportation':
-        return Icons.local_shipping;
-      default:
-        return Icons.work;
-    }
-  }
-
   /// Show change role dialog for a member
   void _showChangeRoleDialog(UserModel member) {
     final roles = [
@@ -505,7 +473,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: roles.map((role) {
                     return ListTile(
-                      leading: Icon(_getRoleIcon(role), size: 20),
+                      leading: Icon(getRoleIcon(role), size: 20),
                       title: Text(role),
                       trailing: selectedRole == role
                           ? Icon(Icons.check, color: AppColors.primary)
@@ -580,7 +548,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         leading: CircleAvatar(
           backgroundColor: AppColors.primary.withOpacity(0.1),
           child: Icon(
-            _getRoleIcon(member.role),
+            getRoleIcon(member.role),
             color: AppColors.primary,
             size: 20,
           ),

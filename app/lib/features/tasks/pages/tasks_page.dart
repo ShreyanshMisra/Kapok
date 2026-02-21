@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/enums/task_priority.dart';
 import '../../../core/enums/task_status.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/services/hive_service.dart';
+import '../../../core/services/sync_service.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -17,8 +18,9 @@ import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
 import '../../../core/widgets/kapok_logo.dart';
-import '../../../core/widgets/priority_stars.dart';
 import '../../../core/enums/task_category.dart';
+import '../../../core/enums/user_role.dart';
+import '../widgets/enhanced_task_card.dart';
 
 class TasksPage extends StatefulWidget {
   const TasksPage({super.key});
@@ -35,14 +37,31 @@ class _TasksPageState extends State<TasksPage> {
   String? _selectedDateFilter; // 'pastWeek' or 'custom'
   DateTimeRange? _customDateRange;
   String? _selectedAssignment; // 'me', 'unassigned', or null for all
+  bool _filterOverdue = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  bool _isStale = false;
 
   @override
   void initState() {
     super.initState();
     _loadPersistedFilters();
     _loadTasks();
+    _checkStaleness();
+  }
+
+  Future<void> _checkStaleness() async {
+    try {
+      final connectivity = await Connectivity().checkConnectivity();
+      final isOffline = connectivity.contains(ConnectivityResult.none);
+      final ts = SyncService.instance.getLastSyncTimestamp();
+      if (isOffline && ts != null) {
+        final last = DateTime.tryParse(ts);
+        if (last != null && DateTime.now().difference(last).inMinutes > 30) {
+          if (mounted) setState(() => _isStale = true);
+        }
+      }
+    } catch (_) {}
   }
 
   /// Load persisted filter selections from Hive
@@ -139,6 +158,11 @@ class _TasksPageState extends State<TasksPage> {
         return false;
       }
 
+      // Filter by overdue
+      if (_filterOverdue && !task.isOverdue) {
+        return false;
+      }
+
       // Filter by date
       if (_selectedDateFilter != null) {
         final now = DateTime.now();
@@ -191,6 +215,7 @@ class _TasksPageState extends State<TasksPage> {
       _selectedDateFilter = null;
       _customDateRange = null;
       _selectedAssignment = null;
+      _filterOverdue = false;
       _searchQuery = '';
       _searchController.clear();
     });
@@ -206,6 +231,7 @@ class _TasksPageState extends State<TasksPage> {
         _selectedCategory != null ||
         _selectedDateFilter != null ||
         _selectedAssignment != null ||
+        _filterOverdue ||
         _searchQuery.isNotEmpty;
   }
 
@@ -301,6 +327,34 @@ class _TasksPageState extends State<TasksPage> {
         ],
         child: BlocBuilder<TaskBloc, TaskState>(
           builder: (context, state) {
+          return Column(
+            children: [
+              // Staleness banner
+              if (_isStale)
+                MaterialBanner(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  content: Row(
+                    children: [
+                      const Icon(Icons.warning_amber, size: 16, color: Colors.white),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Data may be outdated — last synced over 30 min ago',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Colors.orange.shade700,
+                  actions: [
+                    TextButton(
+                      onPressed: () => setState(() => _isStale = false),
+                      child: const Text('Dismiss', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              Expanded(
+                child: Builder(builder: (context) {
           if (state is TaskLoading) {
             return Center(
               child: CircularProgressIndicator(color: theme.colorScheme.primary),
@@ -331,6 +385,10 @@ class _TasksPageState extends State<TasksPage> {
           }
 
           return _buildEmptyState();
+                }), // Builder
+              ), // Expanded (inner)
+            ], // Column children
+          ); // Column
         },
         ),
       ),
@@ -460,6 +518,15 @@ class _TasksPageState extends State<TasksPage> {
                 icon: Icons.person,
                 isSelected: _selectedAssignment != null,
                 onTap: () => _showAssignmentFilterDialog(),
+              ),
+              // Overdue filter
+              _buildFilterChip(
+                label: localizations.overdueOnly,
+                icon: Icons.schedule,
+                isSelected: _filterOverdue,
+                onTap: () {
+                  setState(() => _filterOverdue = !_filterOverdue);
+                },
               ),
               // Clear filters button
               if (_hasActiveFilters)
@@ -1041,234 +1108,179 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
+  String _getTeamDisplay(String teamId) {
+    final teamState = context.read<TeamBloc>().state;
+    try {
+      final team = teamState.teams.firstWhere((t) => t.id == teamId);
+      return team.teamName;
+    } catch (_) {
+      return teamId;
+    }
+  }
+
   Widget _buildTaskList(List<TaskModel> tasks) {
-    final sortedTasks = List<TaskModel>.from(tasks)
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final authState = context.read<AuthBloc>().state;
+    final currentUserId = authState is AuthAuthenticated ? authState.user.id : '';
+    final userRole = authState is AuthAuthenticated
+        ? authState.user.userRole
+        : UserRole.teamMember;
+    final canComplete = userRole == UserRole.admin ||
+        userRole == UserRole.teamLeader ||
+        (userRole == UserRole.teamMember);
+    final canReassign =
+        userRole == UserRole.admin || userRole == UserRole.teamLeader;
+    final loc = AppLocalizations.of(context);
+
+    // Group by status: Overdue first (if dueDate exists), then Pending, In Progress, Completed
+    final now = DateTime.now();
+    final overdueIds = tasks
+        .where((t) =>
+            t.dueDate != null &&
+            t.dueDate!.isBefore(now) &&
+            t.status != TaskStatus.completed)
+        .map((t) => t.id)
+        .toSet();
+    final overdue = tasks.where((t) => overdueIds.contains(t.id)).toList();
+    final pending = tasks
+        .where((t) =>
+            t.status == TaskStatus.pending && !overdueIds.contains(t.id))
+        .toList();
+    final inProgress = tasks
+        .where((t) =>
+            t.status == TaskStatus.inProgress && !overdueIds.contains(t.id))
+        .toList();
+    final completed =
+        tasks.where((t) => t.status == TaskStatus.completed).toList();
+
+    final sections = <MapEntry<String, List<TaskModel>>>[];
+    if (overdue.isNotEmpty) {
+      sections.add(MapEntry(loc.overdue, overdue));
+    }
+    if (pending.isNotEmpty) {
+      sections.add(MapEntry(loc.pending, pending));
+    }
+    if (inProgress.isNotEmpty) {
+      sections.add(MapEntry(loc.inProgress, inProgress));
+    }
+    if (completed.isNotEmpty) {
+      sections.add(MapEntry(loc.completed, completed));
+    }
+    if (sections.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: sortedTasks.length,
+      itemCount: sections.fold<int>(
+          0, (sum, s) => sum + 1 + s.value.length), // header + cards per section
       itemBuilder: (context, index) {
-        final task = sortedTasks[index];
-        return _buildTaskCard(task);
+        int offset = 0;
+        for (final section in sections) {
+          if (index == offset) {
+            return _buildSectionHeader(
+                section.key, section.value.length,
+                section.key == loc.overdue);
+          }
+          offset++;
+          for (final task in section.value) {
+            if (index == offset) {
+              return EnhancedTaskCard(
+                task: task,
+                assigneeDisplay: _getAssignmentDisplay(task.assignedTo),
+                teamDisplay: _getTeamDisplay(task.teamId),
+                onTap: () => _openTaskDetail(task, currentUserId),
+                onComplete: canComplete && task.status != TaskStatus.completed
+                    ? () => _completeTask(task, currentUserId, userRole)
+                    : null,
+                onShowOptions: () => _showTaskOptionsSheet(
+                    context, task, currentUserId, canComplete, canReassign),
+                onQuickAssign: canReassign
+                    ? () => _openTaskDetail(task, currentUserId)
+                    : null,
+                canComplete: canComplete,
+                canReassign: canReassign,
+              );
+            }
+            offset++;
+          }
+        }
+        return const SizedBox.shrink();
       },
     );
   }
 
-  Widget _buildTaskCard(TaskModel task) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () async {
-          final authState = context.read<AuthBloc>().state;
-          String currentUserId = '';
-          if (authState is AuthAuthenticated) {
-            currentUserId = authState.user.id;
-          }
-
-          final result = await Navigator.of(context).pushNamed(
-            AppRouter.taskDetail,
-            arguments: {'task': task, 'currentUserId': currentUserId},
-          );
-
-          // Reload tasks if task was updated
-          if (result == true && mounted) {
-            context.read<TaskBloc>().add(const LoadTasksRequested());
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${task.category.displayName}: ${task.title}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  PriorityStars(priority: task.priority),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                task.description ?? '',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Lat: ${task.latitude.toStringAsFixed(4)}, Lon: ${task.longitude.toStringAsFixed(4)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.group_outlined,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Team: ${task.teamId}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat('MMM d, y').format(task.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildStatusChip(task.status),
-                  const SizedBox(width: 8),
-                  Text(
-                    _getTimeInStatus(task),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 11,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (task.assignedTo != null && task.assignedTo!.isNotEmpty)
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.person_outline,
-                            size: 16,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${AppLocalizations.of(context).assignedToLabel}: ${_getAssignmentDisplay(task.assignedTo)}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.textSecondary),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Priority badge replaced by PriorityStars widget
-
-  Color _getStatusColor(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.pending:
-        return const Color(0xFF9E9E9E); // Gray
-      case TaskStatus.inProgress:
-        return const Color(0xFF2196F3); // Blue
-      case TaskStatus.completed:
-        return const Color(0xFF4CAF50); // Green
-    }
-  }
-
-  IconData _getStatusIcon(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.pending:
-        return Icons.pending_outlined;
-      case TaskStatus.inProgress:
-        return Icons.play_circle_outline;
-      case TaskStatus.completed:
-        return Icons.check_circle_outline;
-    }
-  }
-
-  /// Get time in current status for a task
-  String _getTimeInStatus(TaskModel task) {
-    DateTime lastChange = task.createdAt;
-    if (task.statusHistory.isNotEmpty) {
-      final lastEntry = task.statusHistory.last;
-      final changedAt = lastEntry['changedAt'] as String?;
-      if (changedAt != null) {
-        lastChange = DateTime.parse(changedAt);
-      }
-    }
-    final duration = DateTime.now().difference(lastChange);
-    if (duration.inDays > 0) return '${duration.inDays}d';
-    if (duration.inHours > 0) return '${duration.inHours}h';
-    return '${duration.inMinutes}m';
-  }
-
-  Widget _buildStatusChip(TaskStatus status) {
-    final color = _getStatusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color),
-      ),
+  Widget _buildSectionHeader(String title, int count, bool isOverdue) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getStatusIcon(status),
-            size: 16,
-            color: color,
-          ),
-          const SizedBox(width: 4),
           Text(
-            status.displayName,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            '$title ($count)',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: isOverdue ? AppColors.error : AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),
     );
   }
+
+  Future<void> _openTaskDetail(TaskModel task, String currentUserId) async {
+    final result = await Navigator.of(context).pushNamed(
+      AppRouter.taskDetail,
+      arguments: {'task': task, 'currentUserId': currentUserId},
+    );
+    if (result == true && mounted) {
+      _loadTasks();
+    }
+  }
+
+  void _completeTask(TaskModel task, String currentUserId, UserRole userRole) {
+    context.read<TaskBloc>().add(StatusChangeRequested(
+          taskId: task.id,
+          newStatus: TaskStatus.completed,
+          userId: currentUserId,
+          userRole: userRole.value,
+        ));
+    _loadTasks();
+  }
+
+  void _showTaskOptionsSheet(BuildContext context, TaskModel task,
+      String currentUserId, bool canComplete, bool canReassign) {
+    final loc = AppLocalizations.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.open_in_new),
+              title: Text(loc.taskDetails),
+              onTap: () {
+                Navigator.pop(ctx);
+                _openTaskDetail(task, currentUserId);
+              },
+            ),
+            if (canComplete && task.status != TaskStatus.completed)
+              ListTile(
+                leading: const Icon(Icons.check_circle),
+                title: Text(loc.markAsCompleted),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  final authState = context.read<AuthBloc>().state;
+                  final role = authState is AuthAuthenticated
+                      ? authState.user.userRole
+                      : UserRole.teamMember;
+                  _completeTask(task, currentUserId, role);
+                  _loadTasks();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

@@ -108,6 +108,11 @@ class AppLocalizations {
   String get low => _getString('low');
   String get assignedToLabel => _getString('assignedToLabel');
   String get pending => _getString('pending');
+  String get overdue => _getString('overdue');
+  String get dueDate => _getString('dueDate');
+  String get selectDueDate => _getString('selectDueDate');
+  String get clearDueDate => _getString('clearDueDate');
+  String get overdueOnly => _getString('overdueOnly');
 
   // Task Filtering
   String get searchTasks => _getString('searchTasks');
@@ -134,6 +139,29 @@ class AppLocalizations {
   String get pastWeek => _getString('pastWeek');
   String get customDateRange => _getString('customDateRange');
   String get selectDateRange => _getString('selectDateRange');
+
+  // Validation errors
+  String get validationEmailRequired => _getString('validationEmailRequired');
+  String get validationEmailInvalid => _getString('validationEmailInvalid');
+  String get validationPasswordRequired => _getString('validationPasswordRequired');
+  String get validationPasswordTooShort => _getString('validationPasswordTooShort');
+  String get validationPasswordsNoMatch => _getString('validationPasswordsNoMatch');
+  String get validationNameRequired => _getString('validationNameRequired');
+  String get validationNameTooShort => _getString('validationNameTooShort');
+  String get validationNameTooLong => _getString('validationNameTooLong');
+  String get validationTeamCodeRequired => _getString('validationTeamCodeRequired');
+  String get validationTeamCodeTooShort => _getString('validationTeamCodeTooShort');
+  String get validationTeamCodeTooLong => _getString('validationTeamCodeTooLong');
+  String get validationTeamCodeAlphanumeric => _getString('validationTeamCodeAlphanumeric');
+  String get validationTeamNameRequired => _getString('validationTeamNameRequired');
+  String get validationTeamNameTooShort => _getString('validationTeamNameTooShort');
+  String get validationTeamNameTooLong => _getString('validationTeamNameTooLong');
+  String get validationTaskNameRequired => _getString('validationTaskNameRequired');
+  String get validationTaskNameTooShort => _getString('validationTaskNameTooShort');
+  String get validationTaskNameTooLong => _getString('validationTaskNameTooLong');
+  String get validationTaskDescTooLong => _getString('validationTaskDescTooLong');
+  String get validationFieldRequired => _getString('validationFieldRequired');
+  String get confirmPasswordLabel => _getString('confirmPasswordLabel');
 
   // Priority Stars
   String get inProgress => _getString('inProgress');
@@ -378,6 +406,7 @@ class AppLocalizations {
   String get youMustBeLoggedInToJoinTeams => _getString('youMustBeLoggedInToJoinTeams');
   String get successfullyJoinedTeam => _getString('successfullyJoinedTeam');
   String get taskDetails => _getString('taskDetails');
+  String get openTask => _getString('openTask');
   String get taskDetailPageToBeImplemented => _getString('taskDetailPageToBeImplemented');
   String get saveChanges => _getString('saveChanges');
   String get tapToChangeProfilePicture => _getString('tapToChangeProfilePicture');
@@ -464,6 +493,11 @@ class AppLocalizations {
         'low': 'Low',
         'assignedToLabel': 'Assigned to',
         'pending': 'Pending',
+        'overdue': 'Overdue',
+        'dueDate': 'Due Date',
+        'selectDueDate': 'Select due date (optional)',
+        'clearDueDate': 'Clear due date',
+        'overdueOnly': 'Overdue only',
 
         // Task Filtering
         'searchTasks': 'Search tasks...',
@@ -490,6 +524,29 @@ class AppLocalizations {
         'pastWeek': 'Past Week',
         'customDateRange': 'Custom Date Range',
         'selectDateRange': 'Select Date Range',
+
+        // Validation errors (EN)
+        'validationEmailRequired': 'Email is required',
+        'validationEmailInvalid': 'Please enter a valid email address',
+        'validationPasswordRequired': 'Password is required',
+        'validationPasswordTooShort': 'Password must be at least 6 characters',
+        'validationPasswordsNoMatch': 'Passwords do not match',
+        'validationNameRequired': 'Name is required',
+        'validationNameTooShort': 'Name must be at least 2 characters',
+        'validationNameTooLong': 'Name must be less than 50 characters',
+        'validationTeamCodeRequired': 'Team code is required',
+        'validationTeamCodeTooShort': 'Team code must be at least 4 characters',
+        'validationTeamCodeTooLong': 'Team code must be less than 20 characters',
+        'validationTeamCodeAlphanumeric': 'Team code can only contain letters and numbers',
+        'validationTeamNameRequired': 'Team name is required',
+        'validationTeamNameTooShort': 'Team name must be at least 3 characters',
+        'validationTeamNameTooLong': 'Team name must be less than 50 characters',
+        'validationTaskNameRequired': 'Task name is required',
+        'validationTaskNameTooShort': 'Task name must be at least 3 characters',
+        'validationTaskNameTooLong': 'Task name must be less than 100 characters',
+        'validationTaskDescTooLong': 'Description must be less than 500 characters',
+        'validationFieldRequired': 'This field is required',
+        'confirmPasswordLabel': 'Confirm Password',
 
         // Priority Stars
         'oneStar': '1 Star',
@@ -731,6 +788,7 @@ class AppLocalizations {
         'youMustBeLoggedInToJoinTeams': 'You must be logged in to join teams',
         'successfullyJoinedTeam': 'Successfully joined team "{teamName}"!',
         'taskDetails': 'Task Details',
+        'openTask': 'Open Task',
         'taskDetailPageToBeImplemented': 'Task Detail page - To be implemented',
         'saveChanges': 'Save Changes',
         'tapToChangeProfilePicture': 'Tap to change profile picture',
@@ -814,6 +872,11 @@ class AppLocalizations {
         'low': 'Baja',
         'assignedToLabel': 'Asignado a',
         'pending': 'Pendiente',
+        'overdue': 'Vencido',
+        'dueDate': 'Fecha de vencimiento',
+        'selectDueDate': 'Seleccionar fecha (opcional)',
+        'clearDueDate': 'Quitar fecha',
+        'overdueOnly': 'Solo vencidas',
 
         // Task Filtering
         'searchTasks': 'Buscar tareas...',
@@ -840,6 +903,29 @@ class AppLocalizations {
         'pastWeek': 'Última Semana',
         'customDateRange': 'Rango de Fechas Personalizado',
         'selectDateRange': 'Seleccionar Rango de Fechas',
+
+        // Validation errors (ES)
+        'validationEmailRequired': 'El correo es requerido',
+        'validationEmailInvalid': 'Por favor ingrese un correo válido',
+        'validationPasswordRequired': 'La contraseña es requerida',
+        'validationPasswordTooShort': 'La contraseña debe tener al menos 6 caracteres',
+        'validationPasswordsNoMatch': 'Las contraseñas no coinciden',
+        'validationNameRequired': 'El nombre es requerido',
+        'validationNameTooShort': 'El nombre debe tener al menos 2 caracteres',
+        'validationNameTooLong': 'El nombre debe tener menos de 50 caracteres',
+        'validationTeamCodeRequired': 'El código de equipo es requerido',
+        'validationTeamCodeTooShort': 'El código debe tener al menos 4 caracteres',
+        'validationTeamCodeTooLong': 'El código debe tener menos de 20 caracteres',
+        'validationTeamCodeAlphanumeric': 'El código solo puede contener letras y números',
+        'validationTeamNameRequired': 'El nombre del equipo es requerido',
+        'validationTeamNameTooShort': 'El nombre debe tener al menos 3 caracteres',
+        'validationTeamNameTooLong': 'El nombre debe tener menos de 50 caracteres',
+        'validationTaskNameRequired': 'El nombre de la tarea es requerido',
+        'validationTaskNameTooShort': 'El nombre debe tener al menos 3 caracteres',
+        'validationTaskNameTooLong': 'El nombre debe tener menos de 100 caracteres',
+        'validationTaskDescTooLong': 'La descripción debe tener menos de 500 caracteres',
+        'validationFieldRequired': 'Este campo es requerido',
+        'confirmPasswordLabel': 'Confirmar contraseña',
 
         // Priority Stars
         'oneStar': '1 Estrella',
@@ -1081,6 +1167,7 @@ class AppLocalizations {
         'youMustBeLoggedInToJoinTeams': 'Debes iniciar sesión para unirte a equipos',
         'successfullyJoinedTeam': '¡Te uniste exitosamente al equipo "{teamName}"!',
         'taskDetails': 'Detalles de la Tarea',
+        'openTask': 'Abrir tarea',
         'taskDetailPageToBeImplemented': 'Página de detalles de tarea - Por implementar',
         'saveChanges': 'Guardar Cambios',
         'tapToChangeProfilePicture': 'Toca para cambiar la foto de perfil',

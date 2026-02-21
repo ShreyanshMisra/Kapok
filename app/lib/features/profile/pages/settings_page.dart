@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
+import '../../../core/services/hive_service.dart';
+import '../../../core/services/sync_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 import '../../teams/bloc/team_bloc.dart';
@@ -24,6 +27,32 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
+  bool _isSyncing = false;
+  String? _lastSyncTimestamp;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshLastSync();
+  }
+
+  void _refreshLastSync() {
+    setState(() {
+      _lastSyncTimestamp = SyncService.instance.getLastSyncTimestamp();
+    });
+  }
+
+  int _estimateStorageKB() {
+    try {
+      final hive = HiveService.instance;
+      final taskCount = hive.tasksBox.length;
+      final teamCount = hive.teamsBox.length;
+      // Rough estimate: ~2 KB per task, ~1 KB per team
+      return (taskCount * 2) + (teamCount * 1);
+    } catch (_) {
+      return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,29 +165,43 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
+          // Sync section
+          _buildSection('Sync', [
+            ListTile(
+              leading: const Icon(Icons.sync),
+              title: const Text('Last Synced'),
+              subtitle: Text(
+                _lastSyncTimestamp != null
+                    ? _formatTimestamp(_lastSyncTimestamp!)
+                    : 'Never synced',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              ),
+              trailing: _isSyncing
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.refresh),
+                      tooltip: 'Sync now',
+                      onPressed: _handleRetrySync,
+                    ),
+            ),
+          ]),
+          const SizedBox(height: 16),
+
           // Data section
           _buildSection(AppLocalizations.of(context).data, [
             ListTile(
+              leading: const Icon(Icons.delete_sweep),
               title: Text(AppLocalizations.of(context).clearCache),
               subtitle: Text(
-                AppLocalizations.of(context).clearLocallyStoredData,
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                _showClearCacheDialog();
-              },
-            ),
-            ListTile(
-              title: Text(
-                AppLocalizations.of(context).exportData,
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Export will be enabled in a future update',
+                '~${_estimateStorageKB()} KB cached locally',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
               ),
-              trailing: Icon(Icons.chevron_right, color: AppColors.textSecondary),
-              enabled: false,
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showClearCacheDialog,
             ),
           ]),
           const SizedBox(height: 16),
@@ -438,29 +481,77 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  String _formatTimestamp(String ts) {
+    try {
+      final dt = DateTime.parse(ts).toLocal();
+      final now = DateTime.now();
+      final diff = now.difference(dt);
+      if (diff.inMinutes < 1) return 'Just now';
+      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+      if (diff.inHours < 24) return '${diff.inHours}h ago';
+      return '${diff.inDays}d ago';
+    } catch (_) {
+      return ts;
+    }
+  }
+
+  Future<void> _handleRetrySync() async {
+    setState(() => _isSyncing = true);
+    try {
+      await SyncService.instance.syncPendingChanges();
+      _refreshLastSync();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sync completed successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sync failed: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
+    }
+  }
+
   /// Show clear cache dialog
   void _showClearCacheDialog() {
     final localizations = AppLocalizations.of(context);
+    final sizeKB = _estimateStorageKB();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(localizations.clearCache),
         content: Text(
-          localizations
-              .thisWillClearAllLocallyStoredDataYouWillNeedToSignInAgain,
+          'This will clear approximately $sizeKB KB of locally cached data (tasks, teams, settings). You will need to sync again after clearing.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: Text(localizations.cancel),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement clear cache
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
-              );
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                await HiveService.instance.clearAllData();
+                context.read<TaskBloc>().add(TaskReset());
+                context.read<TeamBloc>().add(TeamReset());
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
+                  );
+                  setState(() => _lastSyncTimestamp = null);
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to clear cache: $e'), backgroundColor: AppColors.error),
+                  );
+                }
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(localizations.clear),

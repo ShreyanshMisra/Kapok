@@ -1,6 +1,9 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../core/widgets/help_overlay.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/enums/task_priority.dart';
@@ -21,6 +24,7 @@ import '../../map/web/mapbox_web_controller_stub.dart'
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
 import '../../../core/enums/task_category.dart';
+import '../../../core/utils/role_icons.dart';
 
 /// Task detail page with map, editing, and deletion functionality
 class TaskDetailPage extends StatefulWidget {
@@ -47,13 +51,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   TaskStatus _selectedStatus = TaskStatus.pending;
   String? _selectedAssignedTo;
   TaskCategory _selectedCategory = TaskCategory.other;
+  DateTime? _selectedDueDate;
   MapboxWebController? _mapController;
   bool _showMap = true;
   Offset? _pinScreenPosition;
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(
       text: widget.task.description ?? '',
@@ -63,10 +70,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     _selectedStatus = widget.task.status;
     _selectedAssignedTo = widget.task.assignedTo;
     _selectedCategory = widget.task.category;
+    _selectedDueDate = widget.task.dueDate;
   }
 
   @override
   void dispose() {
+    _confettiController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     _addressController.dispose();
@@ -187,7 +196,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         _descriptionController.text.trim() != (widget.task.description ?? '') ||
         _selectedPriority != widget.task.priority ||
         _selectedAssignedTo != widget.task.assignedTo ||
-        _selectedCategory != widget.task.category) {
+        _selectedCategory != widget.task.category ||
+        _selectedDueDate != widget.task.dueDate) {
       context.read<TaskBloc>().add(
         EditTaskRequested(
           taskId: widget.task.id,
@@ -198,8 +208,17 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           taskCompleted: _selectedStatus == TaskStatus.completed,
           assignedTo: _selectedAssignedTo,
           category: _selectedCategory.value,
+          dueDate: _selectedDueDate,
+          clearDueDate: widget.task.dueDate != null && _selectedDueDate == null,
         ),
       );
+    }
+
+    // Fire confetti when a task is marked complete
+    final wasNotComplete = widget.task.status != TaskStatus.completed;
+    final nowComplete = _selectedStatus == TaskStatus.completed;
+    if (wasNotComplete && nowComplete) {
+      _confettiController.play();
     }
 
     setState(() {
@@ -239,7 +258,9 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return Stack(
+      children: [
+      Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
@@ -250,6 +271,42 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'Help',
+              onPressed: () => HelpOverlay.show(
+                context,
+                title: 'Task Details',
+                tips: const [
+                  HelpTip(icon: Icons.edit, title: 'Editing', description: 'Tap the pencil icon to edit the task name, description, priority, and more.'),
+                  HelpTip(icon: Icons.check_circle, title: 'Completing', description: 'Change the status to "Completed" and save to mark the task done.'),
+                  HelpTip(icon: Icons.share, title: 'Sharing', description: 'Use the share button to send task details to others.'),
+                  HelpTip(icon: Icons.swipe, title: 'Swipe Actions', description: 'On the Tasks list, swipe right to complete or swipe left for options.'),
+                ],
+              ),
+            ),
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.share),
+              tooltip: 'Share task',
+              onPressed: () {
+                final task = widget.task;
+                final duePart = task.dueDate != null
+                    ? '\nDue: ${DateFormat.yMd().format(task.dueDate!)}'
+                    : '';
+                Share.share(
+                  '[Kapok Task]\n'
+                  '${task.title}\n'
+                  'Priority: ${task.priority.displayName}\n'
+                  'Status: ${task.status.displayName}\n'
+                  'Category: ${task.category.displayName}'
+                  '$duePart\n'
+                  '${task.description ?? ''}',
+                  subject: task.title,
+                );
+              },
+            ),
           if (!_isEditing && canEdit)
             IconButton(
               icon: const Icon(Icons.edit),
@@ -394,9 +451,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               });
                             },
                             style: IconButton.styleFrom(
-                              backgroundColor: AppColors.surface.withOpacity(
-                                0.9,
-                              ),
+                              backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.9),
+                              foregroundColor: theme.colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -423,10 +479,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -448,10 +504,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -459,8 +515,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           // Location/Address
                           TextFormField(
                             controller: _addressController,
-                            enabled:
-                                false, // Address is read-only, location is set on map
+                            enabled: false,
                             decoration: InputDecoration(
                               labelText: 'Location',
                               prefixIcon: const Icon(Icons.location_on),
@@ -468,7 +523,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: AppColors.background,
+                              fillColor: theme.colorScheme.surfaceContainerHighest,
                             ),
                           ),
                           if (widget.task.geoLocation.latitude != 0.0 &&
@@ -492,10 +547,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             items: TaskStatus.values.map((TaskStatus status) {
                               return DropdownMenuItem<TaskStatus>(
@@ -534,10 +589,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             items: TaskCategory.values.map((
                               TaskCategory category,
@@ -568,10 +623,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             items: TaskPriority.values.map((
                               TaskPriority priority,
@@ -598,6 +653,67 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                 : null,
                           ),
                           const SizedBox(height: 16),
+
+                          // Due date (editable when editing)
+                          if (_isEditing)
+                            InkWell(
+                              onTap: () async {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate: _selectedDueDate ?? DateTime.now().add(const Duration(days: 1)),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                                );
+                                if (date != null) {
+                                  setState(() => _selectedDueDate = date);
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  labelText: AppLocalizations.of(context).dueDate,
+                                  prefixIcon: const Icon(Icons.calendar_today),
+                                  suffixIcon: _selectedDueDate != null
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear),
+                                          onPressed: () => setState(() => _selectedDueDate = null),
+                                          tooltip: AppLocalizations.of(context).clearDueDate,
+                                        )
+                                      : null,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(
+                                  _selectedDueDate != null
+                                      ? DateFormat.yMd().format(_selectedDueDate!)
+                                      : AppLocalizations.of(context).selectDueDate,
+                                  style: _selectedDueDate != null
+                                      ? null
+                                      : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                ),
+                              ),
+                            )
+                          else if (widget.task.dueDate != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.event, size: 20, color: AppColors.textSecondary),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${AppLocalizations.of(context).dueDate}: ${DateFormat.yMd().format(widget.task.dueDate!)}',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (_isEditing || widget.task.dueDate != null)
+                            const SizedBox(height: 16),
 
                           // Assigned To
                           if (_isEditing)
@@ -642,7 +758,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                         child: Row(
                                           children: [
                                             Icon(
-                                              _getRoleIcon(member.role),
+                                              getRoleIcon(member.role),
                                               size: 16,
                                               color: AppColors.textSecondary,
                                             ),
@@ -676,7 +792,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 filled: true,
-                                fillColor: AppColors.background,
+                                fillColor: theme.colorScheme.surfaceContainerHighest,
                               ),
                             ),
                           const SizedBox(height: 16),
@@ -754,63 +870,55 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           },
         ),
       ),
-    );
+    ), // end Scaffold
+    // Confetti overlay — plays when task is marked complete
+    Align(
+      alignment: Alignment.topCenter,
+      child: ConfettiWidget(
+        confettiController: _confettiController,
+        blastDirectionality: BlastDirectionality.explosive,
+        shouldLoop: false,
+        numberOfParticles: 30,
+        colors: const [Colors.green, Colors.blue, Colors.orange, Colors.pink, Colors.purple],
+      ),
+    ),
+    ], // end Stack children
+  ); // end Stack
   }
 
   Widget _buildInfoCard(String label, String value, IconData icon) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.textSecondary.withOpacity(0.2)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
+          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 12),
           Text(
             '$label: ',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  /// Get icon for a specialty role
-  IconData _getRoleIcon(String role) {
-    switch (role.toLowerCase()) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'engineering':
-        return Icons.engineering;
-      case 'carpentry':
-        return Icons.handyman;
-      case 'plumbing':
-        return Icons.plumbing;
-      case 'construction':
-        return Icons.construction;
-      case 'electrical':
-        return Icons.electrical_services;
-      case 'supplies':
-        return Icons.inventory;
-      case 'transportation':
-        return Icons.local_shipping;
-      default:
-        return Icons.work;
-    }
   }
 
   /// Calculate time in current status
@@ -838,15 +946,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   /// Build status history timeline widget
   Widget _buildStatusTimeline() {
     final teamState = context.read<TeamBloc>().state;
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Status History',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -903,15 +1012,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         previousStatus != null
                             ? '${TaskStatus.fromString(previousStatus).displayName} → ${TaskStatus.fromString(status).displayName}'
                             : TaskStatus.fromString(status).displayName,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         '$userName • $formattedDate',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                       ),

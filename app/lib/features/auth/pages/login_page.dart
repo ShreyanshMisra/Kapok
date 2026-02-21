@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/validated_text_field.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -21,7 +22,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -88,50 +88,24 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 48),
                   
                   // Email field
-                  TextFormField(
+                  ValidatedTextField(
                     controller: _emailController,
+                    label: AppLocalizations.of(context).email,
+                    prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).email,
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
-                    ),
-                    validator: Validators.validateEmail,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => Validators.validateEmail(v, l10n: AppLocalizations.of(context)),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Password field
-                  TextFormField(
+                  ValidatedTextField(
                     controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).password,
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
-                    ),
-                    validator: Validators.validatePassword,
+                    label: AppLocalizations.of(context).password,
+                    prefixIcon: Icons.lock_outlined,
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    validator: (v) => Validators.validatePassword(v, l10n: AppLocalizations.of(context)),
                   ),
                   const SizedBox(height: 8),
                   

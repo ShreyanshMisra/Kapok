@@ -4,6 +4,7 @@ import 'package:kapok_app/core/constants/terms_of_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/validated_text_field.dart';
 import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -25,8 +26,6 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   bool _tosAgreed = false;
   
   // Use enum values directly to ensure consistency
@@ -87,39 +86,23 @@ class _SignupPageState extends State<SignupPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Name field
-                  TextFormField(
+                  ValidatedTextField(
                     controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).fullName,
-                      prefixIcon: const Icon(Icons.person_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
-                    ),
-                    validator: Validators.validateName,
+                    label: AppLocalizations.of(context).fullName,
+                    prefixIcon: Icons.person_outlined,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => Validators.validateName(v, l10n: AppLocalizations.of(context)),
                   ),
                   const SizedBox(height: 16),
 
                   // Email field
-                  TextFormField(
+                  ValidatedTextField(
                     controller: _emailController,
+                    label: AppLocalizations.of(context).email,
+                    prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).email,
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
-                    ),
-                    validator: Validators.validateEmail,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => Validators.validateEmail(v, l10n: AppLocalizations.of(context)),
                   ),
                   const SizedBox(height: 16),
 
@@ -203,59 +186,23 @@ class _SignupPageState extends State<SignupPage> {
                   const SizedBox(height: 16),
                   
                   // Password field
-                  TextFormField(
+                  ValidatedTextField(
                     controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).password,
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
-                    ),
-                    validator: Validators.validatePassword,
+                    label: AppLocalizations.of(context).password,
+                    prefixIcon: Icons.lock_outlined,
+                    obscureText: true,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => Validators.validatePassword(v, l10n: AppLocalizations.of(context)),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Confirm password field
-                  TextFormField(
+                  ValidatedTextField(
                     controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).confirmPassword,
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
-                    ),
+                    label: AppLocalizations.of(context).confirmPassword,
+                    prefixIcon: Icons.lock_outlined,
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
                     validator: (value) {
                       if (value != _passwordController.text) {
                         return AppLocalizations.of(context).passwordsDoNotMatch;

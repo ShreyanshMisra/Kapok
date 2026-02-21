@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:kapok_app/features/auth/bloc/auth_event.dart';
 import '../core/constants/app_colors.dart';
+import '../core/enums/task_status.dart';
 import '../core/localization/app_localizations.dart';
 import '../core/widgets/sync_status_widget.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
+import '../features/tasks/bloc/task_bloc.dart';
+import '../features/tasks/bloc/task_state.dart';
 import '../features/map/pages/map_page.dart';
 import '../features/teams/pages/teams_page.dart';
 import '../features/tasks/pages/tasks_page.dart';
@@ -106,9 +111,8 @@ class _HomePageState extends State<HomePage> {
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
+                HapticFeedback.selectionClick();
+                setState(() => _currentIndex = index);
               },
               type: BottomNavigationBarType.fixed,
               backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
@@ -123,7 +127,32 @@ class _HomePageState extends State<HomePage> {
                   label: AppLocalizations.of(context).map,
                 ),
                 BottomNavigationBarItem(
-                  icon: const Icon(Icons.assignment),
+                  icon: BlocBuilder<TaskBloc, TaskState>(
+                    builder: (context, taskState) {
+                      int pendingCount = 0;
+                      if (taskState is TasksLoaded) {
+                        pendingCount = taskState.tasks
+                            .where((t) =>
+                                t.status == TaskStatus.pending ||
+                                t.status == TaskStatus.inProgress)
+                            .length;
+                      }
+                      if (pendingCount == 0) {
+                        return const Icon(Icons.assignment);
+                      }
+                      return badges.Badge(
+                        badgeContent: Text(
+                          pendingCount > 99 ? '99+' : '$pendingCount',
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                        badgeStyle: const badges.BadgeStyle(
+                          badgeColor: AppColors.primary,
+                          padding: EdgeInsets.all(4),
+                        ),
+                        child: const Icon(Icons.assignment),
+                      );
+                    },
+                  ),
                   label: AppLocalizations.of(context).tasks,
                 ),
                 BottomNavigationBarItem(

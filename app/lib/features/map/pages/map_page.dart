@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/mapbox_constants.dart';
 import '../../../core/enums/task_priority.dart';
+import '../../../core/enums/task_status.dart';
 import '../../../core/services/geolocation_service.dart';
+import '../../../core/widgets/priority_stars.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../bloc/map_bloc.dart';
@@ -47,6 +49,10 @@ class _MapPageState extends State<MapPage> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   bool _showSearchResults = false;
+
+  // Map filter state
+  TaskStatus? _filterStatus;
+  TaskPriority? _filterPriority;
 
 
   @override
@@ -521,20 +527,9 @@ class _MapPageState extends State<MapPage> {
               initialZoom: initialCamera.zoom,
               offlineBubble: region,
               isOfflineMode: isOffline,
-              // Pass tasks for mobile native markers
-              tasks: tasks,
-              onTaskMarkerTap: (task) {
-                // Navigate to task detail
-                Navigator.of(context).pushNamed(
-                  AppRouter.taskDetail,
-                  arguments: {
-                    'task': task,
-                    'currentUserId': context.read<AuthBloc>().state is AuthAuthenticated
-                        ? (context.read<AuthBloc>().state as AuthAuthenticated).user.id
-                        : '',
-                  },
-                );
-              },
+              // Pass (filtered) tasks for mobile native markers
+              tasks: tasks != null ? _filteredMapTasks(tasks) : null,
+              onTaskMarkerTap: (task) => _showTaskPreview(context, task),
               onCameraIdle: (cameraState) {
                 setState(() {});
                 context.read<MapBloc>().add(MapCameraMoved(cameraState));
@@ -549,7 +544,7 @@ class _MapPageState extends State<MapPage> {
           ),
           // Task markers overlay (web only - mobile uses native markers)
           if (kIsWeb && tasks != null && tasks.isNotEmpty && _webMapController != null)
-            ...tasks.map((task) => _buildTaskMarker(task)),
+            ..._filteredMapTasks(tasks).map((task) => _buildTaskMarker(task)),
           // Current location button
           Positioned(
             top: 16,
@@ -574,7 +569,297 @@ class _MapPageState extends State<MapPage> {
             right: 16,
             child: _buildSearchBar(context),
           ),
+          // Map filter FAB
+          Positioned(
+            bottom: 24,
+            right: 16,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FloatingActionButton(
+                  heroTag: 'map_filter_fab',
+                  backgroundColor: (_filterStatus != null || _filterPriority != null)
+                      ? AppColors.primary
+                      : AppColors.surface,
+                  onPressed: () => _showMapFilterSheet(context),
+                  tooltip: 'Filter markers',
+                  child: Icon(
+                    Icons.filter_list,
+                    color: (_filterStatus != null || _filterPriority != null)
+                        ? Colors.white
+                        : AppColors.primary,
+                  ),
+                ),
+                if (_filterStatus != null || _filterPriority != null)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppColors.error,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${(_filterStatus != null ? 1 : 0) + (_filterPriority != null ? 1 : 0)}',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  /// Priority-based marker color
+  Color _markerColor(TaskModel task) {
+    if (task.status == TaskStatus.completed) return Colors.grey.shade400;
+    switch (task.priority) {
+      case TaskPriority.high:
+        return const Color(0xFFE53935); // red
+      case TaskPriority.medium:
+        return const Color(0xFFFFA000); // amber
+      case TaskPriority.low:
+        return const Color(0xFF43A047); // green
+    }
+  }
+
+  /// Apply active map filters to task list
+  List<TaskModel> _filteredMapTasks(List<TaskModel> tasks) {
+    return tasks.where((t) {
+      if (_filterStatus != null && t.status != _filterStatus) return false;
+      if (_filterPriority != null && t.priority != _filterPriority) return false;
+      return true;
+    }).toList();
+  }
+
+  /// Show task preview bottom sheet on marker tap
+  void _showTaskPreview(BuildContext ctx, TaskModel task) {
+    final currentUserId = ctx.read<AuthBloc>().state is AuthAuthenticated
+        ? (ctx.read<AuthBloc>().state as AuthAuthenticated).user.id
+        : '';
+    showModalBottomSheet(
+      context: ctx,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        final color = _markerColor(task);
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Title row
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      task.title,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Priority + status row
+              Row(
+                children: [
+                  PriorityStars(priority: task.priority, size: 16),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      task.status.displayName,
+                      style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      task.category.displayName,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+              if (task.dueDate != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.event, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Due ${task.dueDate!.year}-${task.dueDate!.month.toString().padLeft(2, '0')}-${task.dueDate!.day.toString().padLeft(2, '0')}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: task.isOverdue ? AppColors.error : AppColors.textSecondary,
+                        fontWeight: task.isOverdue ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if (task.description != null && task.description!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  task.description!.length > 100
+                      ? '${task.description!.substring(0, 100)}…'
+                      : task.description!,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+              ],
+              const SizedBox(height: 16),
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(ctx).pushNamed(
+                          AppRouter.taskDetail,
+                          arguments: {'task': task, 'currentUserId': currentUserId},
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                      child: const Text('Open Task', style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Show map filter sheet
+  void _showMapFilterSheet(BuildContext ctx) {
+    showModalBottomSheet(
+      context: ctx,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (_, setSheetState) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Filter Map Markers', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              const Text('Status', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: _filterStatus == null,
+                    onSelected: (_) {
+                      setSheetState(() => _filterStatus = null);
+                      setState(() => _filterStatus = null);
+                    },
+                  ),
+                  ...TaskStatus.values.map((s) => FilterChip(
+                    label: Text(s.displayName),
+                    selected: _filterStatus == s,
+                    onSelected: (_) {
+                      final next = _filterStatus == s ? null : s;
+                      setSheetState(() => _filterStatus = next);
+                      setState(() => _filterStatus = next);
+                    },
+                  )),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Priority', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: _filterPriority == null,
+                    onSelected: (_) {
+                      setSheetState(() => _filterPriority = null);
+                      setState(() => _filterPriority = null);
+                    },
+                  ),
+                  ...TaskPriority.values.map((p) => FilterChip(
+                    label: Text(p.displayName),
+                    selected: _filterPriority == p,
+                    onSelected: (_) {
+                      final next = _filterPriority == p ? null : p;
+                      setSheetState(() => _filterPriority = next);
+                      setState(() => _filterPriority = next);
+                    },
+                  )),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(sheetCtx).pop(),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                  child: const Text('Apply', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -591,20 +876,14 @@ class _MapPageState extends State<MapPage> {
 
     if (screenPos == null) return const SizedBox.shrink();
 
-    // Use blue for all priorities, gray for completed
-    Color markerColor;
-    IconData markerIcon;
-    String priorityLabel;
+    final color = _markerColor(task);
     int starCount;
+    String priorityLabel;
 
-    if (task.status.value == 'completed') {
-      markerColor = AppColors.textSecondary;
-      markerIcon = Icons.check_circle;
+    if (task.status == TaskStatus.completed) {
       priorityLabel = 'Completed';
       starCount = 0;
     } else {
-      markerColor = AppColors.primary;
-      markerIcon = Icons.star;
       switch (task.priority) {
         case TaskPriority.high:
           priorityLabel = 'High Priority';
@@ -622,26 +901,15 @@ class _MapPageState extends State<MapPage> {
     }
 
     return Positioned(
-      left: screenPos.dx - 20, // Center the 40px pin
-      top: screenPos.dy - 50, // Position pin point at location
+      left: screenPos.dx - 20,
+      top: screenPos.dy - 50,
       child: _MapPin(
         task: task,
-        markerColor: markerColor,
-        markerIcon: markerIcon,
+        markerColor: color,
+        markerIcon: task.status == TaskStatus.completed ? Icons.check_circle : Icons.star,
         priorityLabel: priorityLabel,
         starCount: starCount,
-        onTap: () {
-          // Navigate to task detail
-          Navigator.of(context).pushNamed(
-            AppRouter.taskDetail,
-            arguments: {
-              'task': task,
-              'currentUserId': context.read<AuthBloc>().state is AuthAuthenticated
-                  ? (context.read<AuthBloc>().state as AuthAuthenticated).user.id
-                  : '',
-            },
-          );
-        },
+        onTap: () => _showTaskPreview(context, task),
       ),
     );
   }

@@ -1013,6 +1013,8 @@ class TaskRepository {
     bool? taskCompleted,
     String? assignedTo,
     String? category,
+    DateTime? dueDate,
+    bool clearDueDate = false,
   }) async {
     try {
       Logger.task('Editing task: $taskId by user: $userId');
@@ -1043,6 +1045,7 @@ class TaskRepository {
         status: status,
         priority: priority,
         category: category != null ? TaskCategory.fromString(category) : currentTask.category,
+        dueDate: clearDueDate ? null : (dueDate ?? currentTask.dueDate),
         updatedAt: DateTime.now(),
         completedAt: taskCompleted == true
             ? DateTime.now()

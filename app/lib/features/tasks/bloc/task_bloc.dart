@@ -63,7 +63,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         status: status,
         priority: priority,
         category: TaskCategory.fromString(event.category),
-        dueDate: null,
+        dueDate: event.dueDate,
         createdAt: now,
         updatedAt: now,
         completedAt: event.taskCompleted ? now : null,
@@ -217,6 +217,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         taskCompleted: event.taskCompleted,
         assignedTo: event.assignedTo,
         category: event.category,
+        dueDate: event.dueDate,
+        clearDueDate: event.clearDueDate,
       );
 
       emit(TaskUpdated(task: task));
