@@ -23,6 +23,7 @@ class TaskModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? completedAt; // Nullable, set when status becomes Completed
+  final List<Map<String, dynamic>> statusHistory; // Status change history
 
   const TaskModel({
     required this.id,
@@ -40,6 +41,7 @@ class TaskModel {
     required this.createdAt,
     required this.updatedAt,
     this.completedAt,
+    this.statusHistory = const [],
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
@@ -73,6 +75,13 @@ class TaskModel {
       ).value;
     }
 
+    // Convert statusHistory
+    if (jsonCopy['statusHistory'] is List) {
+      jsonCopy['statusHistory'] = (jsonCopy['statusHistory'] as List)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    }
+
     return _$TaskModelFromJson(jsonCopy);
   }
 
@@ -87,6 +96,7 @@ class TaskModel {
       'latitude': geoLocation.latitude,
       'longitude': geoLocation.longitude,
     };
+    json['statusHistory'] = statusHistory;
     return json;
   }
 
@@ -132,6 +142,10 @@ class TaskModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+      statusHistory: (data['statusHistory'] as List<dynamic>?)
+              ?.map((e) => Map<String, dynamic>.from(e as Map))
+              .toList() ??
+          [],
     );
   }
 
@@ -151,6 +165,7 @@ class TaskModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
+      'statusHistory': statusHistory,
     };
   }
 
@@ -170,6 +185,7 @@ class TaskModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,
+    List<Map<String, dynamic>>? statusHistory,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -187,6 +203,7 @@ class TaskModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       completedAt: completedAt ?? this.completedAt,
+      statusHistory: statusHistory ?? this.statusHistory,
     );
   }
 

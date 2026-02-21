@@ -461,18 +461,112 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     );
   }
 
+  /// Get icon for a specialty role
+  IconData _getRoleIcon(String role) {
+    switch (role.toLowerCase()) {
+      case 'medical':
+        return Icons.medical_services;
+      case 'engineering':
+        return Icons.engineering;
+      case 'carpentry':
+        return Icons.handyman;
+      case 'plumbing':
+        return Icons.plumbing;
+      case 'construction':
+        return Icons.construction;
+      case 'electrical':
+        return Icons.electrical_services;
+      case 'supplies':
+        return Icons.inventory;
+      case 'transportation':
+        return Icons.local_shipping;
+      default:
+        return Icons.work;
+    }
+  }
+
+  /// Show change role dialog for a member
+  void _showChangeRoleDialog(UserModel member) {
+    final roles = [
+      'Medical', 'Engineering', 'Carpentry', 'Plumbing',
+      'Construction', 'Electrical', 'Supplies', 'Transportation', 'Other',
+    ];
+    String selectedRole = member.role;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Change Role for ${member.name}'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: roles.map((role) {
+                    return ListTile(
+                      leading: Icon(_getRoleIcon(role), size: 20),
+                      title: Text(role),
+                      trailing: selectedRole == role
+                          ? Icon(Icons.check, color: AppColors.primary)
+                          : null,
+                      onTap: () {
+                        setDialogState(() => selectedRole = role);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    final authState = context.read<AuthBloc>().state;
+                    if (authState is AuthAuthenticated) {
+                      context.read<TeamBloc>().add(
+                        ChangeMemberRoleRequested(
+                          teamId: widget.team.id,
+                          memberId: member.id,
+                          leaderId: authState.user.id,
+                          newRole: selectedRole,
+                        ),
+                      );
+                      ScaffoldMessenger.of(this.context).showSnackBar(
+                        SnackBar(
+                          content: Text('${member.name}\'s role changed to $selectedRole'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('SAVE'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   /// Build expandable member card
   Widget _buildExpandableMemberCard(UserModel member) {
     final isLeader = member.id == widget.team.leaderId;
     final isExpanded = _expandedMembers[member.id] ?? false;
 
     // Determine display role for this team context
-    // If not the leader of THIS team, show as "Member" regardless of their account type
     String displayRole;
     if (isLeader) {
       displayRole = 'Team Leader';
     } else {
-      // Non-leaders are shown as "Member" in this team context
       displayRole = 'Member';
     }
 
@@ -485,19 +579,39 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
       child: ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: AppColors.primary.withOpacity(0.1),
-          child: Text(
-            member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Icon(
+            _getRoleIcon(member.role),
+            color: AppColors.primary,
+            size: 20,
           ),
         ),
-        title: Text(
-          member.name,
-          style: TextStyle(
-            fontWeight: isLeader ? FontWeight.bold : FontWeight.normal,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                member.name,
+                style: TextStyle(
+                  fontWeight: isLeader ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            // Specialty role badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                member.role,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
         subtitle: Text(
           displayRole,
@@ -577,22 +691,33 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     );
                   },
                 ),
-                // Remove member button (only for leaders, and can't remove themselves)
+                // Leader actions (change role + remove member)
                 if (_isCurrentUserLeader() && !isLeader) ...[
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _showRemoveMemberDialog(member),
-                      icon: const Icon(Icons.person_remove),
-                      label: Text(AppLocalizations.of(context).removeFromTeam.toUpperCase()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showChangeRoleDialog(member),
+                          icon: const Icon(Icons.swap_horiz),
+                          label: const Text('CHANGE ROLE'),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showRemoveMemberDialog(member),
+                          icon: const Icon(Icons.person_remove),
+                          label: Text(AppLocalizations.of(context).remove.toUpperCase()),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ],

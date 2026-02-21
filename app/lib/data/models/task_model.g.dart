@@ -41,6 +41,10 @@ TaskModel _$TaskModelFromJson(Map<String, dynamic> json) => TaskModel(
   completedAt: json['completedAt'] == null
       ? null
       : DateTime.parse(json['completedAt'] as String),
+  statusHistory: (json['statusHistory'] as List<dynamic>?)
+          ?.map((e) => Map<String, dynamic>.from(e as Map))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$TaskModelToJson(TaskModel instance) => <String, dynamic>{
@@ -62,4 +66,5 @@ Map<String, dynamic> _$TaskModelToJson(TaskModel instance) => <String, dynamic>{
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
   'completedAt': instance.completedAt?.toIso8601String(),
+  'statusHistory': instance.statusHistory,
 };

@@ -26,6 +26,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<DeleteTaskRequested>(_onDeleteTaskRequested);
     on<MarkTaskCompletedRequested>(_onMarkTaskCompletedRequested);
     on<AssignTaskRequested>(_onAssignTaskRequested);
+    on<StatusChangeRequested>(_onStatusChangeRequested);
     on<TaskReset>(_onTaskReset);
   }
 
@@ -282,6 +283,30 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task assigned successfully');
     } catch (e) {
       Logger.task('Error assigning task', error: e);
+      emit(TaskError(message: e.toString()));
+    }
+  }
+
+  /// Handle status change request with validation and history tracking
+  Future<void> _onStatusChangeRequested(
+    StatusChangeRequested event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(const TaskLoading());
+      Logger.task('Changing status of task: ${event.taskId} to ${event.newStatus.value}');
+
+      final task = await _taskRepository.changeTaskStatus(
+        taskId: event.taskId,
+        newStatus: event.newStatus,
+        userId: event.userId,
+        userRole: event.userRole,
+      );
+
+      emit(TaskUpdated(task: task));
+      Logger.task('Task status changed successfully');
+    } catch (e) {
+      Logger.task('Error changing task status', error: e);
       emit(TaskError(message: e.toString()));
     }
   }

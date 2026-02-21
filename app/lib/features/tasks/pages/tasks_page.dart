@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/enums/task_priority.dart';
 import '../../../core/enums/task_status.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/services/hive_service.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -40,7 +41,46 @@ class _TasksPageState extends State<TasksPage> {
   @override
   void initState() {
     super.initState();
+    _loadPersistedFilters();
     _loadTasks();
+  }
+
+  /// Load persisted filter selections from Hive
+  void _loadPersistedFilters() {
+    try {
+      final hive = HiveService.instance;
+      final statusStr = hive.getSetting<String>('taskFilter_status');
+      if (statusStr != null) {
+        _selectedStatus = TaskStatus.fromString(statusStr);
+      }
+      final priorityStr = hive.getSetting<String>('taskFilter_priority');
+      if (priorityStr != null) {
+        _selectedPriority = TaskPriority.fromString(priorityStr);
+      }
+      final categoryStr = hive.getSetting<String>('taskFilter_category');
+      if (categoryStr != null) {
+        _selectedCategory = TaskCategory.fromString(categoryStr);
+      }
+      final assignmentStr = hive.getSetting<String>('taskFilter_assignment');
+      if (assignmentStr != null) {
+        _selectedAssignment = assignmentStr;
+      }
+    } catch (_) {
+      // Ignore errors loading persisted filters
+    }
+  }
+
+  /// Persist a filter value to Hive
+  void _persistFilter(String key, String? value) {
+    try {
+      if (value != null) {
+        HiveService.instance.storeSetting(key, value);
+      } else {
+        HiveService.instance.settingsBox.delete(key);
+      }
+    } catch (_) {
+      // Ignore errors persisting filters
+    }
   }
 
   @override
@@ -120,12 +160,21 @@ class _TasksPageState extends State<TasksPage> {
         }
       }
 
-      // Filter by search query
+      // Filter by search query (title, description, address, assignee name)
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
         final titleMatch = task.title.toLowerCase().contains(query);
         final descriptionMatch = task.description?.toLowerCase().contains(query) ?? false;
-        if (!titleMatch && !descriptionMatch) {
+        final addressMatch = task.address?.toLowerCase().contains(query) ?? false;
+        // Resolve assignee name for matching
+        bool assigneeMatch = false;
+        if (task.assignedTo != null && task.assignedTo!.isNotEmpty) {
+          try {
+            final name = _getUserName(task.assignedTo);
+            assigneeMatch = name.toLowerCase().contains(query);
+          } catch (_) {}
+        }
+        if (!titleMatch && !descriptionMatch && !addressMatch && !assigneeMatch) {
           return false;
         }
       }
@@ -145,6 +194,10 @@ class _TasksPageState extends State<TasksPage> {
       _searchQuery = '';
       _searchController.clear();
     });
+    _persistFilter('taskFilter_status', null);
+    _persistFilter('taskFilter_priority', null);
+    _persistFilter('taskFilter_category', null);
+    _persistFilter('taskFilter_assignment', null);
   }
 
   bool get _hasActiveFilters {
@@ -448,6 +501,11 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
+  void _setStatusFilter(TaskStatus? value) {
+    setState(() => _selectedStatus = value);
+    _persistFilter('taskFilter_status', value?.value);
+  }
+
   void _showStatusFilterDialog() {
     final localizations = AppLocalizations.of(context);
     showDialog(
@@ -463,12 +521,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: null,
                 groupValue: _selectedStatus,
                 onChanged: (value) {
-                  setState(() => _selectedStatus = value);
+                  _setStatusFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedStatus = null);
+                _setStatusFilter(null);
                 Navigator.of(context).pop();
               },
             ),
@@ -478,12 +536,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: TaskStatus.pending,
                 groupValue: _selectedStatus,
                 onChanged: (value) {
-                  setState(() => _selectedStatus = value);
+                  _setStatusFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedStatus = TaskStatus.pending);
+                _setStatusFilter(TaskStatus.pending);
                 Navigator.of(context).pop();
               },
             ),
@@ -493,12 +551,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: TaskStatus.inProgress,
                 groupValue: _selectedStatus,
                 onChanged: (value) {
-                  setState(() => _selectedStatus = value);
+                  _setStatusFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedStatus = TaskStatus.inProgress);
+                _setStatusFilter(TaskStatus.inProgress);
                 Navigator.of(context).pop();
               },
             ),
@@ -508,12 +566,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: TaskStatus.completed,
                 groupValue: _selectedStatus,
                 onChanged: (value) {
-                  setState(() => _selectedStatus = value);
+                  _setStatusFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedStatus = TaskStatus.completed);
+                _setStatusFilter(TaskStatus.completed);
                 Navigator.of(context).pop();
               },
             ),
@@ -521,6 +579,11 @@ class _TasksPageState extends State<TasksPage> {
         ),
       ),
     );
+  }
+
+  void _setPriorityFilter(TaskPriority? value) {
+    setState(() => _selectedPriority = value);
+    _persistFilter('taskFilter_priority', value?.value);
   }
 
   void _showPriorityFilterDialog() {
@@ -538,12 +601,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: null,
                 groupValue: _selectedPriority,
                 onChanged: (value) {
-                  setState(() => _selectedPriority = value);
+                  _setPriorityFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedPriority = null);
+                _setPriorityFilter(null);
                 Navigator.of(context).pop();
               },
             ),
@@ -553,12 +616,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: TaskPriority.high,
                 groupValue: _selectedPriority,
                 onChanged: (value) {
-                  setState(() => _selectedPriority = value);
+                  _setPriorityFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedPriority = TaskPriority.high);
+                _setPriorityFilter(TaskPriority.high);
                 Navigator.of(context).pop();
               },
             ),
@@ -568,12 +631,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: TaskPriority.medium,
                 groupValue: _selectedPriority,
                 onChanged: (value) {
-                  setState(() => _selectedPriority = value);
+                  _setPriorityFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedPriority = TaskPriority.medium);
+                _setPriorityFilter(TaskPriority.medium);
                 Navigator.of(context).pop();
               },
             ),
@@ -583,12 +646,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: TaskPriority.low,
                 groupValue: _selectedPriority,
                 onChanged: (value) {
-                  setState(() => _selectedPriority = value);
+                  _setPriorityFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedPriority = TaskPriority.low);
+                _setPriorityFilter(TaskPriority.low);
                 Navigator.of(context).pop();
               },
             ),
@@ -596,6 +659,11 @@ class _TasksPageState extends State<TasksPage> {
         ),
       ),
     );
+  }
+
+  void _setCategoryFilter(TaskCategory? value) {
+    setState(() => _selectedCategory = value);
+    _persistFilter('taskFilter_category', value?.value);
   }
 
   void _showCategoryFilterDialog() {
@@ -614,12 +682,12 @@ class _TasksPageState extends State<TasksPage> {
                   value: null,
                   groupValue: _selectedCategory,
                   onChanged: (value) {
-                    setState(() => _selectedCategory = value);
+                    _setCategoryFilter(value);
                     Navigator.of(context).pop();
                   },
                 ),
                 onTap: () {
-                  setState(() => _selectedCategory = null);
+                  _setCategoryFilter(null);
                   Navigator.of(context).pop();
                 },
               ),
@@ -629,12 +697,12 @@ class _TasksPageState extends State<TasksPage> {
                   value: category,
                   groupValue: _selectedCategory,
                   onChanged: (value) {
-                    setState(() => _selectedCategory = value);
+                    _setCategoryFilter(value);
                     Navigator.of(context).pop();
                   },
                 ),
                 onTap: () {
-                  setState(() => _selectedCategory = category);
+                  _setCategoryFilter(category);
                   Navigator.of(context).pop();
                 },
               )),
@@ -760,6 +828,11 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
+  void _setAssignmentFilter(String? value) {
+    setState(() => _selectedAssignment = value);
+    _persistFilter('taskFilter_assignment', value);
+  }
+
   void _showAssignmentFilterDialog() {
     final localizations = AppLocalizations.of(context);
     showDialog(
@@ -775,12 +848,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: null,
                 groupValue: _selectedAssignment,
                 onChanged: (value) {
-                  setState(() => _selectedAssignment = value);
+                  _setAssignmentFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedAssignment = null);
+                _setAssignmentFilter(null);
                 Navigator.of(context).pop();
               },
             ),
@@ -790,12 +863,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: 'me',
                 groupValue: _selectedAssignment,
                 onChanged: (value) {
-                  setState(() => _selectedAssignment = value);
+                  _setAssignmentFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedAssignment = 'me');
+                _setAssignmentFilter('me');
                 Navigator.of(context).pop();
               },
             ),
@@ -805,12 +878,12 @@ class _TasksPageState extends State<TasksPage> {
                 value: 'unassigned',
                 groupValue: _selectedAssignment,
                 onChanged: (value) {
-                  setState(() => _selectedAssignment = value);
+                  _setAssignmentFilter(value);
                   Navigator.of(context).pop();
                 },
               ),
               onTap: () {
-                setState(() => _selectedAssignment = 'unassigned');
+                _setAssignmentFilter('unassigned');
                 Navigator.of(context).pop();
               },
             ),
@@ -1090,6 +1163,14 @@ class _TasksPageState extends State<TasksPage> {
                 children: [
                   _buildStatusChip(task.status),
                   const SizedBox(width: 8),
+                  Text(
+                    _getTimeInStatus(task),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const Spacer(),
                   if (task.assignedTo != null && task.assignedTo!.isNotEmpty)
                     Expanded(
                       child: Row(
@@ -1122,31 +1203,66 @@ class _TasksPageState extends State<TasksPage> {
 
   // Priority badge replaced by PriorityStars widget
 
+  Color _getStatusColor(TaskStatus status) {
+    switch (status) {
+      case TaskStatus.pending:
+        return const Color(0xFF9E9E9E); // Gray
+      case TaskStatus.inProgress:
+        return const Color(0xFF2196F3); // Blue
+      case TaskStatus.completed:
+        return const Color(0xFF4CAF50); // Green
+    }
+  }
+
+  IconData _getStatusIcon(TaskStatus status) {
+    switch (status) {
+      case TaskStatus.pending:
+        return Icons.pending_outlined;
+      case TaskStatus.inProgress:
+        return Icons.play_circle_outline;
+      case TaskStatus.completed:
+        return Icons.check_circle_outline;
+    }
+  }
+
+  /// Get time in current status for a task
+  String _getTimeInStatus(TaskModel task) {
+    DateTime lastChange = task.createdAt;
+    if (task.statusHistory.isNotEmpty) {
+      final lastEntry = task.statusHistory.last;
+      final changedAt = lastEntry['changedAt'] as String?;
+      if (changedAt != null) {
+        lastChange = DateTime.parse(changedAt);
+      }
+    }
+    final duration = DateTime.now().difference(lastChange);
+    if (duration.inDays > 0) return '${duration.inDays}d';
+    if (duration.inHours > 0) return '${duration.inHours}h';
+    return '${duration.inMinutes}m';
+  }
+
   Widget _buildStatusChip(TaskStatus status) {
+    final color = _getStatusColor(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primary,
-        ),
+        border: Border.all(color: color),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            status == TaskStatus.completed
-                ? Icons.check_circle_outline
-                : Icons.pending_outlined,
+            _getStatusIcon(status),
             size: 16,
-            color: AppColors.primary,
+            color: color,
           ),
           const SizedBox(width: 4),
           Text(
             status.displayName,
             style: TextStyle(
-              color: AppColors.primary,
+              color: color,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),

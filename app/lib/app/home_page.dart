@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:kapok_app/features/auth/bloc/auth_event.dart';
 import '../core/constants/app_colors.dart';
 import '../core/localization/app_localizations.dart';
+import '../core/widgets/sync_status_widget.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/map/pages/map_page.dart';
@@ -21,6 +24,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  bool _isOffline = false;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   final List<Widget> _pages = [
     const MapPage(),
@@ -30,6 +35,35 @@ class _HomePageState extends State<HomePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
+      (List<ConnectivityResult> results) {
+        final offline = results.contains(ConnectivityResult.none);
+        if (mounted && offline != _isOffline) {
+          setState(() => _isOffline = offline);
+        }
+      },
+    );
+  }
+
+  Future<void> _checkConnectivity() async {
+    final results = await Connectivity().checkConnectivity();
+    if (mounted) {
+      setState(() {
+        _isOffline = results.contains(ConnectivityResult.none);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
@@ -37,9 +71,37 @@ class _HomePageState extends State<HomePage> {
           final theme = Theme.of(context);
           return Scaffold(
             backgroundColor: theme.scaffoldBackgroundColor,
-            body: IndexedStack(
-              index: _currentIndex,
-              children: _pages,
+            body: Column(
+              children: [
+                // Offline banner
+                if (_isOffline)
+                  MaterialBanner(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    content: Row(
+                      children: [
+                        const Icon(Icons.cloud_off, size: 18, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(context).offlineBanner,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: Colors.orange.shade700,
+                    actions: const [SizedBox.shrink()],
+                  ),
+                // Sync status indicator
+                const SyncStatusWidget(),
+                // Main content
+                Expanded(
+                  child: IndexedStack(
+                    index: _currentIndex,
+                    children: _pages,
+                  ),
+                ),
+              ],
             ),
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _currentIndex,

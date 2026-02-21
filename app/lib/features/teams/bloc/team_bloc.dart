@@ -22,6 +22,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     on<DeleteTeamRequested>(_onDeleteTeamRequested);
     on<RemoveMemberRequested>(_onRemoveMemberRequested);
     on<LoadTeamMembers>(_onLoadTeamMembers);
+    on<ChangeMemberRoleRequested>(_onChangeMemberRoleRequested);
     on<TeamReset>(_onTeamReset);
   }
 
@@ -357,6 +358,37 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       );
     } catch (e) {
       Logger.team('Error loading team members', error: e);
+      emit(
+        TeamError(
+          message: e.toString(),
+          teams: state.teams,
+          members: state.members,
+        ),
+      );
+    }
+  }
+
+  /// Handle change member role
+  Future<void> _onChangeMemberRoleRequested(
+    ChangeMemberRoleRequested event,
+    Emitter<TeamState> emit,
+  ) async {
+    try {
+      emit(TeamLoading(teams: state.teams, members: state.members));
+      Logger.team('Changing member role: ${event.memberId} to ${event.newRole}');
+
+      await _teamRepository.changeMemberRole(
+        teamId: event.teamId,
+        memberId: event.memberId,
+        leaderId: event.leaderId,
+        newRole: event.newRole,
+      );
+
+      // Reload team members to reflect the change
+      add(LoadTeamMembers(teamId: event.teamId));
+      Logger.team('Member role changed successfully');
+    } catch (e) {
+      Logger.team('Error changing member role', error: e);
       emit(
         TeamError(
           message: e.toString(),

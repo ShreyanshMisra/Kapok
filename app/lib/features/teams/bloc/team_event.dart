@@ -142,6 +142,24 @@ class DeleteTeamRequested extends TeamEvent {
   List<Object> get props => [teamId, userId];
 }
 
+/// Change member specialty role
+class ChangeMemberRoleRequested extends TeamEvent {
+  final String teamId;
+  final String memberId;
+  final String leaderId;
+  final String newRole;
+
+  const ChangeMemberRoleRequested({
+    required this.teamId,
+    required this.memberId,
+    required this.leaderId,
+    required this.newRole,
+  });
+
+  @override
+  List<Object> get props => [teamId, memberId, leaderId, newRole];
+}
+
 /// Reset team state (on logout)
 class TeamReset extends TeamEvent {
   const TeamReset();

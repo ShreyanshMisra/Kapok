@@ -1060,6 +1060,72 @@ class TaskRepository {
     }
   }
 
+  /// Change task status with validation and history tracking
+  Future<TaskModel> changeTaskStatus({
+    required String taskId,
+    required TaskStatus newStatus,
+    required String userId,
+    required String userRole,
+  }) async {
+    try {
+      Logger.task('Changing task status: $taskId to ${newStatus.value}');
+
+      final currentTask = await getTask(taskId);
+      final oldStatus = currentTask.status;
+
+      // Skip if status hasn't changed
+      if (oldStatus == newStatus) {
+        return currentTask;
+      }
+
+      // Validate transition
+      if (!_isValidStatusTransition(oldStatus, newStatus, userRole)) {
+        throw TaskException(
+          message: 'Invalid status transition from ${oldStatus.displayName} to ${newStatus.displayName}. Only team leaders and admins can skip steps or reverse status.',
+        );
+      }
+
+      // Build updated status history
+      final historyEntry = <String, dynamic>{
+        'status': newStatus.value,
+        'changedBy': userId,
+        'changedAt': DateTime.now().toIso8601String(),
+        'previousStatus': oldStatus.value,
+      };
+      final updatedHistory = [...currentTask.statusHistory, historyEntry];
+
+      // Update task
+      final updatedTask = currentTask.copyWith(
+        status: newStatus,
+        updatedAt: DateTime.now(),
+        completedAt: newStatus == TaskStatus.completed ? DateTime.now() : currentTask.completedAt,
+        statusHistory: updatedHistory,
+      );
+
+      return await updateTask(updatedTask);
+    } catch (e) {
+      Logger.task('Error changing task status', error: e);
+      if (e is TaskException) rethrow;
+      throw TaskException(message: 'Failed to change task status', originalError: e);
+    }
+  }
+
+  /// Validate status transition based on user role
+  bool _isValidStatusTransition(TaskStatus oldStatus, TaskStatus newStatus, String userRole) {
+    final isLeaderOrAdmin = userRole == 'admin' || userRole == 'teamLeader';
+
+    // Leaders and admins can make any transition
+    if (isLeaderOrAdmin) return true;
+
+    // Standard forward transitions allowed for all
+    if (oldStatus == TaskStatus.pending && newStatus == TaskStatus.inProgress) return true;
+    if (oldStatus == TaskStatus.inProgress && newStatus == TaskStatus.completed) return true;
+
+    // Skipping pending→completed not allowed for team members
+    // Backward transitions not allowed for team members
+    return false;
+  }
+
   /// Convert old severity int (1-5) to TaskPriority enum
   TaskPriority _convertSeverityToPriority(int severity) {
     if (severity >= 4) {
