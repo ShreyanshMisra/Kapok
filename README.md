@@ -118,7 +118,7 @@ Kapok was developed by [**BUILD UMass**](https://buildumass.com/), a student-led
 |------|------|
 | Project Lead | Shreyansh Misra |
 | Product Manager | Shriya Sanas |
-| Software Developers | Sonny Zhang, Brian Nguyen, Ngoc Duc Nghiem, Dia Sutaria, Jonathan Zhang, Shivansh Soni, Kiran Balasundaram Kuppuraj |
+| Software Developers | Sonny Zhang, Brian Nguyen, Kiran Balasundaram Kuppuraj, Dia Sutaria, Ngoc Duc Nghiem, Shivansh Soni, Jonathan Zhang |
 
 ### Spring 2025
 
@@ -126,7 +126,7 @@ Kapok was developed by [**BUILD UMass**](https://buildumass.com/), a student-led
 |------|------|
 | Project Leads | Shreyansh Misra, Adhiraj Chadha |
 | Product Manager | Aastha Agrawal |
-| Software Developers | Atonbara Diete-Koki, Shobhit Mehrotra, Chau Tran, Ahmed Khan, Abhignan Muppavaram |
+| Software Developers | Shobhit Mehrotra, Ahmed Khan, Chau Tran, Atonbara Diete-Koki, Abhignan Muppavaram |
 
 ### Fall 2024
 
@@ -142,7 +142,7 @@ Kapok was developed by [**BUILD UMass**](https://buildumass.com/), a student-led
 |------|------|
 | Project Lead | Eric Wu |
 | Product Managers | Shreyansh Misra, Khushi Rajoria |
-| Software Developers | Emmet Hamell, Kevin Li, Shobhit Mehrotra, Suryam Gupta, Adhiraj Chadha |
+| Software Developers | Emmet Hamell, Shobhit Mehrotra, Suryam Gupta, Adhiraj Chadha, Kevin Li |
 
 ---
 
