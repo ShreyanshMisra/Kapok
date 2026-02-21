@@ -745,6 +745,19 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                           ? _teamMembers.where((m) => m.id == currentUserId).toList()
                                           : _teamMembers;
 
+                                      // Sort members: matching category role first
+                                      final sortedMembers = List<UserModel>.from(filteredMembers);
+                                      final matchingRole = _getCategoryMatchingRole(_selectedCategory);
+                                      if (matchingRole != null) {
+                                        sortedMembers.sort((a, b) {
+                                          final aMatches = a.role.toLowerCase() == matchingRole.toLowerCase();
+                                          final bMatches = b.role.toLowerCase() == matchingRole.toLowerCase();
+                                          if (aMatches && !bMatches) return -1;
+                                          if (!aMatches && bMatches) return 1;
+                                          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+                                        });
+                                      }
+
                                       return DropdownButtonFormField<String>(
                                         value: _selectedAssignedTo,
                                         decoration: InputDecoration(
@@ -772,18 +785,30 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                             value: null,
                                             child: Text('Unassigned'),
                                           ),
-                                          ...filteredMembers.map((
+                                          ...sortedMembers.map((
                                             UserModel member,
                                           ) {
+                                            final isMatch = matchingRole != null &&
+                                                member.role.toLowerCase() == matchingRole.toLowerCase();
                                             return DropdownMenuItem<String>(
                                               value: member.id,
                                               child: Row(
                                                 children: [
+                                                  Icon(
+                                                    _getRoleIcon(member.role),
+                                                    size: 16,
+                                                    color: isMatch
+                                                        ? theme.colorScheme.primary
+                                                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                                  ),
+                                                  const SizedBox(width: 8),
                                                   Expanded(
                                                     child: Text(
                                                       member.name,
-                                                      style: const TextStyle(
-                                                        fontWeight: FontWeight.w600,
+                                                      style: TextStyle(
+                                                        fontWeight: isMatch
+                                                            ? FontWeight.bold
+                                                            : FontWeight.w600,
                                                       ),
                                                     ),
                                                   ),
@@ -794,7 +819,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                                       vertical: 2,
                                                     ),
                                                     decoration: BoxDecoration(
-                                                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                      color: isMatch
+                                                          ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                                                          : theme.colorScheme.primary.withValues(alpha: 0.1),
                                                       borderRadius: BorderRadius.circular(8),
                                                     ),
                                                     child: Text(
@@ -802,6 +829,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         color: theme.colorScheme.primary,
+                                                        fontWeight: isMatch ? FontWeight.bold : FontWeight.normal,
                                                       ),
                                                     ),
                                                   ),
@@ -967,7 +995,53 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
   }
 
-  // Priority color replaced by PriorityStars widget
+  /// Map task category to matching specialty role
+  String? _getCategoryMatchingRole(TaskCategory category) {
+    switch (category) {
+      case TaskCategory.medical:
+        return 'Medical';
+      case TaskCategory.engineering:
+        return 'Engineering';
+      case TaskCategory.carpentry:
+        return 'Carpentry';
+      case TaskCategory.plumbing:
+        return 'Plumbing';
+      case TaskCategory.construction:
+        return 'Construction';
+      case TaskCategory.electrical:
+        return 'Electrical';
+      case TaskCategory.supplies:
+        return 'Supplies';
+      case TaskCategory.transportation:
+        return 'Transportation';
+      case TaskCategory.other:
+        return null;
+    }
+  }
+
+  /// Get icon for a specialty role
+  IconData _getRoleIcon(String role) {
+    switch (role.toLowerCase()) {
+      case 'medical':
+        return Icons.medical_services;
+      case 'engineering':
+        return Icons.engineering;
+      case 'carpentry':
+        return Icons.handyman;
+      case 'plumbing':
+        return Icons.plumbing;
+      case 'construction':
+        return Icons.construction;
+      case 'electrical':
+        return Icons.electrical_services;
+      case 'supplies':
+        return Icons.inventory;
+      case 'transportation':
+        return Icons.local_shipping;
+      default:
+        return Icons.work;
+    }
+  }
 
   Future<void> _handleCreateTask() async {
     if (_formKey.currentState!.validate()) {

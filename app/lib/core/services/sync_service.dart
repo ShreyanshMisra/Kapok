@@ -9,6 +9,9 @@ import '../../data/sources/hive_source.dart';
 import '../utils/logger.dart';
 import 'hive_service.dart';
 
+/// Sync state enum for UI display
+enum SyncState { synced, syncing, pending, error }
+
 /// Service for syncing local changes to Firebase when online
 class SyncService {
   static SyncService? _instance;
@@ -20,6 +23,23 @@ class SyncService {
   final FirebaseSource _firebaseSource = FirebaseSource();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _isSyncing = false;
+
+  /// Stream controller for sync state
+  final _syncStateController = StreamController<SyncState>.broadcast();
+
+  /// Stream of sync state changes
+  Stream<SyncState> get syncStateStream => _syncStateController.stream;
+
+  /// Current sync state
+  SyncState _currentSyncState = SyncState.synced;
+  SyncState get currentSyncState => _currentSyncState;
+
+  void _updateSyncState(SyncState state) {
+    _currentSyncState = state;
+    if (!_syncStateController.isClosed) {
+      _syncStateController.add(state);
+    }
+  }
 
   /// Initialize sync service and listen to connectivity changes
   Future<void> initialize() async {
@@ -63,6 +83,7 @@ class SyncService {
 
     try {
       _isSyncing = true;
+      _updateSyncState(SyncState.syncing);
       Logger.sync('Starting sync of pending changes');
 
       // Get all queued operations
@@ -70,10 +91,12 @@ class SyncService {
 
       if (syncQueue.isEmpty) {
         Logger.sync('No pending changes to sync');
+        _updateSyncState(SyncState.synced);
         return;
       }
 
       Logger.sync('Found ${syncQueue.length} operations to sync');
+      bool hasErrors = false;
 
       // Process each queued operation
       for (final syncData in syncQueue) {
@@ -88,16 +111,50 @@ class SyncService {
           }
         } catch (e) {
           Logger.sync('Error syncing operation: ${syncData['operation']}', error: e);
-          // Continue with next operation even if this one failed
+          hasErrors = true;
+
+          // Retry with exponential backoff
+          final retryCount = (syncData['retryCount'] as int?) ?? 0;
+          if (retryCount < 5) {
+            // Update retry count in queue
+            final key = _getSyncKey(syncData);
+            if (key != null) {
+              final updatedData = Map<String, dynamic>.from(syncData);
+              updatedData['retryCount'] = retryCount + 1;
+              await HiveService.instance.syncBox.put(key, updatedData);
+            }
+            // Schedule retry with backoff: 1s, 5s, 30s, 5min, 5min
+            final delays = [1, 5, 30, 300, 300];
+            final delay = delays[retryCount];
+            Logger.sync('Scheduling retry ${retryCount + 1}/5 in ${delay}s');
+            Future.delayed(Duration(seconds: delay), () {
+              if (!_isSyncing) syncPendingChanges();
+            });
+          } else {
+            Logger.sync('Max retries reached for operation: ${syncData['operation']}');
+          }
           continue;
         }
       }
 
-      Logger.sync('Sync completed successfully');
+      // Store last sync timestamp
+      await HiveService.instance.storeSetting(
+        'lastSyncTimestamp',
+        DateTime.now().toIso8601String(),
+      );
+
+      _updateSyncState(hasErrors ? SyncState.error : SyncState.synced);
+      Logger.sync('Sync completed${hasErrors ? ' with errors' : ' successfully'}');
     } catch (e) {
       Logger.sync('Error during sync', error: e);
+      _updateSyncState(SyncState.error);
     } finally {
       _isSyncing = false;
+      // Check if there are still pending items
+      final remaining = await getPendingSyncCount();
+      if (remaining > 0 && _currentSyncState != SyncState.error) {
+        _updateSyncState(SyncState.pending);
+      }
     }
   }
 
@@ -308,12 +365,22 @@ class SyncService {
     }
   }
 
+  /// Get last sync timestamp
+  String? getLastSyncTimestamp() {
+    try {
+      return HiveService.instance.getSetting<String>('lastSyncTimestamp');
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Dispose the service
   Future<void> dispose() async {
     try {
       Logger.sync('Disposing SyncService');
       await _connectivitySubscription?.cancel();
       _connectivitySubscription = null;
+      _syncStateController.close();
       Logger.sync('SyncService disposed successfully');
     } catch (e) {
       Logger.sync('Error disposing SyncService', error: e);

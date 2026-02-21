@@ -139,10 +139,33 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     }
   }
 
+  /// Get current user role string
+  String get _currentUserRole {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      final role = authState.user.userRole;
+      if (role == UserRole.admin) return 'admin';
+      if (role == UserRole.teamLeader) return 'teamLeader';
+    }
+    return 'teamMember';
+  }
+
   /// Save changes
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) {
       return;
+    }
+
+    // If status changed, use StatusChangeRequested for validation + history
+    if (_selectedStatus != widget.task.status) {
+      context.read<TaskBloc>().add(
+        StatusChangeRequested(
+          taskId: widget.task.id,
+          newStatus: _selectedStatus,
+          userId: widget.currentUserId,
+          userRole: _currentUserRole,
+        ),
+      );
     }
 
     // Convert priority to severity for backward compatibility
@@ -159,18 +182,25 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         break;
     }
 
-    context.read<TaskBloc>().add(
-      EditTaskRequested(
-        taskId: widget.task.id,
-        userId: widget.currentUserId,
-        taskName: _titleController.text.trim(),
-        taskSeverity: severity,
-        taskDescription: _descriptionController.text.trim(),
-        taskCompleted: _selectedStatus == TaskStatus.completed,
-        assignedTo: _selectedAssignedTo,
-        category: _selectedCategory.value,
-      ),
-    );
+    // Only send EditTaskRequested if something other than status changed
+    if (_titleController.text.trim() != widget.task.title ||
+        _descriptionController.text.trim() != (widget.task.description ?? '') ||
+        _selectedPriority != widget.task.priority ||
+        _selectedAssignedTo != widget.task.assignedTo ||
+        _selectedCategory != widget.task.category) {
+      context.read<TaskBloc>().add(
+        EditTaskRequested(
+          taskId: widget.task.id,
+          userId: widget.currentUserId,
+          taskName: _titleController.text.trim(),
+          taskSeverity: severity,
+          taskDescription: _descriptionController.text.trim(),
+          taskCompleted: _selectedStatus == TaskStatus.completed,
+          assignedTo: _selectedAssignedTo,
+          category: _selectedCategory.value,
+        ),
+      );
+    }
 
     setState(() {
       _isEditing = false;
@@ -609,8 +639,20 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                     ...filteredMembers.map((member) {
                                       return DropdownMenuItem<String>(
                                         value: member.id,
-                                        child: Text(
-                                          '${member.name} (${member.role})',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              _getRoleIcon(member.role),
+                                              size: 16,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                '${member.name} (${member.role})',
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       );
                                     }),
@@ -664,6 +706,18 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               ).format(widget.task.completedAt!),
                               Icons.check_circle,
                             ),
+                          ],
+                          // Time in current status
+                          const SizedBox(height: 8),
+                          _buildInfoCard(
+                            'Time in ${widget.task.status.displayName}',
+                            _getTimeInCurrentStatus(),
+                            Icons.timer_outlined,
+                          ),
+                          // Status History Timeline
+                          if (widget.task.statusHistory.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            _buildStatusTimeline(),
                           ],
                         ],
                       ),
@@ -735,10 +789,165 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     );
   }
 
-  // Priority color replaced by PriorityStars widget
+  /// Get icon for a specialty role
+  IconData _getRoleIcon(String role) {
+    switch (role.toLowerCase()) {
+      case 'medical':
+        return Icons.medical_services;
+      case 'engineering':
+        return Icons.engineering;
+      case 'carpentry':
+        return Icons.handyman;
+      case 'plumbing':
+        return Icons.plumbing;
+      case 'construction':
+        return Icons.construction;
+      case 'electrical':
+        return Icons.electrical_services;
+      case 'supplies':
+        return Icons.inventory;
+      case 'transportation':
+        return Icons.local_shipping;
+      default:
+        return Icons.work;
+    }
+  }
+
+  /// Calculate time in current status
+  String _getTimeInCurrentStatus() {
+    // Find last status change from history, or use createdAt
+    DateTime lastChange = widget.task.createdAt;
+    if (widget.task.statusHistory.isNotEmpty) {
+      final lastEntry = widget.task.statusHistory.last;
+      final changedAt = lastEntry['changedAt'] as String?;
+      if (changedAt != null) {
+        lastChange = DateTime.parse(changedAt);
+      }
+    }
+
+    final duration = DateTime.now().difference(lastChange);
+    if (duration.inDays > 0) {
+      return '${duration.inDays}d ${duration.inHours % 24}h';
+    } else if (duration.inHours > 0) {
+      return '${duration.inHours}h ${duration.inMinutes % 60}m';
+    } else {
+      return '${duration.inMinutes}m';
+    }
+  }
+
+  /// Build status history timeline widget
+  Widget _buildStatusTimeline() {
+    final teamState = context.read<TeamBloc>().state;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Status History',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...widget.task.statusHistory.reversed.map((entry) {
+          final status = entry['status'] as String? ?? 'unknown';
+          final changedBy = entry['changedBy'] as String? ?? '';
+          final changedAt = entry['changedAt'] as String?;
+          final previousStatus = entry['previousStatus'] as String?;
+
+          // Resolve user name
+          String userName = changedBy;
+          try {
+            final member = teamState.members.firstWhere((m) => m.id == changedBy);
+            userName = member.name;
+          } catch (_) {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated && authState.user.id == changedBy) {
+              userName = authState.user.name;
+            }
+          }
+
+          final formattedDate = changedAt != null
+              ? DateFormat('MMM d, y • h:mm a').format(DateTime.parse(changedAt))
+              : 'Unknown date';
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: _getStatusColorForValue(status),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Container(
+                      width: 2,
+                      height: 30,
+                      color: AppColors.textSecondary.withValues(alpha: 0.3),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        previousStatus != null
+                            ? '${TaskStatus.fromString(previousStatus).displayName} → ${TaskStatus.fromString(status).displayName}'
+                            : TaskStatus.fromString(status).displayName,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '$userName • $formattedDate',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Color _getStatusColorForValue(String status) {
+    switch (status) {
+      case 'pending':
+        return const Color(0xFF9E9E9E); // Gray
+      case 'inProgress':
+        return const Color(0xFF2196F3); // Blue
+      case 'completed':
+        return const Color(0xFF4CAF50); // Green
+      default:
+        return AppColors.primary;
+    }
+  }
 
   Color _getStatusColor(TaskStatus status) {
-    return AppColors.primary;
+    switch (status) {
+      case TaskStatus.pending:
+        return const Color(0xFF9E9E9E);
+      case TaskStatus.inProgress:
+        return const Color(0xFF2196F3);
+      case TaskStatus.completed:
+        return const Color(0xFF4CAF50);
+    }
   }
 }
 

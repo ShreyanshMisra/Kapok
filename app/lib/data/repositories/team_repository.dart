@@ -1203,6 +1203,46 @@ class TeamRepository {
     }
   }
 
+  /// Change a team member's specialty role
+  Future<void> changeMemberRole({
+    required String teamId,
+    required String memberId,
+    required String leaderId,
+    required String newRole,
+  }) async {
+    try {
+      Logger.team('Changing member $memberId role to $newRole in team $teamId');
+
+      // Verify the requester is the team leader
+      final team = await getTeam(teamId);
+      if (team.leaderId != leaderId) {
+        throw TeamException(message: 'Only team leaders can change member roles');
+      }
+
+      if (await _networkChecker.isConnected()) {
+        // Update user's role field in Firestore
+        final userRef = _firestore.collection('users').doc(memberId);
+        await userRef.update({
+          'role': newRole,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        Logger.team('Member role updated in Firestore');
+      }
+
+      // Update local cache
+      final user = await _hiveSource.getUser(memberId);
+      if (user != null) {
+        final updatedUser = user.copyWith(role: newRole);
+        await _hiveSource.saveUser(updatedUser);
+        Logger.team('Member role updated in local cache');
+      }
+    } catch (e) {
+      Logger.team('Error changing member role', error: e);
+      if (e is TeamException) rethrow;
+      throw TeamException(message: 'Failed to change member role', originalError: e);
+    }
+  }
+
   /// Generate secure random team code (6 characters: A-Z, 0-9)
   String _generateSecureTeamCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

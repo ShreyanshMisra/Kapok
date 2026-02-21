@@ -210,6 +210,23 @@ class AppLocalizations {
   String get cacheClearedSuccessfully => _getString('cacheClearedSuccessfully');
   String get dataExportNotImplementedYet => _getString('dataExportNotImplementedYet');
 
+  // Offline & Sync
+  String get offlineBanner => _getString('offlineBanner');
+  String get syncPending => _getString('syncPending');
+  String get syncError => _getString('syncError');
+  String get lastSynced => _getString('lastSynced');
+
+  // Status Workflow
+  String get statusHistory => _getString('statusHistory');
+  String get timeInStatus => _getString('timeInStatus');
+  String get statusChanged => _getString('statusChanged');
+  String get invalidStatusTransition => _getString('invalidStatusTransition');
+
+  // Role Management
+  String get changeSpecialtyRole => _getString('changeSpecialtyRole');
+  String get roleSaved => _getString('roleSaved');
+  String get selectRole => _getString('selectRole');
+
   // Status Messages
   String get loading => _getString('loading');
   String get saving => _getString('saving');
@@ -549,6 +566,23 @@ class AppLocalizations {
         'cacheClearedSuccessfully': 'Cache cleared successfully',
         'dataExportNotImplementedYet': 'Data export not implemented yet',
         
+        // Offline & Sync
+        'offlineBanner': 'You\'re offline — changes will sync when connected',
+        'syncPending': 'pending',
+        'syncError': 'Sync error',
+        'lastSynced': 'Last synced',
+
+        // Status Workflow
+        'statusHistory': 'Status History',
+        'timeInStatus': 'Time in status',
+        'statusChanged': 'Status changed',
+        'invalidStatusTransition': 'Invalid status transition',
+
+        // Role Management
+        'changeSpecialtyRole': 'Change Specialty Role',
+        'roleSaved': 'Role saved successfully',
+        'selectRole': 'Select Role',
+
         // Status Messages
         'loading': 'Loading...',
         'saving': 'Saving...',
@@ -882,6 +916,23 @@ class AppLocalizations {
         'cacheClearedSuccessfully': 'Caché limpiado exitosamente',
         'dataExportNotImplementedYet': 'Exportación de datos aún no implementada',
         
+        // Offline & Sync
+        'offlineBanner': 'Sin conexión — los cambios se sincronizarán al conectarse',
+        'syncPending': 'pendientes',
+        'syncError': 'Error de sincronización',
+        'lastSynced': 'Última sincronización',
+
+        // Status Workflow
+        'statusHistory': 'Historial de Estado',
+        'timeInStatus': 'Tiempo en estado',
+        'statusChanged': 'Estado cambiado',
+        'invalidStatusTransition': 'Transición de estado inválida',
+
+        // Role Management
+        'changeSpecialtyRole': 'Cambiar Rol de Especialidad',
+        'roleSaved': 'Rol guardado exitosamente',
+        'selectRole': 'Seleccionar Rol',
+
         // Status Messages
         'loading': 'Cargando...',
         'saving': 'Guardando...',

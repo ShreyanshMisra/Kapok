@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../core/enums/task_status.dart';
 
 /// Task events
 abstract class TaskEvent extends Equatable {
@@ -196,6 +197,24 @@ class EditTaskRequested extends TaskEvent {
     assignedTo,
     category,
   ];
+}
+
+/// Change task status with validation and history tracking
+class StatusChangeRequested extends TaskEvent {
+  final String taskId;
+  final TaskStatus newStatus;
+  final String userId;
+  final String userRole; // 'admin', 'teamLeader', 'teamMember'
+
+  const StatusChangeRequested({
+    required this.taskId,
+    required this.newStatus,
+    required this.userId,
+    required this.userRole,
+  });
+
+  @override
+  List<Object> get props => [taskId, newStatus, userId, userRole];
 }
 
 /// Reset task state (on logout)
