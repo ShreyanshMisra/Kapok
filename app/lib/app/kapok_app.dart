@@ -190,19 +190,15 @@ class KapokApp extends StatelessWidget {
                               currentRoute != '/role-selection') {
                             final isFirstLogin = !FirstLoginService.instance
                                 .hasLoggedInBefore(state.user.id);
+                            final destination = isFirstLogin ? '/about' : '/home';
                             if (isFirstLogin) {
-                              await FirstLoginService.instance
+                              FirstLoginService.instance
                                   .markLoggedIn(state.user.id);
-                              navigator.pushNamedAndRemoveUntil(
-                                '/about',
-                                (route) => false,
-                              );
-                            } else {
-                              navigator.pushNamedAndRemoveUntil(
-                                '/home',
-                                (route) => false,
-                              );
                             }
+                            navigator.pushNamedAndRemoveUntil(
+                              destination,
+                              (route) => false,
+                            );
                           }
                         }
                       }
@@ -218,9 +214,6 @@ class KapokApp extends StatelessWidget {
                       body: Center(child: CircularProgressIndicator()),
                     );
                   } else if (state is AuthAuthenticated) {
-                    if (!FirstLoginService.instance.hasLoggedInBefore(state.user.id)) {
-                      return const AboutPage();
-                    }
                     return const HomePage();
                   } else if (state is AuthUnauthenticated) {
                     return const LoginPage();
