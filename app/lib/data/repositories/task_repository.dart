@@ -607,27 +607,35 @@ class TaskRepository {
     }
   }
 
-  /// Get tasks stream
+  /// Get tasks stream.
+  /// Admin users get a real-time stream of ALL tasks (no team/user filter).
+  /// Regular users get a stream scoped to [teamId] / [userId].
   Stream<List<TaskModel>> getTasksStream({String? teamId, String? userId}) {
-    try {
+    // Resolve admin status asynchronously, then switch to the right stream.
+    return Stream.fromFuture(_isAdminUser(userId)).asyncExpand((isAdmin) {
+      if (isAdmin) {
+        Logger.task('Admin user — streaming all tasks');
+        return _firebaseSource.getAllTasksStream();
+      }
       Logger.task('Starting tasks stream');
-      return _firebaseSource
-          .getTasksStream(teamId: teamId, userId: userId)
-          .handleError((error) {
-            Logger.task('Error in tasks stream', error: error);
-            throw TaskException(
-              message: 'Failed to stream tasks',
-              originalError: error,
-            );
-          });
-    } catch (e) {
-      Logger.task('Error creating tasks stream', error: e);
-      return Stream.error(
-        TaskException(
-          message: 'Failed to create tasks stream',
-          originalError: e,
-        ),
+      return _firebaseSource.getTasksStream(teamId: teamId, userId: userId);
+    }).handleError((error) {
+      Logger.task('Error in tasks stream', error: error);
+      throw TaskException(
+        message: 'Failed to stream tasks',
+        originalError: error,
       );
+    });
+  }
+
+  /// Returns true if [userId] belongs to an admin (checked via local cache).
+  Future<bool> _isAdminUser(String? userId) async {
+    if (userId == null) return false;
+    try {
+      final user = await _hiveSource.getUser(userId);
+      return user?.userRole == UserRole.admin;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -918,13 +926,9 @@ class TaskRepository {
     try {
       Logger.task('Getting tasks for ${teamIds.length} teams');
 
-      // If no teams provided, return empty list
-      if (teamIds.isEmpty) {
-        Logger.task('No teams provided, returning empty list');
-        return [];
-      }
-
-      // If userId provided, check if admin
+      // Admin check runs FIRST — before the teamIds.isEmpty guard so that an
+      // admin with an empty teamIds list (e.g. no personal team) still gets
+      // all tasks rather than an empty result.
       if (userId != null) {
         try {
           final user = await _hiveSource.getUser(userId);
@@ -936,6 +940,12 @@ class TaskRepository {
           // If we can't get user data, continue with normal flow
           Logger.task('Could not check user role, continuing with normal flow', error: e);
         }
+      }
+
+      // If no teams provided (and not admin), return empty list
+      if (teamIds.isEmpty) {
+        Logger.task('No teams provided, returning empty list');
+        return [];
       }
 
       List<TaskModel> allTasks = [];

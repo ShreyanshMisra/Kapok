@@ -423,6 +423,29 @@ class FirebaseSource {
     }
   }
 
+  /// Real-time stream of ALL tasks — for admin users only.
+  Stream<List<TaskModel>> getAllTasksStream() {
+    try {
+      Logger.firebase('Getting all-tasks stream (admin)');
+      return _firestore
+          .collection('tasks')
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map(
+            (snapshot) =>
+                snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList(),
+          );
+    } catch (e) {
+      Logger.firebase('Error getting all-tasks stream', error: e);
+      return Stream.error(
+        DatabaseException(
+          message: 'Failed to get all-tasks stream',
+          originalError: e,
+        ),
+      );
+    }
+  }
+
   Future<TaskModel> getTask(String taskId) async {
     try {
       Logger.firebase('Getting task: $taskId');
