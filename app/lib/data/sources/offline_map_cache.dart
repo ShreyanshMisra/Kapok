@@ -13,30 +13,28 @@ class OfflineMapCache {
   /// Maximum cache size in bytes (default: 500MB)
   final int maxCacheSizeBytes;
 
-  /// Current cache size in bytes
+  /// Current cache size in bytes (computed lazily on first write)
   int _currentCacheSizeBytes = 0;
+
+  /// Whether the cache size has been computed yet
+  bool _cacheSizeReady = false;
 
   OfflineMapCache({this.maxCacheSizeBytes = 500 * 1024 * 1024});
 
-  /// Initializes the cache by opening the Hive box
+  /// Initializes the cache by opening the Hive box.
+  /// Cache-size calculation is deferred to the first write to avoid blocking
+  /// the main thread at startup (iterating all tiles is O(n) and very slow).
   Future<void> initialize() async {
     try {
-      // Logger.hive('Initializing offline map cache'); // Commented out - map logs disabled
-
       if (!Hive.isBoxOpen(_boxName)) {
         _tilesBox = await Hive.openBox(_boxName);
       } else {
         _tilesBox = Hive.box(_boxName);
       }
-
-      // Calculate current cache size
-      _calculateCacheSize();
-
-      // Logger.hive(
-      //   'Offline map cache initialized: ${_tilesBox!.length} tiles, ${_formatBytes(_currentCacheSizeBytes)}',
-      // ); // Commented out - map logs disabled
+      // Do NOT call _calculateCacheSize() here — it iterates every tile on
+      // the main thread and causes a multi-second freeze at startup.
+      // It will be triggered lazily before the first putTile() call.
     } catch (e) {
-      // Logger.hive('Failed to initialize offline map cache', error: e); // Commented out - map logs disabled
       throw CacheException(
         message: 'Failed to initialize offline map cache',
         originalError: e,
@@ -77,6 +75,12 @@ class OfflineMapCache {
     try {
       if (_tilesBox == null) {
         await initialize();
+      }
+
+      // Compute the actual cache size lazily on the first write.
+      if (!_cacheSizeReady) {
+        _calculateCacheSize();
+        _cacheSizeReady = true;
       }
 
       final key = tile.key;

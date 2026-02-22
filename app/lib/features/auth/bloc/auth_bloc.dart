@@ -36,22 +36,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
       
-      // Check if user needs onboarding
-      // Refined onboarding logic: role-specific requirements
-      final needsOnboarding = (user.userRole == UserRole.teamLeader && user.teamId == null) ||
-          (user.userRole == UserRole.teamMember && user.teamId == null) ||
-          (user.role.isEmpty && user.userRole != UserRole.admin);
-      
+      // For sign-in, only require onboarding if the user has NO role set —
+      // this means their account has no Firestore document (temporary user).
+      // Existing web users who haven't joined a team yet should still go
+      // straight to the app; they can create/join a team from the Teams tab.
+      final needsOnboarding = user.role.isEmpty && user.userRole != UserRole.admin;
+
       emit(AuthAuthenticated(
         user: user,
         needsOnboarding: needsOnboarding,
-        isNewSignup: false, // Existing user sign-in
+        isNewSignup: false,
       ));
-      if (needsOnboarding) {
-        Logger.auth('Sign in successful - user needs onboarding');
-      } else {
-        Logger.auth('Sign in successful');
-      }
+      Logger.auth(
+        'Sign in successful - userRole: ${user.userRole.value}, needsOnboarding: $needsOnboarding',
+      );
     } catch (e) {
       Logger.auth('Sign in failed', error: e);
       // Extract user-friendly error message
@@ -205,10 +203,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         
         final user = await _authRepository.updateUserProfile(updatedUser);
         
-        // Re-evaluate onboarding status after update
-        final needsOnboarding = (user.userRole == UserRole.teamLeader && user.teamId == null) ||
-            (user.userRole == UserRole.teamMember && user.teamId == null) ||
-            (user.role.isEmpty && user.userRole != UserRole.admin);
+        // Only require onboarding if the user still has no role (temporary user).
+        final needsOnboarding = user.role.isEmpty && user.userRole != UserRole.admin;
         
         // Emit new authenticated state without going through loading
         // This prevents navigation issues
