@@ -64,7 +64,7 @@ class _MapCachePageState extends State<MapCachePage> {
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
-        title: const Text('Offline Map Cache'),
+        title: const Text('Maps Stored Offline Temporarily'),
         centerTitle: true,
         elevation: 0,
         actions: const [KapokLogo()],

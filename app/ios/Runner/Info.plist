@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>kapok_app</string>
+	<string>Kapok</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,7 +27,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Kapok needs your location to create and display disaster relief tasks on the map. This helps coordinate emergency response efforts by showing task locations to your team members.</string>
+	<string>Kapok needs your location to create and display disaster response tasks on the map. This helps coordinate emergency response efforts by showing task locations to your team members.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -47,21 +47,12 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        foregroundColor: AppColors.primary,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         centerTitle: true,
         title: Text(AppLocalizations.of(context).createAccount),
         actions: const [KapokLogo()],
-        titleTextStyle: TextStyle(
-          color: theme.colorScheme.primary,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
       ),
       body: SafeArea(
         child: BlocListener<AuthBloc, AuthState>(

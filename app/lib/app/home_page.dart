@@ -108,7 +108,12 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            bottomNavigationBar: BottomNavigationBar(
+            bottomNavigationBar: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              child: BottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
                 HapticFeedback.selectionClick();
@@ -164,6 +169,7 @@ class _HomePageState extends State<HomePage> {
                   label: AppLocalizations.of(context).profile,
                 ),
               ],
+            ),
             ),
             floatingActionButton: _buildFloatingActionButton(),
           );

@@ -25,6 +25,12 @@ class AppTheme {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.surface,
         elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
         iconTheme: const IconThemeData(color: AppColors.surface),
         titleTextStyle: const TextStyle(
           color: AppColors.surface,
@@ -164,6 +170,12 @@ class AppTheme {
         backgroundColor: AppColors.primaryDark,
         foregroundColor: AppColors.surface,
         elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
         iconTheme: const IconThemeData(color: AppColors.surface),
         titleTextStyle: const TextStyle(
           color: AppColors.surface,

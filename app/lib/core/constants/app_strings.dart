@@ -1,7 +1,7 @@
 class AppStrings {
   // App Information
   static const String appName = 'Kapok';
-  static const String appDescription = 'Disaster Relief Coordination App';
+  static const String appDescription = 'Disaster Response Coordination App';
   static const String appVersion = '1.0.0';
   
   // Authentication
@@ -89,8 +89,8 @@ class AppStrings {
   static const String aboutNCTDR = 'About NCTDR';
   static const String nationalCenterForTechnologyAndDisputeResolution = 
       'National Center for Technology and Dispute Resolution';
-  static const String disasterReliefCoordination = 
-      'Disaster Relief Coordination';
+  static const String disasterReliefCoordination =
+      'Disaster Response Coordination';
   
   // Settings
   static const String language = 'Language';

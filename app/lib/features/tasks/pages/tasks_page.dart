@@ -553,16 +553,18 @@ class _TasksPageState extends State<TasksPage> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return FilterChip(
       label: Text(label),
       avatar: Icon(icon, size: 18),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      backgroundColor: Colors.grey.shade100,
-      selectedColor: AppColors.primary.withOpacity(0.2),
-      checkmarkColor: AppColors.primary,
+      backgroundColor: isDark ? theme.colorScheme.surface : Colors.grey.shade100,
+      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+      checkmarkColor: theme.colorScheme.primary,
       labelStyle: TextStyle(
-        color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.8),
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
     );

@@ -10,7 +10,7 @@ class KapokLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.only(right: 12.0, top: 4.0, bottom: 4.0),
       child: Image.asset(
         'assets/images/kapok_icon.png',
         height: height,

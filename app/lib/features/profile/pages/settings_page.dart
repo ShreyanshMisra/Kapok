@@ -525,7 +525,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (ctx) => AlertDialog(
         title: Text(localizations.clearCache),
         content: Text(
-          'This will clear approximately $sizeKB KB of locally cached data (tasks, teams, settings). You will need to sync again after clearing.',
+          'This will clear approximately $sizeKB KB of locally saved data (tasks, teams, settings). You will need to sync again after clearing.',
         ),
         actions: [
           TextButton(

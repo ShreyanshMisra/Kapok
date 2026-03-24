@@ -33,20 +33,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         centerTitle: true,
         title: Text(AppLocalizations.of(context).resetPassword),
         actions: const [KapokLogo()],
-        titleTextStyle: TextStyle(
-          color: theme.colorScheme.primary,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
       ),
       body: SafeArea(
         child: BlocListener<AuthBloc, AuthState>(
