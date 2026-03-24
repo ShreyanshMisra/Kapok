@@ -10,17 +10,15 @@
 
 These changes affect every screen in the app. Complete them first so subsequent phase work inherits the fixes.
 
-### 1.1 — Equal Spacing for Back Arrow & Kapok Logo (All Pages)
+### 1.1 — Equal Spacing for Kapok Logo (All Pages)
 
-**What:** On every page that has a back arrow (←) on the left and the Kapok tree logo on the right of the app bar, the horizontal spacing is uneven. The logo sits too close to the right edge compared to the arrow's distance from the left edge.
+**What:** On every page that has a back arrow (←) on the left and the Kapok tree logo on the right of the app bar, the horizontal spacing is uneven. The logo sits too close to the right edge compared to the arrow's distance from the left edge. Even on pages without the arrow, the logo is too close to the right edge.
 
 **Required behavior:**
 - Measure the left padding/margin of the back arrow from the left screen edge.
-- Set the right padding/margin of the Kapok logo to match that exact value.
-- Apply this consistently on **every page** that has both elements (e.g., Create Account, Join Team, Task Details, Settings, About, etc.).
+- Set the right padding/margin of the Kapok logo to match that exact value across all pages. 
+- Apply this consistently on **every page** that has the logo (e.g., Create Account, Join Team, Task Details, Settings, About, etc.).
 - Verify on multiple screen sizes.
-
-**Reference:** The Create Account page screenshot shows the problem clearly — the logo is flush with the edge while the arrow has visible padding.
 
 ---
 
