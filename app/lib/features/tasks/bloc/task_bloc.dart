@@ -211,6 +211,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       final task = await _taskRepository.editTask(
         taskId: event.taskId,
         userId: event.userId,
+        userRole: event.userRole,
         taskName: event.taskName,
         taskSeverity: event.taskSeverity,
         taskDescription: event.taskDescription,

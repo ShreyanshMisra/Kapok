@@ -171,6 +171,7 @@ class LoadTasksForUserTeamsRequested extends TaskEvent {
 class EditTaskRequested extends TaskEvent {
   final String taskId;
   final String userId;
+  final String? userRole;
   final String? taskName;
   final int? taskSeverity;
   final String? taskDescription;
@@ -183,6 +184,7 @@ class EditTaskRequested extends TaskEvent {
   const EditTaskRequested({
     required this.taskId,
     required this.userId,
+    this.userRole,
     this.taskName,
     this.taskSeverity,
     this.taskDescription,
@@ -197,6 +199,7 @@ class EditTaskRequested extends TaskEvent {
   List<Object?> get props => [
     taskId,
     userId,
+    userRole,
     taskName,
     taskSeverity,
     taskDescription,

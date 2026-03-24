@@ -217,6 +217,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 _showTermsOfService();
               },
             ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: Text(AppLocalizations.of(context).administratorPermissions),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).pushNamed('/admin-permissions');
+              },
+            ),
           ]),
           const SizedBox(height: 24),
 

@@ -1007,16 +1007,19 @@ class TaskRepository {
     return allTasks;
   }
 
-  /// Check if user has permission to edit task
-  /// User can edit if they created the task or it's assigned to them
-  bool canEditTask(TaskModel task, String userId) {
-    return task.createdBy == userId || task.assignedTo == userId;
+  /// Check if user has permission to edit task.
+  /// Team members can only edit tasks assigned to them.
+  /// Team leaders and admins can edit any task.
+  bool canEditTask(TaskModel task, String userId, {String? userRole}) {
+    if (userRole == 'admin' || userRole == 'teamLeader') return true;
+    return task.assignedTo == userId;
   }
 
   /// Edit task (with permission check)
   Future<TaskModel> editTask({
     required String taskId,
     required String userId,
+    String? userRole,
     String? taskName,
     int? taskSeverity,
     String? taskDescription,
@@ -1033,7 +1036,7 @@ class TaskRepository {
       final currentTask = await getTask(taskId);
 
       // Check permissions
-      if (!canEditTask(currentTask, userId)) {
+      if (!canEditTask(currentTask, userId, userRole: userRole)) {
         throw TaskException(
           message: 'User does not have permission to edit this task',
         );

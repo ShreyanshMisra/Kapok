@@ -425,6 +425,26 @@ class AppLocalizations {
   String get removeFromTeam => _getString('removeFromTeam');
   String get editTaskPageToBeImplemented => _getString('editTaskPageToBeImplemented');
 
+  // Admin Permissions Page
+  String get administratorPermissions => _getString('administratorPermissions');
+  String get permissionsPageDescription => _getString('permissionsPageDescription');
+  String get action => _getString('action');
+  String get whoCanPerform => _getString('whoCanPerform');
+  String get viewTeam => _getString('viewTeam');
+  String get deleteTeam => _getString('deleteTeam');
+  String get viewAllTeams => _getString('viewAllTeams');
+  String get anyTeamMember => _getString('anyTeamMember');
+  String get teamLeaderOnly => _getString('teamLeaderOnly');
+  String get anyMemberExceptLeader => _getString('anyMemberExceptLeader');
+  String get adminOnly => _getString('adminOnly');
+  String get adminFeaturesPlannedNote => _getString('adminFeaturesPlannedNote');
+
+  // Profile Permissions Table
+  String get permissions => _getString('permissions');
+  String get editOwnTasks => _getString('editOwnTasks');
+  String get editAllTasks => _getString('editAllTasks');
+  String get yourRole => _getString('yourRole');
+
   /// Gets localized string
   String _getString(String key) {
     final Map<String, Map<String, String>> localizedValues = {
@@ -807,6 +827,26 @@ class AppLocalizations {
         'remove': 'Remove',
         'removeFromTeam': 'Remove from Team',
         'editTaskPageToBeImplemented': 'Edit Task page - To be implemented',
+
+        // Admin Permissions Page
+        'administratorPermissions': 'Administrator Permissions',
+        'permissionsPageDescription': 'This page documents the permission model for the Kapok app. Each action is restricted to specific roles.',
+        'action': 'Action',
+        'whoCanPerform': 'Who Can Perform',
+        'viewTeam': 'View Team',
+        'deleteTeam': 'Delete Team',
+        'viewAllTeams': 'View All Teams',
+        'anyTeamMember': 'Any team member',
+        'teamLeaderOnly': 'Team Leader only',
+        'anyMemberExceptLeader': 'Any member (except leader)',
+        'adminOnly': 'Admin only',
+        'adminFeaturesPlannedNote': 'Note: Some admin-specific actions (such as "View All Teams" and "Delete Team") are planned but not yet fully functional in the backend.',
+
+        // Profile Permissions Table
+        'permissions': 'Permissions',
+        'editOwnTasks': 'Edit Own Tasks',
+        'editAllTasks': 'Edit All Tasks',
+        'yourRole': 'Your Role',
       },
       'es': {
         // App Information
@@ -1187,6 +1227,26 @@ class AppLocalizations {
         'remove': 'Eliminar',
         'removeFromTeam': 'Eliminar del Equipo',
         'editTaskPageToBeImplemented': 'Página de editar tarea - Por implementar',
+
+        // Admin Permissions Page
+        'administratorPermissions': 'Permisos de Administrador',
+        'permissionsPageDescription': 'Esta página documenta el modelo de permisos de la aplicación Kapok. Cada acción está restringida a roles específicos.',
+        'action': 'Acción',
+        'whoCanPerform': 'Quién Puede Realizar',
+        'viewTeam': 'Ver Equipo',
+        'deleteTeam': 'Eliminar Equipo',
+        'viewAllTeams': 'Ver Todos los Equipos',
+        'anyTeamMember': 'Cualquier miembro del equipo',
+        'teamLeaderOnly': 'Solo Líder de Equipo',
+        'anyMemberExceptLeader': 'Cualquier miembro (excepto líder)',
+        'adminOnly': 'Solo Administrador',
+        'adminFeaturesPlannedNote': 'Nota: Algunas acciones específicas de administrador (como "Ver Todos los Equipos" y "Eliminar Equipo") están planificadas pero aún no son completamente funcionales en el backend.',
+
+        // Profile Permissions Table
+        'permissions': 'Permisos',
+        'editOwnTasks': 'Editar Tareas Propias',
+        'editAllTasks': 'Editar Todas las Tareas',
+        'yourRole': 'Tu Rol',
       },
     };
 

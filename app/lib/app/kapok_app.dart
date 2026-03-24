@@ -54,7 +54,6 @@ class _KapokAppState extends State<KapokApp> {
         child: Consumer2<LanguageProvider, ThemeProvider>(
           builder: (context, languageProvider, themeProvider, _) {
             return MaterialApp(
-              key: ValueKey(languageProvider.currentLocale.languageCode),
               navigatorKey: _navigatorKey,
               title: 'Kapok',
               debugShowCheckedModeBanner: false,

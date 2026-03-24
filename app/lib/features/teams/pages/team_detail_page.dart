@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/team_model.dart';
@@ -17,6 +19,7 @@ import '../../../app/router.dart';
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
 import '../../../core/utils/role_icons.dart';
+import 'edit_team_page.dart';
 
 /// Team detail page showing team information, members, and tasks
 class TeamDetailPage extends StatefulWidget {
@@ -344,10 +347,11 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // TODO: Copy team code to clipboard
+                      Clipboard.setData(ClipboardData(text: widget.team.teamCode));
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(AppLocalizations.of(context).teamCodeCopiedToClipboard),
+                          backgroundColor: AppColors.primary,
                         ),
                       );
                     },
@@ -359,7 +363,9 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // TODO: Share team code
+                      Share.share(
+                        'Join my team on Kapok! Team code: ${widget.team.teamCode}',
+                      );
                     },
                     icon: const Icon(Icons.share),
                     label: Text(AppLocalizations.of(context).share),
@@ -989,28 +995,16 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     );
   }
 
-  /// Show edit team dialog
-  void _showEditTeamDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final localizations = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(localizations.editTeam),
-          content: Text(localizations.editTeamFunctionalityWillBeImplementedHere),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizations.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizations.save),
-            ),
-          ],
-        );
-      },
+  /// Navigate to edit team screen
+  void _showEditTeamDialog() async {
+    final result = await Navigator.of(context).push<TeamModel>(
+      MaterialPageRoute(
+        builder: (context) => EditTeamPage(team: widget.team),
+      ),
     );
+    if (result != null && mounted) {
+      context.read<TeamBloc>().add(LoadTeam(teamId: widget.team.id));
+    }
   }
 
   /// Show close team dialog

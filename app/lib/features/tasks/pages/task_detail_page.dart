@@ -10,6 +10,7 @@ import '../../../core/enums/task_priority.dart';
 import '../../../core/enums/user_role.dart';
 import '../../../core/enums/task_status.dart';
 import '../../../data/models/task_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
@@ -43,6 +44,7 @@ class TaskDetailPage extends StatefulWidget {
 
 class _TaskDetailPageState extends State<TaskDetailPage> {
   bool _isEditing = false;
+  bool _isSaving = false;
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
@@ -55,6 +57,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   bool _showMap = true;
   Offset? _pinScreenPosition;
   late ConfettiController _confettiController;
+  List<UserModel> _cachedMembers = [];
 
   @override
   void initState() {
@@ -81,14 +84,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   /// Check if user can edit this task
+  /// Team members can only edit tasks assigned to them.
+  /// Team leaders and admins can edit all tasks.
   bool get canEdit {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       final user = authState.user;
-      return widget.task.createdBy == user.id ||
-          widget.task.assignedTo == user.id ||
-          user.userRole.toString().contains('admin') ||
-          user.userRole.toString().contains('teamLeader');
+      if (user.userRole == UserRole.admin || user.userRole == UserRole.teamLeader) {
+        return true;
+      }
+      return widget.task.assignedTo == user.id;
     }
     return false;
   }
@@ -159,23 +164,23 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   /// Save changes
   Future<void> _saveChanges() async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate()) return;
+
+    final statusChanged = _selectedStatus != widget.task.status;
+    final fieldsChanged =
+        _titleController.text.trim() != widget.task.title ||
+        _descriptionController.text.trim() != (widget.task.description ?? '') ||
+        _selectedPriority != widget.task.priority ||
+        _selectedAssignedTo != widget.task.assignedTo ||
+        _selectedCategory != widget.task.category;
+
+    if (!statusChanged && !fieldsChanged) {
+      setState(() { _isEditing = false; });
       return;
     }
 
-    // If status changed, use StatusChangeRequested for validation + history
-    if (_selectedStatus != widget.task.status) {
-      context.read<TaskBloc>().add(
-        StatusChangeRequested(
-          taskId: widget.task.id,
-          newStatus: _selectedStatus,
-          userId: widget.currentUserId,
-          userRole: _currentUserRole,
-        ),
-      );
-    }
+    _isSaving = true;
 
-    // Convert priority to severity for backward compatibility
     int severity;
     switch (_selectedPriority) {
       case TaskPriority.low:
@@ -189,16 +194,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         break;
     }
 
-    // Only send EditTaskRequested if something other than status changed
-    if (_titleController.text.trim() != widget.task.title ||
-        _descriptionController.text.trim() != (widget.task.description ?? '') ||
-        _selectedPriority != widget.task.priority ||
-        _selectedAssignedTo != widget.task.assignedTo ||
-        _selectedCategory != widget.task.category) {
+    if (fieldsChanged) {
       context.read<TaskBloc>().add(
         EditTaskRequested(
           taskId: widget.task.id,
           userId: widget.currentUserId,
+          userRole: _currentUserRole,
           taskName: _titleController.text.trim(),
           taskSeverity: severity,
           taskDescription: _descriptionController.text.trim(),
@@ -207,9 +208,17 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           category: _selectedCategory.value,
         ),
       );
+    } else if (statusChanged) {
+      context.read<TaskBloc>().add(
+        StatusChangeRequested(
+          taskId: widget.task.id,
+          newStatus: _selectedStatus,
+          userId: widget.currentUserId,
+          userRole: _currentUserRole,
+        ),
+      );
     }
 
-    // Fire confetti when a task is marked complete
     final wasNotComplete = widget.task.status != TaskStatus.completed;
     final nowComplete = _selectedStatus == TaskStatus.completed;
     if (wasNotComplete && nowComplete) {
@@ -302,12 +311,21 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
-                // Load team members for reassignment dropdown
+                final teamState = context.read<TeamBloc>().state;
                 context.read<TeamBloc>().add(
                   LoadTeamMembers(teamId: widget.task.teamId),
                 );
                 setState(() {
                   _isEditing = true;
+                  _isSaving = false;
+                  _cachedMembers = teamState.members;
+                  _titleController.text = widget.task.title;
+                  _descriptionController.text = widget.task.description ?? '';
+                  _addressController.text = widget.task.address ?? '';
+                  _selectedPriority = widget.task.priority;
+                  _selectedStatus = widget.task.status;
+                  _selectedAssignedTo = widget.task.assignedTo;
+                  _selectedCategory = widget.task.category;
                 });
               },
               tooltip: 'Edit Task',
@@ -342,13 +360,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       body: BlocListener<TaskBloc, TaskState>(
         listener: (context, state) {
           if (state is TaskUpdated) {
+            if (!_isSaving) return;
+            _isSaving = false;
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Task updated successfully'),
                 backgroundColor: AppColors.primary,
               ),
             );
-            Navigator.of(context).pop(true); // Return true to indicate update
+            Navigator.of(context).pop(true);
           } else if (state is TaskDeleted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -647,69 +667,75 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
                           // Assigned To
                           if (_isEditing)
-                            BlocBuilder<TeamBloc, TeamState>(
-                              builder: (context, teamState) {
-                                final members = teamState.members;
-                                // Filter members based on role
-                                final currentAuthState = context.read<AuthBloc>().state;
-                                final isTeamMember = currentAuthState is AuthAuthenticated &&
-                                    currentAuthState.user.userRole == UserRole.teamMember;
-                                final currentUserId = widget.currentUserId;
-                                final filteredMembers = isTeamMember
-                                    ? members.where((m) => m.id == currentUserId).toList()
-                                    : members;
-
-                                // Ensure current selection is valid
-                                final validIds = filteredMembers.map((m) => m.id).toSet();
-                                final effectiveValue =
-                                    (_selectedAssignedTo != null &&
-                                            _selectedAssignedTo!.isNotEmpty &&
-                                            validIds.contains(_selectedAssignedTo))
-                                        ? _selectedAssignedTo
-                                        : null;
-
-                                return DropdownButtonFormField<String>(
-                                  value: effectiveValue,
-                                  decoration: InputDecoration(
-                                    labelText: 'Assigned To',
-                                    prefixIcon: const Icon(Icons.person),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  items: [
-                                    const DropdownMenuItem<String>(
-                                      value: null,
-                                      child: Text('Unassigned'),
-                                    ),
-                                    ...filteredMembers.map((member) {
-                                      return DropdownMenuItem<String>(
-                                        value: member.id,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              getRoleIcon(member.role),
-                                              size: 16,
-                                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                '${member.name} (${member.role})',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      _selectedAssignedTo = newValue;
-                                    });
-                                  },
-                                );
+                            BlocListener<TeamBloc, TeamState>(
+                              listenWhen: (prev, curr) => curr.members != prev.members,
+                              listener: (context, teamState) {
+                                if (teamState.members.isNotEmpty) {
+                                  setState(() { _cachedMembers = teamState.members; });
+                                }
                               },
+                              child: Builder(
+                                builder: (context) {
+                                  final currentAuthState = context.read<AuthBloc>().state;
+                                  final isTeamMember = currentAuthState is AuthAuthenticated &&
+                                      currentAuthState.user.userRole == UserRole.teamMember;
+                                  final currentUserId = widget.currentUserId;
+                                  final filteredMembers = isTeamMember
+                                      ? _cachedMembers.where((m) => m.id == currentUserId).toList()
+                                      : _cachedMembers;
+
+                                  final validIds = filteredMembers.map((m) => m.id).toSet();
+                                  final effectiveValue =
+                                      (_selectedAssignedTo != null &&
+                                              _selectedAssignedTo!.isNotEmpty &&
+                                              validIds.contains(_selectedAssignedTo))
+                                          ? _selectedAssignedTo
+                                          : null;
+
+                                  return DropdownButtonFormField<String>(
+                                    key: ValueKey('assignedTo_${filteredMembers.length}_$effectiveValue'),
+                                    value: effectiveValue,
+                                    decoration: InputDecoration(
+                                      labelText: 'Assigned To',
+                                      prefixIcon: const Icon(Icons.person),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    items: [
+                                      const DropdownMenuItem<String>(
+                                        value: null,
+                                        child: Text('Unassigned'),
+                                      ),
+                                      ...filteredMembers.map((member) {
+                                        return DropdownMenuItem<String>(
+                                          value: member.id,
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                getRoleIcon(member.role),
+                                                size: 16,
+                                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${member.name} (${member.role})',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        _selectedAssignedTo = newValue;
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
                             )
                           else
                             TextFormField(
