@@ -34,10 +34,7 @@ class _TasksPageState extends State<TasksPage> {
   TaskStatus? _selectedStatus;
   TaskPriority? _selectedPriority;
   TaskCategory? _selectedCategory;
-  String? _selectedDateFilter; // 'pastWeek' or 'custom'
-  DateTimeRange? _customDateRange;
   String? _selectedAssignment; // 'me', 'unassigned', or null for all
-  bool _filterOverdue = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   bool _isStale = false;
@@ -158,32 +155,6 @@ class _TasksPageState extends State<TasksPage> {
         return false;
       }
 
-      // Filter by overdue
-      if (_filterOverdue && !task.isOverdue) {
-        return false;
-      }
-
-      // Filter by date
-      if (_selectedDateFilter != null) {
-        final now = DateTime.now();
-        if (_selectedDateFilter == 'pastDay') {
-          final dayAgo = now.subtract(const Duration(days: 1));
-          if (task.createdAt.isBefore(dayAgo)) {
-            return false;
-          }
-        } else if (_selectedDateFilter == 'pastWeek') {
-          final weekAgo = now.subtract(const Duration(days: 7));
-          if (task.createdAt.isBefore(weekAgo)) {
-            return false;
-          }
-        } else if (_selectedDateFilter == 'custom' && _customDateRange != null) {
-          if (task.createdAt.isBefore(_customDateRange!.start) ||
-              task.createdAt.isAfter(_customDateRange!.end.add(const Duration(days: 1)))) {
-            return false;
-          }
-        }
-      }
-
       // Filter by search query (title, description, address, assignee name)
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
@@ -212,10 +183,7 @@ class _TasksPageState extends State<TasksPage> {
       _selectedStatus = null;
       _selectedPriority = null;
       _selectedCategory = null;
-      _selectedDateFilter = null;
-      _customDateRange = null;
       _selectedAssignment = null;
-      _filterOverdue = false;
       _searchQuery = '';
       _searchController.clear();
     });
@@ -229,9 +197,7 @@ class _TasksPageState extends State<TasksPage> {
     return _selectedStatus != null ||
         _selectedPriority != null ||
         _selectedCategory != null ||
-        _selectedDateFilter != null ||
         _selectedAssignment != null ||
-        _filterOverdue ||
         _searchQuery.isNotEmpty;
   }
 
@@ -495,19 +461,6 @@ class _TasksPageState extends State<TasksPage> {
                 isSelected: _selectedCategory != null,
                 onTap: () => _showCategoryFilterDialog(),
               ),
-              // Date filter
-              _buildFilterChip(
-                label: _selectedDateFilter == null
-                    ? localizations.allDates
-                    : _selectedDateFilter == 'pastDay'
-                        ? localizations.pastDay
-                        : _selectedDateFilter == 'pastWeek'
-                            ? localizations.pastWeek
-                            : localizations.customDateRange,
-                icon: Icons.calendar_today,
-                isSelected: _selectedDateFilter != null,
-                onTap: () => _showDateFilterDialog(),
-              ),
               // Assignment filter
               _buildFilterChip(
                 label: _selectedAssignment == null
@@ -518,15 +471,6 @@ class _TasksPageState extends State<TasksPage> {
                 icon: Icons.person,
                 isSelected: _selectedAssignment != null,
                 onTap: () => _showAssignmentFilterDialog(),
-              ),
-              // Overdue filter
-              _buildFilterChip(
-                label: localizations.overdueOnly,
-                icon: Icons.schedule,
-                isSelected: _filterOverdue,
-                onTap: () {
-                  setState(() => _filterOverdue = !_filterOverdue);
-                },
               ),
               // Clear filters button
               if (_hasActiveFilters)
@@ -782,121 +726,6 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
-  void _showDateFilterDialog() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.filterByDate),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(localizations.allDates),
-              leading: Radio<String?>(
-                value: null,
-                groupValue: _selectedDateFilter,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDateFilter = null;
-                    _customDateRange = null;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-              onTap: () {
-                setState(() {
-                  _selectedDateFilter = null;
-                  _customDateRange = null;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              title: Text(localizations.pastDay),
-              leading: Radio<String?>(
-                value: 'pastDay',
-                groupValue: _selectedDateFilter,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDateFilter = 'pastDay';
-                    _customDateRange = null;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-              onTap: () {
-                setState(() {
-                  _selectedDateFilter = 'pastDay';
-                  _customDateRange = null;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              title: Text(localizations.pastWeek),
-              leading: Radio<String?>(
-                value: 'pastWeek',
-                groupValue: _selectedDateFilter,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDateFilter = 'pastWeek';
-                    _customDateRange = null;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-              onTap: () {
-                setState(() {
-                  _selectedDateFilter = 'pastWeek';
-                  _customDateRange = null;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              title: Text(localizations.customDateRange),
-              leading: Radio<String?>(
-                value: 'custom',
-                groupValue: _selectedDateFilter,
-                onChanged: (_) async {
-                  Navigator.of(context).pop();
-                  await _showDateRangePicker();
-                },
-              ),
-              onTap: () async {
-                Navigator.of(context).pop();
-                await _showDateRangePicker();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showDateRangePicker() async {
-    final localizations = AppLocalizations.of(context);
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: now,
-      initialDateRange: _customDateRange ??
-          DateTimeRange(
-            start: now.subtract(const Duration(days: 30)),
-            end: now,
-          ),
-      helpText: localizations.selectDateRange,
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDateFilter = 'custom';
-        _customDateRange = picked;
-      });
-    }
-  }
-
   void _setAssignmentFilter(String? value) {
     setState(() => _selectedAssignment = value);
     _persistFilter('taskFilter_assignment', value);
@@ -1132,31 +961,16 @@ class _TasksPageState extends State<TasksPage> {
         userRole == UserRole.admin || userRole == UserRole.teamLeader;
     final loc = AppLocalizations.of(context);
 
-    // Group by status: Overdue first (if dueDate exists), then Pending, In Progress, Completed
-    final now = DateTime.now();
-    final overdueIds = tasks
-        .where((t) =>
-            t.dueDate != null &&
-            t.dueDate!.isBefore(now) &&
-            t.status != TaskStatus.completed)
-        .map((t) => t.id)
-        .toSet();
-    final overdue = tasks.where((t) => overdueIds.contains(t.id)).toList();
     final pending = tasks
-        .where((t) =>
-            t.status == TaskStatus.pending && !overdueIds.contains(t.id))
+        .where((t) => t.status == TaskStatus.pending)
         .toList();
     final inProgress = tasks
-        .where((t) =>
-            t.status == TaskStatus.inProgress && !overdueIds.contains(t.id))
+        .where((t) => t.status == TaskStatus.inProgress)
         .toList();
     final completed =
         tasks.where((t) => t.status == TaskStatus.completed).toList();
 
     final sections = <MapEntry<String, List<TaskModel>>>[];
-    if (overdue.isNotEmpty) {
-      sections.add(MapEntry(loc.overdue, overdue));
-    }
     if (pending.isNotEmpty) {
       sections.add(MapEntry(loc.pending, pending));
     }
@@ -1179,8 +993,7 @@ class _TasksPageState extends State<TasksPage> {
         for (final section in sections) {
           if (index == offset) {
             return _buildSectionHeader(
-                section.key, section.value.length,
-                section.key == loc.overdue);
+                section.key, section.value.length);
           }
           offset++;
           for (final task in section.value) {
@@ -1210,7 +1023,7 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
-  Widget _buildSectionHeader(String title, int count, bool isOverdue) {
+  Widget _buildSectionHeader(String title, int count) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Row(
@@ -1218,7 +1031,7 @@ class _TasksPageState extends State<TasksPage> {
           Text(
             '$title ($count)',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: isOverdue ? AppColors.error : Theme.of(context).colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
           ),

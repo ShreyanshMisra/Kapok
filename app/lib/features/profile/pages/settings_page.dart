@@ -70,27 +70,6 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Notifications section
-          // Note: Push notifications intentionally deferred pending infrastructure setup
-          _buildSection(
-            AppLocalizations.of(context).notifications,
-            [
-              ListTile(
-                leading: Icon(Icons.notifications_off, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-                title: Text(AppLocalizations.of(context).notifications),
-                subtitle: Text(
-                  'Push notifications will be enabled in a future update',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-                enabled: false,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
           // Location section
           _buildSection(
             AppLocalizations.of(context).location,
@@ -206,76 +185,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ]),
           const SizedBox(height: 16),
 
-          // Privacy section
-          _buildSection('Privacy', [
-            SwitchListTile(
-              title: Text(
-                'Analytics',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              ),
-              subtitle: Text(
-                'Analytics will be enabled in a future update',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              value: false,
-              onChanged: null,
-            ),
-            SwitchListTile(
-              title: Text(
-                'Crash Reporting',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              ),
-              subtitle: Text(
-                'Crash reporting will be enabled in a future update',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              value: false,
-              onChanged: null,
-            ),
-          ]),
-          const SizedBox(height: 16),
-
-          // Feedback section
-          _buildSection('Feedback & Support', [
-            ListTile(
-              leading: Icon(Icons.email_outlined, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              title: Text(
-                'Email Support',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              ),
-              subtitle: Text(
-                'Support will be available in a future update',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              enabled: false,
-            ),
-            ListTile(
-              leading: Icon(Icons.bug_report_outlined, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              title: Text(
-                'Report an Issue',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              ),
-              subtitle: Text(
-                'Issue reporting will be available in a future update',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              enabled: false,
-            ),
-            ListTile(
-              leading: Icon(Icons.rate_review_outlined, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              title: Text(
-                'Send Feedback',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-              ),
-              subtitle: Text(
-                'Feedback will be available in a future update',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              enabled: false,
-            ),
-          ]),
-          const SizedBox(height: 16),
-
           // About section
           _buildSection(AppLocalizations.of(context).about, [
             ListTile(
@@ -283,6 +192,17 @@ class _SettingsPageState extends State<SettingsPage> {
               subtitle: Text(AppLocalizations.of(context).appVersion),
               onTap: () {},
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                AppLocalizations.of(context).builtWithLove,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
             ListTile(
               title: Text(AppLocalizations.of(context).privacyPolicy),
               trailing: const Icon(Icons.chevron_right),

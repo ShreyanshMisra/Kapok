@@ -619,17 +619,9 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  /// Priority-based marker color
   Color _markerColor(TaskModel task) {
     if (task.status == TaskStatus.completed) return Colors.grey.shade400;
-    switch (task.priority) {
-      case TaskPriority.high:
-        return const Color(0xFFE53935); // red
-      case TaskPriority.medium:
-        return const Color(0xFFFFA000); // amber
-      case TaskPriority.low:
-        return const Color(0xFF43A047); // green
-    }
+    return AppColors.primary;
   }
 
   /// Apply active map filters to task list
@@ -719,23 +711,6 @@ class _MapPageState extends State<MapPage> {
                   ),
                 ],
               ),
-              if (task.dueDate != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.event, size: 14, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Due ${task.dueDate!.year}-${task.dueDate!.month.toString().padLeft(2, '0')}-${task.dueDate!.day.toString().padLeft(2, '0')}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: task.isOverdue ? AppColors.error : AppColors.textSecondary,
-                        fontWeight: task.isOverdue ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
               if (task.description != null && task.description!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(

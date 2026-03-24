@@ -65,15 +65,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            _buildSection(
-              context,
-              AppLocalizations.of(context).aFairResolutionLLC,
-              AppLocalizations.of(context).aFairResolutionLLCDescription,
-              Icons.business,
-            ),
-            const SizedBox(height: 24),
-
-            _buildSection(
+            _buildBulletSection(
               context,
               AppLocalizations.of(context).keyFeatures,
               AppLocalizations.of(context).keyFeaturesDescription,
@@ -87,6 +79,9 @@ class AboutPage extends StatelessWidget {
               AppLocalizations.of(context).technologyDescription,
               Icons.phone_android,
             ),
+            const SizedBox(height: 24),
+
+            _buildVersionTagline(context),
             const SizedBox(height: 24),
 
             _buildSection(
@@ -133,6 +128,109 @@ class AboutPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Build the app version and tagline widget
+  Widget _buildVersionTagline(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            '${AppLocalizations.of(context).appVersionLabel} ${AppLocalizations.of(context).appVersion}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            AppLocalizations.of(context).builtWithLove,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build a section with bullet points using proper hanging indent
+  Widget _buildBulletSection(
+    BuildContext context,
+    String title,
+    String content,
+    IconData icon,
+  ) {
+    final lines = content.split('\n');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...lines.map((line) {
+          final trimmed = line.trim();
+          if (trimmed.startsWith('•')) {
+            final text = trimmed.substring(1).trim();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '•  ',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.5,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          return Text(
+            trimmed,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              height: 1.5,
+            ),
+          );
+        }),
+      ],
     );
   }
 

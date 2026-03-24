@@ -55,7 +55,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   bool _showTaskForm = false;
   String? _selectedTeamId;
   String? _selectedAssignedTo;
-  DateTime? _selectedDueDate;
   List<TeamModel> _userTeams = [];
   List<UserModel> _teamMembers = [];
   
@@ -339,7 +338,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 HelpTip(icon: Icons.star, title: 'Priority', description: 'Set Low, Medium, or High priority so team members know what to tackle first.'),
                 HelpTip(icon: Icons.map, title: 'Location', description: 'Tap on the map or use the location button to pin the task to a specific spot.'),
                 HelpTip(icon: Icons.person, title: 'Assignment', description: 'Assign the task to a team member or leave it unassigned for anyone to pick up.'),
-                HelpTip(icon: Icons.event, title: 'Due Date', description: 'Optionally set a due date. Overdue tasks are highlighted in the task list.'),
               ],
             ),
           ),
@@ -952,56 +950,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       }
                                     },
                                   ),
-                                  const SizedBox(height: 16),
-
-                                  // Due date picker (optional)
-                                  InkWell(
-                                    onTap: () async {
-                                      final date = await showDatePicker(
-                                        context: context,
-                                        initialDate: _selectedDueDate ?? DateTime.now().add(const Duration(days: 1)),
-                                        firstDate: DateTime.now(),
-                                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                                      );
-                                      if (date != null) {
-                                        setState(() => _selectedDueDate = date);
-                                      }
-                                    },
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: InputDecorator(
-                                      decoration: InputDecoration(
-                                        labelText: AppLocalizations.of(context).dueDate,
-                                        hintText: AppLocalizations.of(context).selectDueDate,
-                                        prefixIcon: const Icon(Icons.calendar_today_outlined),
-                                        suffixIcon: _selectedDueDate != null
-                                            ? IconButton(
-                                                icon: const Icon(Icons.clear),
-                                                onPressed: () => setState(() => _selectedDueDate = null),
-                                                tooltip: AppLocalizations.of(context).clearDueDate,
-                                              )
-                                            : null,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        _selectedDueDate != null
-                                            ? '${_selectedDueDate!.year}-${_selectedDueDate!.month.toString().padLeft(2, '0')}-${_selectedDueDate!.day.toString().padLeft(2, '0')}'
-                                            : '',
-                                        style: _selectedDueDate != null
-                                            ? null
-                                            : theme.textTheme.bodyMedium?.copyWith(
-                                                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
                                   const SizedBox(height: 24),
 
                                   // Create button
@@ -1164,7 +1112,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           longitude: _longitude!,
           createdBy: user.id,
           category: _selectedCategory.value,
-          dueDate: _selectedDueDate,
         ),
       );
 
@@ -1176,7 +1123,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         _latitude = null;
         _longitude = null;
         _selectedAddress = null;
-        _selectedDueDate = null;
         _showTaskForm = false;
       });
     }

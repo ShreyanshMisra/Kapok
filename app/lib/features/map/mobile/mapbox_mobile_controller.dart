@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import '../../../data/models/offline_map_region_model.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../data/models/task_model.dart';
 import '../models/map_camera_state.dart';
 
@@ -58,11 +59,8 @@ class MapboxMobileController {
   // User location tracking
   StreamSubscription<void>? _locationSubscription;
 
-  // Marker colors matching web priority colours
-  static const Color _highPriorityColor = Color(0xFFE53935);  // red
-  static const Color _mediumPriorityColor = Color(0xFFFFA000); // amber
-  static const Color _lowPriorityColor = Color(0xFF43A047);   // green
-  static const Color _completedColor = Color(0xFF808080);     // grey
+  static const Color _activeMarkerColor = AppColors.primary;
+  static const Color _completedColor = Color(0xFF808080);
 
   /// Sets the MapboxMap instance from the widget callback
   void setMapboxMap(MapboxMap map) {
@@ -135,9 +133,9 @@ class MapboxMobileController {
 
     try {
       // Create and register marker images for each priority with star counts
-      await _addMarkerImage(_MarkerIcons.high, _highPriorityColor, Icons.star, starCount: 3);
-      await _addMarkerImage(_MarkerIcons.medium, _mediumPriorityColor, Icons.star, starCount: 2);
-      await _addMarkerImage(_MarkerIcons.low, _lowPriorityColor, Icons.star, starCount: 1);
+      await _addMarkerImage(_MarkerIcons.high, _activeMarkerColor, Icons.star, starCount: 3);
+      await _addMarkerImage(_MarkerIcons.medium, _activeMarkerColor, Icons.star, starCount: 2);
+      await _addMarkerImage(_MarkerIcons.low, _activeMarkerColor, Icons.star, starCount: 1);
       await _addMarkerImage(_MarkerIcons.completed, _completedColor, Icons.check_circle, starCount: 0);
       
       _markerImagesRegistered = true;
@@ -400,16 +398,16 @@ class MapboxMobileController {
         
         if (task.status.value == 'completed') {
           iconImage = _MarkerIcons.completed;
-          textColor = 0xFF808080; // grey
+          textColor = 0xFF808080;
         } else if (task.priority.value == 'high') {
           iconImage = _MarkerIcons.high;
-          textColor = 0xFFE53935; // red
+          textColor = 0xFF013576;
         } else if (task.priority.value == 'medium') {
           iconImage = _MarkerIcons.medium;
-          textColor = 0xFFFFA000; // amber
+          textColor = 0xFF013576;
         } else {
           iconImage = _MarkerIcons.low;
-          textColor = 0xFF43A047; // green
+          textColor = 0xFF013576;
         }
 
         annotationOptions.add(PointAnnotationOptions(

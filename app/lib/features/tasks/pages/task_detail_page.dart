@@ -51,7 +51,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   TaskStatus _selectedStatus = TaskStatus.pending;
   String? _selectedAssignedTo;
   TaskCategory _selectedCategory = TaskCategory.other;
-  DateTime? _selectedDueDate;
   MapboxWebController? _mapController;
   bool _showMap = true;
   Offset? _pinScreenPosition;
@@ -70,7 +69,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     _selectedStatus = widget.task.status;
     _selectedAssignedTo = widget.task.assignedTo;
     _selectedCategory = widget.task.category;
-    _selectedDueDate = widget.task.dueDate;
   }
 
   @override
@@ -196,8 +194,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         _descriptionController.text.trim() != (widget.task.description ?? '') ||
         _selectedPriority != widget.task.priority ||
         _selectedAssignedTo != widget.task.assignedTo ||
-        _selectedCategory != widget.task.category ||
-        _selectedDueDate != widget.task.dueDate) {
+        _selectedCategory != widget.task.category) {
       context.read<TaskBloc>().add(
         EditTaskRequested(
           taskId: widget.task.id,
@@ -208,8 +205,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           taskCompleted: _selectedStatus == TaskStatus.completed,
           assignedTo: _selectedAssignedTo,
           category: _selectedCategory.value,
-          dueDate: _selectedDueDate,
-          clearDueDate: widget.task.dueDate != null && _selectedDueDate == null,
         ),
       );
     }
@@ -279,10 +274,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 context,
                 title: 'Task Details',
                 tips: const [
-                  HelpTip(icon: Icons.edit, title: 'Editing', description: 'Tap the pencil icon to edit the task name, description, priority, and more.'),
-                  HelpTip(icon: Icons.check_circle, title: 'Completing', description: 'Change the status to "Completed" and save to mark the task done.'),
-                  HelpTip(icon: Icons.share, title: 'Sharing', description: 'Use the share button to send task details to others.'),
-                  HelpTip(icon: Icons.swipe, title: 'Swipe Actions', description: 'On the Tasks list, swipe right to complete or swipe left for options.'),
+                  HelpTip(icon: Icons.edit, title: 'Edit', description: 'Tap the pencil icon to edit the task name, description, priority, and more.'),
+                  HelpTip(icon: Icons.share, title: 'Share', description: 'Use the share button to send task details to others.'),
+                  HelpTip(icon: Icons.delete, title: 'Delete', description: 'Tap the trash icon to permanently delete this task.'),
+                  HelpTip(icon: Icons.check_circle, title: 'Completing', description: 'Change the status to "Completed" using the status dropdown and save to mark the task done.'),
                 ],
               ),
             ),
@@ -292,16 +287,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
               tooltip: 'Share task',
               onPressed: () {
                 final task = widget.task;
-                final duePart = task.dueDate != null
-                    ? '\nDue: ${DateFormat.yMd().format(task.dueDate!)}'
-                    : '';
                 Share.share(
                   '[Kapok Task]\n'
                   '${task.title}\n'
                   'Priority: ${task.priority.displayName}\n'
                   'Status: ${task.status.displayName}\n'
-                  'Category: ${task.category.displayName}'
-                  '$duePart\n'
+                  'Category: ${task.category.displayName}\n'
                   '${task.description ?? ''}',
                   subject: task.title,
                 );
@@ -653,67 +644,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                 : null,
                           ),
                           const SizedBox(height: 16),
-
-                          // Due date (editable when editing)
-                          if (_isEditing)
-                            InkWell(
-                              onTap: () async {
-                                final date = await showDatePicker(
-                                  context: context,
-                                  initialDate: _selectedDueDate ?? DateTime.now().add(const Duration(days: 1)),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                                );
-                                if (date != null) {
-                                  setState(() => _selectedDueDate = date);
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: InputDecorator(
-                                decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context).dueDate,
-                                  prefixIcon: const Icon(Icons.calendar_today),
-                                  suffixIcon: _selectedDueDate != null
-                                      ? IconButton(
-                                          icon: const Icon(Icons.clear),
-                                          onPressed: () => setState(() => _selectedDueDate = null),
-                                          tooltip: AppLocalizations.of(context).clearDueDate,
-                                        )
-                                      : null,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(
-                                  _selectedDueDate != null
-                                      ? DateFormat.yMd().format(_selectedDueDate!)
-                                      : AppLocalizations.of(context).selectDueDate,
-                                  style: _selectedDueDate != null
-                                      ? null
-                                      : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                        ),
-                                ),
-                              ),
-                            )
-                          else if (widget.task.dueDate != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Row(
-                                children: [
-                                Icon(Icons.event, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-                                const SizedBox(width: 8),
-                                Text(
-                                    '${AppLocalizations.of(context).dueDate}: ${DateFormat.yMd().format(widget.task.dueDate!)}',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (_isEditing || widget.task.dueDate != null)
-                            const SizedBox(height: 16),
 
                           // Assigned To
                           if (_isEditing)
@@ -1077,7 +1007,7 @@ class TaskLocationPinPainter extends CustomPainter {
 
     // Draw pin icon (location_on style)
     final pinPaint = Paint()
-      ..color = AppColors.error
+      ..color = AppColors.primary
       ..style = PaintingStyle.fill;
 
     // Draw pin circle
