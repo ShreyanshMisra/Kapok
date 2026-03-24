@@ -24,21 +24,30 @@ class OfflineMapCache {
   /// Initializes the cache by opening the Hive box.
   /// Cache-size calculation is deferred to the first write to avoid blocking
   /// the main thread at startup (iterating all tiles is O(n) and very slow).
+  /// If the box is corrupt or too large to load (OOM), it is deleted and
+  /// replaced with a fresh empty box so the app never crashes on startup.
   Future<void> initialize() async {
+    if (Hive.isBoxOpen(_boxName)) {
+      _tilesBox = Hive.box(_boxName);
+      return;
+    }
     try {
-      if (!Hive.isBoxOpen(_boxName)) {
-        _tilesBox = await Hive.openBox(_boxName);
-      } else {
-        _tilesBox = Hive.box(_boxName);
-      }
-      // Do NOT call _calculateCacheSize() here — it iterates every tile on
-      // the main thread and causes a multi-second freeze at startup.
-      // It will be triggered lazily before the first putTile() call.
+      _tilesBox = await Hive.openBox(_boxName);
     } catch (e) {
-      throw CacheException(
-        message: 'Failed to initialize offline map cache',
-        originalError: e,
-      );
+      // Box is corrupt, oversized, or caused an OOM — wipe and start fresh.
+      try {
+        await Hive.deleteBoxFromDisk(_boxName);
+      } catch (_) {}
+      try {
+        _tilesBox = await Hive.openBox(_boxName);
+        _currentCacheSizeBytes = 0;
+        _cacheSizeReady = true;
+      } catch (innerError) {
+        throw CacheException(
+          message: 'Failed to initialize offline map cache',
+          originalError: innerError,
+        );
+      }
     }
   }
 

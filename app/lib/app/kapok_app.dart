@@ -21,11 +21,19 @@ import '../injection_container.dart';
 import '../features/auth/pages/login_page.dart';
 import '../core/services/first_login_service.dart';
 import 'router.dart';
-import 'home_page.dart';
-import 'about_page.dart';
 
-class KapokApp extends StatelessWidget {
+class KapokApp extends StatefulWidget {
   const KapokApp({super.key});
+
+  @override
+  State<KapokApp> createState() => _KapokAppState();
+}
+
+class _KapokAppState extends State<KapokApp> {
+  // GlobalKey gives the BlocListener direct access to the NavigatorState,
+  // bypassing the limitation that MaterialApp.builder's context sits above
+  // the Navigator in the widget tree (making Navigator.maybeOf(context) null).
+  final _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +55,7 @@ class KapokApp extends StatelessWidget {
           builder: (context, languageProvider, themeProvider, _) {
             return MaterialApp(
               key: ValueKey(languageProvider.currentLocale.languageCode),
+              navigatorKey: _navigatorKey,
               title: 'Kapok',
               debugShowCheckedModeBanner: false,
               locale: languageProvider.currentLocale,
@@ -65,144 +74,85 @@ class KapokApp extends StatelessWidget {
               builder: (context, child) {
                 return BlocListener<AuthBloc, AuthState>(
                   listenWhen: (previous, current) {
-                    // Only navigate on significant state changes, not on every update
-                    if (current is AuthUnauthenticated) {
-                      return true; // Always navigate on logout
-                    }
-                    // NEVER navigate on AuthLoading or AuthError - user should stay where they are
+                    if (current is AuthUnauthenticated) return true;
                     if (current is AuthLoading || current is AuthError) {
-                      return false; // Don't navigate on loading or errors
+                      return false;
                     }
                     if (current is AuthAuthenticated) {
-                      // Only navigate if:
-                      // 1. This is the first authentication (previous was not authenticated)
-                      // 2. This is a new signup
-                      // 3. Onboarding status changed from false to true (not when completed)
-                      if (previous is! AuthAuthenticated) {
-                        return true; // First authentication - always navigate
-                      }
+                      if (previous is! AuthAuthenticated) return true;
                       final prevAuth = previous;
                       final currAuth = current;
-                      // Navigate if signup status changed
                       if (prevAuth.isNewSignup != currAuth.isNewSignup) {
                         return true;
                       }
-                      // Only navigate if onboarding became needed (not when it's completed)
-                      // This prevents navigation when user joins/creates team
-                      if (!prevAuth.needsOnboarding &&
-                          currAuth.needsOnboarding) {
-                        return true; // User now needs onboarding
+                      if (!prevAuth.needsOnboarding && currAuth.needsOnboarding) {
+                        return true;
                       }
-                      // Don't navigate on profile updates (like joining/creating team)
-                      // This includes when needsOnboarding changes from true to false
-                      // This includes when teamId is updated
                       return false;
                     }
                     return false;
                   },
                   listener: (context, state) {
-                    // Use post-frame callback to ensure Navigator is available
+                    // _navigatorKey.currentState is always valid regardless of
+                    // where this BlocListener sits in the widget tree relative
+                    // to the Navigator (MaterialApp.builder context is above it).
                     WidgetsBinding.instance.addPostFrameCallback((_) async {
-                      // Check if context is still mounted and has a Navigator
-                      if (!context.mounted) return;
-                      final navigator = Navigator.maybeOf(context);
-                      if (navigator == null) return;
+                      final navigator = _navigatorKey.currentState;
+                      if (navigator == null || !navigator.mounted) return;
 
                       if (state is AuthUnauthenticated) {
-                        // Reset all BLoCs on logout to stop map and clear state
-                        // Logger.auth('Resetting BLoCs on logout'); // Commented out - map logs disabled
                         try {
-                          // Reset map first to stop it immediately
-                          // This will emit MapLoading state which triggers map disposal
-                          context.read<MapBloc>().add(MapReset());
-                          // Give minimal time for map to dispose
-                          await Future.delayed(
-                            const Duration(milliseconds: 50),
-                          );
-                          // Reset other BLoCs
-                          context.read<TeamBloc>().add(TeamReset());
-                          context.read<TaskBloc>().add(TaskReset());
-                        } catch (e) {
-                          // Logger.auth('Error resetting BLoCs', error: e); // Commented out - map logs disabled
-                        }
-
-                        // Only navigate if not already navigated (settings page handles its own navigation)
-                        // This is a fallback for other logout scenarios
-                        if (context.mounted &&
-                            Navigator.maybeOf(context) != null) {
-                          final currentRoute = ModalRoute.of(context);
-                          if (currentRoute?.settings.name != '/login') {
-                            navigator.pushNamedAndRemoveUntil(
-                              '/login',
-                              (route) => false,
-                            );
+                          if (context.mounted) {
+                            context.read<MapBloc>().add(MapReset());
+                            await Future.delayed(const Duration(milliseconds: 50));
+                            context.read<TeamBloc>().add(TeamReset());
+                            context.read<TaskBloc>().add(TaskReset());
                           }
-                        }
+                        } catch (_) {}
+                        navigator.pushNamedAndRemoveUntil(
+                          '/login',
+                          (route) => false,
+                        );
                       } else if (state is AuthAuthenticated) {
-                        // Check again before navigation
-                        if (!context.mounted ||
-                            Navigator.maybeOf(context) == null) {
-                          return;
-                        }
-
-                        // New signup: navigate based on role immediately
                         if (state.isNewSignup) {
                           if (state.user.userRole == UserRole.teamLeader) {
                             navigator.pushNamedAndRemoveUntil(
                               '/create-team',
                               (route) => false,
                             );
-                          } else if (state.user.userRole ==
-                              UserRole.teamMember) {
+                          } else if (state.user.userRole == UserRole.teamMember) {
                             navigator.pushNamedAndRemoveUntil(
                               '/join-team',
                               (route) => false,
                             );
                           } else {
-                            // Admin
                             navigator.pushNamedAndRemoveUntil(
                               '/home',
                               (route) => false,
                             );
                           }
                         } else if (state.needsOnboarding) {
-                          // Existing user needs onboarding (missing team or role)
-                          final currentRoute = ModalRoute.of(
-                            context,
-                          )?.settings.name;
-                          // Only navigate if not already on onboarding pages
-                          if (currentRoute != '/role-selection' &&
-                              currentRoute != '/create-team' &&
-                              currentRoute != '/join-team') {
-                            navigator.pushNamedAndRemoveUntil(
-                              '/role-selection',
-                              (route) => false,
-                            );
-                          }
+                          navigator.pushNamedAndRemoveUntil(
+                            '/role-selection',
+                            (route) => false,
+                          );
                         } else {
-                          final currentRoute = ModalRoute.of(
-                            context,
-                          )?.settings.name;
-                          if (currentRoute != '/home' &&
-                              currentRoute != '/about' &&
-                              currentRoute != '/create-team' &&
-                              currentRoute != '/join-team' &&
-                              currentRoute != '/role-selection') {
-                            final isFirstLogin = !FirstLoginService.instance
-                                .hasLoggedInBefore(state.user.id);
-                            if (isFirstLogin) {
-                              await FirstLoginService.instance
-                                  .markLoggedIn(state.user.id);
+                          final isFirstLogin = !FirstLoginService.instance
+                              .hasLoggedInBefore(state.user.id);
+                          if (isFirstLogin) {
+                            await FirstLoginService.instance
+                                .markLoggedIn(state.user.id);
+                            if (navigator.mounted) {
                               navigator.pushNamedAndRemoveUntil(
                                 '/about',
                                 (route) => false,
                               );
-                            } else {
-                              navigator.pushNamedAndRemoveUntil(
-                                '/home',
-                                (route) => false,
-                              );
                             }
+                          } else {
+                            navigator.pushNamedAndRemoveUntil(
+                              '/home',
+                              (route) => false,
+                            );
                           }
                         }
                       }
@@ -211,22 +161,18 @@ class KapokApp extends StatelessWidget {
                   child: child ?? const SizedBox.shrink(),
                 );
               },
+              // Show a spinner for all states except unauthenticated.
+              // The BlocListener above (via _navigatorKey) handles all
+              // authenticated routing, so the home widget only needs to
+              // provide the initial shell before auth resolves.
               home: BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
-                  if (state is AuthLoading) {
-                    return const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (state is AuthAuthenticated) {
-                    if (!FirstLoginService.instance.hasLoggedInBefore(state.user.id)) {
-                      return const AboutPage();
-                    }
-                    return const HomePage();
-                  } else if (state is AuthUnauthenticated) {
-                    return const LoginPage();
-                  } else {
+                  if (state is AuthUnauthenticated) {
                     return const LoginPage();
                   }
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
                 },
               ),
             );
