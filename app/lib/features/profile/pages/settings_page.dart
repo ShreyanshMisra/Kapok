@@ -9,6 +9,7 @@ import '../../../core/services/hive_service.dart';
 import '../../../core/services/sync_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../tasks/bloc/task_bloc.dart';
@@ -428,6 +429,16 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _isSyncing = true);
     try {
       await SyncService.instance.syncPendingChanges();
+
+      if (mounted) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          final userId = authState.user.id;
+          context.read<TeamBloc>().add(LoadUserTeams(userId: userId));
+          context.read<TaskBloc>().add(LoadTasksRequested(userId: userId));
+        }
+      }
+
       _refreshLastSync();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

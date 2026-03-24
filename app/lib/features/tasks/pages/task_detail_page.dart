@@ -414,13 +414,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             initialLongitude: widget.task.geoLocation.longitude,
                             initialZoom: 16.0,
                             interactive: true,
+                            tasks: [widget.task],
                             onControllerReady: (controller) {
                               setState(() {
                                 _mapController = controller;
                               });
-                              // Update pin position when controller is ready
                               _updatePinPosition();
-                              // Center map on task location
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 _mapController?.setCenter(
                                   widget.task.geoLocation.latitude,
@@ -429,8 +428,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                 );
                               });
                             },
+                            onMobileControllerReady: (controller) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                controller.setCenter(
+                                  widget.task.geoLocation.latitude,
+                                  widget.task.geoLocation.longitude,
+                                  zoom: 16.0,
+                                );
+                              });
+                            },
                             onCameraIdle: (cameraState) {
-                              // Update pin position whenever camera moves
                               _updatePinPosition();
                             },
                           ),
