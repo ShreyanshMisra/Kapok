@@ -1,8 +1,8 @@
 # Kapok App — Fix & Enhancement Spec
 
 > **App:** Kapok — a disaster response coordination mobile app built with Flutter + Firebase + Mapbox
-> **Platform:** Android (primary), iOS
-> **Total Items:** 31 fixes/enhancements across 6 phases
+> **Platforms:** Android, iOS
+> **Total Items:** 34 fixes/enhancements across 7 phases
 
 ---
 
@@ -30,6 +30,7 @@ These changes affect every screen in the app. Complete them first so subsequent 
 - Every page in the app (except the Sign In page and the loading/splash page) must have a blue header block at the top spanning the full width.
 - The page title text (e.g., "Create Account", "Join Team", "Tasks", "Settings", etc.) should appear inside this blue block.
 - The bottom edge of the blue block must have a **curved/rounded shape** — specifically, the bottom-left and bottom-right corners should be rounded, similar to how the "Join Team" page currently looks. The top edge remains straight/flush with the top of the screen.
+- The page navigation bar at the bottom of the screen should have a a **curved/rounded shape**, in this case the top-left and top-right corners. 
 - The blue color should match the existing blue used on pages like Join Team and Settings.
 
 ---
@@ -47,7 +48,7 @@ These changes affect every screen in the app. Complete them first so subsequent 
 
 ### 1.4 — Dark Mode Filter Chips Visibility (Tasks Page)
 
-**What:** On the Tasks page, when dark mode is enabled, the filter chips/boxes (e.g., "All Statuses", "All Priorities", "All Categories", "All Dates", "Overdue only") have dark backgrounds with dark text, making the labels invisible.
+**What:** On the Tasks page, when dark mode is enabled, the filter chips/boxes (e.g., "All Statuses", "All Priorities", "All Categories", "All Dates") have dark backgrounds with dark text, making the labels invisible.
 
 **Required behavior:**
 - Ensure all filter chips on the Tasks page use a color scheme that is legible in both light and dark mode.
@@ -429,6 +430,62 @@ This should appear in the About subsection, likely above the "Privacy Policy" an
 
 ---
 
+### 6.3 — Add Permissions Table to Profile Page
+
+**What:** The Profile page should display a "Permissions" table so that users can see what actions their current account role (Team Member, Team Leader, or Admin) allows them to perform.
+
+**Required behavior:**
+- Add a "Permissions" section to the Profile page, visible to all authenticated users.
+- Display the following table showing which roles can perform each action:
+
+| Action | Team Member | Team Leader | Admin |
+|---|---|---|---|
+| Create Team | ✗ | ✓ | ✓ |
+| Join Team | ✓ | ✓ | ✓ |
+| View Team | ✓ | ✓ | ✓ |
+| Edit Team | ✗ | ✓ | ✓ |
+| Close Team | ✗ | ✓ | ✓ |
+| Delete Team | ✗ | ✓ | ✓ |
+| Remove Member | ✗ | ✓ | ✗ |
+| Leave Team | ✓ | ✗ | ✓ |
+| View All Teams | ✗ | ✗ | ✓ |
+| Edit Own Tasks | ✓ | ✓ | ✓ |
+| Edit All Tasks | ✗ | ✓ | ✓ |
+
+- Highlight or visually indicate the user's current role in the table (e.g., bold the column header for their role, or add a subtle background color to that column).
+- Style the table consistently with the rest of the app (blue header, same font, proper padding).
+- The table should be scrollable horizontally if needed on smaller screens.
+
+---
+
+## Phase 7: Documentation Reconciliation
+
+After all code changes from Phases 1–6 are complete, reconcile the project documentation with the actual state of the app.
+
+### 7.1 — Audit Documentation Against Current Implementation
+
+**What:** The `docs/` directory may contain documentation that is outdated, incomplete, or inconsistent with the app as it exists after all prior phases have been implemented. Perform a full reconciliation pass.
+
+**Required behavior:**
+- Read every file in the `docs/` directory (and any subdirectories).
+- For each document, compare its claims against the current codebase — check referenced file paths, feature descriptions, UI flows, API contracts, data models, and configuration details.
+- Identify any discrepancies: features described but not implemented, implemented features not documented, incorrect file paths or class names, outdated screenshots or diagrams, removed features still referenced, and newly added features missing from docs.
+- Update each document in place to reflect the current state of the app. Do not delete documents unless their subject matter has been entirely removed from the project.
+- If a document references features planned for the future, clearly label them as "Planned" or "Not Yet Implemented" so they are distinguishable from current functionality.
+
+### 7.2 — Update This Spec Document
+
+**What:** This fix & enhancement spec (`kapok_fixes.md`) should be updated to reflect the completion status of all phases.
+
+**Required behavior:**
+- For each item in Phases 1–6, verify whether the fix/enhancement has been fully implemented in the codebase.
+- Mark each item as **Done**, **Partial**, or **Not Started** based on the code audit.
+- Add a "Status" column to the Summary Checklist table.
+- If any item was implemented differently than specified (e.g., a different UI approach was chosen), add a brief note explaining the deviation.
+- This item (7.2) should be the very last task executed, as it depends on the completion of everything else.
+
+---
+
 ## Summary Checklist
 
 | Phase | Items | Description |
@@ -438,4 +495,5 @@ This should appear in the About subsection, likely above the "Privacy Policy" an
 | 3 | 3.1–3.8 | About page & Settings page structural changes |
 | 4 | 4.1–4.3 | Feature removals (due date, overdue) + map pin + help icons |
 | 5 | 5.1–5.6 | Feature implementations + bug fixes |
-| 6 | 6.1–6.2 | Permissions enforcement + new admin page |
+| 6 | 6.1–6.3 | Permissions enforcement + admin page + profile permissions table |
+| 7 | 7.1–7.2 | Documentation reconciliation + spec completion audit |
