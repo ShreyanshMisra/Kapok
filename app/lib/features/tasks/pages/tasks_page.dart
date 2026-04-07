@@ -35,6 +35,7 @@ class _TasksPageState extends State<TasksPage> {
   TaskPriority? _selectedPriority;
   TaskCategory? _selectedCategory;
   String? _selectedAssignment; // 'me', 'unassigned', or null for all
+  DateTimeRange? _selectedDateRange;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   bool _isStale = false;
@@ -155,6 +156,19 @@ class _TasksPageState extends State<TasksPage> {
         return false;
       }
 
+      // Filter by created date range
+      if (_selectedDateRange != null) {
+        final created = task.createdAt;
+        final start = DateTime(_selectedDateRange!.start.year,
+            _selectedDateRange!.start.month, _selectedDateRange!.start.day);
+        final end = DateTime(_selectedDateRange!.end.year,
+                _selectedDateRange!.end.month, _selectedDateRange!.end.day)
+            .add(const Duration(days: 1));
+        if (created.isBefore(start) || !created.isBefore(end)) {
+          return false;
+        }
+      }
+
       // Filter by search query (title, description, address, assignee name)
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
@@ -184,6 +198,7 @@ class _TasksPageState extends State<TasksPage> {
       _selectedPriority = null;
       _selectedCategory = null;
       _selectedAssignment = null;
+      _selectedDateRange = null;
       _searchQuery = '';
       _searchController.clear();
     });
@@ -198,6 +213,7 @@ class _TasksPageState extends State<TasksPage> {
         _selectedPriority != null ||
         _selectedCategory != null ||
         _selectedAssignment != null ||
+        _selectedDateRange != null ||
         _searchQuery.isNotEmpty;
   }
 
@@ -471,6 +487,15 @@ class _TasksPageState extends State<TasksPage> {
                 icon: Icons.person,
                 isSelected: _selectedAssignment != null,
                 onTap: () => _showAssignmentFilterDialog(),
+              ),
+              // Date created filter
+              _buildFilterChip(
+                label: _selectedDateRange == null
+                    ? 'Any Date'
+                    : _formatDateRangeLabel(_selectedDateRange!),
+                icon: Icons.date_range,
+                isSelected: _selectedDateRange != null,
+                onTap: () => _showDateFilterDialog(),
               ),
               // Clear filters button
               if (_hasActiveFilters)
@@ -783,6 +808,100 @@ class _TasksPageState extends State<TasksPage> {
               onTap: () {
                 _setAssignmentFilter('unassigned');
                 Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDateRangeLabel(DateTimeRange range) {
+    String fmt(DateTime d) =>
+        '${d.month}/${d.day}/${d.year.toString().substring(2)}';
+    if (range.start.year == range.end.year &&
+        range.start.month == range.end.month &&
+        range.start.day == range.end.day) {
+      return fmt(range.start);
+    }
+    return '${fmt(range.start)}–${fmt(range.end)}';
+  }
+
+  void _setDateRange(DateTimeRange? range) {
+    setState(() => _selectedDateRange = range);
+  }
+
+  void _showDateFilterDialog() {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Filter by Date Created'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.clear, color: theme.colorScheme.primary),
+              title: const Text('Any date'),
+              onTap: () {
+                _setDateRange(null);
+                Navigator.of(ctx).pop();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.today, color: theme.colorScheme.primary),
+              title: const Text('Past day'),
+              onTap: () {
+                final now = DateTime.now();
+                _setDateRange(DateTimeRange(
+                  start: now.subtract(const Duration(days: 1)),
+                  end: now,
+                ));
+                Navigator.of(ctx).pop();
+              },
+            ),
+            ListTile(
+              leading:
+                  Icon(Icons.date_range, color: theme.colorScheme.primary),
+              title: const Text('Past week'),
+              onTap: () {
+                final now = DateTime.now();
+                _setDateRange(DateTimeRange(
+                  start: now.subtract(const Duration(days: 7)),
+                  end: now,
+                ));
+                Navigator.of(ctx).pop();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.edit_calendar,
+                  color: theme.colorScheme.primary),
+              title: const Text('Custom range'),
+              onTap: () async {
+                Navigator.of(ctx).pop();
+                final now = DateTime.now();
+                final picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(now.year - 5),
+                  lastDate: now,
+                  initialDateRange: _selectedDateRange ??
+                      DateTimeRange(
+                        start: now.subtract(const Duration(days: 7)),
+                        end: now,
+                      ),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: Theme.of(context).colorScheme.copyWith(
+                              primary: AppColors.primary,
+                              onPrimary: Colors.white,
+                            ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) _setDateRange(picked);
               },
             ),
           ],

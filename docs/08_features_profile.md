@@ -28,6 +28,12 @@ The profile feature provides user account management, app settings, and personal
    - Role/specialty
    - User ID
 
+4. **Permissions Table**
+   - `DataTable` with columns: Action | Team Member | Team Leader | Admin
+   - Rows: Create Team, Join Team, View Team, Edit Team, Close Team, Delete Team, Remove Member, Leave Team, View All Teams, Edit Own Tasks, Edit All Tasks
+   - The current user's role column is highlighted (bold + subtle blue background)
+   - A "Your Role: [role]" chip appears at the top right; the table is horizontally scrollable on smaller screens
+
 ### Authentication Check
 
 The page requires `AuthAuthenticated` state. If the user is not authenticated, displays "User not authenticated" message.
@@ -63,33 +69,33 @@ The page requires `AuthAuthenticated` state. If the user is not authenticated, d
 
 ### Settings Sections
 
-#### 1. Notifications
-Push notifications are disabled with a note that they will be enabled in a future update.
+The Settings page has been simplified. Remaining sections: Location, Language, Appearance (Theme), Data (Sync, Clear Cache), About (with Privacy Policy, Terms of Service, and Administrator Permissions links), and Sign Out. The previous Notifications, Privacy, and Feedback & Support sections have been removed.
 
-#### 2. Location
+#### 1. Location
 | Setting | Description |
 |---------|-------------|
 | Location Services | Toggle for app location access |
 
-#### 3. Language
+#### 2. Language
 Supports two languages:
 - English (en)
 - Spanish (es)
 
 Language selection is persisted via `LanguageProvider` and stored in Hive.
 
-#### 4. Appearance (Theme)
-Three options:
-- System (follows device setting)
+#### 3. Appearance (Theme)
+Three options (user-facing label for the follow-device option is "Default", not "System"):
+- Default (follows device setting)
 - Light
 - Dark
 
 Theme selection is persisted via `ThemeProvider` and stored in Hive.
 
-#### 5. Data
+#### 4. Data
 | Action | Description |
 |--------|-------------|
-| Clear Cache | Clears locally stored data (requires re-login) |
+| Sync | Runs `SyncService.syncPendingChanges()` then dispatches `LoadUserTeams` and `LoadTasksRequested` to re-fetch from Firebase |
+| Clear Cache | Clears locally saved data (requires re-login) |
 | Export Data | Exports tasks and teams to JSON file |
 
 **Export Data Feature:**
@@ -98,29 +104,14 @@ Theme selection is persisted via `ThemeProvider` and stored in Hive.
 - Option to share the exported file via system share sheet
 - Works offline using cached data
 
-#### 6. Privacy
-| Setting | Description |
-|---------|-------------|
-| Analytics | Toggle anonymous usage data sharing |
-| Crash Reporting | Toggle automatic crash report sending |
+The in-app Analytics/Crash Reporting opt-out toggles were removed in Phase 3.5; defaults still apply via `AnalyticsService`.
 
-Settings are managed by `AnalyticsService`.
-
-#### 7. Feedback & Support
-| Action | Description |
-|--------|-------------|
-| Email Support | Opens email client with pre-filled template |
-| Report an Issue | Opens GitHub issues page |
-| Send Feedback | Dialog to submit feedback via email |
-
-**Support Email:** support@kapokapp.org
-**Feedback Email:** feedback@kapokapp.org
-**GitHub Issues:** https://github.com/ShreyanshMisra/Kapok/issues/new
-
-#### 8. About
+#### 5. About
 - App version display (1.0.0)
+- "Built with ❤️ for disaster response coordination." tagline
 - Privacy Policy (placeholder dialog)
 - Terms of Service (placeholder dialog)
+- Administrator Permissions → navigates to `/admin-permissions`
 
 ### Sign Out
 
@@ -215,6 +206,13 @@ JSON file with structure:
 Saved to app's documents directory with filename:
 `kapok_export_YYYYMMDD_HHMMSS.json`
 
+## Administrator Permissions Page
+
+### Location
+`lib/features/profile/pages/admin_permissions_page.dart`
+
+A standalone page (route `/admin-permissions`) reached from Settings → About → Administrator Permissions. Renders a styled two-column `DataTable`: **Action | Who Can Perform**. Actions documented: Create Team, Join Team, View Team, Edit Team, Close Team, Delete Team, Remove Member, Leave Team, View All Teams. A note at the bottom flags that some admin-specific actions are planned but not yet fully functional.
+
 ## About Page
 
 ### Location
@@ -243,11 +241,11 @@ Saved to app's documents directory with filename:
 ## Theme Configuration
 
 ### Light Theme
-Primary color: Green (#2E7D32)
+Primary color: Blue (`AppColors.primary`, `#013576`)
 Background: Light gray (#F5F5F5)
 
 ### Dark Theme
-Primary color: Light Green (#66BB6A)
+Primary color: Blue (`AppColors.primary`, `#013576`)
 Background: Dark gray (#121212)
 
 Theme definitions in `lib/core/theme/app_theme.dart`.

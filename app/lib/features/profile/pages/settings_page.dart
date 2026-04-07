@@ -6,10 +6,8 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../core/services/hive_service.dart';
-import '../../../core/services/sync_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
-import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../tasks/bloc/task_bloc.dart';
@@ -28,20 +26,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
-  bool _isSyncing = false;
-  String? _lastSyncTimestamp;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshLastSync();
-  }
-
-  void _refreshLastSync() {
-    setState(() {
-      _lastSyncTimestamp = SyncService.instance.getLastSyncTimestamp();
-    });
-  }
 
   int _estimateStorageKB() {
     try {
@@ -145,32 +129,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
-          // Sync section
-          _buildSection('Sync', [
-            ListTile(
-              leading: const Icon(Icons.sync),
-              title: const Text('Last Synced'),
-              subtitle: Text(
-                _lastSyncTimestamp != null
-                    ? _formatTimestamp(_lastSyncTimestamp!)
-                    : 'Never synced',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              trailing: _isSyncing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.refresh),
-                      tooltip: 'Sync now',
-                      onPressed: _handleRetrySync,
-                    ),
-            ),
-          ]),
-          const SizedBox(height: 16),
-
           // Data section
           _buildSection(AppLocalizations.of(context).data, [
             ListTile(
@@ -216,15 +174,6 @@ class _SettingsPageState extends State<SettingsPage> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 _showTermsOfService();
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.admin_panel_settings),
-              title: Text(AppLocalizations.of(context).administratorPermissions),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).pushNamed('/admin-permissions');
               },
             ),
           ]),
@@ -411,51 +360,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  String _formatTimestamp(String ts) {
-    try {
-      final dt = DateTime.parse(ts).toLocal();
-      final now = DateTime.now();
-      final diff = now.difference(dt);
-      if (diff.inMinutes < 1) return 'Just now';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      return '${diff.inDays}d ago';
-    } catch (_) {
-      return ts;
-    }
-  }
-
-  Future<void> _handleRetrySync() async {
-    setState(() => _isSyncing = true);
-    try {
-      await SyncService.instance.syncPendingChanges();
-
-      if (mounted) {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated) {
-          final userId = authState.user.id;
-          context.read<TeamBloc>().add(LoadUserTeams(userId: userId));
-          context.read<TaskBloc>().add(LoadTasksRequested(userId: userId));
-        }
-      }
-
-      _refreshLastSync();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sync completed successfully')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sync failed: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSyncing = false);
-    }
-  }
-
   /// Show clear cache dialog
   void _showClearCacheDialog() {
     final localizations = AppLocalizations.of(context);
@@ -483,7 +387,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
                   );
-                  setState(() => _lastSyncTimestamp = null);
                 }
               } catch (e) {
                 if (mounted) {

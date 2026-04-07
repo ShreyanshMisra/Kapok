@@ -6,12 +6,15 @@ Services are singleton classes that provide shared functionality across the app.
 
 ## Service Registration
 
-Services are registered in `lib/injection_container.dart` using get_it:
+Some services are registered in `lib/injection_container.dart` using get_it, while many others are accessed directly via the `.instance` singleton pattern rather than through the locator. Both access styles coexist in the codebase:
 
 ```dart
+// get_it style
 final GetIt sl = GetIt.instance;
-
 sl.registerLazySingleton<ServiceName>(() => ServiceName.instance);
+
+// Direct singleton style
+ServiceName.instance.someMethod();
 ```
 
 ## Core Services
@@ -89,6 +92,9 @@ Handles offline-to-online data synchronization.
 ```dart
 Future<void> initialize();
 Future<void> syncPendingChanges();
+// Note: the Settings → Sync button calls syncPendingChanges() and then dispatches
+// LoadUserTeams + LoadTasksRequested so data is re-fetched from Firebase even
+// when the local sync queue is empty.
 Future<void> manualSync();
 Future<int> getPendingSyncCount();
 Future<void> dispose();
@@ -185,6 +191,7 @@ Firebase Analytics and Crashlytics management.
 - Analytics enabled/disabled (stored in Hive)
 - Crash reporting enabled/disabled (stored in Hive)
 - Both default to enabled
+- The in-app opt-out UI was removed in Phase 3.5; the underlying settings and defaults still apply.
 
 **Key Methods:**
 

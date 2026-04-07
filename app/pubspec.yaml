@@ -1,5 +1,5 @@
 name: kapok_app
-description: "Kapok – A disaster relief coordination app built with Flutter, Firebase, and Mapbox."
+description: "Kapok – A disaster response coordination app built with Flutter, Firebase, and Mapbox."
 publish_to: "none"
 
 version: 1.0.0+1

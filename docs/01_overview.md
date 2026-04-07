@@ -2,13 +2,13 @@
 
 ## What is Kapok?
 
-Kapok is a mobile application designed for disaster relief coordination. It enables volunteer teams to organize, assign, and track tasks during disaster response operations. The app prioritizes offline functionality, making it suitable for field conditions where network connectivity may be unreliable.
+Kapok is a mobile application designed for disaster response coordination. It enables volunteer teams to organize, assign, and track tasks during disaster response operations. The app prioritizes offline functionality, making it suitable for field conditions where network connectivity may be unreliable.
 
 ## Who is it for?
 
 Based on the application's implementation, Kapok serves:
 
-- **Disaster relief volunteers** who need to coordinate tasks in the field
+- **Disaster response volunteers** who need to coordinate tasks in the field
 - **Team leaders** who manage volunteer groups and assign tasks
 - **Administrators** who oversee multiple teams and operations
 
@@ -31,7 +31,7 @@ Based on the application's implementation, Kapok serves:
 - View tasks on a Mapbox-powered map
 - Create tasks by selecting locations on the map
 - Offline map caching for field use (3-mile radius around current location)
-- Task markers with priority-based color coding
+- Task markers are blue for active tasks, grey for completed; priority is conveyed via star count on the marker, not pin color
 
 ### Offline-First Architecture
 - All data stored locally using Hive database
@@ -44,9 +44,16 @@ The app implements three user roles with different permissions:
 
 | Role | Capabilities |
 |------|-------------|
-| **Team Member** | View and complete assigned tasks, join teams |
+| **Team Member** | View and complete assigned tasks, edit their own assigned tasks, join teams |
 | **Team Leader** | Create teams, manage members, assign tasks |
 | **Admin** | Full access to all teams and operations |
+
+## UI & Navigation Notes
+
+- AppBars use a blue header block with curved bottom corners across all pages.
+- First-time logins land on the About page (serves as post-login landing); subsequent logins go to Home.
+- Task detail pages embed a map with a blue pin marker at the task location.
+- A profile permissions table (on the Profile page) and a dedicated Administrator Permissions page (under Settings → About) document role capabilities.
 
 ## Supported Languages
 

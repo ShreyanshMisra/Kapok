@@ -38,11 +38,8 @@ The primary map interface displayed in the home navigation.
    - Cache overlay toggle (shows cached region boundary)
 
 4. **Task Markers**
-   - Custom pin design with priority-based colors:
-     - High: Red
-     - Medium: Orange/Yellow
-     - Low: Green
-     - Completed: Gray
+   - Single blue color (`AppColors.primary`) for active tasks, grey for completed
+   - Priority is conveyed via star count overlaid on the marker, not pin color
    - Hover tooltip showing task title and ID (web)
    - Tap to navigate to task detail
 
@@ -199,6 +196,9 @@ MapboxMapView({
   Function(MapCameraState)? onCameraIdle,
   Function(MapboxWebController)? onControllerReady,
   Function(MapboxMobileController)? onMobileControllerReady,
+  bool interactive,
+  VoidCallback? onDoubleClick,
+  VoidCallback? onTap,
 })
 ```
 
@@ -213,14 +213,18 @@ Custom painted markers with:
 - Hover scale animation (web)
 - White border for visibility
 
-### Priority Colors
+### Marker Colors
 
-| Priority | Color | Icon |
-|----------|-------|------|
-| High | Red (#F44336) | Warning |
-| Medium | Orange (#FFC107) | Info |
-| Low | Green (#4CAF50) | Check Circle |
-| Completed | Gray | Check Circle |
+| State | Color |
+|-------|-------|
+| Active (any priority) | Blue (`AppColors.primary`, `#013576`) |
+| Completed | Gray |
+
+Priority is shown by the number of stars rendered on the marker, not by pin color.
+
+### Task Detail Map Pin
+
+The task detail page embeds `MapboxMapView` with `tasks: [widget.task]` and centers the map on the task location via `onMobileControllerReady`. A blue pin is rendered at the task coordinates.
 
 ### Marker Interaction
 

@@ -261,6 +261,8 @@ All technical documentation is available in the `/docs` folder:
 - Feature documentation
 - Development setup guide
 
+Notable pages to review during handoff: `edit_team_page.dart` (full Edit Team screen), `admin_permissions_page.dart` (Administrator Permissions), and the simplified Settings page. The `pubspec.yaml` description was updated to use "disaster response" wording.
+
 ### Known Limitations
 
 Refer to `12_development_notes.md` for:

@@ -18,7 +18,9 @@ The task management system allows users to create, assign, and track location-ba
 | `address` | String? | Human-readable address |
 | `status` | TaskStatus | Current status |
 | `priority` | TaskPriority | Task priority level |
-| `dueDate` | DateTime? | Optional deadline |
+| `category` | TaskCategory | Task category (defaults to `other`) |
+| `statusHistory` | List | Audit log of status changes |
+| `dueDate` | DateTime? | Stored on the model but **not exposed in UI** (Phase 4.1) |
 | `createdAt` | DateTime | Creation timestamp |
 | `updatedAt` | DateTime | Last modification |
 | `completedAt` | DateTime? | Completion timestamp |
@@ -53,6 +55,7 @@ Main task list view with filtering capabilities.
 - Displays all tasks from user's teams
 - Filter by status (Pending, In Progress, Completed)
 - Filter by priority (Low, Medium, High)
+- Filter by category (TaskCategory values)
 - Filter by assignment (All, My Tasks, Unassigned)
 - Search by title or description
 - Task cards show priority badge, status chip, location, team info
@@ -95,8 +98,10 @@ Detailed task view with editing capabilities.
 - Custom pin marker that updates with map movement
 
 **Permissions:**
-- Edit: Task creator, assigned user, admin, or team leader
+- Edit: **assigned user, team leader, or admin only** (Phase 6.1). Team members who created a task but are not assigned to it cannot edit it.
 - Delete: Task creator, admin, or team leader
+
+The detail page also embeds a map with a blue pin marker at the task location, and offers a Share action (`Share.share`).
 
 ### EditTaskPage (`lib/features/tasks/pages/edit_task_page.dart`)
 
@@ -114,7 +119,8 @@ Placeholder page - editing is handled in TaskDetailPage.
 | `LoadTasksByUserRequested` | userId | Load tasks assigned to user |
 | `LoadTasksForUserTeamsRequested` | teamIds, userId | Load tasks from user's teams |
 | `UpdateTaskRequested` | taskId, fields to update | Update task properties |
-| `EditTaskRequested` | taskId, userId, updated fields | Edit with permission check |
+| `EditTaskRequested` | taskId, userId, userRole, updated fields | Edit with permission check |
+| `StatusChangeRequested` | taskId, status | Status-only change |
 | `DeleteTaskRequested` | taskId | Delete task |
 | `MarkTaskCompletedRequested` | taskId | Mark as completed |
 | `AssignTaskRequested` | taskId, userId | Assign to user |
@@ -210,20 +216,11 @@ Tasks are stored at `tasks/{taskId}`:
 |--------|-----------------|
 | Create Task | Any team member |
 | View Task | Any team member |
-| Edit Task | Creator OR assigned user |
+| Edit Task | Assigned user, team leader, or admin |
 | Delete Task | Creator OR admin/team leader |
 | Assign Task | Admin or team leader |
 | Complete Task | Assigned user or creator |
 
 ## Map Integration
 
-Tasks display on the map with color-coded markers:
-
-| Priority | Color |
-|----------|-------|
-| High | Red |
-| Medium | Orange |
-| Low | Green |
-| Completed | Gray |
-
-Clicking a marker navigates to the task detail page.
+Tasks display on the map as single-color markers: blue (`AppColors.primary`) for active tasks and grey for completed tasks. Priority is indicated via star count on the marker rather than by pin color. Clicking a marker navigates to the task detail page.

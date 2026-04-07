@@ -398,8 +398,9 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
             return Column(
               children: [
-                // Map section - exactly 50% of available height, full width
+                // Map section - hidden during edit so the form is fully interactive
                 if (_showMap &&
+                    !_isEditing &&
                     widget.task.geoLocation.latitude != 0.0 &&
                     widget.task.geoLocation.longitude != 0.0)
                   SizedBox(
@@ -835,7 +836,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       ),
     ), // end Scaffold
     // Confetti overlay — plays when task is marked complete
-    Align(
+    IgnorePointer(
+      child: Align(
       alignment: Alignment.topCenter,
       child: ConfettiWidget(
         confettiController: _confettiController,
@@ -844,6 +846,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         numberOfParticles: 30,
         colors: const [Colors.green, Colors.blue, Colors.orange, Colors.pink, Colors.purple],
       ),
+    ),
     ),
     ], // end Stack children
   ); // end Stack

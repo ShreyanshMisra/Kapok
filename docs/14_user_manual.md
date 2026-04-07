@@ -44,6 +44,13 @@
 4. Tap **Create**
 5. Share the generated team code with your members
 
+### Editing a Team (Team Leaders)
+
+1. Open the team detail page
+2. Tap the overflow menu (⋮) in the top right
+3. Select **Edit Team**
+4. Update name or description on the full-screen edit page, then tap **Save**
+
 ### Viewing Your Team
 
 1. Go to the **Teams** tab
@@ -89,10 +96,12 @@
 1. Tap on any task to open it
 2. View task details including:
    - Description
-   - Location on map
+   - Location on map (with a blue pin at the task location)
    - Assigned person
    - Status
 3. Update status or details as needed
+
+**Who can edit a task:** Team members can only edit tasks that are assigned to them. Team leaders and admins can edit any task within their teams.
 
 ### Task Priorities
 
@@ -154,10 +163,11 @@ Tap any pin on the map to see task details and navigate to the full task view.
 Go to **Profile** → **Settings** to:
 
 - **Language**: Switch between English and Spanish
-- **Theme**: Choose Light, Dark, or System
+- **Theme**: Choose Light, Dark, or Default (follows device setting)
 - **Location Services**: Enable/disable location access
-- **Privacy**: Control analytics and crash reporting
+- **Sync**: Push any queued local changes and pull the latest teams and tasks from the cloud
 - **Export Data**: Download your tasks and teams as a file
+- **About**: App version, Privacy Policy, Terms of Service, and Administrator Permissions links
 
 ### Signing Out
 
@@ -185,7 +195,7 @@ Kapok is designed to work without internet:
 
 ## Tips
 
-- **Refresh data** by pulling down on any list
+- **Refresh data** from the cloud via **Settings → Sync** (the Tasks page does not support pull-to-refresh)
 - **View all task details** by tapping the task card
 - **Copy team codes** easily with the copy button
 - **Check connection status** in the map view status card

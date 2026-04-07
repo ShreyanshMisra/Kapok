@@ -571,9 +571,9 @@ class _MapPageState extends State<MapPage> {
             right: 16,
             child: _buildSearchBar(context),
           ),
-          // Map filter FAB
+          // Map filter FAB (sits above the global Create Task FAB)
           Positioned(
-            bottom: 24,
+            bottom: 96,
             right: 16,
             child: Stack(
               clipBehavior: Clip.none,
