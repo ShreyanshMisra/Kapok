@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/widgets/help_overlay.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/mapbox_constants.dart';
@@ -26,6 +27,7 @@ import '../../map/web/mapbox_web_controller_stub.dart'
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
 import '../../../core/enums/task_category.dart';
+import '../../../core/utils/role_icons.dart';
 
 class CreateTaskPage extends StatefulWidget {
   const CreateTaskPage({super.key});
@@ -325,6 +327,20 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'Help',
+            onPressed: () => HelpOverlay.show(
+              context,
+              title: 'Create Task',
+              tips: const [
+                HelpTip(icon: Icons.edit, title: 'Task Name & Description', description: 'Give the task a clear name (3–100 chars) and an optional description.'),
+                HelpTip(icon: Icons.star, title: 'Priority', description: 'Set Low, Medium, or High priority so team members know what to tackle first.'),
+                HelpTip(icon: Icons.map, title: 'Location', description: 'Tap on the map or use the location button to pin the task to a specific spot.'),
+                HelpTip(icon: Icons.person, title: 'Assignment', description: 'Assign the task to a team member or leave it unassigned for anyone to pick up.'),
+              ],
+            ),
+          ),
           if (_isLoadingLocation)
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -795,7 +811,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                               child: Row(
                                                 children: [
                                                   Icon(
-                                                    _getRoleIcon(member.role),
+                                                    getRoleIcon(member.role),
                                                     size: 16,
                                                     color: isMatch
                                                         ? theme.colorScheme.primary
@@ -1016,30 +1032,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         return 'Transportation';
       case TaskCategory.other:
         return null;
-    }
-  }
-
-  /// Get icon for a specialty role
-  IconData _getRoleIcon(String role) {
-    switch (role.toLowerCase()) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'engineering':
-        return Icons.engineering;
-      case 'carpentry':
-        return Icons.handyman;
-      case 'plumbing':
-        return Icons.plumbing;
-      case 'construction':
-        return Icons.construction;
-      case 'electrical':
-        return Icons.electrical_services;
-      case 'supplies':
-        return Icons.inventory;
-      case 'transportation':
-        return Icons.local_shipping;
-      default:
-        return Icons.work;
     }
   }
 

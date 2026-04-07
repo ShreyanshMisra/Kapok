@@ -1,273 +1,193 @@
+import '../localization/app_localizations.dart';
+
+/// Static validators for form fields.
+///
+/// Every method has two variants:
+///   - `validate*(value)` — returns a hardcoded English string (for contexts
+///     where [AppLocalizations] is unavailable, e.g. inside a [TextFormField]
+///     `validator` callback without a context).
+///   - `validate*(value, l10n: localizations)` — returns a localized string.
 class Validators {
-  /// Validates email format
-  static String? validateEmail(String? value) {
+  // ─────────────────────────── Email ───────────────────────────
+
+  static String? validateEmail(String? value, {AppLocalizations? l10n}) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return l10n?.validationEmailRequired ?? 'Email is required';
     }
-    
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
+      return l10n?.validationEmailInvalid ?? 'Please enter a valid email address';
     }
-    
     return null;
   }
 
-  /// Validates password strength
-  static String? validatePassword(String? value) {
+  // ─────────────────────────── Password ────────────────────────
+
+  static String? validatePassword(String? value, {AppLocalizations? l10n}) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return l10n?.validationPasswordRequired ?? 'Password is required';
     }
-    
     if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
+      return l10n?.validationPasswordTooShort ?? 'Password must be at least 6 characters';
     }
-    
     return null;
   }
 
-  /// Validates password confirmation
-  static String? confirmPassword(String? value, String? password) {
+  static String? confirmPassword(String? value, String? password, {AppLocalizations? l10n}) {
     if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+      return l10n?.validationPasswordRequired ?? 'Password is required';
     }
-    
     if (value != password) {
-      return 'Passwords do not match';
+      return l10n?.validationPasswordsNoMatch ?? 'Passwords do not match';
     }
-    
     return null;
   }
 
-  /// Validates name field
-  static String? validateName(String? value) {
+  // ─────────────────────────── Name ────────────────────────────
+
+  static String? validateName(String? value, {AppLocalizations? l10n}) {
     if (value == null || value.isEmpty) {
-      return 'Name is required';
+      return l10n?.validationNameRequired ?? 'Name is required';
     }
-    
     if (value.length < 2) {
-      return 'Name must be at least 2 characters long';
+      return l10n?.validationNameTooShort ?? 'Name must be at least 2 characters';
     }
-    
     if (value.length > 50) {
-      return 'Name must be less than 50 characters';
+      return l10n?.validationNameTooLong ?? 'Name must be less than 50 characters';
     }
-    
     return null;
   }
 
-  // Keep legacy methods for backward compatibility
+  // ─────────────────────────── Team code ───────────────────────
+
+  static String? teamCode(String? value, {AppLocalizations? l10n}) {
+    if (value == null || value.isEmpty) {
+      return l10n?.validationTeamCodeRequired ?? 'Team code is required';
+    }
+    if (value.length < 4) {
+      return l10n?.validationTeamCodeTooShort ?? 'Team code must be at least 4 characters';
+    }
+    if (value.length > 20) {
+      return l10n?.validationTeamCodeTooLong ?? 'Team code must be less than 20 characters';
+    }
+    final codeRegex = RegExp(r'^[a-zA-Z0-9]+$');
+    if (!codeRegex.hasMatch(value)) {
+      return l10n?.validationTeamCodeAlphanumeric ?? 'Team code can only contain letters and numbers';
+    }
+    return null;
+  }
+
+  // ─────────────────────────── Team name ───────────────────────
+
+  static String? teamName(String? value, {AppLocalizations? l10n}) {
+    if (value == null || value.isEmpty) {
+      return l10n?.validationTeamNameRequired ?? 'Team name is required';
+    }
+    if (value.length < 3) {
+      return l10n?.validationTeamNameTooShort ?? 'Team name must be at least 3 characters';
+    }
+    if (value.length > 50) {
+      return l10n?.validationTeamNameTooLong ?? 'Team name must be less than 50 characters';
+    }
+    return null;
+  }
+
+  // ─────────────────────────── Task name ───────────────────────
+
+  static String? taskName(String? value, {AppLocalizations? l10n}) {
+    if (value == null || value.isEmpty) {
+      return l10n?.validationTaskNameRequired ?? 'Task name is required';
+    }
+    if (value.length < 3) {
+      return l10n?.validationTaskNameTooShort ?? 'Task name must be at least 3 characters';
+    }
+    if (value.length > 100) {
+      return l10n?.validationTaskNameTooLong ?? 'Task name must be less than 100 characters';
+    }
+    return null;
+  }
+
+  // ─────────────────────────── Task description ────────────────
+
+  static String? taskDescription(String? value, {AppLocalizations? l10n}) {
+    if (value != null && value.length > 500) {
+      return l10n?.validationTaskDescTooLong ?? 'Description must be less than 500 characters';
+    }
+    return null;
+  }
+
+  // ─────────────────────────── Generic ─────────────────────────
+
+  static String? required(String? value, String fieldName, {AppLocalizations? l10n}) {
+    if (value == null || value.isEmpty) {
+      return l10n?.validationFieldRequired ?? '$fieldName is required';
+    }
+    return null;
+  }
+
+  static String? taskSeverity(int? value) {
+    if (value == null) return 'Task severity is required';
+    if (value < 1 || value > 5) return 'Task severity must be between 1 and 5';
+    return null;
+  }
+
+  static String? latitude(double? value) {
+    if (value == null) return 'Latitude is required';
+    if (value < -90 || value > 90) return 'Latitude must be between -90 and 90';
+    return null;
+  }
+
+  static String? longitude(double? value) {
+    if (value == null) return 'Longitude is required';
+    if (value < -180 || value > 180) return 'Longitude must be between -180 and 180';
+    return null;
+  }
+
+  static String? minLength(String? value, int minLen, String fieldName) {
+    if (value == null || value.isEmpty) return '$fieldName is required';
+    if (value.length < minLen) return '$fieldName must be at least $minLen characters';
+    return null;
+  }
+
+  static String? maxLength(String? value, int maxLen, String fieldName) {
+    if (value == null || value.isEmpty) return '$fieldName is required';
+    if (value.length > maxLen) return '$fieldName must be less than $maxLen characters';
+    return null;
+  }
+
+  static String? numericRange(num? value, num min, num max, String fieldName) {
+    if (value == null) return '$fieldName is required';
+    if (value < min || value > max) return '$fieldName must be between $min and $max';
+    return null;
+  }
+
+  static String? phoneNumber(String? value) {
+    if (value == null || value.isEmpty) return 'Phone number is required';
+    final digits = value.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 10) return 'Phone number must be at least 10 digits';
+    if (digits.length > 15) return 'Phone number must be less than 15 digits';
+    return null;
+  }
+
+  static String? url(String? value) {
+    if (value == null || value.isEmpty) return 'URL is required';
+    final urlRegex = RegExp(
+      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$',
+    );
+    if (!urlRegex.hasMatch(value)) return 'Please enter a valid URL';
+    return null;
+  }
+
+  static String? combine(List<String? Function()> validators) {
+    for (final v in validators) {
+      final result = v();
+      if (result != null) return result;
+    }
+    return null;
+  }
+
+  // ─── Legacy aliases (keep backward compatibility) ─────────────
   static String? email(String? value) => validateEmail(value);
   static String? password(String? value) => validatePassword(value);
   static String? name(String? value) => validateName(value);
-
-  /// Validates team code format
-  static String? teamCode(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Team code is required';
-    }
-    
-    if (value.length < 4) {
-      return 'Team code must be at least 4 characters long';
-    }
-    
-    if (value.length > 20) {
-      return 'Team code must be less than 20 characters';
-    }
-    
-    // Check for alphanumeric characters only
-    final codeRegex = RegExp(r'^[a-zA-Z0-9]+$');
-    if (!codeRegex.hasMatch(value)) {
-      return 'Team code can only contain letters and numbers';
-    }
-    
-    return null;
-  }
-
-  /// Validates task name
-  static String? taskName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Task name is required';
-    }
-    
-    if (value.length < 3) {
-      return 'Task name must be at least 3 characters long';
-    }
-    
-    if (value.length > 100) {
-      return 'Task name must be less than 100 characters';
-    }
-    
-    return null;
-  }
-
-  /// Validates task description
-  static String? taskDescription(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Task description is required';
-    }
-    
-    if (value.length < 10) {
-      return 'Task description must be at least 10 characters long';
-    }
-    
-    if (value.length > 500) {
-      return 'Task description must be less than 500 characters';
-    }
-    
-    return null;
-  }
-
-  /// Validates task severity (1-5)
-  static String? taskSeverity(int? value) {
-    if (value == null) {
-      return 'Task severity is required';
-    }
-    
-    if (value < 1 || value > 5) {
-      return 'Task severity must be between 1 and 5';
-    }
-    
-    return null;
-  }
-
-  /// Validates team name
-  static String? teamName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Team name is required';
-    }
-    
-    if (value.length < 3) {
-      return 'Team name must be at least 3 characters long';
-    }
-    
-    if (value.length > 50) {
-      return 'Team name must be less than 50 characters';
-    }
-    
-    return null;
-  }
-
-  /// Validates latitude
-  static String? latitude(double? value) {
-    if (value == null) {
-      return 'Latitude is required';
-    }
-    
-    if (value < -90 || value > 90) {
-      return 'Latitude must be between -90 and 90';
-    }
-    
-    return null;
-  }
-
-  /// Validates longitude
-  static String? longitude(double? value) {
-    if (value == null) {
-      return 'Longitude is required';
-    }
-    
-    if (value < -180 || value > 180) {
-      return 'Longitude must be between -180 and 180';
-    }
-    
-    return null;
-  }
-
-  /// Validates required field
-  static String? required(String? value, String fieldName) {
-    if (value == null || value.isEmpty) {
-      return '$fieldName is required';
-    }
-    
-    return null;
-  }
-
-  /// Validates minimum length
-  static String? minLength(String? value, int minLength, String fieldName) {
-    if (value == null || value.isEmpty) {
-      return '$fieldName is required';
-    }
-    
-    if (value.length < minLength) {
-      return '$fieldName must be at least $minLength characters long';
-    }
-    
-    return null;
-  }
-
-  /// Validates maximum length
-  static String? maxLength(String? value, int maxLength, String fieldName) {
-    if (value == null || value.isEmpty) {
-      return '$fieldName is required';
-    }
-    
-    if (value.length > maxLength) {
-      return '$fieldName must be less than $maxLength characters';
-    }
-    
-    return null;
-  }
-
-  /// Validates numeric range
-  static String? numericRange(num? value, num min, num max, String fieldName) {
-    if (value == null) {
-      return '$fieldName is required';
-    }
-    
-    if (value < min || value > max) {
-      return '$fieldName must be between $min and $max';
-    }
-    
-    return null;
-  }
-
-  /// Validates phone number (basic format)
-  static String? phoneNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Phone number is required';
-    }
-    
-    // Remove all non-digit characters
-    final digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
-    
-    if (digitsOnly.length < 10) {
-      return 'Phone number must be at least 10 digits';
-    }
-    
-    if (digitsOnly.length > 15) {
-      return 'Phone number must be less than 15 digits';
-    }
-    
-    return null;
-  }
-
-  /// Validates URL format
-  static String? url(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'URL is required';
-    }
-    
-    final urlRegex = RegExp(
-      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
-    );
-    
-    if (!urlRegex.hasMatch(value)) {
-      return 'Please enter a valid URL';
-    }
-    
-    return null;
-  }
-
-  /// Combines multiple validators
-  static String? combine(List<String? Function()> validators) {
-    for (final validator in validators) {
-      final result = validator();
-      if (result != null) {
-        return result;
-      }
-    }
-    return null;
-  }
 }
-

@@ -347,7 +347,7 @@ class _TeamCreatedDialog extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'Share this code with your team members',
-            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           ),
         ],
       ),

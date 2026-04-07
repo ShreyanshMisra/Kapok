@@ -1146,9 +1146,11 @@ class TeamRepository {
         throw TeamException(message: 'Cannot remove member while offline');
       }
 
-      // Use transaction
+      final teamRef = _firestore.collection('teams').doc(teamId);
+      final memberRef = _firestore.collection('users').doc(memberId);
+
       await _firestore.runTransaction((transaction) async {
-        final teamDoc = await _firestore.collection('teams').doc(teamId).get();
+        final teamDoc = await transaction.get(teamRef);
 
         if (!teamDoc.exists) {
           throw TeamException(message: 'Team not found');
@@ -1156,24 +1158,20 @@ class TeamRepository {
 
         final team = TeamModel.fromFirestore(teamDoc);
 
-        // Check if user is the leader
         if (team.leaderId != leaderId) {
           throw TeamException(message: 'Only team leader can remove members');
         }
 
-        // Check if member exists
         if (!team.memberIds.contains(memberId)) {
           throw TeamException(message: 'Member not found in team');
         }
 
-        // Remove member from team
-        transaction.update(teamDoc.reference, {
+        transaction.update(teamRef, {
           'memberIds': FieldValue.arrayRemove([memberId]),
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        // Clear member's teamId
-        transaction.update(_firestore.collection('users').doc(memberId), {
+        transaction.update(memberRef, {
           'teamId': FieldValue.delete(),
           'updatedAt': FieldValue.serverTimestamp(),
         });

@@ -26,6 +26,8 @@ class PriorityStars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final starColor = isDark ? Colors.white : AppColors.primary;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(
@@ -33,7 +35,7 @@ class PriorityStars extends StatelessWidget {
         (index) => Icon(
           Icons.star,
           size: size,
-          color: AppColors.primary,
+          color: starColor,
         ),
       ),
     );

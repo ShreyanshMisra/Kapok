@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
+import '../../../core/services/hive_service.dart';
+import '../../../core/services/sync_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
+import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../tasks/bloc/task_bloc.dart';
@@ -24,6 +28,32 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
+  bool _isSyncing = false;
+  String? _lastSyncTimestamp;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshLastSync();
+  }
+
+  void _refreshLastSync() {
+    setState(() {
+      _lastSyncTimestamp = SyncService.instance.getLastSyncTimestamp();
+    });
+  }
+
+  int _estimateStorageKB() {
+    try {
+      final hive = HiveService.instance;
+      final taskCount = hive.tasksBox.length;
+      final teamCount = hive.teamsBox.length;
+      // Rough estimate: ~2 KB per task, ~1 KB per team
+      return (taskCount * 2) + (teamCount * 1);
+    } catch (_) {
+      return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,27 +71,6 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Notifications section
-          // Note: Push notifications intentionally deferred pending infrastructure setup
-          _buildSection(
-            AppLocalizations.of(context).notifications,
-            [
-              ListTile(
-                leading: Icon(Icons.notifications_off, color: AppColors.textSecondary),
-                title: Text(AppLocalizations.of(context).notifications),
-                subtitle: Text(
-                  'Push notifications will be enabled in a future update',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-                enabled: false,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
           // Location section
           _buildSection(
             AppLocalizations.of(context).location,
@@ -136,99 +145,43 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
+          // Sync section
+          _buildSection('Sync', [
+            ListTile(
+              leading: const Icon(Icons.sync),
+              title: const Text('Last Synced'),
+              subtitle: Text(
+                _lastSyncTimestamp != null
+                    ? _formatTimestamp(_lastSyncTimestamp!)
+                    : 'Never synced',
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
+              ),
+              trailing: _isSyncing
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.refresh),
+                      tooltip: 'Sync now',
+                      onPressed: _handleRetrySync,
+                    ),
+            ),
+          ]),
+          const SizedBox(height: 16),
+
           // Data section
           _buildSection(AppLocalizations.of(context).data, [
             ListTile(
+              leading: const Icon(Icons.delete_sweep),
               title: Text(AppLocalizations.of(context).clearCache),
               subtitle: Text(
-                AppLocalizations.of(context).clearLocallyStoredData,
+                '~${_estimateStorageKB()} KB cached locally',
+                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                _showClearCacheDialog();
-              },
-            ),
-            ListTile(
-              title: Text(
-                AppLocalizations.of(context).exportData,
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Export will be enabled in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              trailing: Icon(Icons.chevron_right, color: AppColors.textSecondary),
-              enabled: false,
-            ),
-          ]),
-          const SizedBox(height: 16),
-
-          // Privacy section
-          _buildSection('Privacy', [
-            SwitchListTile(
-              title: Text(
-                'Analytics',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Analytics will be enabled in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              value: false,
-              onChanged: null,
-            ),
-            SwitchListTile(
-              title: Text(
-                'Crash Reporting',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Crash reporting will be enabled in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              value: false,
-              onChanged: null,
-            ),
-          ]),
-          const SizedBox(height: 16),
-
-          // Feedback section
-          _buildSection('Feedback & Support', [
-            ListTile(
-              leading: Icon(Icons.email_outlined, color: AppColors.textSecondary),
-              title: Text(
-                'Email Support',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Support will be available in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              enabled: false,
-            ),
-            ListTile(
-              leading: Icon(Icons.bug_report_outlined, color: AppColors.textSecondary),
-              title: Text(
-                'Report an Issue',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Issue reporting will be available in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              enabled: false,
-            ),
-            ListTile(
-              leading: Icon(Icons.rate_review_outlined, color: AppColors.textSecondary),
-              title: Text(
-                'Send Feedback',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              subtitle: Text(
-                'Feedback will be available in a future update',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              enabled: false,
+              onTap: _showClearCacheDialog,
             ),
           ]),
           const SizedBox(height: 16),
@@ -240,6 +193,17 @@ class _SettingsPageState extends State<SettingsPage> {
               subtitle: Text(AppLocalizations.of(context).appVersion),
               onTap: () {},
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                AppLocalizations.of(context).builtWithLove,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
             ListTile(
               title: Text(AppLocalizations.of(context).privacyPolicy),
               trailing: const Icon(Icons.chevron_right),
@@ -252,6 +216,15 @@ class _SettingsPageState extends State<SettingsPage> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 _showTermsOfService();
+              },
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: Text(AppLocalizations.of(context).administratorPermissions),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).pushNamed('/admin-permissions');
               },
             ),
           ]),
@@ -438,29 +411,87 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  String _formatTimestamp(String ts) {
+    try {
+      final dt = DateTime.parse(ts).toLocal();
+      final now = DateTime.now();
+      final diff = now.difference(dt);
+      if (diff.inMinutes < 1) return 'Just now';
+      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+      if (diff.inHours < 24) return '${diff.inHours}h ago';
+      return '${diff.inDays}d ago';
+    } catch (_) {
+      return ts;
+    }
+  }
+
+  Future<void> _handleRetrySync() async {
+    setState(() => _isSyncing = true);
+    try {
+      await SyncService.instance.syncPendingChanges();
+
+      if (mounted) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          final userId = authState.user.id;
+          context.read<TeamBloc>().add(LoadUserTeams(userId: userId));
+          context.read<TaskBloc>().add(LoadTasksRequested(userId: userId));
+        }
+      }
+
+      _refreshLastSync();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sync completed successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sync failed: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
+    }
+  }
+
   /// Show clear cache dialog
   void _showClearCacheDialog() {
     final localizations = AppLocalizations.of(context);
+    final sizeKB = _estimateStorageKB();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(localizations.clearCache),
         content: Text(
-          localizations
-              .thisWillClearAllLocallyStoredDataYouWillNeedToSignInAgain,
+          'This will clear approximately $sizeKB KB of locally saved data (tasks, teams, settings). You will need to sync again after clearing.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: Text(localizations.cancel),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement clear cache
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
-              );
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                await HiveService.instance.clearAllData();
+                context.read<TaskBloc>().add(TaskReset());
+                context.read<TeamBloc>().add(TeamReset());
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
+                  );
+                  setState(() => _lastSyncTimestamp = null);
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to clear cache: $e'), backgroundColor: AppColors.error),
+                  );
+                }
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(localizations.clear),

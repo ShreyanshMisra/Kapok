@@ -6,7 +6,7 @@ Kapok Terms of Service Agreement
 
 Welcome to Kapok
 
-Kapok is a volunteer coordination platform designed to assist in organizing disaster relief efforts. Kapok is owned by and developed under the auspices of A Fair Resolution, LLC. Volunteers built Kapok including in collaboration with A Fair Resolution, LLC. By using Kapok, you agree to these Terms of Service ("Terms"). Thank you to the dedicated volunteers involved in the Kapok project.
+Kapok is a volunteer coordination platform designed to assist in organizing disaster response efforts. Kapok is owned by and developed under the auspices of A Fair Resolution, LLC. Volunteers built Kapok including in collaboration with A Fair Resolution, LLC. By using Kapok, you agree to these Terms of Service ("Terms"). Thank you to the dedicated volunteers involved in the Kapok project.
 
 1. Acceptance of Terms
 
@@ -21,7 +21,7 @@ Kapok is intended solely for users who are at least 18 years old. By using the a
 Users are responsible for maintaining the confidentiality of their account credentials. Any activities performed under your account are solely your responsibility.
 
 2.3 Appropriate Use
-Users agree to use Kapok solely for volunteer coordination in disaster relief settings and in compliance with all local laws and regulations. Unauthorized use of Kapok for illegal or harmful activities is strictly prohibited.
+Users agree to use Kapok solely for volunteer coordination in disaster response settings and in compliance with all local laws and regulations. Unauthorized use of Kapok for illegal or harmful activities is strictly prohibited.
 
 3. Disclaimer of Warranties
 

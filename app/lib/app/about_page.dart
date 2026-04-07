@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/localization/app_localizations.dart';
+import '../core/services/first_login_service.dart';
 import '../core/widgets/kapok_logo.dart';
+import '../features/auth/bloc/auth_bloc.dart';
+import '../features/auth/bloc/auth_state.dart';
 
 /// About page with information about Kapok and A Fair Resolution, LLC
 class AboutPage extends StatelessWidget {
@@ -9,6 +13,8 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final canPop = Navigator.of(context).canPop();
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -16,6 +22,7 @@ class AboutPage extends StatelessWidget {
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(AppLocalizations.of(context).about),
         centerTitle: true,
+        automaticallyImplyLeading: canPop,
         actions: const [KapokLogo()],
         elevation: 0,
       ),
@@ -24,18 +31,16 @@ class AboutPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with icon tagline wordmark
             Center(
               child: Image.asset(
                 theme.brightness == Brightness.dark
-                    ? 'assets/images/icon_tagline/Kapok_Icon_Dark_Tagline_Wordmark.png'
-                    : 'assets/images/icon_tagline/KapokIcon_Light_Tagline_Wordmark.png',
+                    ? 'assets/images/icon_tagline/KapokIcon_Dark_Tagline_Wordmark.png'
+                    : 'assets/images/icon_tagline/Kapok_Icon_Light_Tagline_Wordmark.png',
                 width: 220,
               ),
             ),
             const SizedBox(height: 32),
 
-            // Mission section
             _buildSection(
               context,
               AppLocalizations.of(context).ourMission,
@@ -44,7 +49,6 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Kapok Icon section
             _buildSection(
               context,
               AppLocalizations.of(context).kapokIcon,
@@ -53,7 +57,6 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Digging Deeper: Tech Roots section
             _buildSection(
               context,
               AppLocalizations.of(context).diggingDeeperTechRoots,
@@ -62,17 +65,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // A Fair Resolution, LLC section
-            _buildSection(
-              context,
-              AppLocalizations.of(context).aFairResolutionLLC,
-              AppLocalizations.of(context).aFairResolutionLLCDescription,
-              Icons.business,
-            ),
-            const SizedBox(height: 24),
-
-            // Features section
-            _buildSection(
+            _buildBulletSection(
               context,
               AppLocalizations.of(context).keyFeatures,
               AppLocalizations.of(context).keyFeaturesDescription,
@@ -80,7 +73,6 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Technology section
             _buildSection(
               context,
               AppLocalizations.of(context).technology,
@@ -89,16 +81,156 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Legal section
+            _buildVersionTagline(context),
+            const SizedBox(height: 24),
+
             _buildSection(
               context,
               AppLocalizations.of(context).legal,
               AppLocalizations.of(context).legalDescription,
               Icons.gavel,
             ),
+
+            if (!canPop) ...[
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final authState = context.read<AuthBloc>().state;
+                    if (authState is AuthAuthenticated) {
+                      FirstLoginService.instance.markLoggedIn(authState.user.id);
+                    }
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/home',
+                      (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_forward),
+                  label: Text(
+                    AppLocalizations.of(context).continueText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  /// Build the app version and tagline widget
+  Widget _buildVersionTagline(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            '${AppLocalizations.of(context).appVersionLabel} ${AppLocalizations.of(context).appVersion}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            AppLocalizations.of(context).builtWithLove,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build a section with bullet points using proper hanging indent
+  Widget _buildBulletSection(
+    BuildContext context,
+    String title,
+    String content,
+    IconData icon,
+  ) {
+    final lines = content.split('\n');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...lines.map((line) {
+          final trimmed = line.trim();
+          if (trimmed.startsWith('•')) {
+            final text = trimmed.substring(1).trim();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '•  ',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.5,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          return Text(
+            trimmed,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              height: 1.5,
+            ),
+          );
+        }),
+      ],
     );
   }
 

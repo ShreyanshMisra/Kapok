@@ -147,7 +147,7 @@ class DataExportService {
       // Use share_plus to invoke native share sheet
       final result = await Share.shareXFiles(
         [XFile(filePath)],
-        subject: 'Kapok Disaster Relief Data Export',
+        subject: 'Kapok Disaster Response Data Export',
         text: 'Emergency response data export from Kapok app',
       );
 

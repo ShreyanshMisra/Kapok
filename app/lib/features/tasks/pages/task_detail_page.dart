@@ -1,12 +1,16 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../core/widgets/help_overlay.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/enums/task_priority.dart';
 import '../../../core/enums/user_role.dart';
 import '../../../core/enums/task_status.dart';
 import '../../../data/models/task_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
@@ -21,6 +25,7 @@ import '../../map/web/mapbox_web_controller_stub.dart'
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
 import '../../../core/enums/task_category.dart';
+import '../../../core/utils/role_icons.dart';
 
 /// Task detail page with map, editing, and deletion functionality
 class TaskDetailPage extends StatefulWidget {
@@ -39,6 +44,7 @@ class TaskDetailPage extends StatefulWidget {
 
 class _TaskDetailPageState extends State<TaskDetailPage> {
   bool _isEditing = false;
+  bool _isSaving = false;
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
@@ -50,10 +56,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   MapboxWebController? _mapController;
   bool _showMap = true;
   Offset? _pinScreenPosition;
+  late ConfettiController _confettiController;
+  List<UserModel> _cachedMembers = [];
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(
       text: widget.task.description ?? '',
@@ -67,6 +76,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   @override
   void dispose() {
+    _confettiController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     _addressController.dispose();
@@ -74,14 +84,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   /// Check if user can edit this task
+  /// Team members can only edit tasks assigned to them.
+  /// Team leaders and admins can edit all tasks.
   bool get canEdit {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       final user = authState.user;
-      return widget.task.createdBy == user.id ||
-          widget.task.assignedTo == user.id ||
-          user.userRole.toString().contains('admin') ||
-          user.userRole.toString().contains('teamLeader');
+      if (user.userRole == UserRole.admin || user.userRole == UserRole.teamLeader) {
+        return true;
+      }
+      return widget.task.assignedTo == user.id;
     }
     return false;
   }
@@ -152,23 +164,23 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   /// Save changes
   Future<void> _saveChanges() async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate()) return;
+
+    final statusChanged = _selectedStatus != widget.task.status;
+    final fieldsChanged =
+        _titleController.text.trim() != widget.task.title ||
+        _descriptionController.text.trim() != (widget.task.description ?? '') ||
+        _selectedPriority != widget.task.priority ||
+        _selectedAssignedTo != widget.task.assignedTo ||
+        _selectedCategory != widget.task.category;
+
+    if (!statusChanged && !fieldsChanged) {
+      setState(() { _isEditing = false; });
       return;
     }
 
-    // If status changed, use StatusChangeRequested for validation + history
-    if (_selectedStatus != widget.task.status) {
-      context.read<TaskBloc>().add(
-        StatusChangeRequested(
-          taskId: widget.task.id,
-          newStatus: _selectedStatus,
-          userId: widget.currentUserId,
-          userRole: _currentUserRole,
-        ),
-      );
-    }
+    _isSaving = true;
 
-    // Convert priority to severity for backward compatibility
     int severity;
     switch (_selectedPriority) {
       case TaskPriority.low:
@@ -182,16 +194,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         break;
     }
 
-    // Only send EditTaskRequested if something other than status changed
-    if (_titleController.text.trim() != widget.task.title ||
-        _descriptionController.text.trim() != (widget.task.description ?? '') ||
-        _selectedPriority != widget.task.priority ||
-        _selectedAssignedTo != widget.task.assignedTo ||
-        _selectedCategory != widget.task.category) {
+    if (fieldsChanged) {
       context.read<TaskBloc>().add(
         EditTaskRequested(
           taskId: widget.task.id,
           userId: widget.currentUserId,
+          userRole: _currentUserRole,
           taskName: _titleController.text.trim(),
           taskSeverity: severity,
           taskDescription: _descriptionController.text.trim(),
@@ -200,6 +208,21 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           category: _selectedCategory.value,
         ),
       );
+    } else if (statusChanged) {
+      context.read<TaskBloc>().add(
+        StatusChangeRequested(
+          taskId: widget.task.id,
+          newStatus: _selectedStatus,
+          userId: widget.currentUserId,
+          userRole: _currentUserRole,
+        ),
+      );
+    }
+
+    final wasNotComplete = widget.task.status != TaskStatus.completed;
+    final nowComplete = _selectedStatus == TaskStatus.completed;
+    if (wasNotComplete && nowComplete) {
+      _confettiController.play();
     }
 
     setState(() {
@@ -239,7 +262,9 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return Stack(
+      children: [
+      Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
@@ -250,16 +275,57 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'Help',
+              onPressed: () => HelpOverlay.show(
+                context,
+                title: 'Task Details',
+                tips: const [
+                  HelpTip(icon: Icons.edit, title: 'Edit', description: 'Tap the pencil icon to edit the task name, description, priority, and more.'),
+                  HelpTip(icon: Icons.share, title: 'Share', description: 'Use the share button to send task details to others.'),
+                  HelpTip(icon: Icons.delete, title: 'Delete', description: 'Tap the trash icon to permanently delete this task.'),
+                  HelpTip(icon: Icons.check_circle, title: 'Completing', description: 'Change the status to "Completed" using the status dropdown and save to mark the task done.'),
+                ],
+              ),
+            ),
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.share),
+              tooltip: 'Share task',
+              onPressed: () {
+                final task = widget.task;
+                Share.share(
+                  '[Kapok Task]\n'
+                  '${task.title}\n'
+                  'Priority: ${task.priority.displayName}\n'
+                  'Status: ${task.status.displayName}\n'
+                  'Category: ${task.category.displayName}\n'
+                  '${task.description ?? ''}',
+                  subject: task.title,
+                );
+              },
+            ),
           if (!_isEditing && canEdit)
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
-                // Load team members for reassignment dropdown
+                final teamState = context.read<TeamBloc>().state;
                 context.read<TeamBloc>().add(
                   LoadTeamMembers(teamId: widget.task.teamId),
                 );
                 setState(() {
                   _isEditing = true;
+                  _isSaving = false;
+                  _cachedMembers = teamState.members;
+                  _titleController.text = widget.task.title;
+                  _descriptionController.text = widget.task.description ?? '';
+                  _addressController.text = widget.task.address ?? '';
+                  _selectedPriority = widget.task.priority;
+                  _selectedStatus = widget.task.status;
+                  _selectedAssignedTo = widget.task.assignedTo;
+                  _selectedCategory = widget.task.category;
                 });
               },
               tooltip: 'Edit Task',
@@ -294,13 +360,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       body: BlocListener<TaskBloc, TaskState>(
         listener: (context, state) {
           if (state is TaskUpdated) {
+            if (!_isSaving) return;
+            _isSaving = false;
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Task updated successfully'),
                 backgroundColor: AppColors.primary,
               ),
             );
-            Navigator.of(context).pop(true); // Return true to indicate update
+            Navigator.of(context).pop(true);
           } else if (state is TaskDeleted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -346,13 +414,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             initialLongitude: widget.task.geoLocation.longitude,
                             initialZoom: 16.0,
                             interactive: true,
+                            tasks: [widget.task],
                             onControllerReady: (controller) {
                               setState(() {
                                 _mapController = controller;
                               });
-                              // Update pin position when controller is ready
                               _updatePinPosition();
-                              // Center map on task location
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 _mapController?.setCenter(
                                   widget.task.geoLocation.latitude,
@@ -361,8 +428,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                 );
                               });
                             },
+                            onMobileControllerReady: (controller) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                controller.setCenter(
+                                  widget.task.geoLocation.latitude,
+                                  widget.task.geoLocation.longitude,
+                                  zoom: 16.0,
+                                );
+                              });
+                            },
                             onCameraIdle: (cameraState) {
-                              // Update pin position whenever camera moves
                               _updatePinPosition();
                             },
                           ),
@@ -394,9 +469,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               });
                             },
                             style: IconButton.styleFrom(
-                              backgroundColor: AppColors.surface.withOpacity(
-                                0.9,
-                              ),
+                              backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.9),
+                              foregroundColor: theme.colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -423,10 +497,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -448,10 +522,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -459,8 +533,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           // Location/Address
                           TextFormField(
                             controller: _addressController,
-                            enabled:
-                                false, // Address is read-only, location is set on map
+                            enabled: false,
                             decoration: InputDecoration(
                               labelText: 'Location',
                               prefixIcon: const Icon(Icons.location_on),
@@ -468,7 +541,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: AppColors.background,
+                              fillColor: theme.colorScheme.surfaceContainerHighest,
                             ),
                           ),
                           if (widget.task.geoLocation.latitude != 0.0 &&
@@ -478,7 +551,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               child: Text(
                                 'Coordinates: ${widget.task.geoLocation.latitude.toStringAsFixed(6)}, ${widget.task.geoLocation.longitude.toStringAsFixed(6)}',
                                 style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppColors.textSecondary),
+                                    ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                               ),
                             ),
                           const SizedBox(height: 16),
@@ -492,10 +565,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             items: TaskStatus.values.map((TaskStatus status) {
                               return DropdownMenuItem<TaskStatus>(
@@ -534,10 +607,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             items: TaskCategory.values.map((
                               TaskCategory category,
@@ -568,10 +641,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              filled: !_isEditing,
+                              filled: true,
                               fillColor: _isEditing
-                                  ? null
-                                  : AppColors.background,
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.surfaceContainerHighest,
                             ),
                             items: TaskPriority.values.map((
                               TaskPriority priority,
@@ -601,69 +674,75 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
                           // Assigned To
                           if (_isEditing)
-                            BlocBuilder<TeamBloc, TeamState>(
-                              builder: (context, teamState) {
-                                final members = teamState.members;
-                                // Filter members based on role
-                                final currentAuthState = context.read<AuthBloc>().state;
-                                final isTeamMember = currentAuthState is AuthAuthenticated &&
-                                    currentAuthState.user.userRole == UserRole.teamMember;
-                                final currentUserId = widget.currentUserId;
-                                final filteredMembers = isTeamMember
-                                    ? members.where((m) => m.id == currentUserId).toList()
-                                    : members;
-
-                                // Ensure current selection is valid
-                                final validIds = filteredMembers.map((m) => m.id).toSet();
-                                final effectiveValue =
-                                    (_selectedAssignedTo != null &&
-                                            _selectedAssignedTo!.isNotEmpty &&
-                                            validIds.contains(_selectedAssignedTo))
-                                        ? _selectedAssignedTo
-                                        : null;
-
-                                return DropdownButtonFormField<String>(
-                                  value: effectiveValue,
-                                  decoration: InputDecoration(
-                                    labelText: 'Assigned To',
-                                    prefixIcon: const Icon(Icons.person),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  items: [
-                                    const DropdownMenuItem<String>(
-                                      value: null,
-                                      child: Text('Unassigned'),
-                                    ),
-                                    ...filteredMembers.map((member) {
-                                      return DropdownMenuItem<String>(
-                                        value: member.id,
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              _getRoleIcon(member.role),
-                                              size: 16,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                '${member.name} (${member.role})',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      _selectedAssignedTo = newValue;
-                                    });
-                                  },
-                                );
+                            BlocListener<TeamBloc, TeamState>(
+                              listenWhen: (prev, curr) => curr.members != prev.members,
+                              listener: (context, teamState) {
+                                if (teamState.members.isNotEmpty) {
+                                  setState(() { _cachedMembers = teamState.members; });
+                                }
                               },
+                              child: Builder(
+                                builder: (context) {
+                                  final currentAuthState = context.read<AuthBloc>().state;
+                                  final isTeamMember = currentAuthState is AuthAuthenticated &&
+                                      currentAuthState.user.userRole == UserRole.teamMember;
+                                  final currentUserId = widget.currentUserId;
+                                  final filteredMembers = isTeamMember
+                                      ? _cachedMembers.where((m) => m.id == currentUserId).toList()
+                                      : _cachedMembers;
+
+                                  final validIds = filteredMembers.map((m) => m.id).toSet();
+                                  final effectiveValue =
+                                      (_selectedAssignedTo != null &&
+                                              _selectedAssignedTo!.isNotEmpty &&
+                                              validIds.contains(_selectedAssignedTo))
+                                          ? _selectedAssignedTo
+                                          : null;
+
+                                  return DropdownButtonFormField<String>(
+                                    key: ValueKey('assignedTo_${filteredMembers.length}_$effectiveValue'),
+                                    value: effectiveValue,
+                                    decoration: InputDecoration(
+                                      labelText: 'Assigned To',
+                                      prefixIcon: const Icon(Icons.person),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    items: [
+                                      const DropdownMenuItem<String>(
+                                        value: null,
+                                        child: Text('Unassigned'),
+                                      ),
+                                      ...filteredMembers.map((member) {
+                                        return DropdownMenuItem<String>(
+                                          value: member.id,
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                getRoleIcon(member.role),
+                                                size: 16,
+                                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${member.name} (${member.role})',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        _selectedAssignedTo = newValue;
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
                             )
                           else
                             TextFormField(
@@ -676,7 +755,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 filled: true,
-                                fillColor: AppColors.background,
+                                fillColor: theme.colorScheme.surfaceContainerHighest,
                               ),
                             ),
                           const SizedBox(height: 16),
@@ -754,63 +833,55 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           },
         ),
       ),
-    );
+    ), // end Scaffold
+    // Confetti overlay — plays when task is marked complete
+    Align(
+      alignment: Alignment.topCenter,
+      child: ConfettiWidget(
+        confettiController: _confettiController,
+        blastDirectionality: BlastDirectionality.explosive,
+        shouldLoop: false,
+        numberOfParticles: 30,
+        colors: const [Colors.green, Colors.blue, Colors.orange, Colors.pink, Colors.purple],
+      ),
+    ),
+    ], // end Stack children
+  ); // end Stack
   }
 
   Widget _buildInfoCard(String label, String value, IconData icon) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.textSecondary.withOpacity(0.2)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
+          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 12),
           Text(
             '$label: ',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  /// Get icon for a specialty role
-  IconData _getRoleIcon(String role) {
-    switch (role.toLowerCase()) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'engineering':
-        return Icons.engineering;
-      case 'carpentry':
-        return Icons.handyman;
-      case 'plumbing':
-        return Icons.plumbing;
-      case 'construction':
-        return Icons.construction;
-      case 'electrical':
-        return Icons.electrical_services;
-      case 'supplies':
-        return Icons.inventory;
-      case 'transportation':
-        return Icons.local_shipping;
-      default:
-        return Icons.work;
-    }
   }
 
   /// Calculate time in current status
@@ -838,15 +909,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   /// Build status history timeline widget
   Widget _buildStatusTimeline() {
     final teamState = context.read<TeamBloc>().state;
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Status History',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -890,7 +962,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                     Container(
                       width: 2,
                       height: 30,
-                      color: AppColors.textSecondary.withValues(alpha: 0.3),
+                      color: theme.colorScheme.onSurface.withOpacity(0.18),
                     ),
                   ],
                 ),
@@ -903,15 +975,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         previousStatus != null
                             ? '${TaskStatus.fromString(previousStatus).displayName} → ${TaskStatus.fromString(status).displayName}'
                             : TaskStatus.fromString(status).displayName,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         '$userName • $formattedDate',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                       ),
@@ -968,7 +1040,7 @@ class TaskLocationPinPainter extends CustomPainter {
 
     // Draw pin icon (location_on style)
     final pinPaint = Paint()
-      ..color = AppColors.error
+      ..color = AppColors.primary
       ..style = PaintingStyle.fill;
 
     // Draw pin circle

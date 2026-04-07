@@ -123,30 +123,25 @@ Future<void> initializeDependencies() async {
   //  ));
 }
 
-/// Initializes core services
+/// Initializes core services, parallelizing where dependencies allow.
 Future<void> initializeCoreServices() async {
   try {
-    // Initialize Firebase
-    await sl<FirebaseService>().initialize();
+    // Firebase and Hive are independent — initialize them in parallel.
+    await Future.wait([
+      sl<FirebaseService>().initialize(),
+      sl<HiveService>().initialize(),
+    ]);
 
-    // Initialize Hive
-    await sl<HiveService>().initialize();
+    // ThemeService depends on Hive; map cache and region repo also depend on
+    // Hive but are independent of each other — run all three in parallel.
+    await Future.wait([
+      sl<ThemeService>().initialize(),
+      sl<OfflineMapCache>().initialize(),
+      sl<OfflineMapRegionRepository>().initialize(),
+    ]);
 
-    // Initialize Theme Service (depends on Hive)
-    await sl<ThemeService>().initialize();
-
-    // Initialize map cache and region repository
-    await sl<OfflineMapCache>().initialize();
-    await sl<OfflineMapRegionRepository>().initialize();
-
-    // Initialize other services as needed
-    // Note: GeolocationService and NetworkChecker don't need explicit initialization
-    // Initialize Sync Service
+    // SyncService depends on Hive being ready.
     await sl<SyncService>().initialize();
-
-    // Initialize other services as needed
-    // Note: GeolocationService and NetworkChecker don't need explicit initialization
-
   } catch (e) {
     throw Exception('Failed to initialize core services: $e');
   }

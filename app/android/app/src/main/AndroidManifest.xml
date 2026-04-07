@@ -1,18 +1,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Permissions -->
+    <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Hardware Features -->
-    <uses-feature android:name="android.hardware.location.gps" android:required="true" />
+    <!-- Location -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- File sharing (Android < 10) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- GPS is optional — allows install on non-GPS devices -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <application
         android:label="Kapok"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- Mapbox Configuration -->
+        <!-- Mapbox access token — set your public token (pk.*) here -->
         <meta-data
             android:name="com.mapbox.token"
             android:value="YOUR_MAPBOX_ACCESS_TOKEN" />

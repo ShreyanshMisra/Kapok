@@ -22,6 +22,7 @@ class CreateTaskRequested extends TaskEvent {
   final double longitude;
   final String createdBy;
   final String category;
+  final DateTime? dueDate;
 
   const CreateTaskRequested({
     required this.taskName,
@@ -35,10 +36,11 @@ class CreateTaskRequested extends TaskEvent {
     required this.longitude,
     required this.createdBy,
     this.category = 'other',
+    this.dueDate,
   });
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
     taskName,
     taskSeverity,
     taskDescription,
@@ -50,6 +52,7 @@ class CreateTaskRequested extends TaskEvent {
     longitude,
     createdBy,
     category,
+    dueDate,
   ];
 }
 
@@ -168,34 +171,43 @@ class LoadTasksForUserTeamsRequested extends TaskEvent {
 class EditTaskRequested extends TaskEvent {
   final String taskId;
   final String userId;
+  final String? userRole;
   final String? taskName;
   final int? taskSeverity;
   final String? taskDescription;
   final bool? taskCompleted;
   final String? assignedTo;
   final String? category;
+  final DateTime? dueDate;
+  final bool clearDueDate;
 
   const EditTaskRequested({
     required this.taskId,
     required this.userId,
+    this.userRole,
     this.taskName,
     this.taskSeverity,
     this.taskDescription,
     this.taskCompleted,
     this.assignedTo,
     this.category,
+    this.dueDate,
+    this.clearDueDate = false,
   });
 
   @override
   List<Object?> get props => [
     taskId,
     userId,
+    userRole,
     taskName,
     taskSeverity,
     taskDescription,
     taskCompleted,
     assignedTo,
     category,
+    dueDate,
+    clearDueDate,
   ];
 }
 

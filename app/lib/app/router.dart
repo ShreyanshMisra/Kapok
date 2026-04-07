@@ -20,6 +20,8 @@ import '../features/map/pages/map_page.dart';
 import '../features/map/pages/map_test_page.dart';
 import '../features/map/pages/map_cache_page.dart';
 import '../features/onboarding/pages/onboarding_page.dart';
+import '../features/analytics/pages/analytics_page.dart';
+import '../features/profile/pages/admin_permissions_page.dart';
 import 'home_page.dart';
 import 'about_page.dart';
 
@@ -46,6 +48,8 @@ class AppRouter {
   static const String mapTest = '/map-test';
   static const String mapCache = '/map-cache';
   static const String onboarding = '/onboarding';
+  static const String analytics = '/analytics';
+  static const String adminPermissions = '/admin-permissions';
 
   /// Generate routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -190,6 +194,18 @@ class AppRouter {
           settings: settings,
         );
 
+      case analytics:
+        return MaterialPageRoute(
+          builder: (_) => const AnalyticsPage(),
+          settings: settings,
+        );
+
+      case adminPermissions:
+        return MaterialPageRoute(
+          builder: (_) => const AdminPermissionsPage(),
+          settings: settings,
+        );
+
       case onboarding:
         final onComplete = settings.arguments as VoidCallback?;
         return MaterialPageRoute(
@@ -247,7 +263,7 @@ class NotFoundPage extends StatelessWidget {
               Text(
                 'Page Not Found',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.textPrimary,
+                  color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -256,7 +272,7 @@ class NotFoundPage extends StatelessWidget {
                 'The page you are looking for does not exist.',
                 style: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                ).textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),

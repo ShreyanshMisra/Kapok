@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../app/router.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
@@ -55,6 +57,10 @@ class ProfilePage extends StatelessWidget {
                   
                   // Account information
                   _buildAccountInfo(context, state.user),
+                  const SizedBox(height: 24),
+
+                  // Permissions table
+                  _buildPermissionsTable(context, state.user.userRole),
                 ],
               ),
             );
@@ -231,6 +237,154 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionsTable(BuildContext context, UserRole currentRole) {
+    final theme = Theme.of(context);
+    final localizations = AppLocalizations.of(context);
+
+    int roleIndex(UserRole role) {
+      switch (role) {
+        case UserRole.teamMember:
+          return 0;
+        case UserRole.teamLeader:
+          return 1;
+        case UserRole.admin:
+          return 2;
+      }
+    }
+
+    final currentIdx = roleIndex(currentRole);
+
+    final actions = <String, List<bool>>{
+      localizations.createTeam:    [false, true, true],
+      localizations.joinTeam:      [true, true, true],
+      localizations.viewTeam:      [true, true, true],
+      localizations.editTeam:      [false, true, true],
+      localizations.closeTeam:     [false, true, true],
+      localizations.deleteTeam:    [false, true, true],
+      localizations.removeMember:  [false, true, false],
+      localizations.leaveTeam:     [true, false, true],
+      localizations.viewAllTeams:  [false, false, true],
+      localizations.editOwnTasks:  [true, true, true],
+      localizations.editAllTasks:  [false, true, true],
+    };
+
+    final roleLabels = [
+      localizations.teamMember,
+      localizations.teamLeader,
+      localizations.admin,
+    ];
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.security, color: AppColors.primary, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  localizations.permissions,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${localizations.yourRole}: ${currentRole.displayName}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(
+                  AppColors.primary.withOpacity(0.08),
+                ),
+                columnSpacing: 20,
+                columns: [
+                  DataColumn(
+                    label: Text(
+                      localizations.action,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  for (int i = 0; i < roleLabels.length; i++)
+                    DataColumn(
+                      label: Text(
+                        roleLabels[i],
+                        style: TextStyle(
+                          fontWeight: i == currentIdx
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: i == currentIdx
+                              ? AppColors.primary
+                              : theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                    ),
+                ],
+                rows: actions.entries.map((entry) {
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(entry.key)),
+                      for (int i = 0; i < entry.value.length; i++)
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4,
+                            ),
+                            decoration: i == currentIdx
+                                ? BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.06),
+                                    borderRadius: BorderRadius.circular(6),
+                                  )
+                                : null,
+                            child: Text(
+                              entry.value[i] ? '✓' : '✗',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: i == currentIdx
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color: entry.value[i]
+                                    ? AppColors.success
+                                    : AppColors.error,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

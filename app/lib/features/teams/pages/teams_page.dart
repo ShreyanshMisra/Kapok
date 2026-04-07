@@ -163,9 +163,9 @@ class _TeamsPageState extends State<TeamsPage> {
                           Icon(Icons.error_outline, color: AppColors.error),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
+                            child:                     Text(
                               state.message,
-                              style: TextStyle(color: AppColors.error),
+                              style: const TextStyle(color: AppColors.error),
                             ),
                           ),
                         ],
@@ -210,7 +210,7 @@ class _TeamsPageState extends State<TeamsPage> {
                     Text(
                       state.message,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -397,6 +397,7 @@ class _TeamsPageState extends State<TeamsPage> {
 
   /// Build team card widget
   Widget _buildTeamCard(TeamModel team) {
+    final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -440,12 +441,12 @@ class _TeamsPageState extends State<TeamsPage> {
                         Text(
                           '${team.memberIds.length} ${team.memberIds.length != 1 ? AppLocalizations.of(context).members : AppLocalizations.of(context).member}',
                           style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppColors.textSecondary),
+                              ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                  Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                 ],
               ),
               const SizedBox(height: 12),

@@ -63,7 +63,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         status: status,
         priority: priority,
         category: TaskCategory.fromString(event.category),
-        dueDate: null,
+        dueDate: event.dueDate,
         createdAt: now,
         updatedAt: now,
         completedAt: event.taskCompleted ? now : null,
@@ -211,12 +211,15 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       final task = await _taskRepository.editTask(
         taskId: event.taskId,
         userId: event.userId,
+        userRole: event.userRole,
         taskName: event.taskName,
         taskSeverity: event.taskSeverity,
         taskDescription: event.taskDescription,
         taskCompleted: event.taskCompleted,
         assignedTo: event.assignedTo,
         category: event.category,
+        dueDate: event.dueDate,
+        clearDueDate: event.clearDueDate,
       );
 
       emit(TaskUpdated(task: task));

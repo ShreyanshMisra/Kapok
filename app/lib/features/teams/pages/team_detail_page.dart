@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../data/models/team_model.dart';
@@ -16,6 +18,8 @@ import '../../tasks/bloc/task_state.dart';
 import '../../../app/router.dart';
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
+import '../../../core/utils/role_icons.dart';
+import 'edit_team_page.dart';
 
 /// Team detail page showing team information, members, and tasks
 class TeamDetailPage extends StatefulWidget {
@@ -133,7 +137,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   ),
                 );
               } else if (state is TeamDeleted) {
-                // Team was deleted, navigate back
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -147,7 +150,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
           BlocListener<TaskBloc, TaskState>(
             listener: (context, state) {
               if (state is TaskCreated) {
-                // Reload tasks when a new task is created
                 context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -171,28 +173,21 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             context.read<TeamBloc>().add(LoadTeamMembers(teamId: widget.team.id));
             context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
           },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Team info card
-              _buildTeamInfoCard(),
-              const SizedBox(height: 16),
-              
-              // Team code card (for team leaders)
-              if (_isCurrentUserLeader()) _buildTeamCodeCard(),
-              if (_isCurrentUserLeader()) const SizedBox(height: 16),
-              
-              // Members section
-              _buildMembersSection(),
-              const SizedBox(height: 16),
-              
-              // Tasks section
-              _buildTasksSection(),
-            ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTeamInfoCard(),
+                const SizedBox(height: 16),
+                if (_isCurrentUserLeader()) _buildTeamCodeCard(),
+                if (_isCurrentUserLeader()) const SizedBox(height: 16),
+                _buildMembersSection(),
+                const SizedBox(height: 16),
+                _buildTasksSection(),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -200,6 +195,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build team information card
   Widget _buildTeamInfoCard() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -239,7 +235,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       Text(
                         '${widget.team.memberIds.length} member${widget.team.memberIds.length != 1 ? 's' : ''}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -275,7 +271,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               Text(
                 widget.team.description!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
@@ -287,6 +283,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build team code card (for team leaders)
   Widget _buildTeamCodeCard() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -338,7 +335,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   Text(
                     'Share this code with team members',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -350,10 +347,11 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // TODO: Copy team code to clipboard
+                      Clipboard.setData(ClipboardData(text: widget.team.teamCode));
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(AppLocalizations.of(context).teamCodeCopiedToClipboard),
+                          backgroundColor: AppColors.primary,
                         ),
                       );
                     },
@@ -365,7 +363,9 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // TODO: Share team code
+                      Share.share(
+                        'Join my team on Kapok! Team code: ${widget.team.teamCode}',
+                      );
                     },
                     icon: const Icon(Icons.share),
                     label: Text(AppLocalizations.of(context).share),
@@ -381,6 +381,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build members section
   Widget _buildMembersSection() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -425,7 +426,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       child: Text(
                         'No members found',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     );
@@ -449,7 +450,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   child: Text(
                     AppLocalizations.of(context).loading,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 );
@@ -459,30 +460,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         ),
       ),
     );
-  }
-
-  /// Get icon for a specialty role
-  IconData _getRoleIcon(String role) {
-    switch (role.toLowerCase()) {
-      case 'medical':
-        return Icons.medical_services;
-      case 'engineering':
-        return Icons.engineering;
-      case 'carpentry':
-        return Icons.handyman;
-      case 'plumbing':
-        return Icons.plumbing;
-      case 'construction':
-        return Icons.construction;
-      case 'electrical':
-        return Icons.electrical_services;
-      case 'supplies':
-        return Icons.inventory;
-      case 'transportation':
-        return Icons.local_shipping;
-      default:
-        return Icons.work;
-    }
   }
 
   /// Show change role dialog for a member
@@ -505,7 +482,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: roles.map((role) {
                     return ListTile(
-                      leading: Icon(_getRoleIcon(role), size: 20),
+                      leading: Icon(getRoleIcon(role), size: 20),
                       title: Text(role),
                       trailing: selectedRole == role
                           ? Icon(Icons.check, color: AppColors.primary)
@@ -559,6 +536,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build expandable member card
   Widget _buildExpandableMemberCard(UserModel member) {
+    final theme = Theme.of(context);
     final isLeader = member.id == widget.team.leaderId;
     final isExpanded = _expandedMembers[member.id] ?? false;
 
@@ -580,7 +558,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         leading: CircleAvatar(
           backgroundColor: AppColors.primary.withOpacity(0.1),
           child: Icon(
-            _getRoleIcon(member.role),
+            getRoleIcon(member.role),
             color: AppColors.primary,
             size: 20,
           ),
@@ -616,7 +594,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         subtitle: Text(
           displayRole,
           style: TextStyle(
-            color: isLeader ? AppColors.primary : AppColors.textSecondary,
+            color: isLeader ? AppColors.primary : theme.colorScheme.onSurface.withOpacity(0.6),
             fontSize: 12,
           ),
         ),
@@ -682,7 +660,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                           Text(
                             'No assigned tasks',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           )
                         else
@@ -730,22 +708,23 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build info row
   Widget _buildInfoRow(IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.6)),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textPrimary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -771,7 +750,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 4),
       elevation: 0,
-      color: AppColors.background,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: ListTile(
         dense: true,
         leading: PriorityStars(priority: task.priority, size: 12),
@@ -794,6 +773,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
 
   /// Build tasks section
   Widget _buildTasksSection() {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -848,7 +828,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       child: Text(
                         'No tasks yet. Create one to get started!',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     );
@@ -872,7 +852,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   child: Text(
                     AppLocalizations.of(context).loading,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 );
@@ -1015,28 +995,16 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     );
   }
 
-  /// Show edit team dialog
-  void _showEditTeamDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final localizations = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(localizations.editTeam),
-          content: Text(localizations.editTeamFunctionalityWillBeImplementedHere),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizations.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizations.save),
-            ),
-          ],
-        );
-      },
+  /// Navigate to edit team screen
+  void _showEditTeamDialog() async {
+    final result = await Navigator.of(context).push<TeamModel>(
+      MaterialPageRoute(
+        builder: (context) => EditTeamPage(team: widget.team),
+      ),
     );
+    if (result != null && mounted) {
+      context.read<TeamBloc>().add(LoadTeam(teamId: widget.team.id));
+    }
   }
 
   /// Show close team dialog

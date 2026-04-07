@@ -108,6 +108,11 @@ class AppLocalizations {
   String get low => _getString('low');
   String get assignedToLabel => _getString('assignedToLabel');
   String get pending => _getString('pending');
+  String get overdue => _getString('overdue');
+  String get dueDate => _getString('dueDate');
+  String get selectDueDate => _getString('selectDueDate');
+  String get clearDueDate => _getString('clearDueDate');
+  String get overdueOnly => _getString('overdueOnly');
 
   // Task Filtering
   String get searchTasks => _getString('searchTasks');
@@ -134,6 +139,29 @@ class AppLocalizations {
   String get pastWeek => _getString('pastWeek');
   String get customDateRange => _getString('customDateRange');
   String get selectDateRange => _getString('selectDateRange');
+
+  // Validation errors
+  String get validationEmailRequired => _getString('validationEmailRequired');
+  String get validationEmailInvalid => _getString('validationEmailInvalid');
+  String get validationPasswordRequired => _getString('validationPasswordRequired');
+  String get validationPasswordTooShort => _getString('validationPasswordTooShort');
+  String get validationPasswordsNoMatch => _getString('validationPasswordsNoMatch');
+  String get validationNameRequired => _getString('validationNameRequired');
+  String get validationNameTooShort => _getString('validationNameTooShort');
+  String get validationNameTooLong => _getString('validationNameTooLong');
+  String get validationTeamCodeRequired => _getString('validationTeamCodeRequired');
+  String get validationTeamCodeTooShort => _getString('validationTeamCodeTooShort');
+  String get validationTeamCodeTooLong => _getString('validationTeamCodeTooLong');
+  String get validationTeamCodeAlphanumeric => _getString('validationTeamCodeAlphanumeric');
+  String get validationTeamNameRequired => _getString('validationTeamNameRequired');
+  String get validationTeamNameTooShort => _getString('validationTeamNameTooShort');
+  String get validationTeamNameTooLong => _getString('validationTeamNameTooLong');
+  String get validationTaskNameRequired => _getString('validationTaskNameRequired');
+  String get validationTaskNameTooShort => _getString('validationTaskNameTooShort');
+  String get validationTaskNameTooLong => _getString('validationTaskNameTooLong');
+  String get validationTaskDescTooLong => _getString('validationTaskDescTooLong');
+  String get validationFieldRequired => _getString('validationFieldRequired');
+  String get confirmPasswordLabel => _getString('confirmPasswordLabel');
 
   // Priority Stars
   String get inProgress => _getString('inProgress');
@@ -194,6 +222,7 @@ class AppLocalizations {
   String get privacyPolicy => _getString('privacyPolicy');
   String get termsOfService => _getString('termsOfService');
   String get close => _getString('close');
+  String get continueText => _getString('continueText');
   String get cancel => _getString('cancel');
   String get clear => _getString('clear');
   String get export => _getString('export');
@@ -378,6 +407,7 @@ class AppLocalizations {
   String get youMustBeLoggedInToJoinTeams => _getString('youMustBeLoggedInToJoinTeams');
   String get successfullyJoinedTeam => _getString('successfullyJoinedTeam');
   String get taskDetails => _getString('taskDetails');
+  String get openTask => _getString('openTask');
   String get taskDetailPageToBeImplemented => _getString('taskDetailPageToBeImplemented');
   String get saveChanges => _getString('saveChanges');
   String get tapToChangeProfilePicture => _getString('tapToChangeProfilePicture');
@@ -395,13 +425,33 @@ class AppLocalizations {
   String get removeFromTeam => _getString('removeFromTeam');
   String get editTaskPageToBeImplemented => _getString('editTaskPageToBeImplemented');
 
+  // Admin Permissions Page
+  String get administratorPermissions => _getString('administratorPermissions');
+  String get permissionsPageDescription => _getString('permissionsPageDescription');
+  String get action => _getString('action');
+  String get whoCanPerform => _getString('whoCanPerform');
+  String get viewTeam => _getString('viewTeam');
+  String get deleteTeam => _getString('deleteTeam');
+  String get viewAllTeams => _getString('viewAllTeams');
+  String get anyTeamMember => _getString('anyTeamMember');
+  String get teamLeaderOnly => _getString('teamLeaderOnly');
+  String get anyMemberExceptLeader => _getString('anyMemberExceptLeader');
+  String get adminOnly => _getString('adminOnly');
+  String get adminFeaturesPlannedNote => _getString('adminFeaturesPlannedNote');
+
+  // Profile Permissions Table
+  String get permissions => _getString('permissions');
+  String get editOwnTasks => _getString('editOwnTasks');
+  String get editAllTasks => _getString('editAllTasks');
+  String get yourRole => _getString('yourRole');
+
   /// Gets localized string
   String _getString(String key) {
     final Map<String, Map<String, String>> localizedValues = {
       'en': {
         // App Information
         'appName': 'Kapok',
-        'appDescription': 'Disaster Relief Coordination App',
+        'appDescription': 'Disaster Response Coordination App',
         'appVersion': '1.0.0',
         
         // Authentication
@@ -454,7 +504,7 @@ class AppLocalizations {
         'teamTasks': 'Team Tasks',
         'allTasks': 'All Tasks',
         'noTasksYet': 'No Tasks Yet',
-        'createYourFirstTaskToGetStarted': 'Create your first task to get started with disaster relief coordination',
+        'createYourFirstTaskToGetStarted': 'Create your first task to get started with disaster response coordination',
         'errorLoadingTasks': 'Error Loading Tasks',
         'retry': 'Retry',
         'completed': 'Completed',
@@ -464,6 +514,11 @@ class AppLocalizations {
         'low': 'Low',
         'assignedToLabel': 'Assigned to',
         'pending': 'Pending',
+        'overdue': 'Overdue',
+        'dueDate': 'Due Date',
+        'selectDueDate': 'Select due date (optional)',
+        'clearDueDate': 'Clear due date',
+        'overdueOnly': 'Overdue only',
 
         // Task Filtering
         'searchTasks': 'Search tasks...',
@@ -490,6 +545,29 @@ class AppLocalizations {
         'pastWeek': 'Past Week',
         'customDateRange': 'Custom Date Range',
         'selectDateRange': 'Select Date Range',
+
+        // Validation errors (EN)
+        'validationEmailRequired': 'Email is required',
+        'validationEmailInvalid': 'Please enter a valid email address',
+        'validationPasswordRequired': 'Password is required',
+        'validationPasswordTooShort': 'Password must be at least 6 characters',
+        'validationPasswordsNoMatch': 'Passwords do not match',
+        'validationNameRequired': 'Name is required',
+        'validationNameTooShort': 'Name must be at least 2 characters',
+        'validationNameTooLong': 'Name must be less than 50 characters',
+        'validationTeamCodeRequired': 'Team code is required',
+        'validationTeamCodeTooShort': 'Team code must be at least 4 characters',
+        'validationTeamCodeTooLong': 'Team code must be less than 20 characters',
+        'validationTeamCodeAlphanumeric': 'Team code can only contain letters and numbers',
+        'validationTeamNameRequired': 'Team name is required',
+        'validationTeamNameTooShort': 'Team name must be at least 3 characters',
+        'validationTeamNameTooLong': 'Team name must be less than 50 characters',
+        'validationTaskNameRequired': 'Task name is required',
+        'validationTaskNameTooShort': 'Task name must be at least 3 characters',
+        'validationTaskNameTooLong': 'Task name must be less than 100 characters',
+        'validationTaskDescTooLong': 'Description must be less than 500 characters',
+        'validationFieldRequired': 'This field is required',
+        'confirmPasswordLabel': 'Confirm Password',
 
         // Priority Stars
         'oneStar': '1 Star',
@@ -531,7 +609,7 @@ class AppLocalizations {
         'aboutKapok': 'About Kapok',
         'aboutNCTDR': 'About NCTDR',
         'nationalCenterForTechnologyAndDisputeResolution': 'National Center for Technology and Dispute Resolution',
-        'disasterReliefCoordination': 'Disaster Relief Coordination',
+        'disasterReliefCoordination': 'Disaster Response Coordination',
         
         // Settings
         'language': 'Language',
@@ -550,11 +628,12 @@ class AppLocalizations {
         'privacyPolicy': 'Privacy Policy',
         'termsOfService': 'Terms of Service',
         'close': 'Close',
+        'continueText': 'Continue',
         'cancel': 'Cancel',
         'clear': 'Clear',
         'export': 'Export',
         'selectTheme': 'Select Theme',
-        'system': 'System',
+        'system': 'Default',
         'light': 'Light',
         'dark': 'Dark',
         'receiveNotificationsForNewTasksAndUpdates': 'Receive notifications for new tasks and updates',
@@ -618,7 +697,7 @@ class AppLocalizations {
 
         // Data Export
         'exportSuccessful': 'Export Successful',
-        'dataExportedSuccessfully': 'Your disaster relief data has been exported successfully.',
+        'dataExportedSuccessfully': 'Your disaster response data has been exported successfully.',
         'exportedItemsCount': 'Exported {tasks} tasks and {teams} teams',
         'wouldYouLikeToShareTheFile': 'Would you like to share the export file now?',
         'notNow': 'Not Now',
@@ -653,23 +732,23 @@ class AppLocalizations {
         'teamId': 'Team ID',
         'userId': 'User ID',
         'ourMission': 'Our Mission',
-        'ourMissionDescription': 'Kapok is designed to help coordinate volunteers for disaster relief efforts. The app enables teams to work together efficiently during crisis situations by providing real-time task management, team coordination, and location-based services.',
+        'ourMissionDescription': 'Kapok is designed to help coordinate volunteers for disaster response efforts. The app enables teams to work together efficiently during crisis situations by providing real-time task management, team coordination, and location-based services.',
         'nctdrDescription': 'The National Center for Technology and Dispute Resolution (NCTDR) is an organization that supports developing technology for conflict management. NCTDR works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
         'keyFeatures': 'Key Features',
         'keyFeaturesDescription': '• Real-time task management and assignment\n• Team creation and member coordination\n• Location-based task mapping\n• Offline-first functionality for remote areas\n• Bilingual support (English and Spanish)\n• Role-based access control\n• Secure authentication (end-to-end encrypted) and data protection',
         'technology': 'Technology',
-        'technologyDescription': 'Kapok is built using mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work reliably even in areas with limited internet connectivity.',
+        'technologyDescription': 'Kapok is built using mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work even in areas with limited Internet connectivity.',
         'contactAndSupport': 'Contact & Support',
         'contactAndSupportDescription': 'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
-        'builtWithLove': 'Built with ❤️ for disaster relief coordination',
+        'builtWithLove': 'Built with ❤️ for disaster response coordination.',
         'legal': 'Legal',
-        'legalDescription': 'Kapok is owned by A Fair Resolution, LLC. All rights reserved. Kapok is designed to assist in disaster relief coordination and should be used responsibly.',
+        'legalDescription': '© 2006 A Fair Resolution, LLC. All rights reserved. Kapok is owned by A Fair Resolution, LLC. Kapok is designed to assist in disaster response coordination. Users are responsible for their data and usage of the app and should comply with all applicable laws.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization dedicated to dispute prevention and resolution. It works to create innovative solutions that help communities prevent and resolve disputes and coordinate resources during challenging times.',
         'kapokIcon': 'Kapok Icon',
-        'kapokIconDescription': 'Kapok\'s icon is a stylized representation of the kapok tree, known for its resilience and ability to thrive in challenging environments. The design reflects the app\'s mission to support disaster relief coordination in even the most difficult conditions.',
+        'kapokIconDescription': 'Inspiration: The Living Tree\n\nAt the heart of the design is a majestic kapok tree, its sprawling canopy symbolizing the robust network of individuals united in a mission of disaster response. Every leaf and branch represents the vital links between team members, emphasizing collaboration, rapid response, and the collective strength that drives Kapok\'s initiative forward.',
         'diggingDeeperTechRoots': 'Digging Deeper: Tech Roots',
-        'diggingDeeperTechRootsDescription': 'Kapok\'s technology roots run deep, combining mobile development with cloud-based services to create a robust and reliable platform. The app leverages Flutter for cross-platform compatibility, Firebase for real-time data synchronization, and Mapbox for precise location services.',
+        'diggingDeeperTechRootsDescription': 'Beneath the tree, an intricate network of roots unfolds like a circuit board, illustrating that the foundation of Kapok\'s operation is deeply embedded in advanced technology. This creative fusion of natural form and technical precision speaks to the modern, adaptive strategies the team employs in the face of adversity. The Kapok app was made for you.',
         'myTeams': 'My Teams',
         'errorLoadingTeams': 'Error loading teams',
         'createNewTask': 'Create New Task',
@@ -685,12 +764,12 @@ class AppLocalizations {
         'taskCreatedSuccessfully': 'Task "{taskName}" created successfully!',
         'mapPageToBeImplemented': 'Map page - To be implemented with Mapbox integration',
         'noTeamsYet': 'No Teams Yet',
-        'createYourFirstTeamToGetStarted': 'Create your first team to get started with disaster relief coordination',
+        'createYourFirstTeamToGetStarted': 'Create your first team to get started with disaster response coordination',
         'member': 'member',
         'members': 'members',
         'active': 'Active',
         'inactive': 'Inactive',
-        'joinAnExistingTeamOrCreateANewOneToGetStarted': 'Join an existing team or create a new one to get started with disaster relief coordination.',
+        'joinAnExistingTeamOrCreateANewOneToGetStarted': 'Join an existing team or create a new one to get started with disaster response coordination.',
         'taskTitle': 'Task Title',
         'description': 'Description',
         'priority': 'Priority',
@@ -712,7 +791,7 @@ class AppLocalizations {
         'passwordResetEmailSentTo': 'Password reset email sent to {email}',
         'byCreatingAnAccountYouAgreeToOurTermsOfServiceAndPrivacyPolicy': 'By creating an account, you agree to our Terms of Service and Privacy Policy.',
         'createNewTeam': 'Create New Team',
-        'setUpANewTeamForDisasterReliefCoordination': 'Set up a new team for disaster relief coordination',
+        'setUpANewTeamForDisasterReliefCoordination': 'Set up a new team for disaster response coordination',
         'enterTeamName': 'Enter team name',
         'descriptionOptional': 'Description (Optional)',
         'briefDescriptionOfTheTeamsPurpose': 'Brief description of the team\'s purpose',
@@ -726,11 +805,12 @@ class AppLocalizations {
         'pleaseEnterATeamCode': 'Please enter a team code',
         'teamCodeMustBe6Characters': 'Team code must be 6 characters',
         'howToGetATeamCode': 'How to get a team code',
-        'howToGetATeamCodeDescription': 'Ask your team leader to provide you with a 6-character team code. This code allows you to join their team and participate in disaster relief coordination.',
+        'howToGetATeamCodeDescription': 'Ask your team leader to provide you with a 6-character team code. This code allows you to join their team and participate in disaster response coordination.',
         'dontHaveATeamCodeCreateANewTeam': 'Don\'t have a team code? Create a new team',
         'youMustBeLoggedInToJoinTeams': 'You must be logged in to join teams',
         'successfullyJoinedTeam': 'Successfully joined team "{teamName}"!',
         'taskDetails': 'Task Details',
+        'openTask': 'Open Task',
         'taskDetailPageToBeImplemented': 'Task Detail page - To be implemented',
         'saveChanges': 'Save Changes',
         'tapToChangeProfilePicture': 'Tap to change profile picture',
@@ -747,11 +827,31 @@ class AppLocalizations {
         'remove': 'Remove',
         'removeFromTeam': 'Remove from Team',
         'editTaskPageToBeImplemented': 'Edit Task page - To be implemented',
+
+        // Admin Permissions Page
+        'administratorPermissions': 'Administrator Permissions',
+        'permissionsPageDescription': 'This page documents the permission model for the Kapok app. Each action is restricted to specific roles.',
+        'action': 'Action',
+        'whoCanPerform': 'Who Can Perform',
+        'viewTeam': 'View Team',
+        'deleteTeam': 'Delete Team',
+        'viewAllTeams': 'View All Teams',
+        'anyTeamMember': 'Any team member',
+        'teamLeaderOnly': 'Team Leader only',
+        'anyMemberExceptLeader': 'Any member (except leader)',
+        'adminOnly': 'Admin only',
+        'adminFeaturesPlannedNote': 'Note: Some admin-specific actions (such as "View All Teams" and "Delete Team") are planned but not yet fully functional in the backend.',
+
+        // Profile Permissions Table
+        'permissions': 'Permissions',
+        'editOwnTasks': 'Edit Own Tasks',
+        'editAllTasks': 'Edit All Tasks',
+        'yourRole': 'Your Role',
       },
       'es': {
         // App Information
         'appName': 'Kapok',
-        'appDescription': 'Aplicación de Coordinación de Ayuda en Desastres',
+        'appDescription': 'Aplicación de Coordinación de Respuesta a Desastres',
         'appVersion': '1.0.0',
         
         // Authentication
@@ -804,7 +904,7 @@ class AppLocalizations {
         'teamTasks': 'Tareas del Equipo',
         'allTasks': 'Todas las Tareas',
         'noTasksYet': 'Aún No Hay Tareas',
-        'createYourFirstTaskToGetStarted': 'Crea tu primera tarea para comenzar con la coordinación de ayuda en desastres',
+        'createYourFirstTaskToGetStarted': 'Crea tu primera tarea para comenzar con la coordinación de respuesta a desastres',
         'errorLoadingTasks': 'Error al Cargar Tareas',
         'retry': 'Reintentar',
         'completed': 'Completada',
@@ -814,6 +914,11 @@ class AppLocalizations {
         'low': 'Baja',
         'assignedToLabel': 'Asignado a',
         'pending': 'Pendiente',
+        'overdue': 'Vencido',
+        'dueDate': 'Fecha de vencimiento',
+        'selectDueDate': 'Seleccionar fecha (opcional)',
+        'clearDueDate': 'Quitar fecha',
+        'overdueOnly': 'Solo vencidas',
 
         // Task Filtering
         'searchTasks': 'Buscar tareas...',
@@ -840,6 +945,29 @@ class AppLocalizations {
         'pastWeek': 'Última Semana',
         'customDateRange': 'Rango de Fechas Personalizado',
         'selectDateRange': 'Seleccionar Rango de Fechas',
+
+        // Validation errors (ES)
+        'validationEmailRequired': 'El correo es requerido',
+        'validationEmailInvalid': 'Por favor ingrese un correo válido',
+        'validationPasswordRequired': 'La contraseña es requerida',
+        'validationPasswordTooShort': 'La contraseña debe tener al menos 6 caracteres',
+        'validationPasswordsNoMatch': 'Las contraseñas no coinciden',
+        'validationNameRequired': 'El nombre es requerido',
+        'validationNameTooShort': 'El nombre debe tener al menos 2 caracteres',
+        'validationNameTooLong': 'El nombre debe tener menos de 50 caracteres',
+        'validationTeamCodeRequired': 'El código de equipo es requerido',
+        'validationTeamCodeTooShort': 'El código debe tener al menos 4 caracteres',
+        'validationTeamCodeTooLong': 'El código debe tener menos de 20 caracteres',
+        'validationTeamCodeAlphanumeric': 'El código solo puede contener letras y números',
+        'validationTeamNameRequired': 'El nombre del equipo es requerido',
+        'validationTeamNameTooShort': 'El nombre debe tener al menos 3 caracteres',
+        'validationTeamNameTooLong': 'El nombre debe tener menos de 50 caracteres',
+        'validationTaskNameRequired': 'El nombre de la tarea es requerido',
+        'validationTaskNameTooShort': 'El nombre debe tener al menos 3 caracteres',
+        'validationTaskNameTooLong': 'El nombre debe tener menos de 100 caracteres',
+        'validationTaskDescTooLong': 'La descripción debe tener menos de 500 caracteres',
+        'validationFieldRequired': 'Este campo es requerido',
+        'confirmPasswordLabel': 'Confirmar contraseña',
 
         // Priority Stars
         'oneStar': '1 Estrella',
@@ -881,7 +1009,7 @@ class AppLocalizations {
         'aboutKapok': 'Acerca de Kapok',
         'aboutNCTDR': 'Acerca de NCTDR',
         'nationalCenterForTechnologyAndDisputeResolution': 'Centro Nacional de Tecnología y Resolución de Disputas',
-        'disasterReliefCoordination': 'Coordinación de Ayuda en Desastres',
+        'disasterReliefCoordination': 'Coordinación de Respuesta a Desastres',
         
         // Settings
         'language': 'Idioma',
@@ -900,11 +1028,12 @@ class AppLocalizations {
         'privacyPolicy': 'Política de Privacidad',
         'termsOfService': 'Términos de Servicio',
         'close': 'Cerrar',
+        'continueText': 'Continuar',
         'cancel': 'Cancelar',
         'clear': 'Limpiar',
         'export': 'Exportar',
         'selectTheme': 'Seleccionar Tema',
-        'system': 'Sistema',
+        'system': 'Predeterminado',
         'light': 'Claro',
         'dark': 'Oscuro',
         'receiveNotificationsForNewTasksAndUpdates': 'Recibir notificaciones para nuevas tareas y actualizaciones',
@@ -968,7 +1097,7 @@ class AppLocalizations {
 
         // Data Export
         'exportSuccessful': 'Exportación Exitosa',
-        'dataExportedSuccessfully': 'Sus datos de ayuda en desastres se han exportado exitosamente.',
+        'dataExportedSuccessfully': 'Sus datos de respuesta a desastres se han exportado exitosamente.',
         'exportedItemsCount': '{tasks} tareas y {teams} equipos exportados',
         'wouldYouLikeToShareTheFile': '¿Desea compartir el archivo de exportación ahora?',
         'notNow': 'Ahora No',
@@ -1003,23 +1132,23 @@ class AppLocalizations {
         'teamId': 'ID del Equipo',
         'userId': 'ID de Usuario',
         'ourMission': 'Nuestra Misión',
-        'ourMissionDescription': 'Kapok está diseñado para ayudar a coordinar voluntarios para esfuerzos de ayuda en desastres. La aplicación permite que los equipos trabajen juntos de manera eficiente durante situaciones de crisis al proporcionar gestión de tareas en tiempo real, coordinación de equipos y servicios basados en ubicación.',
+        'ourMissionDescription': 'Kapok está diseñado para ayudar a coordinar voluntarios para esfuerzos de respuesta a desastres. La aplicación permite que los equipos trabajen juntos de manera eficiente durante situaciones de crisis al proporcionar gestión de tareas en tiempo real, coordinación de equipos y servicios basados en ubicación.',
         'nctdrDescription': 'El Centro Nacional de Tecnología y Resolución de Disputas (NCTDR) es una organización que apoya el desarrollo de tecnología para la gestión de conflictos. NCTDR trabaja para crear soluciones innovadoras que ayuden a las comunidades a resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'keyFeatures': 'Características Clave',
         'keyFeaturesDescription': '• Gestión y asignación de tareas en tiempo real\n• Creación de equipos y coordinación de miembros\n• Mapeo de tareas basado en ubicación\n• Funcionalidad sin conexión para áreas remotas\n• Soporte bilingüe (Inglés y Español)\n• Control de acceso basado en roles\n• Autenticación segura (cifrado de extremo a extremo) y protección de datos',
         'technology': 'Tecnología',
-        'technologyDescription': 'Kapok está construido usando tecnologías móviles incluyendo Flutter para desarrollo multiplataforma, Firebase para servicios backend, y Mapbox para servicios de ubicación. La aplicación está diseñada para funcionar de manera confiable incluso en áreas con conectividad limitada a internet.',
+        'technologyDescription': 'Kapok está construido usando tecnologías móviles incluyendo Flutter para desarrollo multiplataforma, Firebase para servicios backend, y Mapbox para servicios de ubicación. La aplicación está diseñada para funcionar en áreas con conectividad limitada a Internet.',
         'contactAndSupport': 'Contacto y Soporte',
         'contactAndSupportDescription': 'Para soporte técnico, solicitudes de funciones o consultas generales, por favor contacte a A Fair Resolution, LLC.',
-        'builtWithLove': 'Construido con ❤️ para coordinación de ayuda en desastres',
+        'builtWithLove': 'Construido con ❤️ para coordinación de respuesta a desastres.',
         'legal': 'Legal',
-        'legalDescription': 'Kapok es propiedad de A Fair Resolution, LLC. Todos los derechos reservados. Kapok está diseñado para asistir en la coordinación de ayuda en desastres y debe usarse de manera responsable.',
+        'legalDescription': '© 2006 A Fair Resolution, LLC. Todos los derechos reservados. Kapok es propiedad de A Fair Resolution, LLC. Kapok está diseñado para asistir en la coordinación de respuesta a desastres. Los usuarios son responsables de sus datos y uso de la aplicación y deben cumplir con todas las leyes aplicables.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización dedicada a la prevención y resolución de disputas. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a prevenir y resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'kapokIcon': 'Icono de Kapok',
-        'kapokIconDescription': 'El icono de Kapok es una representación estilizada del árbol kapok, conocido por su resistencia y capacidad para prosperar en entornos desafiantes. El diseño refleja la misión de la aplicación de apoyar la coordinación de ayuda en desastres incluso en las condiciones más difíciles.',
+        'kapokIconDescription': 'Inspiración: El Árbol Viviente\n\nEn el corazón del diseño se encuentra un majestuoso árbol kapok, cuya copa extensa simboliza la robusta red de individuos unidos en una misión de respuesta a desastres. Cada hoja y rama representa los vínculos vitales entre los miembros del equipo, enfatizando la colaboración, la respuesta rápida y la fortaleza colectiva que impulsa la iniciativa de Kapok.',
         'diggingDeeperTechRoots': 'Profundizando: Raíces Tecnológicas',
-        'diggingDeeperTechRootsDescription': 'Las raíces tecnológicas de Kapok son profundas, combinando desarrollo móvil con servicios basados en la nube para crear una plataforma robusta y confiable. La aplicación aprovecha Flutter para compatibilidad multiplataforma, Firebase para sincronización de datos en tiempo real y Mapbox para servicios de ubicación precisos.',
+        'diggingDeeperTechRootsDescription': 'Debajo del árbol, una intrincada red de raíces se despliega como una placa de circuito, ilustrando que la base de la operación de Kapok está profundamente integrada en tecnología avanzada. Esta fusión creativa de forma natural y precisión técnica habla de las estrategias modernas y adaptativas que el equipo emplea ante la adversidad. La aplicación Kapok fue hecha para ti.',
         'myTeams': 'Mis Equipos',
         'errorLoadingTeams': 'Error al cargar equipos',
         'createNewTask': 'Crear Nueva Tarea',
@@ -1035,12 +1164,12 @@ class AppLocalizations {
         'taskCreatedSuccessfully': '¡Tarea "{taskName}" creada exitosamente!',
         'mapPageToBeImplemented': 'Página de mapa - Por implementar con integración de Mapbox',
         'noTeamsYet': 'Aún No Hay Equipos',
-        'createYourFirstTeamToGetStarted': 'Crea tu primer equipo para comenzar con la coordinación de ayuda en desastres',
+        'createYourFirstTeamToGetStarted': 'Crea tu primer equipo para comenzar con la coordinación de respuesta a desastres',
         'member': 'miembro',
         'members': 'miembros',
         'active': 'Activo',
         'inactive': 'Inactivo',
-        'joinAnExistingTeamOrCreateANewOneToGetStarted': 'Únete a un equipo existente o crea uno nuevo para comenzar con la coordinación de ayuda en desastres.',
+        'joinAnExistingTeamOrCreateANewOneToGetStarted': 'Únete a un equipo existente o crea uno nuevo para comenzar con la coordinación de respuesta a desastres.',
         'taskTitle': 'Título de la Tarea',
         'description': 'Descripción',
         'priority': 'Prioridad',
@@ -1062,7 +1191,7 @@ class AppLocalizations {
         'passwordResetEmailSentTo': 'Correo de restablecimiento de contraseña enviado a {email}',
         'byCreatingAnAccountYouAgreeToOurTermsOfServiceAndPrivacyPolicy': 'Al crear una cuenta, aceptas nuestros Términos de Servicio y Política de Privacidad.',
         'createNewTeam': 'Crear Nuevo Equipo',
-        'setUpANewTeamForDisasterReliefCoordination': 'Configura un nuevo equipo para coordinación de ayuda en desastres',
+        'setUpANewTeamForDisasterReliefCoordination': 'Configura un nuevo equipo para coordinación de respuesta a desastres',
         'enterTeamName': 'Ingresa el nombre del equipo',
         'descriptionOptional': 'Descripción (Opcional)',
         'briefDescriptionOfTheTeamsPurpose': 'Breve descripción del propósito del equipo',
@@ -1076,11 +1205,12 @@ class AppLocalizations {
         'pleaseEnterATeamCode': 'Por favor ingresa un código de equipo',
         'teamCodeMustBe6Characters': 'El código del equipo debe tener 6 caracteres',
         'howToGetATeamCode': 'Cómo obtener un código de equipo',
-        'howToGetATeamCodeDescription': 'Pide a tu líder de equipo que te proporcione un código de equipo de 6 caracteres. Este código te permite unirte a su equipo y participar en la coordinación de ayuda en desastres.',
+        'howToGetATeamCodeDescription': 'Pide a tu líder de equipo que te proporcione un código de equipo de 6 caracteres. Este código te permite unirte a su equipo y participar en la coordinación de respuesta a desastres.',
         'dontHaveATeamCodeCreateANewTeam': '¿No tienes un código de equipo? Crea un nuevo equipo',
         'youMustBeLoggedInToJoinTeams': 'Debes iniciar sesión para unirte a equipos',
         'successfullyJoinedTeam': '¡Te uniste exitosamente al equipo "{teamName}"!',
         'taskDetails': 'Detalles de la Tarea',
+        'openTask': 'Abrir tarea',
         'taskDetailPageToBeImplemented': 'Página de detalles de tarea - Por implementar',
         'saveChanges': 'Guardar Cambios',
         'tapToChangeProfilePicture': 'Toca para cambiar la foto de perfil',
@@ -1097,6 +1227,26 @@ class AppLocalizations {
         'remove': 'Eliminar',
         'removeFromTeam': 'Eliminar del Equipo',
         'editTaskPageToBeImplemented': 'Página de editar tarea - Por implementar',
+
+        // Admin Permissions Page
+        'administratorPermissions': 'Permisos de Administrador',
+        'permissionsPageDescription': 'Esta página documenta el modelo de permisos de la aplicación Kapok. Cada acción está restringida a roles específicos.',
+        'action': 'Acción',
+        'whoCanPerform': 'Quién Puede Realizar',
+        'viewTeam': 'Ver Equipo',
+        'deleteTeam': 'Eliminar Equipo',
+        'viewAllTeams': 'Ver Todos los Equipos',
+        'anyTeamMember': 'Cualquier miembro del equipo',
+        'teamLeaderOnly': 'Solo Líder de Equipo',
+        'anyMemberExceptLeader': 'Cualquier miembro (excepto líder)',
+        'adminOnly': 'Solo Administrador',
+        'adminFeaturesPlannedNote': 'Nota: Algunas acciones específicas de administrador (como "Ver Todos los Equipos" y "Eliminar Equipo") están planificadas pero aún no son completamente funcionales en el backend.',
+
+        // Profile Permissions Table
+        'permissions': 'Permisos',
+        'editOwnTasks': 'Editar Tareas Propias',
+        'editAllTasks': 'Editar Todas las Tareas',
+        'yourRole': 'Tu Rol',
       },
     };
 

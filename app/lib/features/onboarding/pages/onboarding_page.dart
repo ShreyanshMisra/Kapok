@@ -25,7 +25,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       iconColor: AppColors.medical,
       title: 'Welcome to Kapok',
       description:
-          'Coordinate disaster relief efforts with your team. Manage tasks, track progress, and respond to emergencies efficiently.',
+          'Coordinate disaster response efforts with your team. Manage tasks, track progress, and respond to emergencies efficiently.',
       backgroundColor: AppColors.primary,
     ),
     OnboardingSlideData(
@@ -33,7 +33,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       iconColor: AppColors.online,
       title: 'Works Completely Offline',
       description:
-          'No internet? No problem. Create tasks, manage teams, and coordinate relief efforts even without connectivity. Everything syncs automatically when you reconnect.',
+          'No internet? No problem. Create tasks, manage teams, and coordinate response efforts even without connectivity. Everything syncs automatically when you reconnect.',
       backgroundColor: AppColors.primaryDark,
     ),
     OnboardingSlideData(
