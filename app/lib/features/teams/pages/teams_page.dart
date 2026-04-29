@@ -39,17 +39,14 @@ class _TeamsPageState extends State<TeamsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Reload teams when page becomes visible if state has no teams
+    // Reload teams when page becomes visible and the current state carries no
+    // team data — covers TeamInitial, empty TeamLoaded, empty TeamLoading (left
+    // by a detail action), and empty TeamError (e.g. after a failed remove).
     if (_hasInitialized && mounted) {
       final teamState = context.read<TeamBloc>().state;
-      // Only reload if state has no teams (TeamInitial or empty TeamLoaded)
-      if (teamState.teams.isEmpty &&
-          (teamState is TeamInitial ||
-              (teamState is TeamLoaded && teamState.teams.isEmpty))) {
+      if (teamState.teams.isEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _loadTeams();
-          }
+          if (mounted) _loadTeams();
         });
       }
     }

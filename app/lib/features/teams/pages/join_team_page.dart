@@ -101,11 +101,19 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
               ),
             );
 
-            // Navigate to teams page instead of just popping
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              AppRouter.teams,
-              (route) => route.settings.name == AppRouter.home || route.isFirst,
-            );
+            // Return to the home shell so the bottom navigation bar stays visible.
+            // Do NOT push `AppRouter.teams` — that route is a standalone `TeamsPage`
+            // without `HomePage`, which is why the nav bar disappeared after join.
+            final navigator = Navigator.of(context);
+            if (navigator.canPop()) {
+              navigator.pop();
+            } else {
+              navigator.pushNamedAndRemoveUntil(
+                AppRouter.home,
+                (route) =>
+                    route.settings.name == AppRouter.home || route.isFirst,
+              );
+            }
           }
         },
         child: SingleChildScrollView(

@@ -4,6 +4,7 @@ import '../../core/error/exceptions.dart';
 import '../../core/enums/user_role.dart';
 import '../../core/services/network_checker.dart';
 import '../../core/utils/logger.dart';
+import '../models/task_model.dart';
 import '../models/team_model.dart';
 import '../models/user_model.dart';
 import '../sources/firebase_source.dart';
@@ -1049,37 +1050,31 @@ class TeamRepository {
         );
       }
 
-      // Use batch write for better reliability than transaction
-      Logger.team('Creating Firestore batch write...');
-      final batch = _firestore.batch();
-
-      // Soft delete team (set isActive: false instead of deleting)
+      // Step 1: Delete the team document first.
+      Logger.team('Hard-deleting team document...');
       final teamRef = _firestore.collection('teams').doc(teamId);
-      batch.update(teamRef, {
-        'isActive': false,
-        'deletedAt': FieldValue.serverTimestamp(),
-        'deletedBy': userId,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      Logger.team('Team soft delete queued in batch');
+      await teamRef.delete();
+      Logger.team('Team document deleted');
 
-      // Clear teamId from all members (including leader)
+      // Step 2: Clear teamId on each member's user doc.
+      // Uses individual writes so a single permission failure doesn't block
+      // the others. Requires updated Firestore rules; fails gracefully until
+      // rules are deployed (local cache is always cleaned up below).
       final allMemberIds = [team.leaderId, ...team.memberIds].toSet().toList();
-
       Logger.team('Clearing teamId from ${allMemberIds.length} members');
       for (final memberId in allMemberIds) {
-        final userRef = _firestore.collection('users').doc(memberId);
-        batch.update(userRef, {
-          'teamId': FieldValue.delete(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+        try {
+          await _firestore.collection('users').doc(memberId).update({
+            'teamId': FieldValue.delete(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        } catch (rulesError) {
+          Logger.team(
+            'Could not clear teamId for user $memberId '
+            '(deploy updated firestore.rules to fix): $rulesError',
+          );
+        }
       }
-      Logger.team('All member updates queued in batch');
-
-      // Commit batch
-      Logger.team('Committing batch write to Firestore...');
-      await batch.commit();
-      Logger.team('Batch write committed successfully');
 
       // Delete from local cache
       Logger.team('Deleting team from local Hive cache...');
@@ -1149,6 +1144,20 @@ class TeamRepository {
       final teamRef = _firestore.collection('teams').doc(teamId);
       final memberRef = _firestore.collection('users').doc(memberId);
 
+      // Pre-query tasks assigned to the removed member in this team.
+      // Must be done outside the transaction (Firestore doesn't allow queries
+      // inside transactions).
+      final assignedTasksQuery = await _firestore
+          .collection('tasks')
+          .where('teamId', isEqualTo: teamId)
+          .where('assignedTo', isEqualTo: memberId)
+          .get();
+
+      // Step 1: Transaction on the team doc + task unassignment.
+      // The cross-user write (clearing users/{memberId}.teamId) is kept outside
+      // the transaction because the deployed Firestore rules require the acting
+      // user to be the document owner for that collection. Moving it outside
+      // lets the core removal succeed even before updated rules are deployed.
       await _firestore.runTransaction((transaction) async {
         final teamDoc = await transaction.get(teamRef);
 
@@ -1166,18 +1175,50 @@ class TeamRepository {
           throw TeamException(message: 'Member not found in team');
         }
 
+        // Cannot remove the current team leader
+        if (memberId == team.leaderId) {
+          throw TeamException(
+            message: 'Cannot remove the team leader. Transfer leadership first.',
+          );
+        }
+
+        // Remove member from team
         transaction.update(teamRef, {
           'memberIds': FieldValue.arrayRemove([memberId]),
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        transaction.update(memberRef, {
+        // Unassign tasks that were assigned to the removed member (same as
+        // leaveTeam behaviour — tasks are preserved, only assignedTo is cleared).
+        for (final taskDoc in assignedTasksQuery.docs) {
+          transaction.update(taskDoc.reference, {
+            'assignedTo': FieldValue.delete(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      });
+
+      Logger.team(
+        'Member removed and ${assignedTasksQuery.docs.length} task(s) unassigned',
+      );
+
+      // Step 2: Clear teamId on the removed member's user doc.
+      // Requires the updated Firestore rules (allow leader/admin to write
+      // teamId+updatedAt on other users). Fails gracefully until rules are
+      // deployed — local Hive cache is always cleaned up below.
+      try {
+        await memberRef.update({
           'teamId': FieldValue.delete(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
-      });
+      } catch (rulesError) {
+        Logger.team(
+          'Could not clear teamId on removed member Firestore doc '
+          '(deploy updated firestore.rules to fix): $rulesError',
+        );
+      }
 
-      // Update local cache
+      // Update local Hive cache — team
       final team = await _firebaseSource.getTeam(teamId);
       final updatedTeam = team.copyWith(
         memberIds: team.memberIds.where((id) => id != memberId).toList(),
@@ -1185,10 +1226,28 @@ class TeamRepository {
       );
       await _hiveSource.saveTeam(updatedTeam);
 
-      // Update user in Hive
+      // Update local Hive cache — removed member's user record
       final user = await _hiveSource.getUser(memberId);
       if (user != null) {
         await _hiveSource.saveUser(user.copyWith(teamId: null));
+      }
+
+      // Update local Hive cache — unassigned tasks.
+      // TaskModel.copyWith cannot null out assignedTo due to ?? fallback,
+      // so rebuild from the Firestore snapshot which already has no assignedTo.
+      for (final taskDoc in assignedTasksQuery.docs) {
+        try {
+          final freshDoc = await _firestore
+              .collection('tasks')
+              .doc(taskDoc.id)
+              .get();
+          if (freshDoc.exists) {
+            await _hiveSource.saveTask(TaskModel.fromFirestore(freshDoc));
+          }
+        } catch (_) {
+          // Non-fatal: Firestore write already cleared assignedTo;
+          // cache will reconcile on next full sync.
+        }
       }
 
       Logger.team('Member removed successfully');
@@ -1198,6 +1257,108 @@ class TeamRepository {
         rethrow;
       }
       throw TeamException(message: 'Failed to remove member', originalError: e);
+    }
+  }
+
+  /// Transfer team leadership to another member with userRole == teamLeader
+  Future<TeamModel> transferLeadership({
+    required String teamId,
+    required String currentLeaderId,
+    required String newLeaderId,
+  }) async {
+    try {
+      Logger.team(
+        'Transferring leadership of team $teamId from $currentLeaderId to $newLeaderId',
+      );
+
+      if (!await _networkChecker.isConnected()) {
+        throw TeamException(
+          message: 'Cannot transfer leadership while offline',
+        );
+      }
+
+      if (currentLeaderId == newLeaderId) {
+        throw TeamException(
+          message: 'New leader must be a different member',
+        );
+      }
+
+      final teamRef = _firestore.collection('teams').doc(teamId);
+
+      // Fetch new leader's user document to verify userRole BEFORE the transaction
+      final newLeaderDoc = await _firestore
+          .collection('users')
+          .doc(newLeaderId)
+          .get();
+
+      if (!newLeaderDoc.exists) {
+        throw TeamException(message: 'New leader user not found');
+      }
+
+      final newLeaderData = newLeaderDoc.data();
+      if (newLeaderData == null) {
+        throw TeamException(message: 'New leader user data missing');
+      }
+      final newLeaderAccountRole = UserRole.fromString(
+        newLeaderData['userRole'] as String? ??
+            newLeaderData['accountType'] as String?,
+      );
+      if (newLeaderAccountRole != UserRole.teamLeader) {
+        throw TeamException(
+          message:
+              'Cannot transfer leadership: only users with the Team Leader account type can become team leader',
+        );
+      }
+
+      // Run transaction to atomically update leaderId
+      final updatedTeam = await _firestore.runTransaction<TeamModel>((
+        transaction,
+      ) async {
+        final teamDoc = await transaction.get(teamRef);
+
+        if (!teamDoc.exists) {
+          throw TeamException(message: 'Team not found');
+        }
+
+        final team = TeamModel.fromFirestore(teamDoc);
+
+        // Only the current assigned leader may transfer
+        if (team.leaderId != currentLeaderId) {
+          throw TeamException(
+            message: 'Only the current team leader can transfer leadership',
+          );
+        }
+
+        // New leader must be a member of this team
+        if (!team.memberIds.contains(newLeaderId)) {
+          throw TeamException(
+            message: 'The new leader must be a member of this team',
+          );
+        }
+
+        transaction.update(teamRef, {
+          'leaderId': newLeaderId,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        return team.copyWith(
+          leaderId: newLeaderId,
+          updatedAt: DateTime.now(),
+        );
+      });
+
+      // Update local Hive cache
+      await _hiveSource.saveTeam(updatedTeam);
+      Logger.team('Leadership transferred successfully. New leader: $newLeaderId');
+
+      return updatedTeam;
+    } catch (e) {
+      Logger.team('Error transferring leadership', error: e);
+      if (e is TeamException) rethrow;
+      throw TeamException(
+        message: 'Failed to transfer leadership: ${e.toString()}',
+        originalError: e,
+      );
     }
   }
 

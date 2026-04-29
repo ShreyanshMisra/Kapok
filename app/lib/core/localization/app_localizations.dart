@@ -423,6 +423,20 @@ class AppLocalizations {
   String get editTeamFunctionalityWillBeImplementedHere => _getString('editTeamFunctionalityWillBeImplementedHere');
   String get remove => _getString('remove');
   String get removeFromTeam => _getString('removeFromTeam');
+  String get makeTeamLeader => _getString('makeTeamLeader');
+  String get transferLeadership => _getString('transferLeadership');
+  String get confirmTransferLeadership => _getString('confirmTransferLeadership');
+  String get transferLeadershipSuccess => _getString('transferLeadershipSuccess');
+  String get eligibleForLeadershipTransfer => _getString('eligibleForLeadershipTransfer');
+  /// Shown when at least one member can receive leadership (Team Leader account).
+  String get transferLeadershipDiscoverHintEligible =>
+      _getString('transferLeadershipDiscoverHintEligible');
+  /// Shown when no member has the Team Leader account type — explains why UI is limited.
+  String get transferLeadershipNoEligibleExplanation =>
+      _getString('transferLeadershipNoEligibleExplanation');
+  /// Subtitle on a member row who cannot receive leadership.
+  String get transferLeadershipMemberNotEligibleSubtitle =>
+      _getString('transferLeadershipMemberNotEligibleSubtitle');
   String get editTaskPageToBeImplemented => _getString('editTaskPageToBeImplemented');
 
   // Admin Permissions Page
@@ -826,6 +840,17 @@ class AppLocalizations {
         'editTeamFunctionalityWillBeImplementedHere': 'Edit team functionality will be implemented here.',
         'remove': 'Remove',
         'removeFromTeam': 'Remove from Team',
+        'makeTeamLeader': 'Make Team Leader',
+        'transferLeadership': 'Transfer Leadership',
+        'confirmTransferLeadership': 'Transfer leadership to this member? You will remain a member but will no longer be the leader.',
+        'transferLeadershipSuccess': 'Leadership transferred successfully',
+        'eligibleForLeadershipTransfer': 'This member can receive leadership (Team Leader account)',
+        'transferLeadershipDiscoverHintEligible':
+            'Transfer leadership: open the ⋮ menu above, or expand a member below who has a Team Leader account.',
+        'transferLeadershipNoEligibleExplanation':
+            'Transfer leadership only works for members who signed up with the Team Leader account type. Team Member accounts cannot become team leader yet. Invite someone who uses Team Leader, or ask a member to create a Team Leader account and rejoin.',
+        'transferLeadershipMemberNotEligibleSubtitle':
+            'Cannot receive leadership — Team Leader account required',
         'editTaskPageToBeImplemented': 'Edit Task page - To be implemented',
 
         // Admin Permissions Page
@@ -1226,6 +1251,17 @@ class AppLocalizations {
         'editTeamFunctionalityWillBeImplementedHere': 'La funcionalidad de editar equipo se implementará aquí.',
         'remove': 'Eliminar',
         'removeFromTeam': 'Eliminar del Equipo',
+        'makeTeamLeader': 'Hacer Líder del Equipo',
+        'transferLeadership': 'Transferir Liderazgo',
+        'confirmTransferLeadership': '¿Transferir el liderazgo a este miembro? Seguirás siendo miembro pero ya no serás el líder.',
+        'transferLeadershipSuccess': 'Liderazgo transferido exitosamente',
+        'eligibleForLeadershipTransfer': 'Este miembro puede recibir el liderazgo (cuenta de Líder de Equipo)',
+        'transferLeadershipDiscoverHintEligible':
+            'Transferir liderazgo: abre el menú ⋮ arriba o expande un miembro abajo con cuenta de Líder de Equipo.',
+        'transferLeadershipNoEligibleExplanation':
+            'Solo puedes transferir el liderazgo a miembros que se registraron como Líder de Equipo. Las cuentas de Miembro de Equipo aún no pueden ser líderes. Invita a alguien con cuenta de Líder de Equipo, o pide a un miembro que cree esa cuenta y vuelva a unirse.',
+        'transferLeadershipMemberNotEligibleSubtitle':
+            'No puede recibir el liderazgo — se requiere cuenta de Líder de Equipo',
         'editTaskPageToBeImplemented': 'Página de editar tarea - Por implementar',
 
         // Admin Permissions Page

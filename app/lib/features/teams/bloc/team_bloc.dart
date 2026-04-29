@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/error/exceptions.dart';
 import '../../../core/utils/logger.dart';
+import '../../../data/models/team_model.dart';
 import '../../../data/repositories/team_repository.dart';
 import 'team_event.dart';
 import 'team_state.dart';
@@ -23,6 +24,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     on<RemoveMemberRequested>(_onRemoveMemberRequested);
     on<LoadTeamMembers>(_onLoadTeamMembers);
     on<ChangeMemberRoleRequested>(_onChangeMemberRoleRequested);
+    on<TransferLeadershipRequested>(_onTransferLeadershipRequested);
     on<TeamReset>(_onTeamReset);
   }
 
@@ -210,16 +212,26 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
   /// Handle load team
   Future<void> _onLoadTeam(LoadTeam event, Emitter<TeamState> emit) async {
     try {
-      emit(const TeamLoading());
+      emit(TeamLoading(teams: state.teams, members: state.members));
       Logger.team('Loading team: ${event.teamId}');
 
       final team = await _teamRepository.getTeam(event.teamId);
 
-      emit(TeamLoaded(teams: [team]));
+      // Update the single team within the existing list; never discard other teams.
+      final existing = state.teams;
+      final idx = existing.indexWhere((t) => t.id == team.id);
+      final updatedTeams = List<TeamModel>.from(existing);
+      if (idx >= 0) {
+        updatedTeams[idx] = team;
+      } else {
+        updatedTeams.add(team);
+      }
+
+      emit(TeamLoaded(teams: updatedTeams, members: state.members));
       Logger.team('Team loaded successfully: ${team.id}');
     } catch (e) {
       Logger.team('Error loading team', error: e);
-      emit(TeamError(message: e.toString()));
+      emit(TeamError(message: e.toString(), teams: state.teams, members: state.members));
     }
   }
 
@@ -322,7 +334,8 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     Emitter<TeamState> emit,
   ) async {
     try {
-      emit(const TeamLoading());
+      // Preserve the existing teams list so TeamsPage never loses its data.
+      emit(TeamLoading(teams: state.teams, members: state.members));
       Logger.team('Removing member from team: ${event.teamId}');
 
       await _teamRepository.removeMember(
@@ -331,12 +344,18 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
         leaderId: event.leaderId,
       );
 
-      // Reload team after removing member
-      add(LoadTeam(teamId: event.teamId));
+      // Refresh members panel on the detail page AND the full list for TeamsPage.
+      add(LoadTeamMembers(teamId: event.teamId));
+      add(LoadUserTeams(userId: event.leaderId));
       Logger.team('Member removed successfully');
     } catch (e) {
       Logger.team('Error removing member', error: e);
-      emit(TeamError(message: e.toString()));
+      // Preserve teams so TeamsPage still renders.
+      emit(TeamError(
+        message: e is Exception ? e.toString() : 'Failed to remove member',
+        teams: state.teams,
+        members: state.members,
+      ));
     }
   }
 
@@ -392,6 +411,54 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       emit(
         TeamError(
           message: e.toString(),
+          teams: state.teams,
+          members: state.members,
+        ),
+      );
+    }
+  }
+
+  /// Handle transfer leadership request
+  Future<void> _onTransferLeadershipRequested(
+    TransferLeadershipRequested event,
+    Emitter<TeamState> emit,
+  ) async {
+    try {
+      emit(TeamLoading(teams: state.teams, members: state.members));
+      Logger.team(
+        'Transferring leadership in team ${event.teamId} to ${event.newLeaderId}',
+      );
+
+      final updatedTeam = await _teamRepository.transferLeadership(
+        teamId: event.teamId,
+        currentLeaderId: event.currentLeaderId,
+        newLeaderId: event.newLeaderId,
+      );
+
+      emit(
+        LeadershipTransferred(
+          team: updatedTeam,
+          teams: state.teams,
+          members: state.members,
+        ),
+      );
+
+      // Reload team members so UI reflects the new leader immediately
+      add(LoadTeamMembers(teamId: event.teamId));
+      Logger.team('Leadership transferred successfully');
+    } catch (e) {
+      Logger.team('Error transferring leadership', error: e);
+      String errorMessage;
+      if (e is TeamException) {
+        errorMessage = e.message;
+      } else if (e is DatabaseException) {
+        errorMessage = e.message;
+      } else {
+        errorMessage = 'Failed to transfer leadership: ${e.toString()}';
+      }
+      emit(
+        TeamError(
+          message: errorMessage,
           teams: state.teams,
           members: state.members,
         ),
