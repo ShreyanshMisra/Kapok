@@ -346,6 +346,19 @@ class AppLocalizations {
   String get builtWithLove => _getString('builtWithLove');
   String get legal => _getString('legal');
   String get legalDescription => _getString('legalDescription');
+  String get acknowledgements => _getString('acknowledgements');
+  String get acknowledgementsSubtitle => _getString('acknowledgementsSubtitle');
+  String get acknowledgementsIntro => _getString('acknowledgementsIntro');
+  String get acknowledgementsProjectLeaders => _getString('acknowledgementsProjectLeaders');
+  String get acknowledgementsProjectLeadersNames => _getString('acknowledgementsProjectLeadersNames');
+  String get acknowledgementsInspiration => _getString('acknowledgementsInspiration');
+  String get acknowledgementsInspirationNames => _getString('acknowledgementsInspirationNames');
+  String get acknowledgementsThankYou => _getString('acknowledgementsThankYou');
+  String get acknowledgementsThankYouNames => _getString('acknowledgementsThankYouNames');
+  String get acknowledgementsThanksAlsoTo => _getString('acknowledgementsThanksAlsoTo');
+  String get acknowledgementsThanksAlsoToNames => _getString('acknowledgementsThanksAlsoToNames');
+  String get acknowledgementsClosing => _getString('acknowledgementsClosing');
+  String get doNotEnterPersonalNamesNote => _getString('doNotEnterPersonalNamesNote');
   String get myTeams => _getString('myTeams');
   String get errorLoadingTeams => _getString('errorLoadingTeams');
   String get createNewTask => _getString('createNewTask');
@@ -757,6 +770,19 @@ class AppLocalizations {
         'builtWithLove': 'Built with ❤️ for disaster response coordination.',
         'legal': 'Legal',
         'legalDescription': '© 2006 A Fair Resolution, LLC. All rights reserved. Kapok is owned by A Fair Resolution, LLC. Kapok is designed to assist in disaster response coordination. Users are responsible for their data and usage of the app and should comply with all applicable laws.',
+        'acknowledgements': 'Acknowledgements',
+        'acknowledgementsSubtitle': 'The people who made Kapok possible',
+        'acknowledgementsIntro': 'Thank you to all who inspired and assisted in the creation of Kapok: multidisciplinary and multilingual volunteers from many nations: software developers, RNs, online dispute resolution experts, attorneys, and hurricane survivor family members. Inspired by the dedication and resilience of first responders and survivors, we seek to harness technology to assist in disaster prevention and response.',
+        'acknowledgementsProjectLeaders': 'Project Leaders',
+        'acknowledgementsProjectLeadersNames': 'Leah Wing\nNatasha Sustache',
+        'acknowledgementsInspiration': 'Inspiration',
+        'acknowledgementsInspirationNames': 'Natasha S.\nJustin J.\nRuth S.\nRoxanna G.\nKerry G.\nEleanor G.\nMelina A.\nOther disaster medical responders',
+        'acknowledgementsThankYou': 'Thank you',
+        'acknowledgementsThankYouNames': 'Brian R.\nSiddartha S.\nNishant A.\nAparimit C.\nShreyansh M.\nBrian N.\nFuming Z.\nLimbani C.\nAdhiraj C.\nAdvait G.',
+        'acknowledgementsThanksAlsoTo': 'Thanks also to',
+        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
+        'acknowledgementsClosing': '',
+        'doNotEnterPersonalNamesNote': 'Do not enter any person\'s name in the task.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization dedicated to dispute prevention and resolution. It works to create innovative solutions that help communities prevent and resolve disputes and coordinate resources during challenging times.',
         'kapokIcon': 'Kapok Icon',
@@ -1168,6 +1194,19 @@ class AppLocalizations {
         'builtWithLove': 'Construido con ❤️ para coordinación de respuesta a desastres.',
         'legal': 'Legal',
         'legalDescription': '© 2006 A Fair Resolution, LLC. Todos los derechos reservados. Kapok es propiedad de A Fair Resolution, LLC. Kapok está diseñado para asistir en la coordinación de respuesta a desastres. Los usuarios son responsables de sus datos y uso de la aplicación y deben cumplir con todas las leyes aplicables.',
+        'acknowledgements': 'Agradecimientos',
+        'acknowledgementsSubtitle': 'Las personas que hicieron Kapok posible',
+        'acknowledgementsIntro': 'Gracias a todos quienes inspiraron y asistieron en la creación de Kapok: voluntarios multidisciplinarios y multilingües de muchas naciones: desarrolladores de software, enfermeras, expertos en resolución de disputas en línea, abogados y familiares sobrevivientes de huracanes. Inspirados por la dedicación y resiliencia de los socorristas y sobrevivientes, buscamos aprovechar la tecnología para asistir en la prevención y respuesta ante desastres.',
+        'acknowledgementsProjectLeaders': 'Líderes del Proyecto',
+        'acknowledgementsProjectLeadersNames': 'Leah Wing\nNatasha Sustache',
+        'acknowledgementsInspiration': 'Inspiración',
+        'acknowledgementsInspirationNames': 'Natasha S.\nJustin J.\nRuth S.\nRoxanna G.\nKerry G.\nEleanor G.\nMelina A.\nOtros socorristas médicos de desastres',
+        'acknowledgementsThankYou': 'Gracias',
+        'acknowledgementsThankYouNames': 'Brian R.\nSiddartha S.\nNishant A.\nAparimit C.\nShreyansh M.\nBrian N.\nFuming Z.\nLimbani C.\nAdhiraj C.\nAdvait G.',
+        'acknowledgementsThanksAlsoTo': 'Gracias también a',
+        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
+        'acknowledgementsClosing': '',
+        'doNotEnterPersonalNamesNote': 'No ingrese el nombre de ninguna persona en la tarea.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización dedicada a la prevención y resolución de disputas. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a prevenir y resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'kapokIcon': 'Icono de Kapok',
