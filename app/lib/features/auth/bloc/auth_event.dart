@@ -63,6 +63,11 @@ class AuthCheckRequested extends AuthEvent {
   const AuthCheckRequested();
 }
 
+/// Permanently delete the current user's account
+class DeleteAccountRequested extends AuthEvent {
+  const DeleteAccountRequested();
+}
+
 /// Update user profile
 class ProfileUpdateRequested extends AuthEvent {
   final String? name;

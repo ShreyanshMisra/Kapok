@@ -171,9 +171,6 @@ class NetworkChecker {
         case ConnectivityResult.none:
           connectionType = 'No Connection';
           break;
-        case ConnectivityResult.satellite:
-          connectionType = 'Satellite';
-          break;
       }
 
       Logger.network('Connection type: $connectionType');

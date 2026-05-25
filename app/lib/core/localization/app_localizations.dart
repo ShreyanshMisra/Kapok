@@ -359,6 +359,16 @@ class AppLocalizations {
   String get acknowledgementsThanksAlsoToNames => _getString('acknowledgementsThanksAlsoToNames');
   String get acknowledgementsClosing => _getString('acknowledgementsClosing');
   String get doNotEnterPersonalNamesNote => _getString('doNotEnterPersonalNamesNote');
+  String get lastUpdated => _getString('lastUpdated');
+  String get legalDraftNotice => _getString('legalDraftNotice');
+  String get deleteAccount => _getString('deleteAccount');
+  String get deleteAccountWarningTitle => _getString('deleteAccountWarningTitle');
+  String get deleteAccountWarningBody => _getString('deleteAccountWarningBody');
+  String get deleteAccountConfirmPrompt => _getString('deleteAccountConfirmPrompt');
+  String get deleteAccountConfirmWord => _getString('deleteAccountConfirmWord');
+  String get deleteAccountTransferLeadershipFirst => _getString('deleteAccountTransferLeadershipFirst');
+  String get deleteAccountSuccess => _getString('deleteAccountSuccess');
+  String get deleteAccountFailure => _getString('deleteAccountFailure');
   String get myTeams => _getString('myTeams');
   String get errorLoadingTeams => _getString('errorLoadingTeams');
   String get createNewTask => _getString('createNewTask');
@@ -783,6 +793,16 @@ class AppLocalizations {
         'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
         'acknowledgementsClosing': '',
         'doNotEnterPersonalNamesNote': 'Do not enter any person\'s name in the task.',
+        'lastUpdated': 'Last updated',
+        'legalDraftNotice': 'This document is a draft pending final legal review. Placeholders in square brackets will be filled in before public release.',
+        'deleteAccount': 'Delete account',
+        'deleteAccountWarningTitle': 'Delete your account?',
+        'deleteAccountWarningBody': 'This permanently removes your profile and signs you out. Tasks you created or were assigned to will be kept for your team but anonymized (your name is replaced with "deleted_user"). This cannot be undone.',
+        'deleteAccountConfirmPrompt': 'Type DELETE to confirm',
+        'deleteAccountConfirmWord': 'DELETE',
+        'deleteAccountTransferLeadershipFirst': 'You lead one or more active teams. Transfer leadership to another team member from the team page before deleting your account.',
+        'deleteAccountSuccess': 'Your account has been deleted.',
+        'deleteAccountFailure': 'Could not delete the account. Please try again.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization dedicated to dispute prevention and resolution. It works to create innovative solutions that help communities prevent and resolve disputes and coordinate resources during challenging times.',
         'kapokIcon': 'Kapok Icon',
@@ -1207,6 +1227,16 @@ class AppLocalizations {
         'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
         'acknowledgementsClosing': '',
         'doNotEnterPersonalNamesNote': 'No ingrese el nombre de ninguna persona en la tarea.',
+        'lastUpdated': 'Última actualización',
+        'legalDraftNotice': 'Este documento es un borrador pendiente de revisión legal final. Los marcadores entre corchetes se completarán antes del lanzamiento público.',
+        'deleteAccount': 'Eliminar cuenta',
+        'deleteAccountWarningTitle': '¿Eliminar su cuenta?',
+        'deleteAccountWarningBody': 'Esto eliminará permanentemente su perfil y cerrará su sesión. Las tareas que creó o tiene asignadas se conservarán para su equipo pero serán anonimizadas (su nombre se reemplaza por "deleted_user"). Esta acción no se puede deshacer.',
+        'deleteAccountConfirmPrompt': 'Escriba ELIMINAR para confirmar',
+        'deleteAccountConfirmWord': 'ELIMINAR',
+        'deleteAccountTransferLeadershipFirst': 'Usted lidera uno o más equipos activos. Transfiera el liderazgo a otro miembro desde la página del equipo antes de eliminar su cuenta.',
+        'deleteAccountSuccess': 'Su cuenta ha sido eliminada.',
+        'deleteAccountFailure': 'No se pudo eliminar la cuenta. Por favor, inténtelo de nuevo.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización dedicada a la prevención y resolución de disputas. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a prevenir y resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'kapokIcon': 'Icono de Kapok',

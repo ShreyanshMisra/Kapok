@@ -25,10 +25,11 @@
         android:label="Kapok"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- Mapbox access token — set your public token (pk.*) here -->
+        <!-- Mapbox public access token (pk.*). Injected at build time from
+             MAPBOX_ACCESS_TOKEN — see app/android/app/build.gradle.kts. -->
         <meta-data
             android:name="com.mapbox.token"
-            android:value="YOUR_MAPBOX_ACCESS_TOKEN" />
+            android:value="${MAPBOX_ACCESS_TOKEN}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

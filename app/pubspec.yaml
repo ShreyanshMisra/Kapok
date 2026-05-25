@@ -80,6 +80,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^6.0.0
   bloc_test: ^10.0.0
   mocktail: ^1.0.3
@@ -90,6 +92,8 @@ dev_dependencies:
 
   # Launcher icons
   flutter_launcher_icons: ^0.14.4
+  # Native splash screens (Android + iOS)
+  flutter_native_splash: ^2.4.0
 
 flutter_launcher_icons:
   android: true
@@ -100,6 +104,20 @@ flutter_launcher_icons:
   image_path: "assets/images/kapok_icon.png"
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/images/kapok_icon.png"
+
+# Native splash configuration. iOS keeps its custom LaunchScreen.storyboard;
+# this primarily fills in the Android gap so the app boots into a branded
+# screen instead of a default Flutter splash.
+# Generate with: `dart run flutter_native_splash:create`
+flutter_native_splash:
+  color: "#013576"          # AppColors.primary
+  image: assets/images/kapok_icon.png
+  android: true
+  ios: false                # iOS already has LaunchScreen.storyboard
+  web: false
+  android_12:
+    color: "#013576"
+    image: assets/images/kapok_icon.png
 
 flutter:
   uses-material-design: true

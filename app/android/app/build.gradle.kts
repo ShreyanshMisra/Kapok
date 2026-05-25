@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -9,8 +11,22 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Read MAPBOX_ACCESS_TOKEN from (in order): a project-local key.properties file,
+// the environment, and finally an empty string. The empty fallback keeps debug
+// builds working when a developer hasn't set the token yet — the map will fail
+// to authenticate at runtime, but the build won't break.
+val mapboxAccessToken: String = run {
+    val localProps = rootProject.file("../app/android/key.properties")
+        .takeIf { it.exists() }
+        ?.let { Properties().apply { load(it.inputStream()) } }
+    localProps?.getProperty("MAPBOX_ACCESS_TOKEN")
+        ?: System.getenv("MAPBOX_ACCESS_TOKEN")
+        ?: providers.gradleProperty("MAPBOX_ACCESS_TOKEN").orNull
+        ?: ""
+}
+
 android {
-    namespace = "com.example.kapok_app"
+    namespace = "org.afairresolution.kapok"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -26,13 +42,14 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.kapok_app"
+        applicationId = "org.afairresolution.kapok"
         // mapbox_maps_flutter requires minSdk 21; multiDex required for large dependency graphs
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
+        manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] = mapboxAccessToken
     }
 
     buildTypes {
