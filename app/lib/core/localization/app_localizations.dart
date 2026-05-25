@@ -346,6 +346,29 @@ class AppLocalizations {
   String get builtWithLove => _getString('builtWithLove');
   String get legal => _getString('legal');
   String get legalDescription => _getString('legalDescription');
+  String get acknowledgements => _getString('acknowledgements');
+  String get acknowledgementsSubtitle => _getString('acknowledgementsSubtitle');
+  String get acknowledgementsIntro => _getString('acknowledgementsIntro');
+  String get acknowledgementsProjectLeaders => _getString('acknowledgementsProjectLeaders');
+  String get acknowledgementsProjectLeadersNames => _getString('acknowledgementsProjectLeadersNames');
+  String get acknowledgementsInspiration => _getString('acknowledgementsInspiration');
+  String get acknowledgementsInspirationNames => _getString('acknowledgementsInspirationNames');
+  String get acknowledgementsThankYou => _getString('acknowledgementsThankYou');
+  String get acknowledgementsThankYouNames => _getString('acknowledgementsThankYouNames');
+  String get acknowledgementsThanksAlsoTo => _getString('acknowledgementsThanksAlsoTo');
+  String get acknowledgementsThanksAlsoToNames => _getString('acknowledgementsThanksAlsoToNames');
+  String get acknowledgementsClosing => _getString('acknowledgementsClosing');
+  String get doNotEnterPersonalNamesNote => _getString('doNotEnterPersonalNamesNote');
+  String get lastUpdated => _getString('lastUpdated');
+  String get legalDraftNotice => _getString('legalDraftNotice');
+  String get deleteAccount => _getString('deleteAccount');
+  String get deleteAccountWarningTitle => _getString('deleteAccountWarningTitle');
+  String get deleteAccountWarningBody => _getString('deleteAccountWarningBody');
+  String get deleteAccountConfirmPrompt => _getString('deleteAccountConfirmPrompt');
+  String get deleteAccountConfirmWord => _getString('deleteAccountConfirmWord');
+  String get deleteAccountTransferLeadershipFirst => _getString('deleteAccountTransferLeadershipFirst');
+  String get deleteAccountSuccess => _getString('deleteAccountSuccess');
+  String get deleteAccountFailure => _getString('deleteAccountFailure');
   String get myTeams => _getString('myTeams');
   String get errorLoadingTeams => _getString('errorLoadingTeams');
   String get createNewTask => _getString('createNewTask');
@@ -423,6 +446,20 @@ class AppLocalizations {
   String get editTeamFunctionalityWillBeImplementedHere => _getString('editTeamFunctionalityWillBeImplementedHere');
   String get remove => _getString('remove');
   String get removeFromTeam => _getString('removeFromTeam');
+  String get makeTeamLeader => _getString('makeTeamLeader');
+  String get transferLeadership => _getString('transferLeadership');
+  String get confirmTransferLeadership => _getString('confirmTransferLeadership');
+  String get transferLeadershipSuccess => _getString('transferLeadershipSuccess');
+  String get eligibleForLeadershipTransfer => _getString('eligibleForLeadershipTransfer');
+  /// Shown when at least one member can receive leadership (Team Leader account).
+  String get transferLeadershipDiscoverHintEligible =>
+      _getString('transferLeadershipDiscoverHintEligible');
+  /// Shown when no member has the Team Leader account type — explains why UI is limited.
+  String get transferLeadershipNoEligibleExplanation =>
+      _getString('transferLeadershipNoEligibleExplanation');
+  /// Subtitle on a member row who cannot receive leadership.
+  String get transferLeadershipMemberNotEligibleSubtitle =>
+      _getString('transferLeadershipMemberNotEligibleSubtitle');
   String get editTaskPageToBeImplemented => _getString('editTaskPageToBeImplemented');
 
   // Admin Permissions Page
@@ -743,6 +780,29 @@ class AppLocalizations {
         'builtWithLove': 'Built with ❤️ for disaster response coordination.',
         'legal': 'Legal',
         'legalDescription': '© 2006 A Fair Resolution, LLC. All rights reserved. Kapok is owned by A Fair Resolution, LLC. Kapok is designed to assist in disaster response coordination. Users are responsible for their data and usage of the app and should comply with all applicable laws.',
+        'acknowledgements': 'Acknowledgements',
+        'acknowledgementsSubtitle': 'The people who made Kapok possible',
+        'acknowledgementsIntro': 'Thank you to all who inspired and assisted in the creation of Kapok: multidisciplinary and multilingual volunteers from many nations: software developers, RNs, online dispute resolution experts, attorneys, and hurricane survivor family members. Inspired by the dedication and resilience of first responders and survivors, we seek to harness technology to assist in disaster prevention and response.',
+        'acknowledgementsProjectLeaders': 'Project Leaders',
+        'acknowledgementsProjectLeadersNames': 'Leah Wing\nNatasha Sustache',
+        'acknowledgementsInspiration': 'Inspiration',
+        'acknowledgementsInspirationNames': 'Natasha S.\nJustin J.\nRuth S.\nRoxanna G.\nKerry G.\nEleanor G.\nMelina A.\nOther disaster medical responders',
+        'acknowledgementsThankYou': 'Thank you',
+        'acknowledgementsThankYouNames': 'Brian R.\nSiddartha S.\nNishant A.\nAparimit C.\nShreyansh M.\nBrian N.\nFuming Z.\nLimbani C.\nAdhiraj C.\nAdvait G.',
+        'acknowledgementsThanksAlsoTo': 'Thanks also to',
+        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
+        'acknowledgementsClosing': '',
+        'doNotEnterPersonalNamesNote': 'Do not enter any person\'s name in the task.',
+        'lastUpdated': 'Last updated',
+        'legalDraftNotice': 'This document is a draft pending final legal review. Placeholders in square brackets will be filled in before public release.',
+        'deleteAccount': 'Delete account',
+        'deleteAccountWarningTitle': 'Delete your account?',
+        'deleteAccountWarningBody': 'This permanently removes your profile and signs you out. Tasks you created or were assigned to will be kept for your team but anonymized (your name is replaced with "deleted_user"). This cannot be undone.',
+        'deleteAccountConfirmPrompt': 'Type DELETE to confirm',
+        'deleteAccountConfirmWord': 'DELETE',
+        'deleteAccountTransferLeadershipFirst': 'You lead one or more active teams. Transfer leadership to another team member from the team page before deleting your account.',
+        'deleteAccountSuccess': 'Your account has been deleted.',
+        'deleteAccountFailure': 'Could not delete the account. Please try again.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization dedicated to dispute prevention and resolution. It works to create innovative solutions that help communities prevent and resolve disputes and coordinate resources during challenging times.',
         'kapokIcon': 'Kapok Icon',
@@ -826,6 +886,17 @@ class AppLocalizations {
         'editTeamFunctionalityWillBeImplementedHere': 'Edit team functionality will be implemented here.',
         'remove': 'Remove',
         'removeFromTeam': 'Remove from Team',
+        'makeTeamLeader': 'Make Team Leader',
+        'transferLeadership': 'Transfer Leadership',
+        'confirmTransferLeadership': 'Transfer leadership to this member? You will remain a member but will no longer be the leader.',
+        'transferLeadershipSuccess': 'Leadership transferred successfully',
+        'eligibleForLeadershipTransfer': 'This member can receive leadership (Team Leader account)',
+        'transferLeadershipDiscoverHintEligible':
+            'Transfer leadership: open the ⋮ menu above, or expand a member below who has a Team Leader account.',
+        'transferLeadershipNoEligibleExplanation':
+            'Transfer leadership only works for members who signed up with the Team Leader account type. Team Member accounts cannot become team leader yet. Invite someone who uses Team Leader, or ask a member to create a Team Leader account and rejoin.',
+        'transferLeadershipMemberNotEligibleSubtitle':
+            'Cannot receive leadership — Team Leader account required',
         'editTaskPageToBeImplemented': 'Edit Task page - To be implemented',
 
         // Admin Permissions Page
@@ -1143,6 +1214,29 @@ class AppLocalizations {
         'builtWithLove': 'Construido con ❤️ para coordinación de respuesta a desastres.',
         'legal': 'Legal',
         'legalDescription': '© 2006 A Fair Resolution, LLC. Todos los derechos reservados. Kapok es propiedad de A Fair Resolution, LLC. Kapok está diseñado para asistir en la coordinación de respuesta a desastres. Los usuarios son responsables de sus datos y uso de la aplicación y deben cumplir con todas las leyes aplicables.',
+        'acknowledgements': 'Agradecimientos',
+        'acknowledgementsSubtitle': 'Las personas que hicieron Kapok posible',
+        'acknowledgementsIntro': 'Gracias a todos quienes inspiraron y asistieron en la creación de Kapok: voluntarios multidisciplinarios y multilingües de muchas naciones: desarrolladores de software, enfermeras, expertos en resolución de disputas en línea, abogados y familiares sobrevivientes de huracanes. Inspirados por la dedicación y resiliencia de los socorristas y sobrevivientes, buscamos aprovechar la tecnología para asistir en la prevención y respuesta ante desastres.',
+        'acknowledgementsProjectLeaders': 'Líderes del Proyecto',
+        'acknowledgementsProjectLeadersNames': 'Leah Wing\nNatasha Sustache',
+        'acknowledgementsInspiration': 'Inspiración',
+        'acknowledgementsInspirationNames': 'Natasha S.\nJustin J.\nRuth S.\nRoxanna G.\nKerry G.\nEleanor G.\nMelina A.\nOtros socorristas médicos de desastres',
+        'acknowledgementsThankYou': 'Gracias',
+        'acknowledgementsThankYouNames': 'Brian R.\nSiddartha S.\nNishant A.\nAparimit C.\nShreyansh M.\nBrian N.\nFuming Z.\nLimbani C.\nAdhiraj C.\nAdvait G.',
+        'acknowledgementsThanksAlsoTo': 'Gracias también a',
+        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
+        'acknowledgementsClosing': '',
+        'doNotEnterPersonalNamesNote': 'No ingrese el nombre de ninguna persona en la tarea.',
+        'lastUpdated': 'Última actualización',
+        'legalDraftNotice': 'Este documento es un borrador pendiente de revisión legal final. Los marcadores entre corchetes se completarán antes del lanzamiento público.',
+        'deleteAccount': 'Eliminar cuenta',
+        'deleteAccountWarningTitle': '¿Eliminar su cuenta?',
+        'deleteAccountWarningBody': 'Esto eliminará permanentemente su perfil y cerrará su sesión. Las tareas que creó o tiene asignadas se conservarán para su equipo pero serán anonimizadas (su nombre se reemplaza por "deleted_user"). Esta acción no se puede deshacer.',
+        'deleteAccountConfirmPrompt': 'Escriba ELIMINAR para confirmar',
+        'deleteAccountConfirmWord': 'ELIMINAR',
+        'deleteAccountTransferLeadershipFirst': 'Usted lidera uno o más equipos activos. Transfiera el liderazgo a otro miembro desde la página del equipo antes de eliminar su cuenta.',
+        'deleteAccountSuccess': 'Su cuenta ha sido eliminada.',
+        'deleteAccountFailure': 'No se pudo eliminar la cuenta. Por favor, inténtelo de nuevo.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización dedicada a la prevención y resolución de disputas. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a prevenir y resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'kapokIcon': 'Icono de Kapok',
@@ -1226,6 +1320,17 @@ class AppLocalizations {
         'editTeamFunctionalityWillBeImplementedHere': 'La funcionalidad de editar equipo se implementará aquí.',
         'remove': 'Eliminar',
         'removeFromTeam': 'Eliminar del Equipo',
+        'makeTeamLeader': 'Hacer Líder del Equipo',
+        'transferLeadership': 'Transferir Liderazgo',
+        'confirmTransferLeadership': '¿Transferir el liderazgo a este miembro? Seguirás siendo miembro pero ya no serás el líder.',
+        'transferLeadershipSuccess': 'Liderazgo transferido exitosamente',
+        'eligibleForLeadershipTransfer': 'Este miembro puede recibir el liderazgo (cuenta de Líder de Equipo)',
+        'transferLeadershipDiscoverHintEligible':
+            'Transferir liderazgo: abre el menú ⋮ arriba o expande un miembro abajo con cuenta de Líder de Equipo.',
+        'transferLeadershipNoEligibleExplanation':
+            'Solo puedes transferir el liderazgo a miembros que se registraron como Líder de Equipo. Las cuentas de Miembro de Equipo aún no pueden ser líderes. Invita a alguien con cuenta de Líder de Equipo, o pide a un miembro que cree esa cuenta y vuelva a unirse.',
+        'transferLeadershipMemberNotEligibleSubtitle':
+            'No puede recibir el liderazgo — se requiere cuenta de Líder de Equipo',
         'editTaskPageToBeImplemented': 'Página de editar tarea - Por implementar',
 
         // Admin Permissions Page

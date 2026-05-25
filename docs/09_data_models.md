@@ -77,7 +77,8 @@ Handles legacy `accountType` field migration to `userRole` automatically in `fro
 | `address` | String? | No | Human-readable address |
 | `status` | TaskStatus | Yes | Current status |
 | `priority` | TaskPriority | Yes | Priority level |
-| `dueDate` | DateTime? | No | Optional deadline |
+| `category` | TaskCategory | Yes | Non-nullable, defaults to `TaskCategory.other` |
+| `dueDate` | DateTime? | No | Stored on the model but **not surfaced in task UI** (Phase 4.1) |
 | `createdAt` | DateTime | Yes | Creation timestamp |
 | `updatedAt` | DateTime | Yes | Last modification |
 | `completedAt` | DateTime? | No | Completion timestamp |
@@ -109,7 +110,7 @@ enum TaskPriority {
 double get latitude => geoLocation.latitude;
 double get longitude => geoLocation.longitude;
 
-// Check if overdue
+// Check if overdue (present on the model but not surfaced in UI; retained for data compatibility)
 bool get isOverdue;
 
 // UI colors (as int)

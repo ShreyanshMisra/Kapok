@@ -653,6 +653,91 @@ class FirebaseSource {
     }
   }
 
+  /// Deletes a user account, anonymizing their authored tasks and removing
+  /// them from team membership before the Firestore + Auth records are
+  /// destroyed. This sequence keeps disaster-response data usable for the
+  /// rest of the team while removing identifying ties to the leaving user.
+  ///
+  /// Throws [AuthException] if the user is currently the leader of any team —
+  /// they must transfer leadership first so the team isn't orphaned.
+  Future<void> deleteAccount(String userId) async {
+    final authUser = _auth.currentUser;
+    if (authUser == null || authUser.uid != userId) {
+      throw AuthException(
+        message: 'You must be signed in as this user to delete the account.',
+      );
+    }
+
+    try {
+      Logger.firebase('Deleting account for user: $userId');
+
+      final leaderQuery = await _firestore
+          .collection('teams')
+          .where('leaderId', isEqualTo: userId)
+          .where('active', isEqualTo: true)
+          .limit(1)
+          .get();
+      if (leaderQuery.docs.isNotEmpty) {
+        throw AuthException(
+          message:
+              'You lead one or more active teams. Transfer leadership before deleting your account.',
+        );
+      }
+
+      const anonymizedMarker = 'deleted_user';
+      final batch = _firestore.batch();
+
+      final createdTasks = await _firestore
+          .collection('tasks')
+          .where('createdBy', isEqualTo: userId)
+          .get();
+      for (final doc in createdTasks.docs) {
+        batch.update(doc.reference, {'createdBy': anonymizedMarker});
+      }
+
+      final assignedTasks = await _firestore
+          .collection('tasks')
+          .where('assignedTo', isEqualTo: userId)
+          .get();
+      for (final doc in assignedTasks.docs) {
+        batch.update(doc.reference, {'assignedTo': anonymizedMarker});
+      }
+
+      final memberOf = await _firestore
+          .collection('teams')
+          .where('memberIds', arrayContains: userId)
+          .get();
+      for (final doc in memberOf.docs) {
+        batch.update(doc.reference, {
+          'memberIds': FieldValue.arrayRemove([userId]),
+        });
+      }
+
+      batch.delete(_firestore.collection('users').doc(userId));
+
+      await batch.commit();
+      Logger.firebase(
+        'Anonymized ${createdTasks.docs.length} created tasks, '
+        '${assignedTasks.docs.length} assigned tasks, '
+        'removed from ${memberOf.docs.length} teams.',
+      );
+
+      await authUser.delete();
+      Logger.firebase('Firebase Auth user deleted');
+    } on FirebaseAuthException catch (e) {
+      Logger.firebase('Auth error during account deletion', error: e);
+      throw _handleAuthError(e.code, e.message, e);
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      Logger.firebase('Error deleting account', error: e);
+      throw AuthException(
+        message: 'Failed to delete account. Please try again.',
+        originalError: e,
+      );
+    }
+  }
+
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       Logger.firebase('Sending password reset email: $email');

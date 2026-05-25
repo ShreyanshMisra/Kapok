@@ -227,7 +227,24 @@ UI → BLoC → Repository → DataSource(s)
 | Privacy Policy | Content is placeholder |
 | Terms of Service | Content is placeholder |
 | Clear Cache | Shows success but implementation incomplete |
-| Edit Team | Placeholder functionality |
+
+Note: Edit Team is fully implemented via `edit_team_page.dart` (Phase 5.2).
+
+### Settings Page — Remaining Sections
+
+The Settings page was simplified across Phases 3.4–3.6. Current sections are: **Location**, **Language**, **Appearance (Theme)**, **Data** (Sync, Clear Cache, Export Data), **About** (App Version, tagline, Privacy Policy, Terms of Service, Administrator Permissions link), and **Sign Out**. Removed sections: Notifications, Privacy (analytics/crash toggles), Feedback & Support.
+
+### Implemented Changes (Phases 1–7)
+
+High-level summary of changes applied to the app during the Phase 1–7 sprints — useful context when reading code that differs from older docs:
+
+- **UI consistency:** curved blue header block on all AppBars, equal `KapokLogo` spacing, dark-mode-safe filter chips on the Tasks page, centered sub-page titles.
+- **Text/content:** "disaster relief" → "disaster response" globally; About page text refreshed (Kapok Icon, Tech Roots, Technology, Legal); theme option "System" → "Default".
+- **About / Settings structural:** About page is the post-first-login landing page; "A Fair Resolution, LLC" section removed; Key Features bullets use a hanging indent; App Version + tagline added to About and Settings; Notifications, Privacy, and Feedback & Support sections removed from Settings.
+- **Feature removals & map:** due date / overdue UI removed (field preserved on the model); all active map markers are blue (`AppColors.primary`), completed markers grey, priority shown via stars; per-page help overlays corrected.
+- **Feature implementations & bug fixes:** Share Team Code via `share_plus`; full-screen Edit Team page; `removeMember` Firestore transaction fixed to use `transaction.get()`; task edit bugs fixed (assigned-to dropdown state, double-pop on save, form state reset); Spanish locale switching fixed (removed `MaterialApp` `ValueKey`); team join confirmation snackbar verified.
+- **Permissions & admin:** team members may only edit tasks assigned to them; leaders/admins can edit any; permissions enforced in UI and at the repository layer. New Administrator Permissions page under Settings → About and a role-aware permissions table on the Profile page.
+- **Additional fixes:** task detail page map shows a blue pin on mobile via `tasks: [widget.task]` + `onMobileControllerReady`; Settings → Sync now re-fetches teams and tasks from Firebase after running the sync queue.
 
 ### Offline Limitations
 

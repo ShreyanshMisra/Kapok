@@ -354,14 +354,16 @@ class _TeamCreatedDialog extends StatelessWidget {
       actions: [
         ElevatedButton(
           onPressed: () {
+            // Close the success dialog first.
             Navigator.of(context).pop();
-            // Navigate to teams page first to show the newly created team
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/teams',
-              (route) => route.settings.name == '/home' || route.isFirst,
+            // Return to the home shell (keeps bottom nav + Teams tab visible).
+            // popUntil stops at /home without pushing a new route, so the
+            // IndexedStack in HomePage stays alive and the bottom nav persists.
+            Navigator.of(context).popUntil(
+              (route) =>
+                  route.settings.name == AppRouter.home || route.isFirst,
             );
-            // Update AuthBloc AFTER navigation to prevent navigation conflicts
-            // Use a small delay to ensure navigation completes first
+            // Update AuthBloc after navigation to avoid conflicts.
             Future.delayed(const Duration(milliseconds: 100), () {
               if (context.mounted) {
                 onDismiss?.call();

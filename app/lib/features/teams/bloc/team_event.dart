@@ -160,6 +160,22 @@ class ChangeMemberRoleRequested extends TeamEvent {
   List<Object> get props => [teamId, memberId, leaderId, newRole];
 }
 
+/// Transfer leadership to another team member
+class TransferLeadershipRequested extends TeamEvent {
+  final String teamId;
+  final String currentLeaderId;
+  final String newLeaderId;
+
+  const TransferLeadershipRequested({
+    required this.teamId,
+    required this.currentLeaderId,
+    required this.newLeaderId,
+  });
+
+  @override
+  List<Object> get props => [teamId, currentLeaderId, newLeaderId];
+}
+
 /// Reset team state (on logout)
 class TeamReset extends TeamEvent {
   const TeamReset();

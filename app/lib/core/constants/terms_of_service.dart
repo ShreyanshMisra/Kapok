@@ -1,66 +1,88 @@
-/// Terms of Service content for Kapok
-/// Extracted from: assets/docs/Kapok Terms of Service Agreement.pdf
+/// Terms of Use for Kapok.
+///
+/// DRAFT — pending legal review and final attorney sign-off. Placeholders in
+/// square brackets (e.g. `[contact email]`) must be filled in before public
+/// release.
+///
+/// Last updated: 2026-05-25
 class TermsOfService {
+  TermsOfService._();
+
+  static const String lastUpdated = '2026-05-25';
+
   static const String content = '''
-Kapok Terms of Service Agreement
+Welcome to KAPOK ("the App"), operated by A Fair Resolution, LLC ("we," "us," or "our"). By accessing or using the App, you agree to be bound by these Terms of Use. If you do not agree, please do not use the App.
 
-Welcome to Kapok
+1. Eligibility
 
-Kapok is a volunteer coordination platform designed to assist in organizing disaster response efforts. Kapok is owned by and developed under the auspices of A Fair Resolution, LLC. Volunteers built Kapok including in collaboration with A Fair Resolution, LLC. By using Kapok, you agree to these Terms of Service ("Terms"). Thank you to the dedicated volunteers involved in the Kapok project.
+You must be at least 18 years old to use the App. By using the App, you represent that you meet this age requirement.
 
-1. Acceptance of Terms
+2. Account Registration
 
-By creating an account or otherwise accessing or using the Kapok app, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree, please refrain from using Kapok.
+To access certain features, you may be required to create an account. You agree to provide accurate, current, and complete information during registration and to keep your account information up to date. You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account.
 
-2. User Responsibilities and Eligibility
+3. Information We Collect
 
-2.1 Eligibility
-Kapok is intended solely for users who are at least 18 years old. By using the app, you represent that you meet this eligibility requirement.
+We collect personal information that you provide directly to us, which may include your name, email address, phone number, location, and any other information you choose to provide. Our collection and use of your information is governed by our Privacy Policy, which is incorporated into these Terms by reference.
 
-2.2 Account Security
-Users are responsible for maintaining the confidentiality of their account credentials. Any activities performed under your account are solely your responsibility.
+4. How We Use Your Information
 
-2.3 Appropriate Use
-Users agree to use Kapok solely for volunteer coordination in disaster response settings and in compliance with all local laws and regulations. Unauthorized use of Kapok for illegal or harmful activities is strictly prohibited.
+We may use the information we collect to:
+• Provide, maintain, and improve the App
+• Create and manage your account
+• Communicate with you, including sending updates and promotional materials
+• Respond to your inquiries and provide customer support
+• Comply with legal obligations
 
-3. Disclaimer of Warranties
+5. User Conduct
 
-Kapok is provided "as-is" and "as available," with no warranties of any kind. A Fair Resolution, LLC and its volunteers disclaim any warranties, express or implied, including but not limited to the app's suitability for a specific purpose, functionality in offline environments, or non-infringement.
-
-Kapok depends on external services like Firebase and MapBox; we do not guarantee continuous, uninterrupted, or secure access to the app. Users acknowledge that features like offline-first capabilities may be limited by external conditions or third-party service availability.
-
-4. Limitation of Liability
-
-To the fullest extent permitted by law:
-
-\u2022 A Fair Resolution, LLC and its volunteers are not liable for any direct, indirect, incidental, or consequential damages arising from your use or inability to use Kapok.
-
-\u2022 Users accept responsibility for risks associated with volunteer coordination, including personal safety and task execution. Kapok is a coordination tool only and does not assume responsibility for outcomes related to user activities, decisions, or actions taken as a result of app use.
-
-5. User Data and Privacy
-
-5.1 Data Collection
-Kapok may collect data, including account information and task details, for operational purposes. Information is stored on Firebase, which adheres to privacy and security standards but may be subject to third-party risks.
-
-5.2 Offline Data
-Users understand and agree that data collected offline is stored locally on their device until an internet connection is available to synchronize it with our servers. A Fair Resolution, LLC is not responsible for data loss or corruption during this synchronization process.
-
-5.3 Personal Data Security
-A Fair Resolution, LLC prioritizes data security; however, no method of transmission over the internet or electronic storage is 100% secure. Users acknowledge and accept the inherent security risks.
+You agree not to:
+• Use the App for any unlawful purpose
+• Provide false or misleading information
+• Attempt to gain unauthorized access to the App or its systems
+• Interfere with or disrupt the App's functionality
+• Use the App to harass, abuse, or harm others
+• Reverse-engineer, decompile, or disassemble any part of the App
 
 6. Intellectual Property
 
-All content, trademarks, and logos associated with Kapok, including but not limited to the Kapok tree logo, are the property of A Fair Resolution, LLC. Users are granted a limited license to use the app for its intended purpose only.
+All content, features, and functionality of the App — including text, graphics, logos, and software — are the property of A Fair Resolution, LLC and are protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without our prior written consent.
 
-7. Modifications to Terms
+7. Third-Party Services
 
-A Fair Resolution, LLC may modify these Terms at any time. Continued use of Kapok following such changes constitutes acceptance of the updated Terms.
+The App may contain links to or integrations with third-party services (including but not limited to Firebase and Mapbox). We are not responsible for the content, privacy practices, or availability of those services. Your use of third-party services is at your own risk.
 
-8. Contact Us
+8. Disclaimer of Warranties
 
-If you have any questions or concerns regarding these Terms, please contact A Fair Resolution, LLC.
+The App is provided on an "as is" and "as available" basis, without warranties of any kind, either express or implied. We do not warrant that the App will be uninterrupted, error-free, or free of harmful components.
+
+9. Limitation of Liability
+
+TO THE FULLEST EXTENT PERMITTED BY LAW, A FAIR RESOLUTION, LLC SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE APP, REGARDLESS OF THE THEORY OF LIABILITY. NOTWITHSTANDING ANYTHING TO THE CONTRARY CONTAINED HEREIN, OUR LIABILITY TO YOU FOR ANY CAUSE REGARDLESS OF THE FORM, WILL BE LIMITED TO \$100 USD. CERTAIN STATES AND INTERNATIONAL LAWS DO NOT ALLOW LIMITATIONS ON IMPLIED WARRANTIES OR THE EXCLUSION OR LIMITATION OF CERTAIN DAMAGES. IF THESE LAWS APPLY TO YOU, SOME OR ALL OF THE ABOVE DISCLAIMERS MAY NOT APPLY TO YOU, AND YOU MAY HAVE ADDITIONAL RIGHTS.
+
+10. Indemnification
+
+You agree to indemnify and hold harmless A Fair Resolution, LLC, its officers, directors, employees, and agents from any claims, damages, losses, or expenses (including reasonable attorneys' fees) arising out of your use of the App or violation of these Terms.
+
+11. Changes to These Terms
+
+We reserve the right to modify these Terms at any time. If we make material changes, we will notify you by updating the date at the top of this page, sending you an email, or providing in-app notice. Your continued use of the App after changes are posted constitutes acceptance of the revised Terms.
+
+12. Termination
+
+We may suspend or terminate your access to the App at any time, with or without cause, and with or without notice. Upon termination, your right to use the App ceases immediately.
+
+13. Governing Law
+
+These Terms shall be governed by and construed in accordance with the laws of the Commonwealth of Massachusetts, without regard to conflict of law principles.
+
+14. Contact Us
+
+If you have questions about these Terms, please contact us at:
+
+A Fair Resolution, LLC
+[contact email — to be filled in before release]
+P.O. Box 1223
+Amherst, Massachusetts, USA 01004
 ''';
-
-  /// Private constructor to prevent instantiation
-  TermsOfService._();
 }

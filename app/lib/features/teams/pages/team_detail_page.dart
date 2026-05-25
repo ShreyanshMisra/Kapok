@@ -16,6 +16,7 @@ import '../../tasks/bloc/task_bloc.dart';
 import '../../tasks/bloc/task_event.dart';
 import '../../tasks/bloc/task_state.dart';
 import '../../../app/router.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/widgets/priority_stars.dart';
 import '../../../core/utils/role_icons.dart';
@@ -63,59 +64,86 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             builder: (context, authState) {
               if (authState is AuthAuthenticated) {
                 final isLeader = authState.user.id == widget.team.leaderId;
+                final isAdmin = authState.user.userRole == UserRole.admin;
                 final localizations = AppLocalizations.of(context);
-                
-                return PopupMenuButton<String>(
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'edit':
-                        _showEditTeamDialog();
-                        break;
-                      case 'close':
-                        _showCloseTeamDialog();
-                        break;
-                      case 'delete':
-                        _showDeleteTeamDialog();
-                        break;
-                      case 'leave':
-                        _showLeaveTeamDialog();
-                        break;
-                    }
-                  },
-                  itemBuilder: (context) {
-                    final items = <PopupMenuItem<String>>[];
-                    
-                    if (isLeader) {
-                      items.addAll([
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Text(localizations.editTeam),
-                        ),
-                        PopupMenuItem(
-                          value: 'close',
-                          child: Text(localizations.closeTeam),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text('Delete Team'),
-                        ),
-                      ]);
-                    } else {
-                      items.add(
-                        PopupMenuItem(
-                          value: 'leave',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.exit_to_app),
-                              const SizedBox(width: 8),
-                              Text(localizations.leaveTeam),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                    
-                    return items;
+
+                return BlocBuilder<TeamBloc, TeamState>(
+                  builder: (context, teamState) {
+                    return PopupMenuButton<String>(
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            _showEditTeamDialog();
+                            break;
+                          case 'close':
+                            _showCloseTeamDialog();
+                            break;
+                          case 'delete':
+                            _showDeleteTeamDialog();
+                            break;
+                          case 'leave':
+                            _showLeaveTeamDialog();
+                            break;
+                          case 'transfer':
+                            _showTransferLeadershipPickerDialog(teamState.members);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) {
+                        final items = <PopupMenuItem<String>>[];
+
+                        // Admins: only delete from here (even if they are also
+                        // this team's leaderId — otherwise leader menu appears).
+                        if (isAdmin) {
+                          items.add(
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text(localizations.deleteTeam),
+                            ),
+                          );
+                        } else if (isLeader) {
+                          items.addAll([
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text(localizations.editTeam),
+                            ),
+                            PopupMenuItem(
+                              value: 'transfer',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.swap_horiz, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(localizations.transferLeadership),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'close',
+                              child: Text(localizations.closeTeam),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text(localizations.deleteTeam),
+                            ),
+                          ]);
+                        } else {
+                          items.add(
+                            PopupMenuItem(
+                              value: 'leave',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.exit_to_app),
+                                  const SizedBox(width: 8),
+                                  Text(localizations.leaveTeam),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        return items;
+                      },
+                    );
                   },
                 );
               }
@@ -141,6 +169,13 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Team deleted successfully'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+              } else if (state is LeadershipTransferred) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).transferLeadershipSuccess),
                     backgroundColor: AppColors.primary,
                   ),
                 );
@@ -431,8 +466,52 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       ),
                     );
                   }
+                  final hasEligibleCandidate = members.any(
+                    (m) =>
+                        m.id != widget.team.leaderId &&
+                        m.userRole == UserRole.teamLeader,
+                  );
+                  final loc = AppLocalizations.of(context);
                   return Column(
-                    children: members.map((member) => _buildExpandableMemberCard(member)).toList(),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_isCurrentUserLeader()) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.07),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.swap_horiz,
+                                  size: 16, color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  hasEligibleCandidate
+                                      ? loc.transferLeadershipDiscoverHintEligible
+                                      : loc.transferLeadershipNoEligibleExplanation,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(color: AppColors.primary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      ...members.map((member) => _buildExpandableMemberCard(member)),
+                    ],
                   );
                 } else if (state is TeamError) {
                   return Padding(
@@ -697,6 +776,31 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       ),
                     ],
                   ),
+                  // Transfer leadership — only Team Leader account type can receive
+                  if (member.userRole == UserRole.teamLeader) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showTransferLeadershipDialog(member),
+                        icon: const Icon(Icons.swap_horiz),
+                        label: Text(AppLocalizations.of(context).makeTeamLeader.toUpperCase()),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)
+                          .transferLeadershipMemberNotEligibleSubtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.55),
+                          ),
+                    ),
+                  ],
                 ],
               ],
             ),
@@ -988,6 +1092,125 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 foregroundColor: Colors.white,
               ),
               child: Text(localizations.remove.toUpperCase()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Confirm + dispatch transfer leadership for a specific member.
+  void _showTransferLeadershipDialog(UserModel member) {
+    final localizations = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(localizations.transferLeadership),
+          content: Text(
+            '${localizations.confirmTransferLeadership}\n\n'
+            '${member.name}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                final authState = context.read<AuthBloc>().state;
+                if (authState is AuthAuthenticated) {
+                  context.read<TeamBloc>().add(
+                    TransferLeadershipRequested(
+                      teamId: widget.team.id,
+                      currentLeaderId: authState.user.id,
+                      newLeaderId: member.id,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(localizations.transferLeadership.toUpperCase()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Picker dialog launched from the AppBar overflow menu — lists all eligible
+  /// candidates (teamLeader role, in memberIds, not current leader).
+  void _showTransferLeadershipPickerDialog(List<UserModel> members) {
+    final localizations = AppLocalizations.of(context);
+    final eligible = members
+        .where(
+          (m) =>
+              m.id != widget.team.leaderId &&
+              m.userRole == UserRole.teamLeader,
+        )
+        .toList();
+
+    if (eligible.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: Text(localizations.transferLeadership),
+            content: Text(localizations.transferLeadershipNoEligibleExplanation),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(localizations.cancel),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(localizations.transferLeadership),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizations.confirmTransferLeadership,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                ...eligible.map(
+                  (m) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                      child: Icon(Icons.person, color: AppColors.primary, size: 20),
+                    ),
+                    title: Text(m.name),
+                    subtitle: Text(m.email),
+                    onTap: () {
+                      Navigator.of(dialogContext).pop();
+                      _showTransferLeadershipDialog(m);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(localizations.cancel),
             ),
           ],
         );

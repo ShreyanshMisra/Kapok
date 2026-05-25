@@ -995,6 +995,14 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       );
                                     },
                                   ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).doNotEnterPersonalNamesNote,
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodySmall,
+                                  ),
                                 ],
                               ),
                             ),

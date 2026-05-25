@@ -195,6 +195,7 @@ features/teams/
     ├── teams_page.dart
     ├── create_team_page.dart
     ├── join_team_page.dart
+    ├── edit_team_page.dart
     └── team_detail_page.dart
 ```
 
@@ -228,7 +229,9 @@ features/profile/
 └── pages/
     ├── profile_page.dart
     ├── edit_profile_page.dart
-    └── settings_page.dart
+    ├── settings_page.dart
+    ├── admin_permissions_page.dart
+    └── analytics_page.dart
 ```
 
 ### Onboarding Feature

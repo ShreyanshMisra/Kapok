@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import '../../../app/legal_document_page.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/privacy_policy.dart';
+import '../../../core/constants/terms_of_service.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../core/services/hive_service.dart';
-import '../../../core/services/sync_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 import '../../auth/bloc/auth_state.dart';
@@ -28,20 +32,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
-  bool _isSyncing = false;
-  String? _lastSyncTimestamp;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshLastSync();
-  }
-
-  void _refreshLastSync() {
-    setState(() {
-      _lastSyncTimestamp = SyncService.instance.getLastSyncTimestamp();
-    });
-  }
 
   int _estimateStorageKB() {
     try {
@@ -145,32 +135,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 16),
 
-          // Sync section
-          _buildSection('Sync', [
-            ListTile(
-              leading: const Icon(Icons.sync),
-              title: const Text('Last Synced'),
-              subtitle: Text(
-                _lastSyncTimestamp != null
-                    ? _formatTimestamp(_lastSyncTimestamp!)
-                    : 'Never synced',
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
-              ),
-              trailing: _isSyncing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.refresh),
-                      tooltip: 'Sync now',
-                      onPressed: _handleRetrySync,
-                    ),
-            ),
-          ]),
-          const SizedBox(height: 16),
-
           // Data section
           _buildSection(AppLocalizations.of(context).data, [
             ListTile(
@@ -218,15 +182,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 _showTermsOfService();
               },
             ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.admin_panel_settings),
-              title: Text(AppLocalizations.of(context).administratorPermissions),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).pushNamed('/admin-permissions');
-              },
-            ),
           ]),
           const SizedBox(height: 24),
 
@@ -240,6 +195,27 @@ class _SettingsPageState extends State<SettingsPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Delete account button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _showDeleteAccountDialog,
+              icon: const Icon(Icons.delete_forever),
+              label: Text(
+                AppLocalizations.of(context).deleteAccount.toUpperCase(),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: BorderSide(color: AppColors.error),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -411,51 +387,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  String _formatTimestamp(String ts) {
-    try {
-      final dt = DateTime.parse(ts).toLocal();
-      final now = DateTime.now();
-      final diff = now.difference(dt);
-      if (diff.inMinutes < 1) return 'Just now';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      return '${diff.inDays}d ago';
-    } catch (_) {
-      return ts;
-    }
-  }
-
-  Future<void> _handleRetrySync() async {
-    setState(() => _isSyncing = true);
-    try {
-      await SyncService.instance.syncPendingChanges();
-
-      if (mounted) {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated) {
-          final userId = authState.user.id;
-          context.read<TeamBloc>().add(LoadUserTeams(userId: userId));
-          context.read<TaskBloc>().add(LoadTasksRequested(userId: userId));
-        }
-      }
-
-      _refreshLastSync();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sync completed successfully')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sync failed: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSyncing = false);
-    }
-  }
-
   /// Show clear cache dialog
   void _showClearCacheDialog() {
     final localizations = AppLocalizations.of(context);
@@ -483,7 +414,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(localizations.cacheClearedSuccessfully)),
                   );
-                  setState(() => _lastSyncTimestamp = null);
                 }
               } catch (e) {
                 if (mounted) {
@@ -501,48 +431,124 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Show privacy policy
   void _showPrivacyPolicy() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.privacyPolicy),
-        content: const SingleChildScrollView(
-          child: Text(
-            'Privacy Policy content will be implemented here. This will include information about how we collect, use, and protect your data.',
-          ),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LegalDocumentPage(
+          title: AppLocalizations.of(context).privacyPolicy,
+          body: PrivacyPolicy.content,
+          lastUpdated: PrivacyPolicy.lastUpdated,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(localizations.close),
-          ),
-        ],
       ),
     );
   }
 
-  /// Show terms of service
   void _showTermsOfService() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.termsOfService),
-        content: const SingleChildScrollView(
-          child: Text(
-            'Terms of Service content will be implemented here. This will include the terms and conditions for using the Kapok app.',
-          ),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LegalDocumentPage(
+          title: AppLocalizations.of(context).termsOfService,
+          body: TermsOfService.content,
+          lastUpdated: TermsOfService.lastUpdated,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(localizations.close),
-          ),
-        ],
       ),
     );
+  }
+
+  /// Prompts the user to type "DELETE" before destroying their account.
+  Future<void> _showDeleteAccountDialog() async {
+    final localizations = AppLocalizations.of(context);
+    final controller = TextEditingController();
+    var canConfirm = false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(localizations.deleteAccountWarningTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(localizations.deleteAccountWarningBody),
+              const SizedBox(height: 16),
+              Text(
+                localizations.deleteAccountConfirmPrompt,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller,
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: InputDecoration(
+                  hintText: localizations.deleteAccountConfirmWord,
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  final next = value.trim() ==
+                      localizations.deleteAccountConfirmWord;
+                  if (next != canConfirm) {
+                    setDialogState(() => canConfirm = next);
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton.icon(
+              onPressed: canConfirm
+                  ? () => Navigator.of(dialogContext).pop(true)
+                  : null,
+              icon: const Icon(Icons.delete_forever),
+              label: Text(localizations.deleteAccount.toUpperCase()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: AppColors.error.withOpacity(0.4),
+                disabledForegroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.dispose();
+    if (confirmed != true || !mounted) return;
+    _performAccountDeletion();
+  }
+
+  void _performAccountDeletion() {
+    final messenger = ScaffoldMessenger.of(context);
+    final localizations = AppLocalizations.of(context);
+    // Reset BLoCs so streams stop hitting Firestore before the user is gone.
+    try {
+      context.read<TeamBloc>().add(TeamReset());
+      context.read<TaskBloc>().add(TaskReset());
+      context.read<MapBloc>().add(MapReset());
+    } catch (_) {/* ignore */}
+
+    final authBloc = context.read<AuthBloc>();
+    late final StreamSubscription<AuthState> sub;
+    sub = authBloc.stream.listen((next) {
+      if (next is AuthUnauthenticated) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(localizations.deleteAccountSuccess)),
+        );
+        if (mounted) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/login', (_) => false);
+        }
+        sub.cancel();
+      } else if (next is AuthError) {
+        messenger.showSnackBar(SnackBar(content: Text(next.message)));
+        sub.cancel();
+      }
+    });
+    authBloc.add(const DeleteAccountRequested());
   }
 
   /// Show sign out confirmation dialog

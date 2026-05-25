@@ -101,6 +101,20 @@ class TeamDeleted extends TeamState {
   List<Object?> get props => [teamId, teams, members];
 }
 
+/// Leadership transferred state
+class LeadershipTransferred extends TeamState {
+  final TeamModel team;
+
+  const LeadershipTransferred({
+    required this.team,
+    super.teams,
+    super.members,
+  });
+
+  @override
+  List<Object?> get props => [team, teams, members];
+}
+
 /// Error state
 class TeamError extends TeamState {
   final String message;

@@ -15,7 +15,11 @@ The authentication system handles user registration, login, password reset, and 
 5. User profile fetched from Firestore
 6. Profile cached locally in Hive
 7. `AuthAuthenticated` state emitted
-8. App navigates to home or onboarding based on profile completeness
+8. Navigation is determined by profile state:
+   - **First-ever login:** navigate to `/about` (About page as post-login landing)
+   - **Needs onboarding** (no role set, or leader/member without `teamId`): navigate to `/role-selection`
+   - **New signup:** route by role — Team Leader → Create Team, Team Member → Join Team, Admin → Home
+   - **Otherwise:** navigate to `/home`
 
 ### Registration Flow
 
@@ -107,7 +111,7 @@ The authentication system handles user registration, login, password reset, and 
 | `AuthAuthenticated` | user, needsOnboarding, isNewSignup | User logged in |
 | `AuthUnauthenticated` | none | No user logged in |
 | `AuthError` | message | Operation failed |
-| `PasswordResetSent` | none | Reset email sent |
+| `PasswordResetSent` | email | Reset email sent |
 | `ProfileUpdated` | user | Profile updated |
 
 ### Onboarding Check Logic
@@ -179,16 +183,7 @@ Users are stored in Firestore at `users/{userId}`:
 
 ## Error Handling
 
-Firebase error codes are mapped to user-friendly messages:
-
-| Firebase Code | User Message |
-|---------------|--------------|
-| `user-not-found` | "This email is not registered. Please sign up first." |
-| `wrong-password` | "Invalid password. Please try again." |
-| `invalid-credential` | "Invalid email or password." |
-| `email-already-in-use` | "An account already exists with this email." |
-| `weak-password` | "Password is too weak." |
-| `invalid-email` | "Please enter a valid email address." |
+Firebase error codes are mapped to user-friendly messages via `_firebaseAuthMessage` in `auth_repository.dart`. Refer to that method as the source of truth for exact wording; the mapped codes include `user-not-found`, `wrong-password`, `invalid-credential`, `email-already-in-use`, `weak-password`, and `invalid-email`.
 
 ## Form Validation
 

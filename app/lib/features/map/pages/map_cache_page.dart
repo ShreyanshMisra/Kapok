@@ -64,7 +64,7 @@ class _MapCachePageState extends State<MapCachePage> {
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
-        title: const Text('Maps Stored Offline Temporarily'),
+        title: const Text('Maps Stored Offline'),
         centerTitle: true,
         elevation: 0,
         actions: const [KapokLogo()],
@@ -105,6 +105,16 @@ class _MapCachePageState extends State<MapCachePage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'These are your cached maps which are stored offline temporarily. They are downloaded when you zoom into a new location in Maps so that you can access this map while you are not connected to the internet. You can delete maps stored offline using Clear Cache in settings to free up storage.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                  ),
                   // Latest region card
                   Card(
                     elevation: 2,

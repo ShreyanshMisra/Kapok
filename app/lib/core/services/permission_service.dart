@@ -121,17 +121,27 @@ class PermissionService {
     return false;
   }
 
-  /// Check if user can remove a member from team
+  /// Check if user can remove a member from team.
+  /// Only the assigned team leader (team.leaderId) may remove members —
+  /// a global teamLeader role does NOT grant this right in other teams.
   bool canRemoveMember(UserModel user, TeamModel team, String memberId) {
-    if (user.userRole == UserRole.admin) {
-      return true; // Admins can remove any member
-    }
-    if (user.userRole == UserRole.teamLeader && 
-        team.leaderId == user.id && 
-        memberId != user.id) {
-      return true; // Team leader can remove members (not themselves)
-    }
-    return false;
+    if (team.leaderId != user.id) return false; // must be this team's leader
+    if (memberId == user.id) return false; // cannot remove yourself (the leader)
+    if (memberId == team.leaderId) return false; // cannot remove the leader
+    return true;
+  }
+
+  /// Check if user can transfer leadership of a team.
+  /// Only the currently assigned team leader may initiate a transfer.
+  bool canTransferLeadership(UserModel user, TeamModel team) {
+    return user.id == team.leaderId;
+  }
+
+  /// Check if user can delete a team.
+  /// Admin can delete any team; team leader can delete only their own team.
+  bool canDeleteTeam(UserModel user, TeamModel team) {
+    if (user.userRole == UserRole.admin) return true;
+    return user.id == team.leaderId;
   }
 
   /// Check if user can close/deactivate a team

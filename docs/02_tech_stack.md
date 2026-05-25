@@ -66,6 +66,12 @@
 | `share_plus` | ^10.1.1 | Share functionality |
 | `url_launcher` | ^6.2.5 | Open URLs |
 | `flutter_dotenv` | ^5.1.0 | Environment variables |
+| `fl_chart` | — | Charts for analytics page |
+| `pdf` | — | PDF generation for exports |
+| `app_links` | — | Deep link handling |
+| `badges` | — | Notification/count badges |
+| `flutter_local_notifications` | — | Local notification scaffolding |
+| `confetti` | — | Celebration animations |
 
 ### Development Dependencies
 | Package | Version | Purpose |

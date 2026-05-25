@@ -13,6 +13,16 @@ firebase/functions/.env
 *.pem
 *.json
 
+# Firebase mobile config (re-downloaded from Firebase Console per developer;
+# google-services.json is also caught by *.json above)
+app/ios/Runner/GoogleService-Info.plist
+app/android/app/google-services.json
+
+# Android signing keys
+app/android/key.properties
+app/android/**/*.jks
+app/android/**/*.keystore
+
 # IDE and OS files
 .vscode/
 .idea/

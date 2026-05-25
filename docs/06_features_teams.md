@@ -114,10 +114,11 @@ Detailed team view with management capabilities.
    - Tap to view task detail
 
 **Leader Actions (Popup Menu):**
-- Edit Team (placeholder)
+- Edit Team → opens full-screen `EditTeamPage`
 - Close Team → Deactivates team
 - Delete Team → Permanent with confirmation
 - Remove Member → Confirmation dialog
+- Share team code → uses `share_plus` share sheet (available on the team detail page, not the post-create dialog)
 
 **Member Actions:**
 - Leave Team → Confirmation dialog

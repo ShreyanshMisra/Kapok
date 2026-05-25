@@ -362,6 +362,33 @@ class AuthRepository {
     }
   }
 
+  /// Permanently deletes the signed-in user's account: anonymizes their tasks,
+  /// removes them from team membership, deletes the Firestore user doc, clears
+  /// the local Hive cache, and finally deletes the Firebase Auth user.
+  ///
+  /// Throws [AuthException] if the user leads an active team (transfer
+  /// leadership first) or if Firebase Auth requires a recent sign-in.
+  Future<void> deleteAccount() async {
+    final firebaseUser = _firebaseSource.currentUser;
+    if (firebaseUser == null) {
+      throw AuthException(message: 'You are not signed in.');
+    }
+
+    try {
+      Logger.auth('Deleting account: ${firebaseUser.uid}');
+      await _firebaseSource.deleteAccount(firebaseUser.uid);
+      await _hiveSource.deleteUser(firebaseUser.uid);
+      Logger.auth('Account deletion completed');
+    } catch (e) {
+      Logger.auth('Account deletion failed', error: e);
+      if (e is AuthException) rethrow;
+      throw AuthException(
+        message: 'Failed to delete account. Please try again.',
+        originalError: e,
+      );
+    }
+  }
+
   /// Check if user is authenticated
   bool get isAuthenticated => _firebaseSource.currentUser != null;
 

@@ -41,7 +41,7 @@ Each BLoC follows this structure:
 ### Provider Pattern
 
 `ChangeNotifier` providers manage UI preferences:
-- `ThemeProvider`: Light/Dark/System theme modes
+- `ThemeProvider`: Light / Dark / Default theme modes (the "Default" option follows the device setting; user-facing label is "Default", not "System")
 - `LanguageProvider`: English/Spanish locale selection
 
 ## Dependency Injection
@@ -90,6 +90,8 @@ All navigation uses named routes defined in `lib/app/router.dart`:
 | `/settings` | SettingsPage |
 | `/onboarding` | OnboardingPage |
 | `/about` | AboutPage |
+| `/analytics` | AnalyticsPage |
+| `/admin-permissions` | AdminPermissionsPage |
 
 ### Route Parameters
 
@@ -144,11 +146,15 @@ Initialize Core Services
     ▼
 SplashWrapper
     │
-    ├──▶ SplashScreen (3 seconds)
+    ├──▶ SplashScreen (~500ms minimum)
     │
     ├──▶ OnboardingPage (if first launch)
     │
+    ├──▶ AboutPage (on first login, as post-login landing)
+    │
     └──▶ KapokApp (main app with BLoC providers)
+
+Manual sync (Settings → Sync) also re-fetches teams and tasks from Firebase by dispatching `LoadUserTeams` and `LoadTasksRequested` after `SyncService.syncPendingChanges()` completes, so data is pulled back from the cloud even when the local sync queue is empty.
 ```
 
 ## Error Handling

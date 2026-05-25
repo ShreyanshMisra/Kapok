@@ -21,9 +21,9 @@ import '../features/map/pages/map_test_page.dart';
 import '../features/map/pages/map_cache_page.dart';
 import '../features/onboarding/pages/onboarding_page.dart';
 import '../features/analytics/pages/analytics_page.dart';
-import '../features/profile/pages/admin_permissions_page.dart';
 import 'home_page.dart';
 import 'about_page.dart';
+import 'acknowledgements_page.dart';
 
 /// App router for navigation
 class AppRouter {
@@ -33,6 +33,7 @@ class AppRouter {
   static const String roleSelection = '/role-selection';
   static const String home = '/home';
   static const String about = '/about';
+  static const String acknowledgements = '/acknowledgements';
   static const String teams = '/teams';
   static const String createTeam = '/create-team';
   static const String joinTeam = '/join-team';
@@ -49,7 +50,6 @@ class AppRouter {
   static const String mapCache = '/map-cache';
   static const String onboarding = '/onboarding';
   static const String analytics = '/analytics';
-  static const String adminPermissions = '/admin-permissions';
 
   /// Generate routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -95,6 +95,12 @@ class AppRouter {
       case about:
         return MaterialPageRoute(
           builder: (_) => const AboutPage(),
+          settings: settings,
+        );
+
+      case acknowledgements:
+        return MaterialPageRoute(
+          builder: (_) => const AcknowledgementsPage(),
           settings: settings,
         );
       
@@ -197,12 +203,6 @@ class AppRouter {
       case analytics:
         return MaterialPageRoute(
           builder: (_) => const AnalyticsPage(),
-          settings: settings,
-        );
-
-      case adminPermissions:
-        return MaterialPageRoute(
-          builder: (_) => const AdminPermissionsPage(),
           settings: settings,
         );
 
