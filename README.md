@@ -17,6 +17,7 @@
 **Kapok** is a mobile application for coordinating volunteer disaster relief teams. Built with Flutter and Firebase, it enables organizations to efficiently manage tasks, teams, and field operations during crisis response, even in areas with limited connectivity.
 
 Developed for the **A Fair Resolution, LLC**, led by **Dr. Leah Wing**, Professor of Legal Studies. The application will be handed off to the RN Response Network (RNRN), a national network of direct-care RNs powered by National Nurses United, that coordinates sending volunteers to disaster stricken areas where and when they are needed most.
+
 ---
 
 ## Features
