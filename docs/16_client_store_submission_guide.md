@@ -104,7 +104,7 @@ In **Play Console → Users and permissions**, add the engineer with **Admin** a
 
 A few one-time decisions are yours to make. The engineer needs these *before* building (they feed §15's bundle-ID and Firebase work):
 
-- **Reverse-DNS app identifier.** ✅ Decided: **`com.afairresolution.kapok`** (iOS and Android). App Store Connect record: Apple ID `6807118290`, SKU `kapok-afairresolution`, team A Fair Resolution, LLC (`9M48UX3QW7`). This becomes permanent on Google Play and effectively permanent on Apple — **it cannot be changed after first publish.** Confirm the exact string with the engineer. Ideally it's based on a domain you own (§6).
+- **Reverse-DNS app identifier.** The engineer recommends something like `org.afairresolution.kapok` or `com.afairresolution.kapok`. This becomes permanent on Google Play and effectively permanent on Apple — **it cannot be changed after first publish.** Confirm the exact string with the engineer. Ideally it's based on a domain you own (§6).
 - **Public app name.** "Kapok" — confirm this is final and that you have the right to use it (check it's not trademarked by someone else in the app categories; a quick search of both stores for "Kapok" is prudent).
 - **Developer/publisher display name** shown on both listings — confirm "A Fair Resolution, LLC" or a chosen public brand name.
 - **Price & countries:** Confirm Kapok is **free** and decide which **countries/regions** it's distributed in (default: all available).
