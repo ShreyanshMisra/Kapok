@@ -28,6 +28,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Kapok uses your location only while the app is open, to create and display disaster response tasks on the map. Kapok does not track your location in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Kapok needs your location to create and display disaster response tasks on the map. This helps coordinate emergency response efforts by showing task locations to your team members.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
