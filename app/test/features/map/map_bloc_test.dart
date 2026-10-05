@@ -47,7 +47,8 @@ void main() {
 
   tearDown(() async {
     await bloc.close();
-    await progressController.close();
+    // Not awaited: close() on a never-listened controller never completes.
+    unawaited(progressController.close());
   });
 
   blocTest<MapBloc, MapState>(
@@ -60,8 +61,8 @@ void main() {
       return bloc;
     },
     act: (bloc) => bloc.add(const MapStarted()),
+    // Cache-first: a warm cache emits MapReady immediately, no MapLoading.
     expect: () => [
-      const MapLoading(),
       MapReady(region: region, isOfflineMode: false, lastCamera: null),
     ],
   );

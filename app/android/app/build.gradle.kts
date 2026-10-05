@@ -11,22 +11,25 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Read MAPBOX_ACCESS_TOKEN from (in order): a project-local key.properties file,
-// the environment, and finally an empty string. The empty fallback keeps debug
-// builds working when a developer hasn't set the token yet — the map will fail
-// to authenticate at runtime, but the build won't break.
+// app/android/key.properties (gitignored) holds release signing credentials and
+// optionally MAPBOX_ACCESS_TOKEN. See docs/15_store_readiness_evaluation.md §2.2.
+val keyProperties: Properties? = rootProject.file("key.properties")
+    .takeIf { it.exists() }
+    ?.let { file -> Properties().apply { file.inputStream().use { load(it) } } }
+
+// Read MAPBOX_ACCESS_TOKEN from (in order): key.properties, the environment,
+// a Gradle property, and finally an empty string. The empty fallback keeps
+// debug builds working when a developer hasn't set the token yet — the map will
+// fail to authenticate at runtime, but the build won't break.
 val mapboxAccessToken: String = run {
-    val localProps = rootProject.file("../app/android/key.properties")
-        .takeIf { it.exists() }
-        ?.let { Properties().apply { load(it.inputStream()) } }
-    localProps?.getProperty("MAPBOX_ACCESS_TOKEN")
+    keyProperties?.getProperty("MAPBOX_ACCESS_TOKEN")
         ?: System.getenv("MAPBOX_ACCESS_TOKEN")
         ?: providers.gradleProperty("MAPBOX_ACCESS_TOKEN").orNull
         ?: ""
 }
 
 android {
-    namespace = "org.afairresolution.kapok"
+    namespace = "com.afairresolution.kapok"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -34,7 +37,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -42,7 +44,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.afairresolution.kapok"
+        applicationId = "com.afairresolution.kapok"
         // mapbox_maps_flutter requires minSdk 21; multiDex required for large dependency graphs
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
@@ -52,11 +54,24 @@ android {
         manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] = mapboxAccessToken
     }
 
+    signingConfigs {
+        if (keyProperties?.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = file(keyProperties.getProperty("storeFile"))
+                storePassword = keyProperties.getProperty("storePassword")
+                keyAlias = keyProperties.getProperty("keyAlias")
+                keyPassword = keyProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Uses the upload key from key.properties when present. Without it,
+            // falls back to debug keys so `flutter run --release` still works
+            // locally — Play Console rejects debug-signed bundles.
+            signingConfig = signingConfigs.findByName("release")
+                ?: signingConfigs.getByName("debug")
         }
     }
 }
@@ -67,8 +82,4 @@ dependencies {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

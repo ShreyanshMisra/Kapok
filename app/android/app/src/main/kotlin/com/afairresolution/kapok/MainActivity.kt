@@ -1,4 +1,4 @@
-package org.afairresolution.kapok
+package com.afairresolution.kapok
 
 import io.flutter.embedding.android.FlutterActivity
 

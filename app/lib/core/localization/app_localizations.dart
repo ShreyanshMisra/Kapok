@@ -119,6 +119,7 @@ class AppLocalizations {
   String get allStatuses => _getString('allStatuses');
   String get allPriorities => _getString('allPriorities');
   String get unassignedTasks => _getString('unassignedTasks');
+  String get deletedUser => _getString('deletedUser');
   String get clearFilters => _getString('clearFilters');
   String get filterByStatus => _getString('filterByStatus');
   String get filterByPriority => _getString('filterByPriority');
@@ -562,6 +563,7 @@ class AppLocalizations {
         'allStatuses': 'All Statuses',
         'allPriorities': 'All Priorities',
         'unassignedTasks': 'Unassigned',
+        'deletedUser': 'Deleted user',
         'clearFilters': 'Clear Filters',
         'filterByStatus': 'Filter by Status',
         'filterByPriority': 'Filter by Priority',
@@ -772,14 +774,14 @@ class AppLocalizations {
         'ourMissionDescription': 'Kapok is designed to help coordinate volunteers for disaster response efforts. The app enables teams to work together efficiently during crisis situations by providing real-time task management, team coordination, and location-based services.',
         'nctdrDescription': 'The National Center for Technology and Dispute Resolution (NCTDR) is an organization that supports developing technology for conflict management. NCTDR works to create innovative solutions that help communities resolve disputes and coordinate resources during challenging times.',
         'keyFeatures': 'Key Features',
-        'keyFeaturesDescription': '• Real-time task management and assignment\n• Team creation and member coordination\n• Location-based task mapping\n• Offline-first functionality for remote areas\n• Bilingual support (English and Spanish)\n• Role-based access control\n• Secure authentication (end-to-end encrypted) and data protection',
+        'keyFeaturesDescription': '• Real-time task management and assignment\n• Team creation and member coordination\n• Location-based task mapping\n• Offline-first functionality for remote areas\n• Bilingual support (English and Spanish)\n• Role-based access control\n• Secure authentication and encrypted data transfer',
         'technology': 'Technology',
         'technologyDescription': 'Kapok is built using mobile technologies including Flutter for cross-platform development, Firebase for backend services, and Mapbox for location services. The app is designed to work even in areas with limited Internet connectivity.',
         'contactAndSupport': 'Contact & Support',
         'contactAndSupportDescription': 'For technical support, feature requests, or general inquiries, please contact A Fair Resolution, LLC.',
         'builtWithLove': 'Built with ❤️ for disaster response coordination.',
         'legal': 'Legal',
-        'legalDescription': '© 2006 A Fair Resolution, LLC. All rights reserved. Kapok is owned by A Fair Resolution, LLC. Kapok is designed to assist in disaster response coordination. Users are responsible for their data and usage of the app and should comply with all applicable laws.',
+        'legalDescription': '© 2026 A Fair Resolution, LLC. All rights reserved. Kapok is owned by A Fair Resolution, LLC. Kapok is designed to assist in disaster response coordination. Users are responsible for their data and usage of the app and should comply with all applicable laws.',
         'acknowledgements': 'Acknowledgements',
         'acknowledgementsSubtitle': 'The people who made Kapok possible',
         'acknowledgementsIntro': 'Thank you to all who inspired and assisted in the creation of Kapok: multidisciplinary and multilingual volunteers from many nations: software developers, RNs, online dispute resolution experts, attorneys, and hurricane survivor family members. Inspired by the dedication and resilience of first responders and survivors, we seek to harness technology to assist in disaster prevention and response.',
@@ -996,6 +998,7 @@ class AppLocalizations {
         'allStatuses': 'Todos los Estados',
         'allPriorities': 'Todas las Prioridades',
         'unassignedTasks': 'Sin Asignar',
+        'deletedUser': 'Usuario eliminado',
         'clearFilters': 'Limpiar Filtros',
         'filterByStatus': 'Filtrar por Estado',
         'filterByPriority': 'Filtrar por Prioridad',
@@ -1206,14 +1209,14 @@ class AppLocalizations {
         'ourMissionDescription': 'Kapok está diseñado para ayudar a coordinar voluntarios para esfuerzos de respuesta a desastres. La aplicación permite que los equipos trabajen juntos de manera eficiente durante situaciones de crisis al proporcionar gestión de tareas en tiempo real, coordinación de equipos y servicios basados en ubicación.',
         'nctdrDescription': 'El Centro Nacional de Tecnología y Resolución de Disputas (NCTDR) es una organización que apoya el desarrollo de tecnología para la gestión de conflictos. NCTDR trabaja para crear soluciones innovadoras que ayuden a las comunidades a resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'keyFeatures': 'Características Clave',
-        'keyFeaturesDescription': '• Gestión y asignación de tareas en tiempo real\n• Creación de equipos y coordinación de miembros\n• Mapeo de tareas basado en ubicación\n• Funcionalidad sin conexión para áreas remotas\n• Soporte bilingüe (Inglés y Español)\n• Control de acceso basado en roles\n• Autenticación segura (cifrado de extremo a extremo) y protección de datos',
+        'keyFeaturesDescription': '• Gestión y asignación de tareas en tiempo real\n• Creación de equipos y coordinación de miembros\n• Mapeo de tareas basado en ubicación\n• Funcionalidad sin conexión para áreas remotas\n• Soporte bilingüe (Inglés y Español)\n• Control de acceso basado en roles\n• Autenticación segura y transferencia de datos cifrada',
         'technology': 'Tecnología',
         'technologyDescription': 'Kapok está construido usando tecnologías móviles incluyendo Flutter para desarrollo multiplataforma, Firebase para servicios backend, y Mapbox para servicios de ubicación. La aplicación está diseñada para funcionar en áreas con conectividad limitada a Internet.',
         'contactAndSupport': 'Contacto y Soporte',
         'contactAndSupportDescription': 'Para soporte técnico, solicitudes de funciones o consultas generales, por favor contacte a A Fair Resolution, LLC.',
         'builtWithLove': 'Construido con ❤️ para coordinación de respuesta a desastres.',
         'legal': 'Legal',
-        'legalDescription': '© 2006 A Fair Resolution, LLC. Todos los derechos reservados. Kapok es propiedad de A Fair Resolution, LLC. Kapok está diseñado para asistir en la coordinación de respuesta a desastres. Los usuarios son responsables de sus datos y uso de la aplicación y deben cumplir con todas las leyes aplicables.',
+        'legalDescription': '© 2026 A Fair Resolution, LLC. Todos los derechos reservados. Kapok es propiedad de A Fair Resolution, LLC. Kapok está diseñado para asistir en la coordinación de respuesta a desastres. Los usuarios son responsables de sus datos y uso de la aplicación y deben cumplir con todas las leyes aplicables.',
         'acknowledgements': 'Agradecimientos',
         'acknowledgementsSubtitle': 'Las personas que hicieron Kapok posible',
         'acknowledgementsIntro': 'Gracias a todos quienes inspiraron y asistieron en la creación de Kapok: voluntarios multidisciplinarios y multilingües de muchas naciones: desarrolladores de software, enfermeras, expertos en resolución de disputas en línea, abogados y familiares sobrevivientes de huracanes. Inspirados por la dedicación y resiliencia de los socorristas y sobrevivientes, buscamos aprovechar la tecnología para asistir en la prevención y respuesta ante desastres.',
