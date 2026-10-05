@@ -11,8 +11,9 @@ import '../../../core/widgets/priority_stars.dart';
 /// long-press preview, and quick-assign for unassigned tasks.
 class EnhancedTaskCard extends StatelessWidget {
   final TaskModel task;
-  final String assigneeDisplay;
-  final String teamDisplay;
+  /// Resolved names; null while unknown, in which case only the ID shows.
+  final String? assigneeName;
+  final String? teamName;
   final VoidCallback onTap;
   final VoidCallback? onComplete;
   final VoidCallback? onShowOptions;
@@ -23,8 +24,8 @@ class EnhancedTaskCard extends StatelessWidget {
   const EnhancedTaskCard({
     super.key,
     required this.task,
-    required this.assigneeDisplay,
-    required this.teamDisplay,
+    this.assigneeName,
+    this.teamName,
     required this.onTap,
     this.onComplete,
     this.onShowOptions,
@@ -204,13 +205,7 @@ class EnhancedTaskCard extends StatelessWidget {
                     Icon(Icons.group_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(
-                        teamDisplay,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: _NameWithId(name: teamName, id: task.teamId),
                     ),
                     Icon(Icons.access_time, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     const SizedBox(width: 4),
@@ -259,7 +254,7 @@ class EnhancedTaskCard extends StatelessWidget {
                         radius: 12,
                         backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                         child: Text(
-                          assigneeDisplay.isNotEmpty ? assigneeDisplay[0].toUpperCase() : '?',
+                          (assigneeName?.isNotEmpty ?? false) ? assigneeName![0].toUpperCase() : '?',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 12,
@@ -269,13 +264,7 @@ class EnhancedTaskCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          assigneeDisplay,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        child: _NameWithId(name: assigneeName, id: task.assignedTo!),
                       ),
                     ],
                   ],
@@ -407,12 +396,14 @@ class EnhancedTaskCard extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.group_outlined),
                 title: Text(loc.teamName),
-                subtitle: Text(teamDisplay),
+                subtitle: _NameWithId(name: teamName, id: task.teamId),
               ),
               ListTile(
                 leading: const Icon(Icons.person_outline),
                 title: Text(loc.assignedToLabel),
-                subtitle: Text(_isUnassigned ? loc.unassignedTasks : assigneeDisplay),
+                subtitle: _isUnassigned
+                    ? Text(loc.unassignedTasks)
+                    : _NameWithId(name: assigneeName, id: task.assignedTo!),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -433,6 +424,45 @@ class EnhancedTaskCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Shows a resolved [name] prominently with the raw [id] as muted secondary
+/// text. Falls back to the ID alone while the name is unknown.
+class _NameWithId extends StatelessWidget {
+  final String? name;
+  final String id;
+
+  const _NameWithId({required this.name, required this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final idStyle = theme.textTheme.labelSmall?.copyWith(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+      fontFamily: 'monospace',
+      fontSize: 10,
+    );
+    final hasName = name != null && name!.isNotEmpty && name != id;
+    return Text.rich(
+      TextSpan(
+        children: [
+          if (hasName) ...[
+            TextSpan(
+              text: name,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.87),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const TextSpan(text: '  '),
+          ],
+          TextSpan(text: id, style: idStyle),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

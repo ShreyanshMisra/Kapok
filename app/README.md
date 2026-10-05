@@ -18,9 +18,9 @@ iOS Simulator / Android Emulator if you have them installed.
 
 ## Identifiers
 
-- iOS bundle ID: `org.afairresolution.kapok`
-- Android applicationId / namespace: `org.afairresolution.kapok`
-- Kotlin package: `org.afairresolution.kapok`
+- iOS bundle ID: `com.afairresolution.kapok`
+- Android applicationId / namespace: `com.afairresolution.kapok`
+- Kotlin package: `com.afairresolution.kapok`
 
 If you ever rename these, you must also re-register the platform in Firebase
 Console (`build-kapok` project → Project settings → Your apps), re-download

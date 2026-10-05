@@ -1,0 +1,8 @@
+# Copy to key.properties (gitignored) and fill in. Never commit the real file
+# or the keystore. See docs/15_store_readiness_evaluation.md §2.2.
+storeFile=/absolute/path/to/kapok-upload.jks
+storePassword=
+keyAlias=upload
+keyPassword=
+# Mapbox public token (pk.*) injected into AndroidManifest at build time.
+MAPBOX_ACCESS_TOKEN=

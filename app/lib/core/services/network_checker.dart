@@ -165,11 +165,12 @@ class NetworkChecker {
         case ConnectivityResult.vpn:
           connectionType = 'VPN';
           break;
-        case ConnectivityResult.other:
-          connectionType = 'Other';
-          break;
         case ConnectivityResult.none:
           connectionType = 'No Connection';
+          break;
+        // `other`, plus values newer plugin versions add (e.g. `satellite`).
+        default:
+          connectionType = 'Other';
           break;
       }
 

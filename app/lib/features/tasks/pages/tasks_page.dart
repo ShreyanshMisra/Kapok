@@ -9,6 +9,7 @@ import '../../../core/services/hive_service.dart';
 import '../../../core/services/sync_service.dart';
 import '../../../app/router.dart';
 import '../../../data/models/task_model.dart';
+import '../../../data/models/user_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
@@ -21,6 +22,8 @@ import '../../../core/widgets/kapok_logo.dart';
 import '../../../core/enums/task_category.dart';
 import '../../../core/enums/user_role.dart';
 import '../widgets/enhanced_task_card.dart';
+import '../../../data/sources/firebase_source.dart';
+import '../../../injection_container.dart';
 
 class TasksPage extends StatefulWidget {
   const TasksPage({super.key});
@@ -39,6 +42,15 @@ class _TasksPageState extends State<TasksPage> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   bool _isStale = false;
+
+  // Names fetched for teams/users outside the TeamBloc state (e.g. an admin
+  // viewing tasks from teams they aren't in). Requested once per ID.
+  final Map<String, String> _fetchedTeamNames = {};
+  final Map<String, String> _fetchedUserNames = {};
+  final Set<String> _requestedNameIds = {};
+
+  /// Marker written by account deletion in place of a user ID.
+  static const String _deletedUserMarker = 'deleted_user';
 
   @override
   void initState() {
@@ -225,28 +237,56 @@ class _TasksPageState extends State<TasksPage> {
     }
 
     final teamState = context.read<TeamBloc>().state;
-    final member = teamState.members.firstWhere(
-      (m) => m.id == userId,
+    final member = teamState.members.cast<UserModel?>().firstWhere(
+      (m) => m?.id == userId,
       orElse: () => context.read<AuthBloc>().state is AuthAuthenticated &&
               (context.read<AuthBloc>().state as AuthAuthenticated).user.id == userId
           ? (context.read<AuthBloc>().state as AuthAuthenticated).user
-          : throw Exception('User not found'),
+          : null,
     );
 
-    return member.name;
+    final name = member?.name ?? _fetchedUserNames[userId];
+    if (name == null) throw Exception('User not found');
+    return name;
   }
 
-  /// Get assignment display text with fallback
-  String _getAssignmentDisplay(String? assignedTo) {
-    if (assignedTo == null || assignedTo.isEmpty) {
-      return AppLocalizations.of(context).unassignedTasks;
+  /// Assignee's display name, or null while it is unknown (the card then
+  /// shows the raw ID on its own).
+  String? _getAssigneeName(String? assignedTo) {
+    if (assignedTo == null || assignedTo.isEmpty) return null;
+    if (assignedTo == _deletedUserMarker) {
+      return AppLocalizations.of(context).deletedUser;
     }
-
     try {
       return _getUserName(assignedTo);
-    } catch (e) {
-      // Fallback to showing ID if user not found in cache
-      return assignedTo;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Fetches names for any team/assignee IDs not already resolvable locally.
+  /// Safe to call on every build: each ID is requested at most once.
+  void _resolveMissingNames(List<TaskModel> tasks) {
+    final source = sl<FirebaseSource>();
+    for (final task in tasks) {
+      final teamId = task.teamId;
+      if (teamId.isNotEmpty &&
+          _getTeamName(teamId) == null &&
+          _requestedNameIds.add('team:$teamId')) {
+        source.getTeam(teamId).then((team) {
+          if (mounted) setState(() => _fetchedTeamNames[teamId] = team.teamName);
+        }).catchError((_) {});
+      }
+      final userId = task.assignedTo;
+      if (userId != null &&
+          userId.isNotEmpty &&
+          userId != _deletedUserMarker &&
+          _getAssigneeName(userId) == null &&
+          _requestedNameIds.add('user:$userId')) {
+        source.getUser(userId).then((user) {
+          if (mounted) setState(() => _fetchedUserNames[userId] = user.name);
+        }).catchError((_) {});
+      }
     }
   }
 
@@ -1057,14 +1097,13 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
-  String _getTeamDisplay(String teamId) {
+  /// Team's display name, or null while it is unknown.
+  String? _getTeamName(String teamId) {
     final teamState = context.read<TeamBloc>().state;
-    try {
-      final team = teamState.teams.firstWhere((t) => t.id == teamId);
-      return team.teamName;
-    } catch (_) {
-      return teamId;
+    for (final team in teamState.teams) {
+      if (team.id == teamId) return team.teamName;
     }
+    return _fetchedTeamNames[teamId];
   }
 
   Widget _buildTaskList(List<TaskModel> tasks) {
@@ -1079,6 +1118,7 @@ class _TasksPageState extends State<TasksPage> {
     final canReassign =
         userRole == UserRole.admin || userRole == UserRole.teamLeader;
     final loc = AppLocalizations.of(context);
+    _resolveMissingNames(tasks);
 
     final pending = tasks
         .where((t) => t.status == TaskStatus.pending)
@@ -1119,8 +1159,8 @@ class _TasksPageState extends State<TasksPage> {
             if (index == offset) {
               return EnhancedTaskCard(
                 task: task,
-                assigneeDisplay: _getAssignmentDisplay(task.assignedTo),
-                teamDisplay: _getTeamDisplay(task.teamId),
+                assigneeName: _getAssigneeName(task.assignedTo),
+                teamName: _getTeamName(task.teamId),
                 onTap: () => _openTaskDetail(task, currentUserId),
                 onComplete: canComplete && task.status != TaskStatus.completed
                     ? () => _completeTask(task, currentUserId, userRole)
