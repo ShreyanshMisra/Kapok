@@ -770,16 +770,21 @@ class TaskRepository {
           final firestore = FirebaseFirestore.instance;
 
           await firestore.runTransaction((transaction) async {
-            // Delete task document
             final taskRef = firestore.collection('tasks').doc(taskId);
+
+            // Firestore requires all transaction reads before any writes, so
+            // read the team document before deleting the task.
+            final teamRef = task.teamId.isNotEmpty
+                ? firestore.collection('teams').doc(task.teamId)
+                : null;
+            final teamDoc =
+                teamRef != null ? await transaction.get(teamRef) : null;
+
+            // Delete task document
             transaction.delete(taskRef);
 
             // Remove task ID from team's taskIds array
-            if (task.teamId.isNotEmpty) {
-              final teamRef = firestore.collection('teams').doc(task.teamId);
-
-              // Get team document first to verify it exists
-              final teamDoc = await transaction.get(teamRef);
+            if (teamRef != null && teamDoc != null) {
               if (teamDoc.exists) {
                 transaction.update(teamRef, {
                   'taskIds': FieldValue.arrayRemove([taskId]),

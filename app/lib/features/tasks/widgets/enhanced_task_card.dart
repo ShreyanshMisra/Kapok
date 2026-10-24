@@ -235,7 +235,7 @@ class EnhancedTaskCard extends StatelessWidget {
                             onQuickAssign!();
                           },
                           icon: const Icon(Icons.person_add, size: 16),
-                          label: Text(loc.assignedToLabel),
+                          label: Text(loc.assignedToNone),
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             minimumSize: Size.zero,

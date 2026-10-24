@@ -1,5 +1,7 @@
 # Tasks Feature
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
 The task management system allows users to create, assign, and track location-based tasks. Tasks are associated with teams and can be assigned to specific team members.
@@ -9,13 +11,13 @@ The task management system allows users to create, assign, and track location-ba
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | String | Unique identifier (format: `task_{timestamp}`) |
-| `title` | String | Task name (max 100 characters) |
+| `title` | String | Task name (3–100 characters) |
 | `description` | String? | Optional description (max 500 characters) |
 | `createdBy` | String | User ID of creator |
 | `assignedTo` | String? | User ID of assignee (optional) |
 | `teamId` | String | Associated team ID |
 | `geoLocation` | GeoPoint | Latitude/longitude coordinates |
-| `address` | String? | Human-readable address |
+| `address` | String? | Text from the Location field at creation (reverse-geocoded address, or `lat, lon` when geocoding fails) |
 | `status` | TaskStatus | Current status |
 | `priority` | TaskPriority | Task priority level |
 | `category` | TaskCategory | Task category (defaults to `other`) |
@@ -39,11 +41,13 @@ Defined in `lib/core/enums/task_status.dart`:
 
 Defined in `lib/core/enums/task_priority.dart`:
 
-| Priority | Display Name | Color |
-|----------|--------------|-------|
-| `low` | Low | Green |
-| `medium` | Medium | Amber |
-| `high` | High | Red |
+| Priority | Display Name | Shown as |
+|----------|--------------|----------|
+| `low` | Low | ★ |
+| `medium` | Medium | ★★ |
+| `high` | High | ★★★ |
+
+Priority is always rendered with the `PriorityStars` widget (`lib/core/widgets/priority_stars.dart`), never by color.
 
 ## Pages
 
@@ -57,8 +61,12 @@ Main task list view with filtering capabilities.
 - Filter by priority (Low, Medium, High)
 - Filter by category (TaskCategory values)
 - Filter by assignment (All, My Tasks, Unassigned)
-- Search by title or description
-- Task cards show priority badge, status chip, location, team info
+- Filter by date created (Any date, Past day, Past week, Custom range)
+- Search by title or description; **Clear Filters** resets everything
+- Filter choices persist across launches (Hive settings)
+- Tasks grouped by status (Pending / In Progress / Completed) with counts
+- Task cards (`EnhancedTaskCard`) show priority stars, category, time in status, status chip, location, team, and assignee. Unassigned tasks show **"Assigned to none"**; for leaders/admins it is a quick-assign button
+- Refresh button in the app bar re-fetches teams and tasks (no pull-to-refresh)
 - Tap card to view task details
 
 **Filtering:**
@@ -72,30 +80,32 @@ Full-screen map interface for creating tasks with location.
 
 **Features:**
 - Interactive Mapbox map
-- Double-click map to select location (triggers reverse geocoding)
-- Manual address entry with geocoding
-- Current location button
-- Draggable form overlay from bottom
+- Tap the map to select a location (triggers reverse geocoding)
+- Manual address entry with a search button (forward geocoding)
+- Draggable form sheet from the bottom (wrapped in `PointerInterceptor` so taps on the form don't move the pin on web)
 - Team selection dropdown
-- Assignee selection (loads team members dynamically)
-- Priority selection
+- Assignee selection (loads team members dynamically; team members can only pick themselves)
+- Category and priority selection
+- Help overlay (`?` in the app bar)
 
 **Location Selection Methods:**
-1. Double-click on map → reverse geocodes to address
-2. Enter address manually → forward geocodes to coordinates
-3. "Current Location" button → uses device GPS
+1. Tap on the map → reverse geocodes to an address (falls back to `lat, lon`)
+2. Enter an address and tap search → forward geocodes to coordinates
+
+The Location field's text is saved as the task's `address`.
 
 ### TaskDetailPage (`lib/features/tasks/pages/task_detail_page.dart`)
 
 Detailed task view with editing capabilities.
 
 **Features:**
-- Map display (50% of screen height) showing task location
-- Task information display
-- Edit mode toggle (permission-based)
-- Editable fields: title, description, status, priority
-- Delete button (permission-based)
-- Custom pin marker that updates with map movement
+- Map display showing task location with a blue pin; an eye button hides/shows the map
+- Task information display (created/updated dates, time in current status)
+- Edit mode toggle (pencil icon, permission-based); the map is hidden while editing
+- Editable fields: title, description, status, category, priority, assignee
+- Delete button (trash icon, permission-based) with confirmation dialog
+- Share button and help overlay
+- Confetti animation when a task is changed to Completed
 
 **Permissions:**
 - Edit: **assigned user, team leader, or admin only** (Phase 6.1). Team members who created a task but are not assigned to it cannot edit it.
@@ -105,7 +115,7 @@ The detail page also embeds a map with a blue pin marker at the task location, a
 
 ### EditTaskPage (`lib/features/tasks/pages/edit_task_page.dart`)
 
-Placeholder page - editing is handled in TaskDetailPage.
+Placeholder page, not linked from any UI. Editing is handled in TaskDetailPage.
 
 ## BLoC Structure
 
@@ -113,7 +123,7 @@ Placeholder page - editing is handled in TaskDetailPage.
 
 | Event | Parameters | Purpose |
 |-------|------------|---------|
-| `CreateTaskRequested` | title, description, location, teamId, etc. | Create new task |
+| `CreateTaskRequested` | taskName, taskSeverity (1–5, mapped to priority), taskDescription, assignedTo, teamId, latitude, longitude, createdBy, category, address? | Create new task |
 | `LoadTasksRequested` | userId | Load all user's tasks |
 | `LoadTasksByTeamRequested` | teamId | Load tasks for specific team |
 | `LoadTasksByUserRequested` | userId | Load tasks assigned to user |
@@ -184,6 +194,8 @@ Task creation and deletion use Firestore transactions to:
 - Update team's `taskIds` array atomically
 - Ensure data consistency between task and team documents
 
+Firestore requires **all reads before any writes** in a transaction, so `deleteTask` reads the team document first, then deletes the task and updates `taskIds`. If the transaction fails (or the device is offline), the delete is queued as `delete_task_and_update_team`, which `SyncService` replays later (deletes the task, then removes its ID from the team).
+
 ## Firestore Structure
 
 Tasks are stored at `tasks/{taskId}`:
@@ -203,6 +215,8 @@ Tasks are stored at `tasks/{taskId}`:
   "address": "123 Main St, Amherst, MA",
   "status": "pending",
   "priority": "high",
+  "category": "medical",
+  "statusHistory": [],
   "dueDate": null,
   "createdAt": "2024-01-15T10:00:00Z",
   "updatedAt": "2024-01-15T10:00:00Z",
@@ -218,9 +232,9 @@ Tasks are stored at `tasks/{taskId}`:
 | View Task | Any team member |
 | Edit Task | Assigned user, team leader, or admin |
 | Delete Task | Creator OR admin/team leader |
-| Assign Task | Admin or team leader |
-| Complete Task | Assigned user or creator |
+| Assign Task | Admin or team leader (team members can only assign to themselves when creating) |
+| Complete Task | Anyone who can edit it: assigned user, team leader, or admin |
 
 ## Map Integration
 
-Tasks display on the map as single-color markers: blue (`AppColors.primary`) for active tasks and grey for completed tasks. Priority is indicated via star count on the marker rather than by pin color. Clicking a marker navigates to the task detail page.
+Tasks display on the map as single-color markers: blue (`AppColors.primary`) for active tasks and grey for completed tasks. Priority is indicated via star count on the marker rather than by pin color. Tapping a marker opens a preview sheet with an **Open Task** button. The map reloads its tasks whenever a task is created, updated, or deleted.

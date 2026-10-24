@@ -1,14 +1,12 @@
 /// Terms of Use for Kapok.
 ///
-/// DRAFT — pending legal review and final attorney sign-off. Placeholders in
-/// square brackets (e.g. `[contact email]`) must be filled in before public
-/// release.
+/// DRAFT — pending legal review and final attorney sign-off.
 ///
-/// Last updated: 2026-05-25
+/// Last updated: 2026-10-24
 class TermsOfService {
   TermsOfService._();
 
-  static const String lastUpdated = '2026-05-25';
+  static const String lastUpdated = '2026-10-24';
 
   static const String content = '''
 Welcome to KAPOK ("the App"), operated by A Fair Resolution, LLC ("we," "us," or "our"). By accessing or using the App, you agree to be bound by these Terms of Use. If you do not agree, please do not use the App.
@@ -81,7 +79,7 @@ These Terms shall be governed by and construed in accordance with the laws of th
 If you have questions about these Terms, please contact us at:
 
 A Fair Resolution, LLC
-[contact email — to be filled in before release]
+kapok@afairresolution.com
 P.O. Box 1223
 Amherst, Massachusetts, USA 01004
 ''';

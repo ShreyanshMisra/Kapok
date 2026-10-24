@@ -59,7 +59,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         assignedTo: event.assignedTo.isEmpty ? null : event.assignedTo,
         teamId: event.teamId,
         geoLocation: geoLocation,
-        address: null, // Will be reverse-geocoded if needed
+        address: (event.address?.trim().isNotEmpty ?? false)
+            ? event.address!.trim()
+            : null,
         status: status,
         priority: priority,
         category: TaskCategory.fromString(event.category),

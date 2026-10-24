@@ -37,15 +37,31 @@ class TeamDetailPage extends StatefulWidget {
 
 class _TeamDetailPageState extends State<TeamDetailPage> {
   final Map<String, bool> _expandedMembers = {};
+  late final TeamBloc _teamBloc;
+  late final AuthBloc _authBloc;
 
   @override
   void initState() {
     super.initState();
+    _teamBloc = context.read<TeamBloc>();
+    _authBloc = context.read<AuthBloc>();
     // Load team members and tasks when page initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TeamBloc>().add(LoadTeamMembers(teamId: widget.team.id));
       context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
     });
+  }
+
+  @override
+  void dispose() {
+    // This page narrows the shared TaskBloc (and TeamBloc) to one team.
+    // Reload the user's teams on exit so the Tasks tab, badge and map listen
+    // for TeamLoaded and restore tasks for all of the user's teams.
+    final authState = _authBloc.state;
+    if (authState is AuthAuthenticated) {
+      _teamBloc.add(LoadUserTeams(userId: authState.user.id));
+    }
+    super.dispose();
   }
 
   @override
@@ -1011,8 +1027,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                PriorityStars(priority: task.priority, size: 12),
               ],
             ),
           ],

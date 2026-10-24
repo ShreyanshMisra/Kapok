@@ -1,5 +1,7 @@
 # Teams Feature
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
 Teams are the organizational unit for task coordination. Each team has a leader who manages members and task assignments. Teams use unique 6-character codes for joining.
@@ -10,14 +12,14 @@ Teams are the organizational unit for task coordination. Each team has a leader 
 |----------|------|-------------|
 | `id` | String | Unique identifier (format: `team_{timestamp}`) |
 | `teamName` | String | Display name of the team |
-| `leaderId` | String | User ID of the team leader (immutable) |
+| `leaderId` | String | User ID of the team leader (changes only via Transfer Leadership) |
 | `teamCode` | String | 6-character alphanumeric join code |
 | `memberIds` | List<String> | User IDs of all members (includes leader) |
 | `taskIds` | List<String> | IDs of tasks associated with the team |
 | `description` | String? | Optional description (max 200 characters) |
 | `createdAt` | DateTime | Creation timestamp |
 | `updatedAt` | DateTime | Last modification |
-| `isActive` | bool | Soft-deletion flag |
+| `isActive` | bool | `false` once the team is closed (defaults to `true` when missing) |
 
 ## Team Code Generation
 
@@ -31,7 +33,7 @@ Teams are the organizational unit for task coordination. Each team has a leader 
 
 - Maximum 50 members per team
 - Join code is permanent once created
-- Only one leader per team
+- Only one leader per team; leadership can be transferred to a member whose account type is Team Leader
 
 ## Pages
 
@@ -77,7 +79,7 @@ Form for joining existing teams.
 **Features:**
 - Team code input (6 characters, auto-uppercase)
 - Validation (required, exactly 6 characters)
-- Role verification (only Team Members)
+- Team Members and Team Leaders can join; Admins are sent back (they already see all teams)
 - Info card explaining how to get team code
 
 **Error Handling:**
@@ -101,6 +103,7 @@ Detailed team view with management capabilities.
    - Copy-to-clipboard button
 
 3. **Members Section**
+   - Info note explaining that leadership can only be transferred to members with a Team Leader account
    - Expandable member cards showing:
      - Member name, role, email
      - Assigned tasks list
@@ -114,11 +117,14 @@ Detailed team view with management capabilities.
    - Tap to view task detail
 
 **Leader Actions (Popup Menu):**
-- Edit Team → opens full-screen `EditTeamPage`
-- Close Team → Deactivates team
-- Delete Team → Permanent with confirmation
-- Remove Member → Confirmation dialog
-- Share team code → uses `share_plus` share sheet (available on the team detail page, not the post-create dialog)
+- Edit Team → opens full-screen `EditTeamPage` (pushed with `MaterialPageRoute`)
+- Transfer Leadership → pick an eligible member
+- Close Team → sets `isActive: false` (soft close; data kept)
+- Delete Team → permanent, with confirmation
+- Remove Member → confirmation dialog (from the member card)
+- Copy Code / Share → on the Team Code card (`share_plus` share sheet)
+
+**Data note:** this page loads only this team's tasks into the shared `TaskBloc`. On exit it re-dispatches `LoadUserTeams` so the rest of the app reloads all of the user's tasks.
 
 **Member Actions:**
 - Leave Team → Confirmation dialog
@@ -139,6 +145,8 @@ Detailed team view with management capabilities.
 | `DeleteTeamRequested` | teamId, userId | Delete team |
 | `RemoveMemberRequested` | teamId, memberId, leaderId | Remove member |
 | `LoadTeamMembers` | teamId | Load member details |
+| `ChangeMemberRoleRequested` | teamId, memberId, leaderId, newRole | Change a member's professional role |
+| `TransferLeadershipRequested` | teamId, currentLeaderId, newLeaderId | Hand leadership to another member |
 | `TeamReset` | none | Clear state (on logout) |
 
 ### States (`lib/features/teams/bloc/team_state.dart`)
@@ -153,6 +161,7 @@ Detailed team view with management capabilities.
 | `TeamUpdated` | team | Team updated |
 | `TeamMembersLoaded` | members | Members loaded |
 | `TeamDeleted` | teamId | Team deleted |
+| `LeadershipTransferred` | team | Leadership handed off |
 | `TeamError` | message | Operation failed |
 
 ## Repository (`lib/data/repositories/team_repository.dart`)
@@ -184,12 +193,20 @@ Future<List<UserModel>> getTeamMembers(String teamId)
 // Update team
 Future<TeamModel> updateTeam(TeamModel team)
 
-// Delete team (soft delete)
-Future<void> deleteTeam(String teamId, String userId)
+// Close team (soft: isActive = false)
+Future<void> closeTeam({required String teamId, required String userId})
+
+// Delete team (hard delete of the team document)
+Future<void> deleteTeam({required String teamId, required String userId})
+
+// Transfer leadership
+Future<TeamModel> transferLeadership({required String teamId, required String currentLeaderId, required String newLeaderId})
 
 // Remove member
 Future<void> removeMember(String teamId, String memberId, String leaderId)
 ```
+
+Signatures above are abbreviated: the mutating methods take **named, required** parameters (e.g. `createTeam({required teamName, required leaderId, description})`, `joinTeam({required teamCode, required userId})`).
 
 ### Transaction Safety
 
@@ -231,20 +248,23 @@ Teams are stored at `teams/{teamId}`:
 | Action | Who Can Perform |
 |--------|-----------------|
 | Create Team | Team Leaders, Admins |
-| Join Team | Team Members, Team Leaders (as member) |
+| Join Team | Team Members, Team Leaders (Admins already see all teams) |
 | View Team | Any team member |
 | Edit Team | Team Leader, Admin |
 | Close Team | Team Leader, Admin |
+| Transfer Leadership | Team Leader (to a member with a Team Leader account) |
 | Delete Team | Team Leader, Admin |
 | Remove Member | Team Leader only |
 | Leave Team | Any member (except leader) |
 | View All Teams | Admin only |
 
-## Soft Deletion
+## Closing vs. Deleting
 
-When a team is deleted:
-1. `isActive` set to `false`
-2. `deletedAt` timestamp added
-3. `deletedBy` user ID recorded
-4. All members' `teamId` cleared
-5. Team data preserved for historical records
+**Close Team** (soft): sets `isActive` to `false`. The team document, members, and tasks are kept; closed teams can't be updated or joined (enforced in `firestore.rules`).
+
+**Delete Team** (hard), leader or admin only:
+1. The `teams/{teamId}` document is deleted
+2. `teamId` is cleared on each member's user document (individual writes, so one failure doesn't block the rest)
+3. The team is removed from the local Hive cache
+
+Tasks that belonged to the team are not deleted.

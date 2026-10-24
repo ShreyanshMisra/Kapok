@@ -173,5 +173,11 @@ service cloud.firestore {
           (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == "team_leader")))
       );
     }
+
+    // Offline map region metadata, one document per user (keyed by uid).
+    // Written by FirebaseMapSnapshotSource after each offline region refresh.
+    match /mapSnapshots/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

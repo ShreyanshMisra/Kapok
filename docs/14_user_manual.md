@@ -1,5 +1,7 @@
 # User Manual
 
+_Applies to Kapok 1.0.0 on iPhone (iOS 15+) and Android. Last updated 2026-10-24._
+
 ## Getting Started
 
 ### Creating an Account
@@ -7,11 +9,15 @@
 1. Open the Kapok app
 2. Tap **Sign Up**
 3. Enter your name, email, and password
-4. Select your role:
+4. Select your account type:
    - **Team Member**: Join existing teams and complete tasks
    - **Team Leader**: Create and manage teams
+   - **Admin**: Oversee all teams
 5. Select your specialty (Medical, Engineering, etc.)
-6. Tap **Create Account**
+6. Read and accept the Terms of Service
+7. Tap **Create Account**
+
+New Team Leaders are taken to **Create Team** and new Team Members to **Join Team**. The first time you sign in, you'll see the About page. Tap **Continue** to get started.
 
 ### Signing In
 
@@ -29,20 +35,31 @@
 
 ## Teams
 
-### Joining a Team (Team Members)
+### Joining a Team (Team Members and Team Leaders)
 
 1. Go to the **Teams** tab
-2. Tap **Join Team**
+2. Tap the **Join Team** button (person-with-plus icon)
 3. Enter the 6-character team code from your team leader
-4. Tap **Join**
+4. Tap **Join Team**
 
 ### Creating a Team (Team Leaders)
 
 1. Go to the **Teams** tab
 2. Tap **Create Team**
 3. Enter a team name and optional description
-4. Tap **Create**
-5. Share the generated team code with your members
+4. Tap **Create Team**
+5. Share the generated team code with your members (on the team page, use **Copy Code** or **Share**)
+
+### Transferring Leadership (Team Leaders)
+
+1. Open the team detail page
+2. Tap the menu (⋮) → **Transfer Leadership**
+3. Pick the new leader. Only members who signed up with a **Team Leader** account can be chosen.
+
+### Closing or Deleting a Team (Team Leaders and Admins)
+
+- **Close Team** (menu ⋮): the team becomes inactive but its history is kept
+- **Delete Team** (menu ⋮): permanently removes the team (asks for confirmation)
 
 ### Editing a Team (Team Leaders)
 
@@ -75,21 +92,28 @@
 1. Go to the **Tasks** tab
 2. See all tasks for your teams
 3. Use filters to find specific tasks:
-   - Search by name
+   - Search by name or description
    - Filter by status (Pending, In Progress, Completed)
    - Filter by priority (Low, Medium, High)
+   - Filter by category, by assignment (My Tasks / Unassigned), or by date created
+   - Tap **Clear Filters** to reset
+4. Tap the refresh button (top right) to pull the latest tasks from the cloud
+
+The badge on the **Tasks** tab shows how many tasks are still open.
 
 ### Creating a Task
 
-1. Go to the **Tasks** tab
-2. Tap the **+** button
-3. Fill in:
+1. Tap the **+** button (on the Map or Tasks tab)
+2. Tap the map where the task is, or type an address in **Location** and tap the search button
+3. In the form that slides up, fill in:
    - Task title (required)
-   - Description
-   - Priority level
-   - Location
-   - Assignee (optional)
-4. Tap **Save**
+   - Description (optional)
+   - Team
+   - Assign To (optional; team members can only assign to themselves)
+   - Task category and priority
+4. Tap **Create Task**
+
+Don't enter any person's name in the task text.
 
 ### Updating a Task
 
@@ -99,7 +123,8 @@
    - Location on map (with a blue pin at the task location)
    - Assigned person
    - Status
-3. Update status or details as needed
+3. Tap the pencil icon to edit (title, description, status, category, priority, assignee), then **Save**
+4. To delete, tap the trash icon and confirm
 
 **Who can edit a task:** Team members can only edit tasks that are assigned to them. Team leaders and admins can edit any task within their teams.
 
@@ -107,9 +132,9 @@
 
 | Priority | Meaning |
 |----------|---------|
-| **High** | Urgent, address immediately |
-| **Medium** | Important, address soon |
-| **Low** | Can wait, address when possible |
+| **High** (★★★) | Urgent, address immediately |
+| **Medium** (★★) | Important, address soon |
+| **Low** (★) | Can wait, address when possible |
 
 ### Task Statuses
 
@@ -126,10 +151,8 @@
 ### Viewing the Map
 
 1. Go to the **Map** tab
-2. See tasks displayed as colored pins:
-   - **Red**: High priority
-   - **Orange**: Medium priority
-   - **Green**: Low priority
+2. See tasks displayed as pins:
+   - **Blue**: Active task (stars on the pin show priority: 1 = Low, 2 = Medium, 3 = High)
    - **Gray**: Completed
 
 ### Using the Map Offline
@@ -141,7 +164,15 @@ The app automatically saves map tiles for your area. When you don't have interne
 
 ### Tapping a Task Pin
 
-Tap any pin on the map to see task details and navigate to the full task view.
+Tap any pin to see a quick preview, then tap **Open Task** for the full task view.
+
+### Finding Places and Filtering Pins
+
+- **Search Location** (top of the map): type an address to jump there
+- **Location button** (top left): center the map on you
+- **Filter button** (bottom right): show only certain statuses or priorities
+
+If you don't allow location access, the map still works. It just starts at a default area instead of your position.
 
 ---
 
@@ -165,9 +196,8 @@ Go to **Profile** → **Settings** to:
 - **Language**: Switch between English and Spanish
 - **Theme**: Choose Light, Dark, or Default (follows device setting)
 - **Location Services**: Enable/disable location access
-- **Sync**: Push any queued local changes and pull the latest teams and tasks from the cloud
-- **Export Data**: Download your tasks and teams as a file
-- **About**: App version, Privacy Policy, Terms of Service, and Administrator Permissions links
+- **Clear Cache**: Remove locally cached data
+- **About**: App version, Privacy Policy, and Terms of Service
 
 ### Signing Out
 
@@ -175,6 +205,14 @@ Go to **Profile** → **Settings** to:
 2. Scroll to the bottom
 3. Tap **Sign Out**
 4. Confirm your choice
+
+### Deleting Your Account
+
+1. Go to **Profile** → **Settings**
+2. Scroll to the bottom and tap **Delete Account**
+3. Type the confirmation word and confirm
+
+Your profile is deleted. Tasks you created or were assigned to stay with your team but no longer show your name. For security you must have signed in within the last 5 minutes. If not, sign out, sign back in, and try again. If you lead an active team, transfer leadership first.
 
 ---
 
@@ -195,15 +233,14 @@ Kapok is designed to work without internet:
 
 ## Tips
 
-- **Refresh data** from the cloud via **Settings → Sync** (the Tasks page does not support pull-to-refresh)
+- **Refresh data** from the cloud with the refresh button on the **Tasks** page (queued offline changes sync automatically when you reconnect)
 - **View all task details** by tapping the task card
 - **Copy team codes** easily with the copy button
-- **Check connection status** in the map view status card
+- **Check connection status**: an orange banner appears at the top when you're offline
 
 ---
 
 ## Need Help?
 
-- **Email Support**: Contact your organization's support team
-- **Report Issues**: Use Settings → Report an Issue
-- **Send Feedback**: Use Settings → Send Feedback
+- **Email Support**: kapok@afairresolution.com
+- **Report Issues / Feedback**: Contact your team leader or organization administrator

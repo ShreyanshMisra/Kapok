@@ -1,5 +1,7 @@
 # Data Models
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
 The app uses strongly-typed Dart models with JSON serialization support. Models handle conversion between Firestore documents, JSON, and Dart objects. Code generation via `json_serializable` creates the `.g.dart` files.
@@ -68,13 +70,13 @@ Handles legacy `accountType` field migration to `userRole` automatically in `fro
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `id` | String | Yes | Unique identifier |
-| `title` | String | Yes | Task name (max 100 chars) |
+| `title` | String | Yes | Task name (3–100 chars) |
 | `description` | String? | No | Details (max 500 chars) |
 | `createdBy` | String | Yes | Creator's user ID |
 | `assignedTo` | String? | No | Assignee's user ID |
 | `teamId` | String | Yes | Associated team ID |
 | `geoLocation` | GeoPoint | Yes | Latitude/longitude |
-| `address` | String? | No | Human-readable address |
+| `address` | String? | No | Location text from Create Task (address, or `lat, lon` fallback) |
 | `status` | TaskStatus | Yes | Current status |
 | `priority` | TaskPriority | Yes | Priority level |
 | `category` | TaskCategory | Yes | Non-nullable, defaults to `TaskCategory.other` |
@@ -82,6 +84,7 @@ Handles legacy `accountType` field migration to `userRole` automatically in `fro
 | `createdAt` | DateTime | Yes | Creation timestamp |
 | `updatedAt` | DateTime | Yes | Last modification |
 | `completedAt` | DateTime? | No | Completion timestamp |
+| `statusHistory` | List<Map<String, dynamic>> | No | Status change log (defaults to `[]`) |
 
 ### TaskStatus Enum
 
@@ -113,9 +116,10 @@ double get longitude => geoLocation.longitude;
 // Check if overdue (present on the model but not surfaced in UI; retained for data compatibility)
 bool get isOverdue;
 
-// UI colors (as int)
-int get priorityColor;  // Green, Amber, or Red
-int get statusColor;    // Gray, Blue, or Green
+// Legacy color helpers (as int). Still on the model, but the UI shows
+// priority as stars (PriorityStars) and uses AppColors.primary for pins/status.
+int get priorityColor;
+int get statusColor;
 ```
 
 ### Deprecated Getters
@@ -144,7 +148,7 @@ For backward compatibility during migration:
 | `description` | String? | No | Optional description |
 | `createdAt` | DateTime | Yes | Creation timestamp |
 | `updatedAt` | DateTime | Yes | Last modification |
-| `isActive` | bool | Yes | Soft-delete flag |
+| `isActive` | bool | Yes | `false` once closed; missing in Firestore = `true` |
 
 ### Computed Properties
 
@@ -172,16 +176,18 @@ Handles legacy `name` field mapping to `teamName` in JSON parsing.
 | `name` | String | Human-readable region name |
 | `centerLat` | double | Center latitude |
 | `centerLon` | double | Center longitude |
-| `radiusKm` | double | Coverage radius in km |
 | `zoomMin` | int | Minimum zoom level cached |
 | `zoomMax` | int | Maximum zoom level cached |
+| `northEastLat` / `northEastLon` | double | Bounding box corner |
+| `southWestLat` / `southWestLon` | double | Bounding box corner |
 | `lastSyncedAt` | DateTime | Last download timestamp |
-| `tileCount` | int | Total tiles in region |
-| `downloadedTileCount` | int | Tiles downloaded |
+| `totalTiles` | int | Total tiles in region |
+| `downloadedTiles` | int | Tiles downloaded |
+| `status` | String | Download status (e.g. `downloading`) |
 
 ### Hive Storage
 
-Uses Hive type adapter (generated) for local persistence.
+Serialized with `json_serializable` (`toJson`/`fromJson`) and stored in Hive as maps.
 
 ## MapTileModel
 
@@ -199,13 +205,14 @@ All enums are in `lib/core/enums/`:
 | `user_role.dart` | UserRole | Account types |
 | `task_status.dart` | TaskStatus | Task states |
 | `task_priority.dart` | TaskPriority | Task urgency |
+| `task_category.dart` | TaskCategory | Task type: medical, engineering, carpentry, plumbing, construction, electrical, supplies, transportation, other |
 
 ## Code Generation
 
 Models using `@JsonSerializable()` require code generation:
 
 ```bash
-flutter pub run build_runner build
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 Generated files:
@@ -222,7 +229,10 @@ Generated files:
 /users/{userId}
 /teams/{teamId}
 /tasks/{taskId}
+/mapSnapshots/{userId}   # offline region metadata (owner-only rule)
 ```
+
+Rules live in `firebase/firestore.rules`. Diff them against the live ruleset before deploying (see `12_development_notes.md`).
 
 ### Timestamp Handling
 

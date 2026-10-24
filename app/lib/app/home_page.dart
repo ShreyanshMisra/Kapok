@@ -194,6 +194,7 @@ class _HomePageState extends State<HomePage> {
     switch (_currentIndex) {
       case 0: // Map page
         return FloatingActionButton(
+          heroTag: 'home_fab',
           onPressed: () {
             Navigator.of(context).pushNamed('/create-task');
           },
@@ -203,6 +204,7 @@ class _HomePageState extends State<HomePage> {
         );
       case 1: // Tasks page
         return FloatingActionButton(
+          heroTag: 'home_fab',
           onPressed: () {
             Navigator.of(context).pushNamed('/create-task');
           },
@@ -212,6 +214,7 @@ class _HomePageState extends State<HomePage> {
         );
       case 2: // Teams page
         return FloatingActionButton(
+          heroTag: 'home_fab',
           onPressed: () {
             Navigator.of(context).pushNamed('/join-team');
           },

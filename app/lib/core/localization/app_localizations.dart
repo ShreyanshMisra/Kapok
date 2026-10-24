@@ -107,6 +107,7 @@ class AppLocalizations {
   String get medium => _getString('medium');
   String get low => _getString('low');
   String get assignedToLabel => _getString('assignedToLabel');
+  String get assignedToNone => _getString('assignedToNone');
   String get pending => _getString('pending');
   String get overdue => _getString('overdue');
   String get dueDate => _getString('dueDate');
@@ -296,6 +297,8 @@ class AppLocalizations {
   String get wouldYouLikeToShareTheFile => _getString('wouldYouLikeToShareTheFile');
   String get notNow => _getString('notNow');
   String get exportFailed => _getString('exportFailed');
+  String cachedLocallyKB(int kb) =>
+      _getString('cachedLocallyKB').replaceAll('{kb}', kb.toString());
   String exportedItemsCount(int tasks, int teams) =>
       _getString('exportedItemsCount')
           .replaceAll('{tasks}', tasks.toString())
@@ -551,6 +554,7 @@ class AppLocalizations {
         'medium': 'Medium',
         'low': 'Low',
         'assignedToLabel': 'Assigned to',
+        'assignedToNone': 'Assigned to none',
         'pending': 'Pending',
         'overdue': 'Overdue',
         'dueDate': 'Due Date',
@@ -662,6 +666,7 @@ class AppLocalizations {
         'theme': 'Theme',
         'data': 'Data',
         'clearCache': 'Clear Cache',
+        'cachedLocallyKB': '~{kb} KB cached locally',
         'exportData': 'Export Data',
         'appVersionLabel': 'App Version',
         'privacyPolicy': 'Privacy Policy',
@@ -792,7 +797,7 @@ class AppLocalizations {
         'acknowledgementsThankYou': 'Thank you',
         'acknowledgementsThankYouNames': 'Brian R.\nSiddartha S.\nNishant A.\nAparimit C.\nShreyansh M.\nBrian N.\nFuming Z.\nLimbani C.\nAdhiraj C.\nAdvait G.',
         'acknowledgementsThanksAlsoTo': 'Thanks also to',
-        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
+        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nEmma W.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
         'acknowledgementsClosing': '',
         'doNotEnterPersonalNamesNote': 'Do not enter any person\'s name in the task.',
         'lastUpdated': 'Last updated',
@@ -986,6 +991,7 @@ class AppLocalizations {
         'medium': 'Media',
         'low': 'Baja',
         'assignedToLabel': 'Asignado a',
+        'assignedToNone': 'Asignado a nadie',
         'pending': 'Pendiente',
         'overdue': 'Vencido',
         'dueDate': 'Fecha de vencimiento',
@@ -1097,6 +1103,7 @@ class AppLocalizations {
         'theme': 'Tema',
         'data': 'Datos',
         'clearCache': 'Limpiar Caché',
+        'cachedLocallyKB': '~{kb} KB en caché local',
         'exportData': 'Exportar Datos',
         'appVersionLabel': 'Versión de la Aplicación',
         'privacyPolicy': 'Política de Privacidad',
@@ -1227,7 +1234,7 @@ class AppLocalizations {
         'acknowledgementsThankYou': 'Gracias',
         'acknowledgementsThankYouNames': 'Brian R.\nSiddartha S.\nNishant A.\nAparimit C.\nShreyansh M.\nBrian N.\nFuming Z.\nLimbani C.\nAdhiraj C.\nAdvait G.',
         'acknowledgementsThanksAlsoTo': 'Gracias también a',
-        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
+        'acknowledgementsThanksAlsoToNames': 'Shriya S.\nNitya V.\nJonathan Z.\nKiran B. K.\nNgoc D. N.\nDia S.\nKhushi R.\nAastha A.\nArushi A.\nKhushii S.\nEric W.\nPaul D.\nKevin L.\nYona V.-A.\nSuryam G.\nShobhit M.\nEmmet H.\nBhargavi P.\nAtharva S.\nAhmed K.\nThuy N.\nAtonbara D.-K.\nNigel P.\nBryan C.\nGaurav S.\nTejovrash A.\nMethasith R.\nYasmeen M.\nBrijesh V.\nMena I.\nLuke T.\nAndrew T.\nAlbi M.\nNihar K.\nRishi P.\nPrasad A.\nSelena L.\nPhoebe L.\nRishab M.\nKhang N.\nAnh T.\nSnigdha T.\nYusef W.\nIan D’S.\nSapna P.\nShreya M.\nSarah W.\nEzinne O.\nDarrell M.\nEmma W.\nSha B.\nKhanh T. T. D.-M.\nChristopher G.\nJose A. O.\nJanet M.\nVikki R.\nCrystal P.\nVal N.\nChris D.\nSasha R.\nAshley W.\nJessica R.\nNoe H.\nA Fair Resolution, LLC',
         'acknowledgementsClosing': '',
         'doNotEnterPersonalNamesNote': 'No ingrese el nombre de ninguna persona en la tarea.',
         'lastUpdated': 'Última actualización',

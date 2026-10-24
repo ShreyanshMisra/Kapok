@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/widgets/help_overlay.dart';
 import 'package:geolocator/geolocator.dart';
@@ -468,7 +469,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 minChildSize: 0.3,
                 maxChildSize: 0.9,
                 builder: (context, scrollController) {
-                  return Container(
+                  // On web, keep taps on the form from also hitting the map
+                  // (which would move the selected location).
+                  return PointerInterceptor(
+                    child: Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
                       borderRadius: const BorderRadius.vertical(
@@ -776,6 +780,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
                                       return DropdownButtonFormField<String>(
                                         value: _selectedAssignedTo,
+                                        isExpanded: true,
                                         decoration: InputDecoration(
                                           labelText: 'Assign To (Optional)',
                                           hintText: 'Select a team member',
@@ -1010,6 +1015,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         ),
                       ],
                     ),
+                    ),
                   );
                 },
               ),
@@ -1120,6 +1126,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           longitude: _longitude!,
           createdBy: user.id,
           category: _selectedCategory.value,
+          address: _addressController.text,
         ),
       );
 

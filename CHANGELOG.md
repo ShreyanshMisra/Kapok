@@ -10,6 +10,23 @@ of truth; update it in the same PR as the changelog entry.
 
 ## [Unreleased]
 
+### QA pass & store-readiness review (2026-10-24)
+
+- **Tasks:** deleting a task now reaches Firestore (the transaction read the team *after* writing, which Firestore rejects). Offline/failed deletes queued as `delete_task_and_update_team` are now replayed by `SyncService` (previously dropped). The address shown on Create Task is now saved. The Edit Task and Create Task assignee dropdowns no longer break the form's layout (`isExpanded: true`). Unassigned tasks read "Assigned to none".
+- **Teams:** leaving a team's page restores the app-wide task list (it had narrowed the shared `TaskBloc` to one team). Team task rows show priority stars once.
+- **Map:** pins persist through offline-tile progress and refresh after task create/edit/delete. If location is denied, the map falls back to a default center instead of showing an error.
+- **Account deletion:** requires a sign-in within the last 5 minutes *before* any data is touched (prevents half-deleted accounts). The leader guard now checks `isActive` (it queried a non-existent `active` field). Closed teams the user led are skipped. A refused deletion keeps the user's data on screen.
+- **Web:** Crashlytics is skipped (no web support). The map canvas resizes with its container. The Create Task form uses `PointerInterceptor` (new dependency `pointer_interceptor`) so taps don't move the pin. Duplicate FAB hero tags fixed.
+- **iOS:** iPhone only (`TARGETED_DEVICE_FAMILY = 1`). Run `pod install` before the next build.
+- **Legal:** Privacy Policy and Terms contact set to `kapok@afairresolution.com`, last updated 2026-10-24; removed the inaccurate in-app analytics opt-out claim. Old drafts in `app/assets/docs/` are marked superseded (not bundled).
+- **Firestore rules (repo only, not deployed):** owner-only `mapSnapshots/{userId}` rule.
+- **Content:** Emma W. added to Acknowledgements (between Darrell M. and Sha B.); onboarding no longer mentions due dates; "~N KB cached locally" localized.
+- **Docs:** all `docs/` files, READMEs, and the store-readiness evaluation re-verified against the code.
+
+### iOS build 1.0.0+2 (2026-10-05)
+
+- Resolved App Store Connect ITMS-90683: geolocator's "always" location API is compiled out via `BYPASS_PERMISSION_LOCATION_ALWAYS` (Podfile `post_install`), and an accurate `NSLocationAlwaysAndWhenInUseUsageDescription` is kept as a safeguard. Build number bumped for re-upload.
+
 ### Beta pre-flight (2026-10-05)
 
 - **Dependencies:** removed unused `permission_handler`, `flutter_local_notifications`, `app_links`, `url_launcher`, `cached_network_image`, `flutter_spinkit`, `pdf`. Upgraded all remaining packages to latest compatible versions (Firebase iOS SDK 12.19, Mapbox 11.31 / `mapbox_maps_flutter` 2.31).
