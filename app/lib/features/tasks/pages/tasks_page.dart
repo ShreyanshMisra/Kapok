@@ -415,6 +415,7 @@ class _TasksPageState extends State<TasksPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'tasks_page_fab',
         onPressed: () {
           Navigator.of(context).pushNamed(AppRouter.createTask);
         },

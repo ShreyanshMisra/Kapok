@@ -703,6 +703,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                   return DropdownButtonFormField<String>(
                                     key: ValueKey('assignedTo_${filteredMembers.length}_$effectiveValue'),
                                     value: effectiveValue,
+                                    isExpanded: true,
                                     decoration: InputDecoration(
                                       labelText: 'Assigned To',
                                       prefixIcon: const Icon(Icons.person),
@@ -729,6 +730,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                               Expanded(
                                                 child: Text(
                                                   '${member.name} (${member.role})',
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
                                             ],

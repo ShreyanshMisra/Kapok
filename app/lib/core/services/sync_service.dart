@@ -211,6 +211,30 @@ class SyncService {
           await _firebaseSource.deleteTask(taskId);
           Logger.sync('Successfully synced task deletion: $taskId');
         }
+      } else if (operation == 'delete_task_and_update_team') {
+        // Queued by TaskRepository.deleteTask when offline or when the
+        // Firestore transaction fails.
+        final taskId = syncData['taskId'] as String?;
+        final teamId = syncData['teamId'] as String?;
+        if (taskId != null) {
+          await _firebaseSource.deleteTask(taskId);
+          if (teamId != null && teamId.isNotEmpty) {
+            try {
+              await FirebaseFirestore.instance
+                  .collection('teams')
+                  .doc(teamId)
+                  .update({
+                'taskIds': FieldValue.arrayRemove([taskId]),
+                'updatedAt': FieldValue.serverTimestamp(),
+              });
+            } catch (teamError) {
+              Logger.sync('Failed to remove task ID from team',
+                  error: teamError);
+              // Task is already deleted; don't fail the sync
+            }
+          }
+          Logger.sync('Successfully synced task deletion: $taskId');
+        }
       }
       // Handle team operations
       else if (operation == 'create_team') {

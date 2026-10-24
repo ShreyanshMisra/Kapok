@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'hive_service.dart';
 import '../utils/logger.dart';
 
@@ -28,8 +29,11 @@ class AnalyticsService {
       final crashReportingEnabled = isCrashReportingEnabled;
 
       await _analytics.setAnalyticsCollectionEnabled(analyticsEnabled);
-      await FirebaseCrashlytics.instance
-          .setCrashlyticsCollectionEnabled(crashReportingEnabled);
+      // Crashlytics is not supported on web.
+      if (!kIsWeb) {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(crashReportingEnabled);
+      }
 
       _initialized = true;
       Logger.info('Analytics service initialized', tag: 'ANALYTICS');
@@ -81,7 +85,10 @@ class AnalyticsService {
     try {
       await HiveService.instance
           .storeSetting(_crashReportingEnabledKey, enabled);
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(enabled);
+      if (!kIsWeb) {
+        await FirebaseCrashlytics.instance
+            .setCrashlyticsCollectionEnabled(enabled);
+      }
       Logger.info('Crash reporting set to: $enabled', tag: 'ANALYTICS');
     } catch (e) {
       Logger.error('Failed to set crash reporting enabled',

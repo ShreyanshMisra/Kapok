@@ -1,8 +1,24 @@
 # Kapok – Client Action Guide: Getting on the App Store & Google Play
 
-**Date:** 2026-05-26
+**Date:** 2026-05-26 (status updated 2026-10-24)
 **Audience:** A Fair Resolution, LLC (the app owner) — *not* the engineering team
 **Companion document:** [`15_store_readiness_evaluation.md`](15_store_readiness_evaluation.md) covers the technical / engineering work. This document covers everything that **only you, the business owner, can do.**
+
+---
+
+## Status as of 2026-10-24
+
+Decisions made and work done since this guide was written:
+
+- **App identifier:** `com.afairresolution.kapok` (iOS and Android). This is final.
+- **Apple:** Developer team `9M48UX3QW7` is set up, the App Store Connect record exists, and build `1.0.0+2` has been uploaded.
+- **Release order:** iOS first, Android after.
+- **Devices:** iPhone only (no iPad screenshots needed).
+- **Legal contact / support email:** `kapok@afairresolution.com` (used in the in-app Privacy Policy and Terms).
+- **Privacy Policy / Terms text:** drafts are in the app and still need **legal review** and **public hosting** (§6.2).
+- **In-app account deletion:** done (both stores require it).
+
+Still needed from you: lawyer sign-off and hosting of the Privacy Policy and Terms, a public support URL, store descriptions/keywords, screenshot approval, the App Privacy / Data Safety answers, and (for Android) the Google Play organization account.
 
 ---
 
@@ -66,7 +82,7 @@ You, the enrolling person, become the **Account Holder** — keep that role; it 
 - Give the engineer the **Admin** or **App Manager** role so they can create the app record, manage builds, and upload to TestFlight. **Developer** role is the minimum for uploading builds.
 - The engineer will need to be on the team to create the **distribution certificate** and **provisioning profile** referenced in §15 (2.3).
 
-> **Reviewer demo account:** Apple's reviewers must be able to log in. The engineer will supply Apple with the existing test credentials (e.g., `admin@test.com` / `test123` from the handoff doc). Confirm you're comfortable leaving a working demo login active for review.
+> **Reviewer demo account:** Apple's reviewers must be able to log in. The engineer will create a **dedicated reviewer account** (a Team Member in a test team) rather than reusing the shared test logins, because reviewers try the in-app account deletion. Confirm you're comfortable leaving a working demo login active for review.
 
 ---
 
@@ -104,7 +120,7 @@ In **Play Console → Users and permissions**, add the engineer with **Admin** a
 
 A few one-time decisions are yours to make. The engineer needs these *before* building (they feed §15's bundle-ID and Firebase work):
 
-- **Reverse-DNS app identifier.** The engineer recommends something like `org.afairresolution.kapok` or `com.afairresolution.kapok`. This becomes permanent on Google Play and effectively permanent on Apple — **it cannot be changed after first publish.** Confirm the exact string with the engineer. Ideally it's based on a domain you own (§6).
+- **Reverse-DNS app identifier.** ✅ Decided: `com.afairresolution.kapok`. This becomes permanent on Google Play and effectively permanent on Apple — **it cannot be changed after first publish.** Confirm the exact string with the engineer. Ideally it's based on a domain you own (§6).
 - **Public app name.** "Kapok" — confirm this is final and that you have the right to use it (check it's not trademarked by someone else in the app categories; a quick search of both stores for "Kapok" is prudent).
 - **Developer/publisher display name** shown on both listings — confirm "A Fair Resolution, LLC" or a chosen public brand name.
 - **Price & countries:** Confirm Kapok is **free** and decide which **countries/regions** it's distributed in (default: all available).
@@ -137,7 +153,7 @@ Both stores **require a public Privacy Policy URL** and a **support contact** be
 ### 6.1 Domain, hosting, and email
 
 - **Own a domain** (e.g., `afairresolution.com`) if you don't already. The app identifier (§4) and your store-listing URLs ideally live here.
-- Set up a **support email** (e.g., `support@afairresolution.com`) — required on both store listings and shown publicly.
+- Set up a **support email**, required on both store listings and shown publicly. ✅ Decided: `kapok@afairresolution.com`. Make sure this inbox exists and is monitored.
 - You need somewhere to **host two web pages**: the Privacy Policy and the Terms of Service. Any simple website/host works; the engineer can publish the pages, but **you must supply and approve the content.**
 
 ### 6.2 Privacy Policy & Terms of Service (legal content)
@@ -166,7 +182,7 @@ The stores display marketing content that you should write or approve (the engin
 | Full description | ≤4000 chars | ≤4000 chars | What Kapok does |
 | Promotional text | ≤170 chars | — | Apple only |
 | Keywords | ≤100 chars | (baked into description) | App-store search |
-| Screenshots | ≥3–5 per device size | 2–8 phone (+ tablet) | Engineer captures; **you approve** they look right and aren't misleading |
+| Screenshots | ≥3–5 (iPhone only) | 2–8 phone | Engineer captures; **you approve** they look right and aren't misleading |
 | App icon | 1024×1024 | 512×512 | Already designed; confirm final |
 | Feature graphic | — | 1024×500 (**required**) | Banner at top of Play listing |
 | Support URL / email | Required | Required | From §6 |

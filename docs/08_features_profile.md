@@ -1,8 +1,10 @@
 # Profile & Settings Features
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
-The profile feature provides user account management, app settings, and personalization options. Users can view and edit their profile information, configure app behavior, manage privacy settings, and access support.
+The profile area covers the user's account, app settings, legal documents, the About/Acknowledgements pages, and account deletion. It is the fourth tab on the home screen.
 
 ## Profile Page
 
@@ -11,56 +13,38 @@ The profile feature provides user account management, app settings, and personal
 
 ### UI Components
 
-1. **Profile Header Card**
+1. **App bar**: title, Settings gear (→ SettingsPage), Kapok logo
+2. **Profile Header Card**
    - Avatar with user initial (first letter of name)
    - User name (bold, large)
    - User specialty/role (e.g., "Medical", "Engineering")
    - Account type badge (Team Leader, Team Member, Admin)
-
-2. **Profile Actions Card**
-   - Edit Profile → navigates to EditProfilePage
-   - Settings → navigates to SettingsPage
-   - About → navigates to AboutPage
-
-3. **Account Information Card**
-   - Email address
-   - Account type
-   - Role/specialty
-   - User ID
-
-4. **Permissions Table**
+3. **Profile Actions Card**
+   - Edit Profile → EditProfilePage
+   - Settings → SettingsPage
+   - About → AboutPage
+4. **Account Information Card**: email, account type, role/specialty, user ID
+5. **Permissions Table**
    - `DataTable` with columns: Action | Team Member | Team Leader | Admin
    - Rows: Create Team, Join Team, View Team, Edit Team, Close Team, Delete Team, Remove Member, Leave Team, View All Teams, Edit Own Tasks, Edit All Tasks
-   - The current user's role column is highlighted (bold + subtle blue background)
-   - A "Your Role: [role]" chip appears at the top right; the table is horizontally scrollable on smaller screens
+   - The current user's role column is highlighted, with a "Your Role: [role]" chip; horizontally scrollable on small screens
 
 ### Authentication Check
 
-The page requires `AuthAuthenticated` state. If the user is not authenticated, displays "User not authenticated" message.
+The page requires `AuthAuthenticated` state. If the user is not authenticated, it shows a "User not authenticated" message.
 
 ## Edit Profile Page
 
 ### Location
 `lib/features/profile/pages/edit_profile_page.dart`
 
-### Features
-
-- Edit user name
-- Edit role/specialty
-- Save changes updates user profile via `AuthBloc.ProfileUpdateRequested`
+- Edit user name and role/specialty
+- Saves via `AuthBloc` `ProfileUpdateRequested`
 - Form validation for required fields
 
 ### Available Roles (Specialties)
 
-- Medical
-- Engineering
-- Carpentry
-- Plumbing
-- Construction
-- Electrical
-- Supplies
-- Transportation
-- Other
+Medical, Engineering, Carpentry, Plumbing, Construction, Electrical, Supplies, Transportation, Other
 
 ## Settings Page
 
@@ -69,7 +53,7 @@ The page requires `AuthAuthenticated` state. If the user is not authenticated, d
 
 ### Settings Sections
 
-The Settings page has been simplified. Remaining sections: Location, Language, Appearance (Theme), Data (Sync, Clear Cache), About (with Privacy Policy, Terms of Service, and Administrator Permissions links), and Sign Out. The previous Notifications, Privacy, and Feedback & Support sections have been removed.
+Sections, top to bottom: **Location**, **Language**, **Appearance**, **Data**, **About**, then the **Sign Out** and **Delete Account** buttons. The older Notifications, Privacy (analytics/crash toggles), Sync, Export Data, Feedback & Support, and Administrator Permissions entries have all been removed.
 
 #### 1. Location
 | Setting | Description |
@@ -77,182 +61,102 @@ The Settings page has been simplified. Remaining sections: Location, Language, A
 | Location Services | Toggle for app location access |
 
 #### 2. Language
-Supports two languages:
-- English (en)
-- Spanish (es)
-
-Language selection is persisted via `LanguageProvider` and stored in Hive.
+English (en) or Spanish (es), chosen in a dialog. Persisted via `LanguageProvider` in Hive.
 
 #### 3. Appearance (Theme)
-Three options (user-facing label for the follow-device option is "Default", not "System"):
+Three options (the follow-device option is labeled "Default", not "System"):
 - Default (follows device setting)
 - Light
 - Dark
 
-Theme selection is persisted via `ThemeProvider` and stored in Hive.
+Persisted via `ThemeProvider` / `ThemeService` in Hive.
 
 #### 4. Data
 | Action | Description |
 |--------|-------------|
-| Sync | Runs `SyncService.syncPendingChanges()` then dispatches `LoadUserTeams` and `LoadTasksRequested` to re-fetch from Firebase |
-| Clear Cache | Clears locally saved data (requires re-login) |
-| Export Data | Exports tasks and teams to JSON file |
+| Clear Cache | Shows the approximate local cache size ("~N KB cached locally"); after confirmation calls `HiveService.clearAllData()` (tasks, teams, settings). Data is re-fetched from Firebase on next load. |
 
-**Export Data Feature:**
-- Exports all user's tasks and teams to JSON
-- Shows count of exported items
-- Option to share the exported file via system share sheet
-- Works offline using cached data
-
-The in-app Analytics/Crash Reporting opt-out toggles were removed in Phase 3.5; defaults still apply via `AnalyticsService`.
+Analytics and crash reporting have no in-app toggle; collection defaults are applied by `AnalyticsService`. The privacy policy does not promise an in-app opt-out.
 
 #### 5. About
-- App version display (1.0.0)
-- "Built with ❤️ for disaster response coordination." tagline
-- Privacy Policy (placeholder dialog)
-- Terms of Service (placeholder dialog)
-- Administrator Permissions → navigates to `/admin-permissions`
+- App version (`1.0.0`) and the "Built with ❤️ for disaster response coordination." tagline
+- **Privacy Policy** and **Terms of Service** → open `LegalDocumentPage` (`lib/app/legal_document_page.dart`) with the text from `lib/core/constants/privacy_policy.dart` / `terms_of_service.dart`
 
 ### Sign Out
 
-Located at the bottom of settings page:
-1. Shows confirmation dialog
-2. Resets all BLoCs (Team, Task, Map)
-3. Dispatches `SignOutRequested` to AuthBloc
-4. Navigates to login page, clearing navigation stack
+1. Confirmation dialog
+2. Resets the Team, Task, and Map BLoCs
+3. Dispatches `SignOutRequested`
+4. Navigates to `/login`, clearing the navigation stack
+
+### Delete Account
+
+A red **Delete Account** button below Sign Out. The dialog requires typing a confirmation word, then dispatches `DeleteAccountRequested`. See [Authentication → Account Deletion Flow](04_features_authentication.md#account-deletion-flow) for the safeguards (recent sign-in, team leadership) and what is deleted vs. anonymized. On success the app returns to Login; on failure a snackbar explains why and the user stays signed in.
+
+## Legal Documents
+
+`lib/core/constants/privacy_policy.dart` and `terms_of_service.dart` hold the full text plus a `lastUpdated` date (currently **2026-10-24**). Both are marked **DRAFT, pending legal review**. Contact email: **kapok@afairresolution.com**. Keep the privacy policy, `ios/Runner/PrivacyInfo.xcprivacy`, and the store privacy forms in sync. The Terms of Service are also shown during sign-up.
 
 ## Providers
 
-### LanguageProvider
-
-`lib/core/providers/language_provider.dart`
-
-Manages app language selection:
+### LanguageProvider (`lib/core/providers/language_provider.dart`)
 
 ```dart
 class LanguageProvider extends ChangeNotifier {
-  Locale _currentLocale;
-
-  Locale get currentLocale => _currentLocale;
-
+  Locale get currentLocale;
   Future<void> changeLanguage(Locale locale);
   String getLanguageName(Locale locale);
 }
 ```
 
-- Persists language preference to Hive
-- Loads saved preference on app start
-- Notifies listeners on change (triggers app rebuild)
+Persists the language preference to Hive, loads it on start, and notifies listeners (rebuilds the app).
 
-### ThemeProvider
-
-`lib/core/providers/theme_provider.dart`
-
-Manages app theme selection:
+### ThemeProvider (`lib/core/providers/theme_provider.dart`)
 
 ```dart
 class ThemeProvider extends ChangeNotifier {
-  ThemeMode _themeMode;
-
-  ThemeMode get themeMode => _themeMode;
-
+  ThemeMode get themeMode;
   Future<void> changeThemeMode(ThemeMode mode);
 }
 ```
 
-- Persists theme preference to Hive via `ThemeService`
-- Loads saved preference on app start
-- Notifies listeners on change
-
-## Data Export Service
-
-### Location
-`lib/core/services/data_export_service.dart`
-
-### Features
-
-```dart
-class DataExportService {
-  // Export data to JSON file
-  Future<String> exportToJson({
-    required List<TaskModel> tasks,
-    required List<TeamModel> teams,
-    required UserModel currentUser,
-  });
-
-  // Share exported file
-  Future<void> shareExportedFile(String filePath);
-}
-```
-
-### Export Format
-
-JSON file with structure:
-```json
-{
-  "exportedAt": "2024-01-15T10:30:00Z",
-  "exportedBy": {
-    "id": "user_123",
-    "name": "John Doe",
-    "email": "john@example.com"
-  },
-  "tasks": [...],
-  "teams": [...]
-}
-```
-
-### File Location
-
-Saved to app's documents directory with filename:
-`kapok_export_YYYYMMDD_HHMMSS.json`
-
-## Administrator Permissions Page
-
-### Location
-`lib/features/profile/pages/admin_permissions_page.dart`
-
-A standalone page (route `/admin-permissions`) reached from Settings → About → Administrator Permissions. Renders a styled two-column `DataTable`: **Action | Who Can Perform**. Actions documented: Create Team, Join Team, View Team, Edit Team, Close Team, Delete Team, Remove Member, Leave Team, View All Teams. A note at the bottom flags that some admin-specific actions are planned but not yet fully functional.
+Persists the theme preference via `ThemeService`, loads it on start, and notifies listeners.
 
 ## About Page
 
 ### Location
 `lib/app/about_page.dart`
 
+Reached from Profile → About, and shown as the landing page after a user's **first** login (with a **Continue** button that goes to Home; the button only appears when the page can't be popped).
+
 ### Sections
 
 1. **Our Mission**
-   - Description of Kapok's purpose for disaster relief coordination
+2. **Kapok Icon** ("Inspiration: The Living Tree")
+3. **Digging Deeper: Tech Roots**
+4. **Key Features** (hanging-indent bullet list)
+5. **Technology** (Flutter, Firebase, Mapbox)
+6. **Acknowledgements** button → `/acknowledgements`
+7. App version + tagline
+8. **Legal** (© 2026 A Fair Resolution, LLC)
 
-2. **A Fair Resolution, LLC**
-   - Information about the developing organization
+## Acknowledgements Page
 
-3. **Key Features**
-   - List of app capabilities
+`lib/app/acknowledgements_page.dart`. Credits the people who made Kapok possible. The names come from the `acknowledgementsThanksAlsoToNames` string in `app_localizations.dart` (identical English and Spanish lists; one name per line, in the client's requested order).
 
-4. **Technology**
-   - Tech stack overview (Flutter, Firebase, Mapbox)
+## Data Export Service
 
-5. **Contact & Support**
-   - Support contact information
-
-6. **Legal**
-   - Rights and usage information
+`lib/core/services/data_export_service.dart` can export tasks and teams to a JSON file and share it, but **no UI calls it** since the Export Data entry was removed from Settings.
 
 ## Theme Configuration
 
-### Light Theme
-Primary color: Blue (`AppColors.primary`, `#013576`)
-Background: Light gray (#F5F5F5)
+Defined in `lib/core/theme/app_theme.dart`.
 
-### Dark Theme
-Primary color: Blue (`AppColors.primary`, `#013576`)
-Background: Dark gray (#121212)
-
-Theme definitions in `lib/core/theme/app_theme.dart`.
+- **Light**: primary `AppColors.primary` (`#013576`), background `AppColors.background` (`#FEFEFF`)
+- **Dark**: primary `AppColors.primary`, background `#121212`, surfaces `#1E1E1E`
 
 ## Limitations
 
-- Profile picture upload is not implemented (shows placeholder)
+- Profile picture upload is not implemented (initial-letter avatar only)
 - Push notifications are deferred
-- Privacy Policy and Terms of Service are placeholders
-- Clear cache shows success but full implementation is pending
+- Privacy Policy and Terms of Service are drafts pending legal review

@@ -1,14 +1,12 @@
 /// Privacy Policy for Kapok.
 ///
-/// DRAFT — pending legal review and final attorney sign-off. Placeholders in
-/// square brackets (e.g. `[contact email]`) must be filled in before public
-/// release.
+/// DRAFT — pending legal review and final attorney sign-off.
 ///
-/// Last updated: 2026-05-25
+/// Last updated: 2026-10-24
 class PrivacyPolicy {
   PrivacyPolicy._();
 
-  static const String lastUpdated = '2026-05-25';
+  static const String lastUpdated = '2026-10-24';
 
   static const String content = '''
 This Privacy Policy describes our policies and procedures on the collection, use and disclosure of your information when you use Kapok (the "Service") and tells you about your privacy rights and how the law protects you.
@@ -123,7 +121,7 @@ Aggregated analytics data that cannot identify you may be retained for service-i
 
 Analytics
 
-We may use third-party Service Providers to monitor and analyze the use of our Service, including Firebase Analytics and Firebase Crashlytics. These third-party vendors collect, store, use, process, and transfer information about your activity on our Service in accordance with their own privacy policies. You can opt out of analytics from within the app's Settings.
+We may use third-party Service Providers to monitor and analyze the use of our Service, including Firebase Analytics and Firebase Crashlytics. These third-party vendors collect, store, use, process, and transfer information about your activity on our Service in accordance with their own privacy policies.
 
 Children's Privacy
 
@@ -142,7 +140,7 @@ Contact Us
 If you have any questions about this Privacy Policy, you can contact us at:
 
 A Fair Resolution, LLC
-[contact email — to be filled in before release]
+kapok@afairresolution.com
 P.O. Box 1223
 Amherst, Massachusetts, USA 01004
 ''';

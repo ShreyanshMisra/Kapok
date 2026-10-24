@@ -25,6 +25,8 @@ import '../../auth/bloc/auth_state.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../teams/bloc/team_state.dart';
+import '../../tasks/bloc/task_bloc.dart';
+import '../../tasks/bloc/task_state.dart';
 import '../../../app/router.dart';
 import '../../../core/widgets/kapok_logo.dart';
 
@@ -49,6 +51,10 @@ class _MapPageState extends State<MapPage> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   bool _showSearchResults = false;
+
+  // Last tasks loaded for the map. Kept across MapBloc states because offline
+  // tile progress replaces MapWithTasks with MapReady/OfflineRegionUpdating.
+  List<TaskModel>? _mapTasks;
 
   // Map filter state
   TaskStatus? _filterStatus;
@@ -130,6 +136,17 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  void _loadTasksOnMap(BuildContext context, TeamLoaded teamState) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) return;
+    context.read<MapBloc>().add(
+      LoadTasksOnMap(
+        teamIds: teamState.teams.map((team) => team.id).toList(),
+        userId: authState.user.id,
+      ),
+    );
+  }
+
   @override
   void dispose() {
     // Dispose map controllers when page is disposed (e.g., on logout)
@@ -179,18 +196,20 @@ class _MapPageState extends State<MapPage> {
             BlocListener<TeamBloc, TeamState>(
               listener: (context, teamState) {
                 if (teamState is TeamLoaded) {
-                  final authState = context.read<AuthBloc>().state;
-                  if (authState is AuthAuthenticated) {
-                    final teamIds = teamState.teams.map((team) => team.id).toList();
-
-                    // Load tasks for map display
-                    context.read<MapBloc>().add(
-                      LoadTasksOnMap(
-                        teamIds: teamIds,
-                        userId: authState.user.id,
-                      ),
-                    );
-                  }
+                  _loadTasksOnMap(context, teamState);
+                }
+              },
+            ),
+            // Reload map tasks when tasks are created, edited or deleted
+            BlocListener<TaskBloc, TaskState>(
+              listenWhen: (previous, current) =>
+                  current is TaskCreated ||
+                  current is TaskUpdated ||
+                  current is TaskDeleted,
+              listener: (context, _) {
+                final teamState = context.read<TeamBloc>().state;
+                if (teamState is TeamLoaded) {
+                  _loadTasksOnMap(context, teamState);
                 }
               },
             ),
@@ -266,6 +285,7 @@ class _MapPageState extends State<MapPage> {
             }
 
             if (state is MapWithTasks) {
+              _mapTasks = state.tasks;
               return _buildInteractiveMap(
                 context,
                 region: state.region,
@@ -502,6 +522,7 @@ class _MapPageState extends State<MapPage> {
     double? progressOverlay,
     List<TaskModel>? tasks,
   }) {
+    tasks ??= _mapTasks;
     final theme = Theme.of(context);
     final surfaceColor = theme.colorScheme.surface;
     // Priority: 1) provided camera, 2) user location, 3) region center, 4) default (UMass Amherst)
@@ -537,7 +558,10 @@ class _MapPageState extends State<MapPage> {
                 context.read<MapBloc>().add(MapCameraMoved(cameraState));
               },
               onControllerReady: (controller) {
-                _webMapController = controller;
+                // Rebuild so the web marker overlay can project task positions
+                if (mounted && _webMapController != controller) {
+                  setState(() => _webMapController = controller);
+                }
               },
               onMobileControllerReady: (controller) {
                 _mobileMapController = controller;

@@ -1,5 +1,7 @@
 # Application Architecture
 
+_Last verified against the codebase: 2026-10-24._
+
 ## High-Level Structure
 
 Kapok follows a layered architecture with clear separation of concerns:
@@ -33,6 +35,8 @@ The app uses `flutter_bloc` for state management with four main BLoCs:
 | `TeamBloc` | Team management |
 | `MapBloc` | Map state and offline caching |
 
+All four are provided **once** at the app root (`MultiBlocProvider` in `lib/app/kapok_app.dart`), so every page shares the same instance. A page that loads a narrower data set into a shared BLoC must restore the app-wide data when it closes. For example, `TeamDetailPage` loads one team's tasks into `TaskBloc` and re-dispatches `LoadUserTeams` in `dispose()` so the Tasks tab, badge and map reload all of the user's tasks.
+
 Each BLoC follows this structure:
 - **Events**: User actions or system triggers (e.g., `SignInRequested`)
 - **States**: Current application state (e.g., `AuthAuthenticated`)
@@ -59,7 +63,7 @@ final taskRepository = sl<TaskRepository>();
 1. **Services** (Singletons): Core platform services
 2. **Data Sources** (Singletons): Database and API access
 3. **Repositories** (Singletons): Business logic and data coordination
-4. **BLoCs** (Factories): New instance per use
+4. **BLoCs** (Factories): registered as factories, but only resolved once each, at the app root (see above)
 
 ## Navigation
 
@@ -73,7 +77,9 @@ All navigation uses named routes defined in `lib/app/router.dart`:
 | `/signup` | SignupPage |
 | `/forgot-password` | ForgotPasswordPage |
 | `/role-selection` | RoleSelectionPage |
-| `/home` | HomePage |
+| `/home` | HomePage (Map, Tasks, Teams, Profile tabs) |
+| `/about` | AboutPage |
+| `/acknowledgements` | AcknowledgementsPage |
 | `/tasks` | TasksPage |
 | `/create-task` | CreateTaskPage |
 | `/task-detail` | TaskDetailPage |
@@ -89,9 +95,9 @@ All navigation uses named routes defined in `lib/app/router.dart`:
 | `/edit-profile` | EditProfilePage |
 | `/settings` | SettingsPage |
 | `/onboarding` | OnboardingPage |
-| `/about` | AboutPage |
 | `/analytics` | AnalyticsPage |
-| `/admin-permissions` | AdminPermissionsPage |
+
+Routes not linked from any UI today: `/map-test` (development page), `/edit-task` (placeholder; editing happens inside TaskDetailPage), and `/analytics`. `EditTeamPage` is pushed directly with `MaterialPageRoute` from TeamDetailPage rather than through a named route.
 
 ### Route Parameters
 
@@ -124,7 +130,7 @@ UI Layer                Business Layer           Data Layer
 1. **Write Operations**: Save to Hive first, then sync to Firebase
 2. **Read Operations**: Try Firebase, fall back to Hive cache
 3. **Sync Queue**: Failed operations queued for later retry
-4. **Network Monitoring**: `NetworkChecker` triggers sync on reconnection
+4. **Network Monitoring**: `SyncService` listens to `connectivity_plus` and syncs on reconnection; repositories use `NetworkChecker` to decide whether to write to Firebase directly or queue
 
 ## App Initialization Flow
 
@@ -136,6 +142,9 @@ Load Environment Variables (.env)
     │
     ▼
 Initialize Firebase
+    │
+    ▼
+Route errors to Crashlytics (iOS/Android only; skipped on web)
     │
     ▼
 Initialize Dependencies (GetIt)
@@ -153,9 +162,9 @@ SplashWrapper
     ├──▶ AboutPage (on first login, as post-login landing)
     │
     └──▶ KapokApp (main app with BLoC providers)
-
-Manual sync (Settings → Sync) also re-fetches teams and tasks from Firebase by dispatching `LoadUserTeams` and `LoadTasksRequested` after `SyncService.syncPendingChanges()` completes, so data is pulled back from the cloud even when the local sync queue is empty.
 ```
+
+There is no manual Sync button in Settings anymore. `SyncService` pushes queued changes automatically on startup and whenever connectivity returns, and the refresh button on the Tasks page re-fetches teams and tasks (`LoadUserTeams` → `LoadTasksForUserTeamsRequested`).
 
 ## Error Handling
 

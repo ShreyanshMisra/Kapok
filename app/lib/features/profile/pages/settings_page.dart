@@ -141,7 +141,7 @@ class _SettingsPageState extends State<SettingsPage> {
               leading: const Icon(Icons.delete_sweep),
               title: Text(AppLocalizations.of(context).clearCache),
               subtitle: Text(
-                '~${_estimateStorageKB()} KB cached locally',
+                AppLocalizations.of(context).cachedLocallyKB(_estimateStorageKB()),
                 style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6), fontSize: 14),
               ),
               trailing: const Icon(Icons.chevron_right),
@@ -524,13 +524,8 @@ class _SettingsPageState extends State<SettingsPage> {
   void _performAccountDeletion() {
     final messenger = ScaffoldMessenger.of(context);
     final localizations = AppLocalizations.of(context);
-    // Reset BLoCs so streams stop hitting Firestore before the user is gone.
-    try {
-      context.read<TeamBloc>().add(TeamReset());
-      context.read<TaskBloc>().add(TaskReset());
-      context.read<MapBloc>().add(MapReset());
-    } catch (_) {/* ignore */}
-
+    // Team/Task/Map BLoCs are reset by KapokApp's auth listener once the
+    // account is gone (AuthUnauthenticated); a refused deletion keeps them.
     final authBloc = context.read<AuthBloc>();
     late final StreamSubscription<AuthState> sub;
     sub = authBloc.stream.listen((next) {

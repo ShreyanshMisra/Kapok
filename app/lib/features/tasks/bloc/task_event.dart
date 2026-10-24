@@ -23,6 +23,7 @@ class CreateTaskRequested extends TaskEvent {
   final String createdBy;
   final String category;
   final DateTime? dueDate;
+  final String? address;
 
   const CreateTaskRequested({
     required this.taskName,
@@ -37,6 +38,7 @@ class CreateTaskRequested extends TaskEvent {
     required this.createdBy,
     this.category = 'other',
     this.dueDate,
+    this.address,
   });
 
   @override
@@ -53,6 +55,7 @@ class CreateTaskRequested extends TaskEvent {
     createdBy,
     category,
     dueDate,
+    address,
   ];
 }
 

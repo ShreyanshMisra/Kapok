@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../core/services/geolocation_service.dart';
 import '../../../core/utils/logger.dart';
@@ -225,7 +226,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Future<bool> _hasMovedMoreThanThreshold() async {
     final region = _activeRegion;
     if (region == null) return true;
-    final position = await _geolocationService.getCurrentPosition();
+    final Position position;
+    try {
+      position = await _geolocationService.getCurrentPosition();
+    } catch (_) {
+      // Location denied/unavailable: keep the current region rather than
+      // surfacing a MapError over a working map.
+      return false;
+    }
     final distance = _geolocationService.calculateDistance(
       startLatitude: region.centerLat,
       startLongitude: region.centerLon,

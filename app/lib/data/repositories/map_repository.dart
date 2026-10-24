@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import '../../core/constants/mapbox_constants.dart';
 import '../../core/error/exceptions.dart';
 import '../../core/services/network_checker.dart';
 import '../../core/services/geolocation_service.dart';
@@ -523,9 +524,16 @@ class MapRepositoryImpl implements MapRepository {
         centerLat = targetLat;
         centerLon = targetLon;
       } else {
-        final position = await _geolocationService.getCurrentPosition();
-        centerLat = position.latitude;
-        centerLon = position.longitude;
+        try {
+          final position = await _geolocationService.getCurrentPosition();
+          centerLat = position.latitude;
+          centerLon = position.longitude;
+        } catch (_) {
+          // Location denied or unavailable: the map must still work, so fall
+          // back to the default center instead of failing the whole map.
+          centerLat = MapboxConstants.defaultLatitude;
+          centerLon = MapboxConstants.defaultLongitude;
+        }
       }
 
       // Compute bounding box around the center point

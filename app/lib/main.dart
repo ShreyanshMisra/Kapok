@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -32,14 +32,18 @@ Future<void> main() async {
 
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
+    // Crashlytics has no web implementation; calling it there throws an
+    // assertion on every reported error, so keep Flutter's default handlers.
+    if (!kIsWeb) {
+      FlutterError.onError = (errorDetails) {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      };
 
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
 
     await initializeDependencies();
     await initializeCoreServices();
@@ -50,6 +54,10 @@ Future<void> main() async {
 
     runApp(const SplashWrapper());
   }, (error, stack) {
+    if (kIsWeb) {
+      Logger.error('Uncaught error', error: error, stackTrace: stack);
+      return;
+    }
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   });
 }

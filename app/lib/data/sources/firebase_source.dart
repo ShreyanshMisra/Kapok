@@ -668,16 +668,28 @@ class FirebaseSource {
       );
     }
 
+    // Firebase Auth rejects delete() with requires-recent-login once the
+    // sign-in is older than ~5 minutes. Check up front so we never anonymize
+    // tasks and delete the user doc but then fail to delete the Auth user.
+    final lastSignIn = authUser.metadata.lastSignInTime;
+    if (lastSignIn == null ||
+        DateTime.now().difference(lastSignIn) > const Duration(minutes: 5)) {
+      throw AuthException(
+        message:
+            'For your security, please sign out and sign back in, then delete your account.',
+      );
+    }
+
     try {
       Logger.firebase('Deleting account for user: $userId');
 
-      final leaderQuery = await _firestore
+      // Teams store `isActive`; documents without the field are active
+      // (TeamModel defaults it to true).
+      final ledTeams = await _firestore
           .collection('teams')
           .where('leaderId', isEqualTo: userId)
-          .where('active', isEqualTo: true)
-          .limit(1)
           .get();
-      if (leaderQuery.docs.isNotEmpty) {
+      if (ledTeams.docs.any((doc) => doc.data()['isActive'] != false)) {
         throw AuthException(
           message:
               'You lead one or more active teams. Transfer leadership before deleting your account.',
@@ -708,6 +720,9 @@ class FirebaseSource {
           .where('memberIds', arrayContains: userId)
           .get();
       for (final doc in memberOf.docs) {
+        // Closed teams this user led keep their history; security rules don't
+        // let a leader remove themselves from memberIds.
+        if (doc.data()['leaderId'] == userId) continue;
         batch.update(doc.reference, {
           'memberIds': FieldValue.arrayRemove([userId]),
         });

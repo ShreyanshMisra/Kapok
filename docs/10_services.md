@@ -1,5 +1,7 @@
 # Services
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
 Services are singleton classes that provide shared functionality across the app. They handle infrastructure concerns like local storage, networking, location, and analytics.
@@ -83,6 +85,7 @@ Handles offline-to-online data synchronization.
 
 **Supported Operations:**
 - `create_task` / `update_task` / `delete_task`
+- `delete_task_and_update_team`: queued by `TaskRepository.deleteTask` when offline or when the delete transaction fails; deletes the task, then removes its ID from the team's `taskIds`
 - `create_team` / `update_team` / `delete_team`
 - `update_profile`
 - `join_team` / `leave_team` / `remove_member`
@@ -91,12 +94,10 @@ Handles offline-to-online data synchronization.
 
 ```dart
 Future<void> initialize();
-Future<void> syncPendingChanges();
-// Note: the Settings → Sync button calls syncPendingChanges() and then dispatches
-// LoadUserTeams + LoadTasksRequested so data is re-fetched from Firebase even
-// when the local sync queue is empty.
-Future<void> manualSync();
+Future<void> syncPendingChanges();   // runs on startup and on reconnection
+Future<void> manualSync();           // no UI calls this since Settings → Sync was removed
 Future<int> getPendingSyncCount();
+String? getLastSyncTimestamp();
 Future<void> dispose();
 ```
 
@@ -155,7 +156,7 @@ Future<LocationPermission> requestLocationPermission();
 Future<bool> hasLocationPermission();
 
 // Position
-Future<Position> getCurrentPosition();
+Future<Position> getCurrentPosition(); // throws LocationException / PermissionException when unavailable or denied
 Future<Position?> getLastKnownPosition();
 Stream<Position> getLocationUpdates();
 
@@ -181,17 +182,15 @@ Future<void> openAppSettings();
 Firebase Analytics and Crashlytics management.
 
 **Features:**
-- Privacy-respecting analytics (user can opt out)
-- Event tracking
-- Screen view logging
-- Crash reporting control
-- User ID management
+- Applies saved analytics/crash-reporting preferences on startup (both default to enabled)
+- Event, screen-view, and user-ID helpers. None of the `log*` helpers are called anywhere yet, so only Firebase's automatic analytics are collected.
+- Crashlytics calls are skipped on web (no web implementation); `main.dart` also only routes errors to Crashlytics on iOS/Android
 
 **Privacy Settings:**
 - Analytics enabled/disabled (stored in Hive)
 - Crash reporting enabled/disabled (stored in Hive)
 - Both default to enabled
-- The in-app opt-out UI was removed in Phase 3.5; the underlying settings and defaults still apply.
+- There is no in-app opt-out UI (removed in Phase 3.5), and the privacy policy no longer claims one.
 
 **Key Methods:**
 
@@ -226,13 +225,7 @@ Future<void> clearUserData();
 
 **Location:** `lib/core/services/firebase_service.dart`
 
-Firebase initialization wrapper.
-
-**Key Methods:**
-
-```dart
-Future<void> initialize();
-```
+Firebase initialization wrapper and generic Firestore/Storage helpers.
 
 ### ThemeService
 
@@ -252,13 +245,13 @@ Future<void> setThemeMode(ThemeMode mode);
 
 **Location:** `lib/core/services/language_service.dart`
 
-Language preference persistence.
+Language preference persistence (used by `LanguageProvider`). Also has `translateText()` (via the `translator` package), which is not currently called.
 
 ### DataExportService
 
 **Location:** `lib/core/services/data_export_service.dart`
 
-Data export functionality.
+Data export to JSON + share sheet. **Not reachable from the UI** since Export Data was removed from Settings.
 
 **Key Methods:**
 
@@ -276,19 +269,38 @@ Future<void> shareExportedFile(String filePath);
 
 **Location:** `lib/core/services/permission_service.dart`
 
-Runtime permission handling.
+Role/ownership permission checks used by the UI and repositories: `canCreateTeam`, `canJoinTeam`, `canCreateTask`, `canEditTask`, `canDeleteTask`, `canAssignTask`, `canCompleteTask`, `canViewAllTeams`, `canModifyTeamMembers`, `canRemoveMember`, `canTransferLeadership`, `canDeleteTeam`, `canCloseTeam`, `canViewTeam`, `canViewTask`. (Location permission is handled by `GeolocationService` via `geolocator`.)
 
 ### OnboardingService
 
 **Location:** `lib/core/services/onboarding_service.dart`
 
-Onboarding flow state management.
+Tracks whether the first-launch onboarding slides have been seen.
+
+### FirstLoginService
+
+**Location:** `lib/core/services/first_login_service.dart`
+
+Per-user flag (`has_logged_in_before_{uid}` in Hive) that sends a user's first login to the About page instead of Home.
+
+```dart
+bool hasLoggedInBefore(String uid);
+Future<void> markLoggedIn(String uid);
+```
 
 ### GeocodeService
 
 **Location:** `lib/core/services/geocode_service.dart`
 
-Geocoding utilities (address lookup).
+Mapbox Geocoding API client with a Hive cache.
+
+```dart
+Future<String> reverseGeocode(double latitude, double longitude);
+Future<({double latitude, double longitude})> forwardGeocode(String address);
+Future<void> clearCache();
+```
+
+Reverse geocoding throws when it fails (e.g. on web); callers fall back to `lat, lon` text.
 
 ### MigrationService
 
@@ -326,7 +338,13 @@ Local map tile storage.
 
 **Location:** `lib/data/sources/firebase_map_snapshot_source.dart`
 
-Map snapshot storage in Firebase.
+Writes offline-region metadata to `mapSnapshots/{uid}`. Needs the owner-only rule in `firebase/firestore.rules` to be deployed; until then the write fails with `permission-denied` (caught and logged).
+
+### MapboxSource
+
+**Location:** `lib/data/sources/mapbox_source.dart`
+
+Dead code (unimplemented stubs, not registered or imported). Safe to delete.
 
 ## Repositories
 
@@ -342,6 +360,7 @@ Authentication operations:
 - Password reset
 - Profile updates
 - Current user retrieval
+- Account deletion (`deleteAccount`, see 04_features_authentication.md)
 
 ### TaskRepository
 

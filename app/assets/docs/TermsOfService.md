@@ -1,3 +1,5 @@
+> **SUPERSEDED — do not use.** This is an early draft. It is not bundled with the app and differs from the current text. The source of truth is `lib/core/constants/terms_of_service.dart` (contact: kapok@afairresolution.com, last updated 2026-10-24). Delete this file or regenerate it from that source before publishing it anywhere.
+
 # Terms of Service for Kapok
 
 **Effective Date:** December 14, 2025

@@ -39,6 +39,8 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   mapbox_maps_flutter: ^2.31.1
+  # Stops taps on Flutter overlays reaching the Mapbox GL JS view on web
+  pointer_interceptor: ^0.10.1+2
 
   # Network & Permissions
   connectivity_plus: ^6.1.5

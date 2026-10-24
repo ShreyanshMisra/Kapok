@@ -14,7 +14,7 @@
 </p>
 
 
-**Kapok** is a mobile application for coordinating volunteer disaster relief teams. Built with Flutter and Firebase, it enables organizations to efficiently manage tasks, teams, and field operations during crisis response, even in areas with limited connectivity.
+**Kapok** is a mobile application for coordinating volunteer disaster response teams. Built with Flutter and Firebase, it enables organizations to efficiently manage tasks, teams, and field operations during crisis response, even in areas with limited connectivity.
 
 Developed for the **A Fair Resolution, LLC**, led by **Dr. Leah Wing**, Professor of Legal Studies. The application will be handed off to the RN Response Network (RNRN), a national network of direct-care RNs powered by National Nurses United, that coordinates sending volunteers to disaster stricken areas where and when they are needed most.
 
@@ -22,12 +22,13 @@ Developed for the **A Fair Resolution, LLC**, led by **Dr. Leah Wing**, Professo
 
 ## Features
 
-- **Team Management** — Create teams, generate join codes, and manage membership
-- **Task Coordination** — Create, assign, and track location-based tasks with priority levels
-- **Interactive Maps** — Mapbox-powered maps with task visualization and offline caching
-- **Offline-First** — Full functionality without internet; automatic sync when connected
-- **Multi-Language** — English and Spanish support
-- **Role-Based Access** — Team Member, Team Leader, and Admin roles
+- **Team Management**: create teams, share join codes, manage membership, transfer leadership
+- **Task Coordination**: create, assign, and track location-based tasks with priorities (★–★★★) and categories
+- **Interactive Maps**: Mapbox-powered maps with task pins, address search, and offline caching
+- **Offline-First**: works without internet; queued changes sync automatically when connected
+- **Multi-Language**: English and Spanish
+- **Role-Based Access**: Team Member, Team Leader, and Admin roles
+- **Privacy**: in-app account deletion; works without location permission
 
 ---
 
@@ -36,8 +37,8 @@ Developed for the **A Fair Resolution, LLC**, led by **Dr. Leah Wing**, Professo
 | Layer | Technology |
 |-------|------------|
 | Framework | Flutter (Dart) |
-| Backend | Firebase (Auth, Firestore, Storage, Crashlytics) |
-| Maps | Mapbox GL |
+| Backend | Firebase (Auth, Firestore, Storage, Crashlytics, Analytics) |
+| Maps | Mapbox Maps SDK (mobile), Mapbox GL JS (web) |
 | Local Storage | Hive |
 | State Management | BLoC Pattern |
 
@@ -48,8 +49,10 @@ Developed for the **A Fair Resolution, LLC**, led by **Dr. Leah Wing**, Professo
 ```
 Kapok/
 ├── app/          # Flutter application source code
-├── firebase/     # Firebase configuration and Firestore rules
-└── docs/         # Technical and user documentation
+├── firebase/     # Firestore/Storage rules and indexes
+├── docs/         # Technical, handoff, store, and user documentation
+├── .github/      # CI workflow (analyze + test)
+└── CHANGELOG.md
 ```
 
 ---
@@ -58,16 +61,17 @@ Kapok/
 
 ### Prerequisites
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.9.2+)
-- [Firebase CLI](https://firebase.google.com/docs/cli)
-- Mapbox access token
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.35.4 (stable; Dart ^3.9.2)
+- [Firebase CLI](https://firebase.google.com/docs/cli) (for rules deploys)
+- Mapbox public access token (`pk.*`)
+- Xcode 26+ for iOS, Android Studio / SDK for Android
 
 ### Setup
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-org/kapok.git
-   cd kapok/app
+   git clone https://github.com/ShreyanshMisra/Kapok.git
+   cd Kapok/app
    ```
 
 2. Install dependencies
@@ -77,11 +81,12 @@ Kapok/
 
 3. Configure environment variables
    ```bash
-   # Create .env file in app/ directory
-   echo "MAPBOX_ACCESS_TOKEN=your_token_here" > .env
+   cp .env.example .env   # then set MAPBOX_ACCESS_TOKEN=pk....
    ```
 
-4. Run the application
+4. Add the Firebase config files (gitignored; download from the `build-kapok` Firebase project). See [`app/README.md`](./app/README.md).
+
+5. Run the application
    ```bash
    flutter run
    ```
@@ -89,9 +94,9 @@ Kapok/
 ### Running on Specific Platforms
 
 ```bash
-flutter run -d chrome      # Web
-flutter run -d ios         # iOS Simulator
+flutter run -d ios         # iOS Simulator (iPhone only)
 flutter run -d android     # Android Emulator
+flutter run -d chrome      # Web (development/QA only)
 ```
 
 ---
@@ -100,11 +105,24 @@ flutter run -d android     # Android Emulator
 
 Comprehensive documentation is available in the [`/docs`](./docs) folder:
 
-- [Overview](./docs/01_overview.md) — Application purpose and features
-- [Tech Stack](./docs/02_tech_stack.md) — Dependencies and configuration
-- [Architecture](./docs/03_architecture.md) — Code structure and patterns
-- [User Manual](./docs/14_user_manual.md) — End-user guide
-- [Handoff Documentation](./docs/13_handoff_documentation.md) — App store publishing guide
+| Doc | Contents |
+|-----|----------|
+| [01 Overview](./docs/01_overview.md) | Purpose, features, roles, platforms |
+| [02 Tech Stack](./docs/02_tech_stack.md) | Dependencies and platform configuration |
+| [03 Architecture](./docs/03_architecture.md) | Layers, BLoCs, routes, data flow |
+| [04 Authentication](./docs/04_features_authentication.md) | Sign-in/up, password reset, account deletion |
+| [05 Tasks](./docs/05_features_tasks.md) | Task model, pages, permissions |
+| [06 Teams](./docs/06_features_teams.md) | Teams, join codes, leadership, close vs. delete |
+| [07 Map](./docs/07_features_map.md) | Map page, offline regions, web/mobile controllers |
+| [08 Profile & Settings](./docs/08_features_profile.md) | Profile, Settings, legal docs, About |
+| [09 Data Models](./docs/09_data_models.md) | Models, enums, Firestore collections |
+| [10 Services](./docs/10_services.md) | Services, data sources, repositories |
+| [11 Project Structure](./docs/11_project_structure.md) | Directory layout and config files |
+| [12 Development Notes](./docs/12_development_notes.md) | Setup, building, rules deploys, recent fixes |
+| [13 Handoff](./docs/13_handoff_documentation.md) | Test accounts and store publishing steps |
+| [14 User Manual](./docs/14_user_manual.md) | End-user guide |
+| [15 Store Readiness](./docs/15_store_readiness_evaluation.md) | App Store / Play readiness review |
+| [16 Client Submission Guide](./docs/16_client_store_submission_guide.md) | Business-owner actions for publishing |
 
 ---
 

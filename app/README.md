@@ -10,11 +10,10 @@
    - `app/ios/Runner/GoogleService-Info.plist`
    - `app/android/app/google-services.json`
 4. `flutter pub get`
-5. `flutter clean`
-6. `flutter run`
+5. `flutter run` and pick a device: the iOS Simulator (iPhone), an Android
+   emulator, or Chrome (web is for development/QA only).
 
-When prompted, select `2` to develop in Chrome, or alternatively choose the
-iOS Simulator / Android Emulator if you have them installed.
+Full setup, build, and release notes are in `docs/12_development_notes.md`.
 
 ## Identifiers
 
@@ -28,8 +27,10 @@ the config files above, and update `lib/firebase_options.dart`.
 
 ## Mapbox token
 
-The Android manifest reads the token from a Gradle placeholder. Set it in one
-of two places before running on Android:
+The Android manifest reads the token from a Gradle placeholder. The build
+looks for it in `android/key.properties` first (copy
+`android/key.properties.example`; the same file holds release signing), then in
+either of these:
 
 - `~/.gradle/gradle.properties`:
   ```

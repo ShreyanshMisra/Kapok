@@ -1,5 +1,7 @@
 # Project Structure
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
 The project follows a feature-based architecture with clear separation of concerns. Code is organized by feature domain, with shared infrastructure in the `core` directory.
@@ -26,9 +28,10 @@ Application bootstrap:
 2. Load environment variables
 3. Validate Mapbox configuration
 4. Initialize Firebase
-5. Set up Crashlytics error handlers
-6. Initialize dependency injection
-7. Run SplashWrapper
+5. Set up Crashlytics error handlers (iOS/Android only; web keeps Flutter's default handlers)
+6. Initialize dependency injection and core services
+7. Initialize `AnalyticsService`
+8. Run SplashWrapper
 
 ### injection_container.dart
 
@@ -42,10 +45,12 @@ Dependency registration:
 
 ```
 app/
-├── kapok_app.dart    # Root MaterialApp widget
-├── router.dart       # Named route definitions
-├── home_page.dart    # Main navigation scaffold
-└── about_page.dart   # About/info screen
+├── kapok_app.dart              # Root MaterialApp widget + BLoC providers
+├── router.dart                 # Named route definitions
+├── home_page.dart              # Main navigation scaffold (4 tabs)
+├── about_page.dart             # About screen (also first-login landing)
+├── acknowledgements_page.dart  # Credits list
+└── legal_document_page.dart    # Renders Privacy Policy / Terms of Service
 ```
 
 ### kapok_app.dart
@@ -63,8 +68,10 @@ app/
 ### home_page.dart
 - Bottom navigation bar (Map, Tasks, Teams, Profile)
 - IndexedStack for page persistence
-- Floating action buttons per tab
-- AppDrawer widget
+- Floating action button per tab (`heroTag: 'home_fab'`; TasksPage's own FAB uses `'tasks_page_fab'`, so the two never collide in the IndexedStack)
+- Tasks tab badge counts open tasks
+- Offline banner + `SyncStatusWidget`
+- `AppDrawer` widget (defined but not currently used)
 
 ## Core Directory
 
@@ -74,12 +81,14 @@ core/
 │   ├── app_colors.dart      # Color definitions
 │   ├── app_strings.dart     # Static strings
 │   ├── app_styles.dart      # TextStyle definitions
-│   ├── mapbox_constants.dart # Mapbox config
-│   └── terms_of_service.dart # Legal text
+│   ├── mapbox_constants.dart # Mapbox config + default map center
+│   ├── privacy_policy.dart  # Privacy Policy text (in-app source of truth)
+│   └── terms_of_service.dart # Terms of Service text (in-app source of truth)
 ├── enums/
 │   ├── user_role.dart       # UserRole enum
 │   ├── task_status.dart     # TaskStatus enum
-│   └── task_priority.dart   # TaskPriority enum
+│   ├── task_priority.dart   # TaskPriority enum
+│   └── task_category.dart   # TaskCategory enum
 ├── error/
 │   └── exceptions.dart      # Custom exception classes
 ├── localization/
@@ -91,6 +100,7 @@ core/
 │   ├── analytics_service.dart
 │   ├── data_export_service.dart
 │   ├── firebase_service.dart
+│   ├── first_login_service.dart
 │   ├── geocode_service.dart
 │   ├── geolocation_service.dart
 │   ├── hive_service.dart
@@ -103,10 +113,17 @@ core/
 │   └── theme_service.dart
 ├── theme/
 │   └── app_theme.dart       # Light/dark theme definitions
-└── utils/
-    ├── extensions.dart      # Dart extensions
-    ├── logger.dart          # Logging utility
-    └── validators.dart      # Form validation
+├── utils/
+│   ├── extensions.dart      # Dart extensions (incl. floating snackbar styling)
+│   ├── logger.dart          # Logging utility (prints only in debug)
+│   ├── role_icons.dart      # Icon per specialty
+│   └── validators.dart      # Form validation
+└── widgets/
+    ├── help_overlay.dart        # Per-page "?" help tips
+    ├── kapok_logo.dart          # App bar logo
+    ├── priority_stars.dart      # ★/★★/★★★ priority display
+    ├── sync_status_widget.dart  # Sync banner
+    └── validated_text_field.dart
 ```
 
 ## Data Directory
@@ -134,7 +151,8 @@ data/
     ├── hive_source.dart
     ├── mapbox_remote_data_source.dart
     ├── offline_map_cache.dart
-    └── firebase_map_snapshot_source.dart
+    ├── firebase_map_snapshot_source.dart
+    └── mapbox_source.dart        # Dead code (unused stubs), safe to delete
 ```
 
 ## Features Directory
@@ -176,11 +194,13 @@ features/tasks/
 │   ├── task_bloc.dart
 │   ├── task_event.dart
 │   └── task_state.dart
-└── pages/
-    ├── tasks_page.dart
-    ├── create_task_page.dart
-    ├── task_detail_page.dart
-    └── edit_task_page.dart
+├── pages/
+│   ├── tasks_page.dart
+│   ├── create_task_page.dart
+│   ├── task_detail_page.dart
+│   └── edit_task_page.dart      # Placeholder, not linked
+└── widgets/
+    └── enhanced_task_card.dart  # Task list card
 ```
 
 ### Teams Feature
@@ -229,9 +249,15 @@ features/profile/
 └── pages/
     ├── profile_page.dart
     ├── edit_profile_page.dart
-    ├── settings_page.dart
-    ├── admin_permissions_page.dart
-    └── analytics_page.dart
+    └── settings_page.dart
+```
+
+### Analytics Feature
+
+```
+features/analytics/
+└── pages/
+    └── analytics_page.dart   # Charts (fl_chart); route /analytics, not linked from UI
 ```
 
 ### Onboarding Feature
@@ -241,7 +267,7 @@ features/onboarding/
 ├── pages/
 │   └── onboarding_page.dart
 └── widgets/
-    └── onboarding_widgets.dart
+    └── onboarding_slide.dart
 ```
 
 ### Splash Feature
@@ -260,34 +286,60 @@ test/
 ├── widget_test.dart
 ├── integration/
 │   └── critical_flows_test.dart
-├── features/
-│   ├── map/
-│   │   ├── map_status_card_test.dart
-│   │   └── map_bloc_test.dart
-│   └── teams/
-│       └── bloc/
-│           └── team_bloc_remove_member_test.dart
-└── data/
-    └── models/
-        └── task_model_test.dart
+├── core/
+│   ├── enums/            # task_category, task_priority, task_status, user_role
+│   ├── localization/
+│   │   └── app_localizations_completeness_test.dart  # every EN key has ES
+│   └── utils/
+│       └── logger_test.dart
+├── data/
+│   └── models/
+│       ├── task_model_test.dart
+│       └── user_model_test.dart
+└── features/
+    ├── map/
+    │   └── map_bloc_test.dart
+    └── teams/
+        ├── team_permission_test.dart
+        └── bloc/
+            └── team_bloc_remove_member_test.dart
+
+integration_test/
+├── app_smoke_test.dart   # On-device smoke test
+└── README.md
 ```
+
+106 tests; run with `flutter test`. CI (`.github/workflows/ci.yml`) runs analyze + test on pushes/PRs.
 
 ## Assets
 
 ```
 assets/
-└── images/
-    ├── kapok_icon.png     # App icon
-    └── icons/             # Feature icons
+├── images/
+│   ├── kapok_icon.png     # App icon source (flutter_launcher_icons)
+│   ├── icons/             # Icon size variants
+│   └── icon_tagline/      # Logo + tagline wordmarks (light/dark)
+└── docs/                  # SUPERSEDED early legal drafts, not bundled
 ```
+
+`app/.env` is also bundled as an asset (it only holds the public `pk.` Mapbox token and style ID).
 
 ## Configuration Files
 
 ```
-.env                    # Environment variables (Mapbox token)
-.env.example            # Template for .env
-pubspec.yaml            # Dependencies and assets
-firebase_options.dart   # Firebase config (lib/)
+app/.env                                # Mapbox token (gitignored)
+app/.env.example                        # Template for .env
+app/pubspec.yaml                        # Dependencies, assets, icon/splash config
+app/lib/firebase_options.dart           # FlutterFire config
+app/ios/Runner/GoogleService-Info.plist # iOS Firebase config (gitignored)
+app/ios/Runner/PrivacyInfo.xcprivacy    # iOS privacy manifest
+app/android/app/google-services.json    # Android Firebase config (gitignored)
+app/android/key.properties              # Android release signing + Mapbox token (gitignored, not created yet)
+app/android/key.properties.example      # Template for the above
+firebase.json / .firebaserc             # Firebase CLI config (project build-kapok)
+firebase/firestore.rules                # Firestore security rules
+firebase/firestore.indexes.json
+firebase/storage.rules
 ```
 
 ## Generated Files
@@ -295,12 +347,10 @@ firebase_options.dart   # Firebase config (lib/)
 Files with `.g.dart` extension are generated by `build_runner`:
 
 ```bash
-flutter pub run build_runner build
+dart run build_runner build --delete-conflicting-outputs
 ```
 
-These include:
-- JSON serialization methods
-- Hive type adapters
+These contain the JSON serialization methods (`toJson`/`fromJson`) for the user, task, team, and offline-region models.
 
 ## Naming Conventions
 

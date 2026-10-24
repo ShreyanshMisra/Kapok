@@ -1,5 +1,7 @@
 # Authentication Feature
 
+_Last verified against the codebase: 2026-10-24._
+
 ## Overview
 
 The authentication system handles user registration, login, password reset, and profile management. It uses Firebase Authentication for identity management and Firestore for user profile storage.
@@ -46,6 +48,19 @@ The authentication system handles user registration, login, password reset, and 
 3. Firebase sends reset email
 4. `PasswordResetSent` state emitted
 5. UI shows success message
+
+### Account Deletion Flow
+
+Required by both the App Store (guideline 5.1.1(v)) and Google Play.
+
+1. User opens **Profile → Settings → Delete Account** and types the confirmation word in the dialog
+2. `DeleteAccountRequested` event dispatched to `AuthBloc`
+3. `FirebaseSource.deleteAccount()` checks, before touching any data:
+   - **Recent sign-in**: the sign-in must be under 5 minutes old (Firebase Auth rejects `delete()` with `requires-recent-login` otherwise). If not, the user is asked to sign out and back in. This check prevents a half-deleted account (data gone, login still working).
+   - **Team leadership**: if the user leads any team with `isActive != false`, deletion is refused until leadership is transferred
+4. In one Firestore batch: tasks the user created/was assigned are anonymized (`createdBy`/`assignedTo` → `deleted_user`), the user is removed from `memberIds` of teams they belong to (closed teams they led are left as-is), and `users/{uid}` is deleted
+5. Local Hive user cache is cleared, then the Firebase Auth user is deleted
+6. `AuthUnauthenticated` is emitted; `KapokApp` resets the Team/Task/Map BLoCs and returns to Login. On failure, `AuthError` is shown and the user stays signed in with their data intact
 
 ## Pages
 
@@ -101,6 +116,7 @@ The authentication system handles user registration, login, password reset, and 
 | `PasswordResetRequested` | email | Password reset |
 | `AuthCheckRequested` | none | Check current auth status |
 | `ProfileUpdateRequested` | name?, role?, user? | Update profile |
+| `DeleteAccountRequested` | none | Permanently delete the signed-in account |
 
 ### States (`lib/features/auth/bloc/auth_state.dart`)
 
@@ -148,7 +164,12 @@ Future<UserModel?> getCurrentUser()
 
 // Update user profile
 Future<UserModel> updateUserProfile(UserModel user)
+
+// Permanently delete the signed-in account (see Account Deletion Flow)
+Future<void> deleteAccount()
 ```
+
+`signInWithEmailAndPassword` and `createUserWithEmailAndPassword` take named parameters.
 
 ### Offline Support
 
@@ -183,7 +204,7 @@ Users are stored in Firestore at `users/{userId}`:
 
 ## Error Handling
 
-Firebase error codes are mapped to user-friendly messages via `_firebaseAuthMessage` in `auth_repository.dart`. Refer to that method as the source of truth for exact wording; the mapped codes include `user-not-found`, `wrong-password`, `invalid-credential`, `email-already-in-use`, `weak-password`, and `invalid-email`.
+Firebase error codes are mapped to user-friendly messages via `_firebaseAuthMessage` in `auth_repository.dart`. Refer to that method as the source of truth for exact wording; the mapped codes are `user-not-found`, `wrong-password`, `invalid-credential`, `invalid-email`, `user-disabled`, `too-many-requests`, `network-request-failed`, `email-already-in-use`, `weak-password`, `requires-recent-login`, and `operation-not-allowed`.
 
 ## Form Validation
 
@@ -193,3 +214,5 @@ The `Validators` class provides:
 - `validatePassword()`: Minimum 6 characters
 - `validateName()`: 2-50 characters
 - `confirmPassword()`: Must match password field
+
+It also has team/task validators (`teamCode`, `teamName`, `taskName`, `taskDescription`) and generic helpers (`required`, `minLength`, `maxLength`, `combine`, …). All user-facing validators accept an optional `AppLocalizations` for translated messages.

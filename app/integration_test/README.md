@@ -39,7 +39,7 @@ to call `FirebaseFirestore.instance.useFirestoreEmulator(...)` and
 `FirebaseAuth.instance.useAuthEmulator(...)` when set.
 
 (Implementation note: the wiring for that env var is **not yet in place** —
-see `docs/15_store_readiness_evaluation.md` §7 for the gap list.)
+see `docs/15_store_readiness_evaluation.md` §8 (Tests & CI) for the gap list.)
 
 ## What to add next
 

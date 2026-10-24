@@ -49,7 +49,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       iconColor: AppColors.success,
       title: 'Smart Task Management',
       description:
-          'Create location-based tasks with priorities and due dates. Assign to team members, track status, and visualize everything on an interactive map.',
+          'Create location-based tasks with priorities and categories. Assign to team members, track status, and visualize everything on an interactive map.',
       backgroundColor: AppColors.primaryDark,
     ),
   ];

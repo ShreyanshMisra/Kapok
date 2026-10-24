@@ -49,6 +49,7 @@ class MapboxWebController {
   Object? _mapInstance;
   bool _scriptsInjected = false;
   Timer? _pendingTapTimer;
+  html.ResizeObserver? _resizeObserver;
 
   /// Builds the HtmlElementView widget that hosts the Mapbox canvas.
   Widget buildView() {
@@ -83,6 +84,8 @@ class MapboxWebController {
 
   void dispose() {
     _cancelPendingTap();
+    _resizeObserver?.disconnect();
+    _resizeObserver = null;
     if (_mapInstance != null) {
       js_util.callMethod(_mapInstance!, 'remove', const []);
       _mapInstance = null;
@@ -125,6 +128,16 @@ class MapboxWebController {
       'load',
       allowInterop((_) => onMapReady?.call()),
     ]);
+
+    // The map is often created before the platform view is laid out (e.g.
+    // mid route transition), so Mapbox falls back to a 400x300 canvas. Mapbox
+    // only tracks window resizes, so resize whenever the container changes.
+    _resizeObserver = html.ResizeObserver((_, _) {
+      if (_mapInstance != null) {
+        js_util.callMethod(_mapInstance!, 'resize', const []);
+      }
+    })
+      ..observe(_container!);
     js_util.callMethod(_mapInstance!, 'on', [
       'moveend',
       allowInterop((_) => _emitCamera()),
