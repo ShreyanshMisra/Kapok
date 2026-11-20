@@ -628,6 +628,9 @@ class FirebaseSource {
       );
       Logger.firebase('User account created successfully');
       return credential;
+    } on FirebaseAuthException catch (e) {
+      Logger.firebase('Firebase auth error during sign up: ${e.code}', error: e);
+      throw _handleAuthError(e.code, e.message, e);
     } catch (e) {
       Logger.firebase('Error creating user account', error: e);
       throw AuthException(
@@ -802,8 +805,19 @@ class FirebaseSource {
       case 'weak-password':
         errorMessage = 'Password is too weak. Please use a stronger password.';
         break;
+      case 'password-does-not-meet-requirements':
+        errorMessage = message ?? 'Password does not meet the requirements.';
+        break;
+      case 'admin-restricted-operation':
+        errorMessage = 'New sign-ups are currently disabled. Please contact support.';
+        break;
+      case 'network-request-failed':
+        errorMessage = 'Network error. Please check your internet connection.';
+        break;
       default:
-        errorMessage = message ?? 'Failed to authenticate. Please try again.';
+        // Keep the Firebase code visible so field reports are diagnosable.
+        errorMessage =
+            '${message ?? 'Failed to authenticate. Please try again.'} ($code)';
     }
     return AuthException(
       message: errorMessage,
