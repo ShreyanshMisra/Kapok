@@ -14,6 +14,7 @@ import '../../../core/services/hive_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 import '../../auth/bloc/auth_state.dart';
+import '../../auth/widgets/sign_out_flow.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
 import '../../tasks/bloc/task_bloc.dart';
@@ -408,6 +409,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Navigator.of(ctx).pop();
               try {
                 await HiveService.instance.clearAllData();
+                if (!mounted) return;
                 context.read<TaskBloc>().add(TaskReset());
                 context.read<TeamBloc>().add(TeamReset());
                 if (mounted) {
@@ -548,42 +550,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Show sign out confirmation dialog
   void _showSignOutDialog() {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(localizations.signOut),
-        content: Text(localizations.confirmSignOut),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(localizations.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              // Reset BLoCs first to stop map and clear state
-              try {
-                context.read<TeamBloc>().add(TeamReset());
-                context.read<TaskBloc>().add(TaskReset());
-                context.read<MapBloc>().add(MapReset());
-              } catch (e) {
-                // Ignore errors during reset
-              }
-              // Then sign out
-              context.read<AuthBloc>().add(const SignOutRequested());
-              // Navigate immediately to login page and close settings page
-              if (context.mounted) {
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/login', (route) => false);
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: Text(localizations.signOut.toUpperCase()),
-          ),
-        ],
-      ),
-    );
+    confirmAndSignOut(
+      context,
+      onConfirmed: () {
+        // Reset BLoCs first to stop the map and clear state.
+        try {
+          context.read<TeamBloc>().add(TeamReset());
+          context.read<TaskBloc>().add(TaskReset());
+          context.read<MapBloc>().add(MapReset());
+        } catch (_) {}
+      },
+    ).then((signedOut) {
+      if (signedOut && mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
+      }
+    });
   }
 }

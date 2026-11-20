@@ -297,6 +297,10 @@ class AppLocalizations {
   String get wouldYouLikeToShareTheFile => _getString('wouldYouLikeToShareTheFile');
   String get notNow => _getString('notNow');
   String get exportFailed => _getString('exportFailed');
+  String get unsyncedChangesTitle => _getString('unsyncedChangesTitle');
+  String get signOutAnyway => _getString('signOutAnyway');
+  String unsyncedChangesMessage(int count) =>
+      _getString('unsyncedChangesMessage').replaceAll('{count}', count.toString());
   String cachedLocallyKB(int kb) =>
       _getString('cachedLocallyKB').replaceAll('{kb}', kb.toString());
   String exportedItemsCount(int tasks, int teams) =>
@@ -667,6 +671,9 @@ class AppLocalizations {
         'data': 'Data',
         'clearCache': 'Clear Cache',
         'cachedLocallyKB': '~{kb} KB cached locally',
+        'unsyncedChangesTitle': 'Unsynced changes',
+        'unsyncedChangesMessage': 'You have {count} change(s) that haven\'t been uploaded yet. Signing out will permanently discard them. To keep them, connect to the internet and wait for syncing to finish before signing out.',
+        'signOutAnyway': 'Sign out anyway',
         'exportData': 'Export Data',
         'appVersionLabel': 'App Version',
         'privacyPolicy': 'Privacy Policy',
@@ -1104,6 +1111,9 @@ class AppLocalizations {
         'data': 'Datos',
         'clearCache': 'Limpiar Caché',
         'cachedLocallyKB': '~{kb} KB en caché local',
+        'unsyncedChangesTitle': 'Cambios sin sincronizar',
+        'unsyncedChangesMessage': 'Tienes {count} cambio(s) que aún no se han subido. Si cierras sesión, se descartarán permanentemente. Para conservarlos, conéctate a internet y espera a que termine la sincronización antes de cerrar sesión.',
+        'signOutAnyway': 'Cerrar sesión de todos modos',
         'exportData': 'Exportar Datos',
         'appVersionLabel': 'Versión de la Aplicación',
         'privacyPolicy': 'Política de Privacidad',

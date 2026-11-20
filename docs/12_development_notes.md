@@ -374,8 +374,17 @@ Teammates sometimes edit rules directly in the Firebase Console, so the live rul
 1. Open **Firebase Console → Firestore Database → Rules** for `build-kapok` and copy the published rules into a scratch file (e.g. `/tmp/live.rules`).
 2. Diff: `diff --strip-trailing-cr /tmp/live.rules firebase/firestore.rules` (the console copy uses CRLF line endings).
 3. Merge any live-only clauses into the repo file and commit.
-4. Optionally test in the **Rules Playground** in the console.
+4. Run the rules tests: `python3 firebase/rules_test.py`. They run server-side through the Firebase Rules API with mocked documents (no emulator, no database access) and must all pass.
 5. Deploy: `firebase deploy --only firestore:rules` (from the repo root; `.firebaserc` points at `build-kapok`).
+
+### Security model (2026-11-19)
+
+- A team's data (the team doc, its tasks, and its members' profiles) is readable only by that team's members/leader and by admins.
+- Invite codes live in `teamCodes/{code}` → `{teamId}`. Anyone signed in can `get` a code; nobody can list them. Creating a team writes the team and its code doc in one batch (`FirebaseSource.createTeam`); the rules reject a team whose code isn't reserved for it.
+- Joining (`TeamRepository.joinTeam`) writes `users/{uid}.joinCode` and `teams/{id}.memberIds += uid` in one batch. The rules accept the join only if `joinCode` equals the team's code, the team is active, and it has at most 50 members.
+- Leader powers apply only to the team the user leads (`teams/{id}.leaderId`).
+- Teams created before `teamCodes` existed are backfilled when their leader next loads their teams (`FirebaseSource.ensureTeamCodeIndexed`), or all at once with `python3 firebase/backfill_team_codes.py --apply`.
+- Still open: `userRole` (including `admin`) is self-assignable. Lock it down before public release.
 
 ## CI/CD Notes
 

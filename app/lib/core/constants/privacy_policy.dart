@@ -2,11 +2,11 @@
 ///
 /// DRAFT — pending legal review and final attorney sign-off.
 ///
-/// Last updated: 2026-10-24
+/// Last updated: 2026-11-19
 class PrivacyPolicy {
   PrivacyPolicy._();
 
-  static const String lastUpdated = '2026-10-24';
+  static const String lastUpdated = '2026-11-19';
 
   static const String content = '''
 This Privacy Policy describes our policies and procedures on the collection, use and disclosure of your information when you use Kapok (the "Service") and tells you about your privacy rights and how the law protects you.
@@ -72,11 +72,11 @@ The Company may use Personal Data for the following purposes:
 Sharing Your Personal Data
 
 We may share your personal information in the following situations:
-• With Service Providers, to monitor and analyze the use of our Service or to contact you.
+• With Service Providers that operate the Service on our behalf: Google Firebase (authentication, database, analytics, and crash reporting) and Mapbox (maps, address search, and offline maps).
 • For business transfers, in connection with any merger, sale of Company assets, financing, or acquisition of all or a portion of our business.
 • With affiliates, in which case we will require those affiliates to honor this Privacy Policy.
 • With business partners, to offer you certain products, services, or promotions.
-• With other users, when you share personal information or otherwise interact in the public areas of the Service.
+• With other users: your name, email address, role, and the tasks you create or are assigned are visible to the members of your team and to Kapok administrators.
 • With your consent, for any other purpose.
 
 Retention of Your Personal Data
@@ -115,13 +115,21 @@ You can request deletion of your Kapok account from within the app at any time. 
 • Your Firebase Authentication record is removed.
 • Your user profile document in our database is removed.
 • Tasks you created or were assigned to are anonymized: your user identifier is replaced with "deleted_user" so that team members can continue to coordinate around the same disaster-response work without linkage to your identity.
-• Your locally-cached data on your device is cleared.
+• Your locally-cached data on your device is cleared. (Signing out also clears it, including changes that haven't been uploaded yet; the app warns you first.)
 
 Aggregated analytics data that cannot identify you may be retained for service-improvement purposes.
 
 Analytics
 
 We may use third-party Service Providers to monitor and analyze the use of our Service, including Firebase Analytics and Firebase Crashlytics. These third-party vendors collect, store, use, process, and transfer information about your activity on our Service in accordance with their own privacy policies.
+
+Maps and Location Services
+
+Kapok uses Mapbox to display maps, look up addresses, and download maps for offline use. To do this, your device sends Mapbox the map areas you view, the addresses and places you search for, task locations being converted to addresses, and standard device and network information (such as IP address and device type). If you allow location access, your device's location is used to center the map and to tag the tasks you create.
+
+The Mapbox SDK also collects de-identified location and usage telemetry by default, which Mapbox uses to improve its maps. You can opt out at any time by tapping the information (i) button on the map and turning off Mapbox Telemetry. Mapbox processes this information under its own privacy policy, available at https://www.mapbox.com/legal/privacy.
+
+Task locations, addresses, and descriptions you enter are visible to the other members of your team and to Kapok administrators.
 
 Children's Privacy
 

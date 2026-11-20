@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/error/exceptions.dart';
 import '../../core/services/hive_service.dart';
 import '../../core/utils/logger.dart';
@@ -243,9 +244,14 @@ class HiveSource {
   Future<void> queueForSync(Map<String, dynamic> syncData) async {
     try {
       Logger.hive('Queuing for sync: ${syncData['operation']}');
+      // Tag with the account that made the change so it's never replayed
+      // under a different account (see SyncService).
+      final ownerId = FirebaseAuth.instance.currentUser?.uid;
+      // Microsecond keys sort chronologically and don't collide when two
+      // operations are queued in the same millisecond.
       await HiveService.instance.storeSyncData(
-        'sync_${DateTime.now().millisecondsSinceEpoch}',
-        syncData,
+        'sync_${DateTime.now().microsecondsSinceEpoch}',
+        {...syncData, if (ownerId != null) 'ownerId': ownerId},
       );
       Logger.hive('Queued for sync successfully');
     } catch (e) {

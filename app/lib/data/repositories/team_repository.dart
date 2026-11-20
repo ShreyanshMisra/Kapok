@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/error/exceptions.dart';
 import '../../core/enums/user_role.dart';
@@ -42,7 +42,7 @@ class TeamRepository {
       try {
         Logger.team('Generating unique team code...');
         while (!isUnique && attempts < 5) {
-          teamCode = _generateSecureTeamCode();
+          teamCode = FirebaseSource.generateTeamCode();
           Logger.team(
             'Generated team code: $teamCode (attempt ${attempts + 1}/5)',
           );
@@ -50,14 +50,7 @@ class TeamRepository {
           // Verify uniqueness in Firestore
           if (await _networkChecker.isConnected()) {
             try {
-              final query = await _firestore
-                  .collection('teams')
-                  .where('teamCode', isEqualTo: teamCode)
-                  .where('isActive', isEqualTo: true)
-                  .limit(1)
-                  .get();
-
-              isUnique = query.docs.isEmpty;
+              isUnique = !await _firebaseSource.isTeamCodeTaken(teamCode);
               if (!isUnique) {
                 Logger.team(
                   'Team code $teamCode already exists, regenerating...',
@@ -286,339 +279,96 @@ class TeamRepository {
     }
   }
 
-  /// Join a team using team code with transaction-based atomic update
+  /// Join a team using its invite code.
+  ///
+  /// Non-members can't read team documents, so the code is resolved through
+  /// `teamCodes/{code}` and the join is written without reading the team.
+  /// Security rules check that the caller adds only themselves, that the team
+  /// is active with fewer than 50 members, and that `users/{uid}.joinCode`
+  /// (written in the same batch) matches the team's code.
   Future<TeamModel> joinTeam({
     required String teamCode,
     required String userId,
   }) async {
+    final code = teamCode.trim().toUpperCase();
+    Logger.team('Joining team with code: $code for user: $userId');
+
+    if (!await _networkChecker.isConnected()) {
+      throw TeamException(message: 'Cannot join team while offline');
+    }
+
+    final String? teamId;
     try {
-      Logger.team('Joining team with code: $teamCode for user: $userId');
-
-      if (!await _networkChecker.isConnected()) {
-        throw TeamException(message: 'Cannot join team while offline');
-      }
-
-      // Query team by code OUTSIDE transaction (queries can't be done inside transactions)
-      Logger.team('Querying team by code: ${teamCode.toUpperCase()}');
-      final teamQuery = await _firestore
-          .collection('teams')
-          .where('teamCode', isEqualTo: teamCode.toUpperCase())
-          .where('isActive', isEqualTo: true)
-          .limit(1)
-          .get();
-
-      if (teamQuery.docs.isEmpty) {
-        Logger.team('No team found with code: ${teamCode.toUpperCase()}');
-        throw TeamException(message: 'Invalid team code');
-      }
-
-      final teamDoc = teamQuery.docs.first;
-      Logger.team('Team found: ${teamDoc.id}');
-      final team = TeamModel.fromFirestore(teamDoc);
-
-      // Check if user is already a member
-      if (team.memberIds.contains(userId)) {
-        Logger.team('User $userId is already a member of team ${team.id}');
-        throw TeamException(message: 'Already a member of this team');
-      }
-
-      // Check if team is full (max 50 members)
-      if (team.memberIds.length >= 50) {
-        Logger.team(
-          'Team ${team.id} is full (${team.memberIds.length} members)',
-        );
-        throw TeamException(message: 'Team is full');
-      }
-
-      Logger.team('Team validation passed. Starting transaction...');
-
-      // Check if user document exists before transaction
-      final userDocCheck = await _firestore
-          .collection('users')
-          .doc(userId)
-          .get();
-      if (!userDocCheck.exists) {
-        Logger.team('User document does not exist: $userId');
-        throw TeamException(
-          message: 'User account not found. Please contact support.',
-        );
-      }
-      Logger.team('User document exists: $userId');
-
-      // Use Firestore transaction for atomic update
-      TeamModel updatedTeam;
-      try {
-        updatedTeam = await _firestore.runTransaction<TeamModel>((
-          transaction,
-        ) async {
-          try {
-            // Get fresh team document inside transaction
-            Logger.team('Getting fresh team document in transaction');
-            final freshTeamDoc = await transaction.get(teamDoc.reference);
-            if (!freshTeamDoc.exists) {
-              Logger.team('Team document does not exist in transaction');
-              throw TeamException(message: 'Team no longer exists');
-            }
-
-            TeamModel freshTeam;
-            try {
-              freshTeam = TeamModel.fromFirestore(freshTeamDoc);
-              Logger.team(
-                'Fresh team loaded: ${freshTeam.id}, members: ${freshTeam.memberIds.length}',
-              );
-            } catch (parseError) {
-              Logger.team('Failed to parse team document', error: parseError);
-              throw TeamException(
-                message:
-                    'Failed to load team data. The team document may be corrupted.',
-                originalError: parseError,
-              );
-            }
-
-            // Double-check conditions inside transaction
-            if (freshTeam.memberIds.contains(userId)) {
-              Logger.team('User is already a member (checked in transaction)');
-              throw TeamException(message: 'Already a member of this team');
-            }
-
-            if (freshTeam.memberIds.length >= 50) {
-              Logger.team('Team is full (checked in transaction)');
-              throw TeamException(message: 'Team is full');
-            }
-
-            // Get fresh user document inside transaction
-            Logger.team('Getting fresh user document in transaction');
-            final userRef = _firestore.collection('users').doc(userId);
-            final freshUserDoc = await transaction.get(userRef);
-            if (!freshUserDoc.exists) {
-              Logger.team('User document does not exist in transaction');
-              throw TeamException(message: 'User account not found');
-            }
-            Logger.team('Fresh user document loaded');
-
-            // Update team document: add user to memberIds
-            Logger.team('Updating team document in transaction');
-            try {
-              transaction.update(teamDoc.reference, {
-                'memberIds': FieldValue.arrayUnion([userId]),
-                'updatedAt': FieldValue.serverTimestamp(),
-              });
-              Logger.team('Team document update queued in transaction');
-            } catch (updateError) {
-              Logger.team('Failed to queue team update', error: updateError);
-              throw TeamException(
-                message: 'Failed to update team: ${updateError.toString()}',
-                originalError: updateError,
-              );
-            }
-
-            // Update user document: set teamId
-            Logger.team('Updating user document in transaction');
-            try {
-              transaction.update(userRef, {
-                'teamId': teamDoc.id,
-                'updatedAt': FieldValue.serverTimestamp(),
-              });
-              Logger.team('User document update queued in transaction');
-            } catch (updateError) {
-              Logger.team('Failed to queue user update', error: updateError);
-              throw TeamException(
-                message: 'Failed to update user: ${updateError.toString()}',
-                originalError: updateError,
-              );
-            }
-
-            // Return updated team model
-            final updatedMemberIds = List<String>.from(freshTeam.memberIds)
-              ..add(userId);
-            Logger.team('Transaction operations queued successfully');
-            return freshTeam.copyWith(
-              memberIds: updatedMemberIds,
-              updatedAt: DateTime.now(),
-            );
-          } on TeamException {
-            // Re-throw TeamException as-is
-            rethrow;
-          } catch (innerError) {
-            Logger.team(
-              'Unexpected error inside transaction',
-              error: innerError,
-            );
-            throw TeamException(
-              message: 'Transaction failed: ${innerError.toString()}',
-              originalError: innerError,
-            );
-          }
-        });
-      } on TeamException catch (transactionError) {
-        // Re-throw TeamException as-is
-        Logger.team(
-          'Transaction failed with TeamException: ${transactionError.message}',
-        );
-        rethrow;
-      } catch (transactionError) {
-        Logger.team('Transaction failed', error: transactionError);
-        Logger.team('Transaction error type: ${transactionError.runtimeType}');
-        Logger.team('Transaction error string: ${transactionError.toString()}');
-
-        // Handle "Dart exception thrown from converted Future" error
-        String errorMessage = transactionError.toString();
-
-        // Check if this is the "converted Future" error
-        if (errorMessage.contains(
-              'Dart exception thrown from converted Future',
-            ) ||
-            errorMessage.contains('Use the properties')) {
-          Logger.team(
-            'Detected "converted Future" error - trying to extract actual error',
-          );
-
-          // Try to get the actual error from the exception
-          // This error usually means there's a nested exception
-          try {
-            // Check if the error has an 'error' property (from the error message)
-            if (transactionError is Exception) {
-              final errorStr = transactionError.toString();
-              // Try to extract any meaningful error message
-              if (errorStr.contains('TeamException')) {
-                final match = RegExp(
-                  r'TeamException[:\s]+([^.\n]+)',
-                  caseSensitive: false,
-                ).firstMatch(errorStr);
-                if (match != null) {
-                  errorMessage =
-                      match.group(1)?.trim() ?? 'Failed to join team';
-                }
-              } else if (errorStr.contains('permission') ||
-                  errorStr.contains('denied')) {
-                errorMessage =
-                    'Permission denied. Please check Firestore security rules.';
-              } else if (errorStr.contains('not found') ||
-                  errorStr.contains('does not exist')) {
-                errorMessage = 'Team or user document not found.';
-              } else {
-                // Try to find any error message in the string
-                final errorMatch = RegExp(
-                  r'Error[:\s]+([^.\n]+)',
-                  caseSensitive: false,
-                ).firstMatch(errorStr);
-                if (errorMatch != null) {
-                  errorMessage =
-                      errorMatch.group(1)?.trim() ?? 'Unknown error occurred';
-                } else {
-                  errorMessage = 'Transaction failed. Please try again.';
-                }
-              }
-            }
-          } catch (extractError) {
-            Logger.team('Failed to extract error details', error: extractError);
-            errorMessage = 'Failed to join team. Please try again.';
-          }
-        } else {
-          // Try to extract the actual error from the transaction
-          if (errorMessage.contains('TeamException')) {
-            final match = RegExp(
-              r'TeamException[:\s]+([^.\n]+)',
-              caseSensitive: false,
-            ).firstMatch(errorMessage);
-            if (match != null) {
-              errorMessage = match.group(1)?.trim() ?? 'Failed to join team';
-            }
-          } else if (errorMessage.contains('permission') ||
-              errorMessage.contains('denied')) {
-            errorMessage =
-                'Permission denied. Please check Firestore security rules.';
-          } else if (errorMessage.contains('not found') ||
-              errorMessage.contains('does not exist')) {
-            errorMessage = 'Team or user document not found.';
-          }
-        }
-
-        throw TeamException(
-          message: errorMessage,
-          originalError: transactionError,
-        );
-      }
-
-      Logger.team('Transaction completed successfully');
-
-      // Update local cache after transaction succeeds
-      try {
-        await _hiveSource.saveTeam(updatedTeam);
-        Logger.team('Team saved to Hive cache');
-
-        // Update user in Hive cache
-        final user = await _hiveSource.getUser(userId);
-        if (user != null) {
-          await _hiveSource.saveUser(user.copyWith(teamId: updatedTeam.id));
-          Logger.team('User updated in Hive cache');
-        }
-      } catch (cacheError) {
-        Logger.team(
-          'Failed to update cache, but team join succeeded',
-          error: cacheError,
-        );
-        // Don't fail the operation if cache update fails
-      }
-
-      Logger.team('User joined team successfully: ${updatedTeam.id}');
-      return updatedTeam;
+      teamId = await _firebaseSource.lookupTeamIdByCode(code);
     } catch (e) {
-      Logger.team('Error joining team', error: e);
-      Logger.team('Error type: ${e.runtimeType}');
-      Logger.team('Error details: ${e.toString()}');
-
-      // Extract error message from nested exceptions
-      String errorMessage = e.toString();
-      if (e is TeamException) {
-        Logger.team('Re-throwing TeamException: ${e.message}');
-        rethrow;
-      }
-
-      // Check for specific error patterns
-      final errorStr = errorMessage.toLowerCase();
-
-      if (errorStr.contains('invalid team code') ||
-          errorStr.contains('not found') ||
-          errorStr.contains('no team found')) {
-        throw TeamException(message: 'Invalid team code');
-      }
-      if (errorStr.contains('already a member')) {
-        throw TeamException(message: 'Already a member of this team');
-      }
-      if (errorStr.contains('team is full')) {
-        throw TeamException(message: 'Team is full');
-      }
-      if (errorStr.contains('permission') || errorStr.contains('denied')) {
-        throw TeamException(
-          message: 'Permission denied. Please check your account permissions.',
-          originalError: e,
-        );
-      }
-      if (errorStr.contains('network') || errorStr.contains('connection')) {
-        throw TeamException(
-          message: 'Network error. Please check your connection and try again.',
-          originalError: e,
-        );
-      }
-
-      // Try to extract error from nested exception
-      if (errorMessage.contains('error')) {
-        // Try to get the actual error message
-        final match = RegExp(
-          r'error[:\s]+([^.\n]+)',
-          caseSensitive: false,
-        ).firstMatch(errorMessage);
-        if (match != null) {
-          errorMessage = match.group(1) ?? errorMessage;
-        }
-      }
-
+      Logger.team('Team code lookup failed', error: e);
       throw TeamException(
-        message: 'Failed to join team: $errorMessage',
+        message: 'Network error. Please check your connection and try again.',
         originalError: e,
       );
     }
+    if (teamId == null) {
+      throw TeamException(message: 'Invalid team code');
+    }
+
+    // Only members (and admins) can read a team, so a readable team that
+    // lists this user means they've already joined.
+    try {
+      final existing = await _firebaseSource.getTeam(teamId);
+      if (existing.memberIds.contains(userId) || existing.leaderId == userId) {
+        throw TeamException(message: 'Already a member of this team');
+      }
+    } on TeamException {
+      rethrow;
+    } catch (_) {
+      // Not readable yet — expected for a new member.
+    }
+
+    try {
+      final batch = _firestore.batch();
+      batch.update(_firestore.collection('users').doc(userId), {
+        'teamId': teamId,
+        'joinCode': code,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      batch.update(_firestore.collection('teams').doc(teamId), {
+        'memberIds': FieldValue.arrayUnion([userId]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      await batch.commit();
+    } on FirebaseException catch (e) {
+      Logger.team('Join batch failed: ${e.code}', error: e);
+      if (e.code == 'permission-denied') {
+        throw TeamException(
+          message: 'Could not join this team. It may be closed or full.',
+          originalError: e,
+        );
+      }
+      if (e.code == 'not-found') {
+        throw TeamException(
+          message: 'User account not found. Please contact support.',
+          originalError: e,
+        );
+      }
+      throw TeamException(
+        message: 'Failed to join team. Please try again.',
+        originalError: e,
+      );
+    }
+
+    final team = await _firebaseSource.getTeam(teamId);
+    try {
+      await _hiveSource.saveTeam(team);
+      final user = await _hiveSource.getUser(userId);
+      if (user != null) {
+        await _hiveSource.saveUser(user.copyWith(teamId: team.id));
+      }
+    } catch (cacheError) {
+      Logger.team('Joined team but failed to update cache', error: cacheError);
+    }
+
+    Logger.team('User joined team successfully: ${team.id}');
+    return team;
   }
 
   /// Leave a team
@@ -733,6 +483,12 @@ class TeamRepository {
 
         // Cache locally
         await _hiveSource.cacheTeams(teams);
+
+        // Teams created before /teamCodes existed can't be joined until their
+        // code is indexed; only the leader may do that.
+        for (final team in teams.where((t) => t.leaderId == userId)) {
+          unawaited(_firebaseSource.ensureTeamCodeIndexed(team));
+        }
       } else {
         // Get from local cache
         teams = await _hiveSource.getUserTeams(userId);
@@ -847,33 +603,6 @@ class TeamRepository {
     }
   }
 
-  /// Get team by code
-  Future<TeamModel> getTeamByCode(String teamCode) async {
-    try {
-      Logger.team('Getting team by code: $teamCode');
-
-      if (!await _networkChecker.isConnected()) {
-        throw TeamException(message: 'Cannot get team by code while offline');
-      }
-
-      final team = await _firebaseSource.getTeamByCode(teamCode.toUpperCase());
-
-      // Cache locally
-      await _hiveSource.saveTeam(team);
-
-      return team;
-    } catch (e) {
-      Logger.team('Error getting team by code', error: e);
-      if (e is TeamException) {
-        rethrow;
-      }
-      throw TeamException(
-        message: 'Failed to get team by code',
-        originalError: e,
-      );
-    }
-  }
-
   /// Get team members (users) by team ID
   Future<List<UserModel>> getTeamMembers(String teamId) async {
     try {
@@ -885,27 +614,34 @@ class TeamRepository {
         return [];
       }
 
-      // Firestore 'in' query limit is 10, so batch if needed
+      // Member profiles are readable only by teammates, which security rules
+      // can check per document but not for a whereIn query, so fetch each doc.
       final List<UserModel> members = [];
-      final batchSize = 10;
-
-      for (int i = 0; i < team.memberIds.length; i += batchSize) {
-        final batch = team.memberIds.skip(i).take(batchSize).toList();
-
-        if (await _networkChecker.isConnected()) {
-          final query = await _firestore
-              .collection('users')
-              .where(FieldPath.documentId, whereIn: batch)
-              .get();
-
-          members.addAll(query.docs.map((doc) => UserModel.fromFirestore(doc)));
-        } else {
-          // Get from Hive cache
-          for (final memberId in batch) {
-            final user = await _hiveSource.getUser(memberId);
-            if (user != null) {
-              members.add(user);
-            }
+      if (await _networkChecker.isConnected()) {
+        final docs = await Future.wait(
+          team.memberIds.map(
+            (id) => _firestore.collection('users').doc(id).get().then<
+                DocumentSnapshot<Map<String, dynamic>>?>(
+              (doc) => doc,
+              onError: (Object e) {
+                Logger.team('Could not load member $id', error: e);
+                return null;
+              },
+            ),
+          ),
+        );
+        for (final doc in docs) {
+          if (doc != null && doc.exists) {
+            final member = UserModel.fromFirestore(doc);
+            members.add(member);
+            await _hiveSource.saveUser(member);
+          }
+        }
+      } else {
+        for (final memberId in team.memberIds) {
+          final user = await _hiveSource.getUser(memberId);
+          if (user != null) {
+            members.add(user);
           }
         }
       }
@@ -1050,16 +786,10 @@ class TeamRepository {
         );
       }
 
-      // Step 1: Delete the team document first.
-      Logger.team('Hard-deleting team document...');
+      // Step 1: Clear teamId on each member's user doc while the team still
+      // exists (security rules check that the caller leads that team).
+      // Individual writes so one failure doesn't block the others.
       final teamRef = _firestore.collection('teams').doc(teamId);
-      await teamRef.delete();
-      Logger.team('Team document deleted');
-
-      // Step 2: Clear teamId on each member's user doc.
-      // Uses individual writes so a single permission failure doesn't block
-      // the others. Requires updated Firestore rules; fails gracefully until
-      // rules are deployed (local cache is always cleaned up below).
       final allMemberIds = [team.leaderId, ...team.memberIds].toSet().toList();
       Logger.team('Clearing teamId from ${allMemberIds.length} members');
       for (final memberId in allMemberIds) {
@@ -1069,12 +799,23 @@ class TeamRepository {
             'updatedAt': FieldValue.serverTimestamp(),
           });
         } catch (rulesError) {
-          Logger.team(
-            'Could not clear teamId for user $memberId '
-            '(deploy updated firestore.rules to fix): $rulesError',
-          );
+          Logger.team('Could not clear teamId for user $memberId: $rulesError');
         }
       }
+
+      // Step 2: Delete the team and release its invite code.
+      Logger.team('Hard-deleting team document...');
+      final batch = _firestore.batch();
+      batch.delete(teamRef);
+      if (team.teamCode.isNotEmpty) {
+        final codeRef = _firestore.collection('teamCodes').doc(team.teamCode);
+        final codeDoc = await codeRef.get();
+        if (codeDoc.exists && codeDoc.data()?['teamId'] == teamId) {
+          batch.delete(codeRef);
+        }
+      }
+      await batch.commit();
+      Logger.team('Team document deleted');
 
       // Delete from local cache
       Logger.team('Deleting team from local Hive cache...');
@@ -1400,17 +1141,5 @@ class TeamRepository {
       if (e is TeamException) rethrow;
       throw TeamException(message: 'Failed to change member role', originalError: e);
     }
-  }
-
-  /// Generate secure random team code (6 characters: A-Z, 0-9)
-  String _generateSecureTeamCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random.secure();
-    return String.fromCharCodes(
-      Iterable.generate(
-        6,
-        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
-      ),
-    );
   }
 }

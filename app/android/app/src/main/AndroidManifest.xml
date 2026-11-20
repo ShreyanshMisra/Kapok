@@ -13,7 +13,9 @@
     <application
         android:label="Kapok"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
         <!-- Mapbox public access token (pk.*). Injected at build time from
              MAPBOX_ACCESS_TOKEN — see app/android/app/build.gradle.kts. -->
         <meta-data
