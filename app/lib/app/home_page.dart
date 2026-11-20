@@ -4,13 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:kapok_app/features/auth/bloc/auth_event.dart';
 import '../core/constants/app_colors.dart';
 import '../core/enums/task_status.dart';
 import '../core/localization/app_localizations.dart';
 import '../core/widgets/sync_status_widget.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_state.dart';
+import '../features/auth/widgets/sign_out_flow.dart';
 import '../features/tasks/bloc/task_bloc.dart';
 import '../features/tasks/bloc/task_state.dart';
 import '../features/map/pages/map_page.dart';
@@ -305,29 +305,6 @@ class AppDrawer extends StatelessWidget {
 
   /// Show sign out confirmation dialog
   void _showSignOutDialog(BuildContext context) {
-    final localizations = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.signOut),
-        content: Text(localizations.confirmSignOut),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(localizations.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<AuthBloc>().add(SignOutRequested());
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-            ),
-            child: Text(localizations.signOut.toUpperCase()),
-          ),
-        ],
-      ),
-    );
+    confirmAndSignOut(context);
   }
 }

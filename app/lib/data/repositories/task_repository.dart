@@ -527,8 +527,17 @@ class TaskRepository {
 
       if (await _networkChecker.isConnected()) {
         try {
-          // Get from Firebase
-          tasks = await _firebaseSource.getTasks();
+          // Non-admins can only query tasks of teams they belong to; an
+          // unfiltered query on /tasks is rejected by security rules.
+          if (userId == null) {
+            throw TaskException(message: 'No user to load tasks for');
+          }
+          final teams = await _firebaseSource.getUserTeams(userId);
+          final perTeam = await Future.wait(
+            teams.map((t) => _firebaseSource.getTasksByTeam(t.id)),
+          );
+          tasks = perTeam.expand((t) => t).toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
           Logger.task('Loaded ${tasks.length} tasks from Firebase');
 
           // Cache locally

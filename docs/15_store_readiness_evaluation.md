@@ -1,6 +1,6 @@
 # Kapok – App Store & Google Play Readiness Evaluation
 
-**Date:** 2026-10-24 (replaces the 2026-05-25 evaluation)
+**Date:** 2026-10-24, updated 2026-11-19 (security and data-handling pass; see CHANGELOG)
 **App version:** `1.0.0+2` (`app/pubspec.yaml`)
 **Plan:** iOS (App Store) first, Android (Google Play) after
 **Status:** iOS is code-ready, pending the items in §2. Android's configuration is in place but has never been built for release (signing deferred).
@@ -21,7 +21,8 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 | Privacy Policy / Terms **URL** | Not hosted yet | **Blocker** (both stores) |
 | Account deletion | In-app, with recent-login and team-leader safeguards | Done |
 | Location-denied behavior | Map falls back to a default center | Done |
-| Firestore rules | Repo has a new `mapSnapshots` rule; not deployed; live ruleset must be diffed first | High |
+| Firestore rules | Rewritten 2026-11-19 for per-team isolation and invite-code joins (67/67 server-side tests pass); **not deployed**; live ruleset matched the old repo copy on 2026-11-19 | **Blocker** (deploy + backfill) |
+| Admin role | Self-assignable at sign-up (C1); accepted for internal testing only | **Blocker** for public release |
 | Secrets hygiene | `.env`, `GoogleService-Info.plist`, `google-services.json`, `key.properties` all gitignored; `.env` only holds the public `pk.` token | Done |
 | Tests / CI | 106 unit/widget tests pass; CI runs analyze + test | Low |
 | Store listing content | Not started | High |
@@ -41,9 +42,9 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 ### iOS (now)
 
 1. **Host the Privacy Policy and Terms of Service** at stable public URLs (same text as `lib/core/constants/privacy_policy.dart` / `terms_of_service.dart`, after legal review). Enter them in App Store Connect, plus a **support URL**.
-2. **Deploy Firestore rules** after diffing against the live ruleset (procedure in `12_development_notes.md`). Until then the `mapSnapshots` write logs a harmless `permission-denied`.
+2. **Deploy Firestore rules and backfill invite codes** together with build 1.0.0+3. Old builds can't create or join teams under the new rules, so have testers update. Procedure: `12_development_notes.md` → Firestore Rules Deployment.
 3. **Run `pod install`** before the next build (the `pointer_interceptor` plugin was added), and bump the build number (`1.0.0+3`).
-4. **App Privacy answers** in App Store Connect must match `PrivacyInfo.xcprivacy`: Email, Name, User ID, Precise Location, Other User Content (app functionality, linked); Product Interaction (analytics, linked); Crash Data (not linked); no tracking.
+4. **App Privacy answers** in App Store Connect must match `PrivacyInfo.xcprivacy`: Email, Name, User ID, Precise Location, Other User Content (app functionality, linked); Product Interaction (analytics, linked); Crash Data (not linked); no tracking. Also include third-party SDK collection: the Mapbox SDK sends de-identified location and usage telemetry by default (users can opt out from the map's (i) button), and address searches go to Mapbox's geocoding API. Decide with counsel whether to declare **Search History** and Mapbox's **Coarse Location / Product Interaction (analytics, not linked)**. The Play Data Safety form needs the same answers.
 5. **Reviewer account**: a dedicated Team Member account in a test team, plus a note that team leaders must transfer leadership before deleting their account.
 6. **Screenshots** for the iPhone 6.9"/6.7" class (no iPad, since the app is iPhone-only).
 

@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../data/models/task_model.dart';
 import '../../data/models/team_model.dart';
@@ -74,10 +77,39 @@ class SyncService {
     }
   }
 
+  /// Queued items belong to the account that created them (`ownerId`, set by
+  /// HiveSource.queueForSync). Items from before ownership tagging have no
+  /// owner and are treated as the current user's.
+  bool _isOwnedByCurrentUser(Map<String, dynamic> data, String uid) {
+    final owner = data['ownerId'];
+    return owner == null || owner == uid;
+  }
+
+  /// Errors that retrying can never fix: the server rejected the write, or
+  /// the queued payload can't be parsed. These are dropped instead of
+  /// blocking the queue forever.
+  bool _isPermanentFailure(Object e) {
+    if (e is FirebaseException) {
+      return const {
+        'permission-denied',
+        'not-found',
+        'invalid-argument',
+        'already-exists',
+      }.contains(e.code);
+    }
+    return e is FormatException || e is TypeError;
+  }
+
   /// Sync all pending changes from the queue
   Future<void> syncPendingChanges() async {
     if (_isSyncing) {
       Logger.sync('Sync already in progress, skipping');
+      return;
+    }
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      Logger.sync('No signed-in user, skipping sync');
       return;
     }
 
@@ -86,44 +118,61 @@ class SyncService {
       _updateSyncState(SyncState.syncing);
       Logger.sync('Starting sync of pending changes');
 
-      // Get all queued operations
-      final syncQueue = await _hiveSource.getSyncQueue();
+      final box = HiveService.instance.syncBox;
+      final keys = box.keys.toList()..sort((a, b) => '$a'.compareTo('$b'));
 
-      if (syncQueue.isEmpty) {
+      if (keys.isEmpty) {
         Logger.sync('No pending changes to sync');
         _updateSyncState(SyncState.synced);
         return;
       }
 
-      Logger.sync('Found ${syncQueue.length} operations to sync');
+      Logger.sync('Found ${keys.length} operations to sync');
       bool hasErrors = false;
 
-      // Process each queued operation
-      for (final syncData in syncQueue) {
+      for (final key in keys) {
+        final raw = box.get(key);
+        if (raw is! Map) {
+          await box.delete(key);
+          continue;
+        }
+        final syncData = Map<String, dynamic>.from(raw);
+
+        // Never replay another account's changes under this account.
+        if (!_isOwnedByCurrentUser(syncData, uid)) {
+          Logger.sync('Dropping queued operation owned by another account: $key');
+          await box.delete(key);
+          continue;
+        }
+
         try {
           await _processSyncItem(syncData);
-
-          // Remove from sync queue after successful sync
-          final key = _getSyncKey(syncData);
-          if (key != null) {
-            await HiveService.instance.syncBox.delete(key);
-            Logger.sync('Removed synced operation from queue: $key');
-          }
-        } catch (e) {
+          await box.delete(key);
+          Logger.sync('Removed synced operation from queue: $key');
+        } catch (e, stack) {
           Logger.sync('Error syncing operation: ${syncData['operation']}', error: e);
+
+          if (_isPermanentFailure(e)) {
+            Logger.sync('Permanent failure, dropping operation: $key');
+            await box.delete(key);
+            if (!kIsWeb) {
+              FirebaseCrashlytics.instance.recordError(
+                e,
+                stack,
+                reason: 'Dropped unsyncable ${syncData['operation']} operation',
+              );
+            }
+            continue;
+          }
+
           hasErrors = true;
 
-          // Retry with exponential backoff
+          // Transient failure: retry with backoff (1s, 5s, 30s, 5min, 5min),
+          // then leave it queued for the next connectivity change or launch.
           final retryCount = (syncData['retryCount'] as int?) ?? 0;
           if (retryCount < 5) {
-            // Update retry count in queue
-            final key = _getSyncKey(syncData);
-            if (key != null) {
-              final updatedData = Map<String, dynamic>.from(syncData);
-              updatedData['retryCount'] = retryCount + 1;
-              await HiveService.instance.syncBox.put(key, updatedData);
-            }
-            // Schedule retry with backoff: 1s, 5s, 30s, 5min, 5min
+            syncData['retryCount'] = retryCount + 1;
+            await box.put(key, syncData);
             final delays = [1, 5, 30, 300, 300];
             final delay = delays[retryCount];
             Logger.sync('Scheduling retry ${retryCount + 1}/5 in ${delay}s');
@@ -133,7 +182,6 @@ class SyncService {
           } else {
             Logger.sync('Max retries reached for operation: ${syncData['operation']}');
           }
-          continue;
         }
       }
 
@@ -344,34 +392,6 @@ class SyncService {
     }
   }
 
-  /// Get the sync key from sync data
-  String? _getSyncKey(Map<String, dynamic> syncData) {
-    // The key is stored in the sync box, we need to find it
-    // by matching the data
-    try {
-      for (final key in HiveService.instance.syncBox.keys) {
-        final data = HiveService.instance.syncBox.get(key);
-        if (data != null && _isSameSyncData(data, syncData)) {
-          return key.toString();
-        }
-      }
-    } catch (e) {
-      Logger.sync('Error getting sync key', error: e);
-    }
-    return null;
-  }
-
-  /// Check if two sync data objects are the same
-  bool _isSameSyncData(dynamic data1, dynamic data2) {
-    if (data1 is! Map || data2 is! Map) return false;
-
-    final map1 = Map<String, dynamic>.from(data1);
-    final map2 = Map<String, dynamic>.from(data2);
-
-    return map1['operation'] == map2['operation'] &&
-        map1['timestamp'] == map2['timestamp'];
-  }
-
   /// Manually trigger sync
   Future<void> manualSync() async {
     Logger.sync('Manual sync triggered');
@@ -381,8 +401,10 @@ class SyncService {
   /// Get count of pending sync operations
   Future<int> getPendingSyncCount() async {
     try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return 0;
       final syncQueue = await _hiveSource.getSyncQueue();
-      return syncQueue.length;
+      return syncQueue.where((d) => _isOwnedByCurrentUser(d, uid)).length;
     } catch (e) {
       Logger.sync('Error getting pending sync count', error: e);
       return 0;

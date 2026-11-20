@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/error/exceptions.dart';
 import '../../core/enums/user_role.dart';
 import '../../core/services/network_checker.dart';
+import '../../core/services/hive_service.dart';
 import '../../core/utils/logger.dart';
 import '../models/user_model.dart';
 import '../sources/firebase_source.dart';
@@ -256,9 +257,10 @@ class AuthRepository {
       // Sign out from Firebase
       await _firebaseSource.signOut();
 
-      // Clear local cache
-      // TODO: Implement local cache clearing
-      // await _hiveSource.clearUserData();
+      // Clear this account's cached data (and its unsynced queue — the UI
+      // warns before signing out with pending changes). Best effort: a cache
+      // failure must not leave the user signed in.
+      await _clearLocalUserData();
 
       Logger.auth('User signed out successfully');
     } catch (e) {
@@ -377,7 +379,7 @@ class AuthRepository {
     try {
       Logger.auth('Deleting account: ${firebaseUser.uid}');
       await _firebaseSource.deleteAccount(firebaseUser.uid);
-      await _hiveSource.deleteUser(firebaseUser.uid);
+      await _clearLocalUserData();
       Logger.auth('Account deletion completed');
     } catch (e) {
       Logger.auth('Account deletion failed', error: e);
@@ -386,6 +388,14 @@ class AuthRepository {
         message: 'Failed to delete account. Please try again.',
         originalError: e,
       );
+    }
+  }
+
+  Future<void> _clearLocalUserData() async {
+    try {
+      await HiveService.instance.clearUserData();
+    } catch (e) {
+      Logger.auth('Failed to clear local user data', error: e);
     }
   }
 

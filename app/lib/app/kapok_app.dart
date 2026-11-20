@@ -104,8 +104,10 @@ class _KapokAppState extends State<KapokApp> {
                           if (context.mounted) {
                             context.read<MapBloc>().add(MapReset());
                             await Future.delayed(const Duration(milliseconds: 50));
-                            context.read<TeamBloc>().add(TeamReset());
-                            context.read<TaskBloc>().add(TaskReset());
+                            if (context.mounted) {
+                              context.read<TeamBloc>().add(TeamReset());
+                              context.read<TaskBloc>().add(TaskReset());
+                            }
                           }
                         } catch (_) {}
                         navigator.pushNamedAndRemoveUntil(

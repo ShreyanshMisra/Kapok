@@ -333,6 +333,32 @@ class HiveService {
   }
 
   /// Clears all data
+  /// Clears everything tied to the signed-in account: cached users, teams,
+  /// tasks, the pending-sync queue, offline map region metadata, and the
+  /// geocode cache. Device settings (theme, language, onboarding, per-user
+  /// first-login flags) are kept. Used on sign-out and account deletion so the
+  /// next person on a shared device can't see this account's data.
+  Future<void> clearUserData() async {
+    try {
+      Logger.hive('Clearing user data');
+      await usersBox.clear();
+      await teamsBox.clear();
+      await tasksBox.clear();
+      await syncBox.clear();
+      for (final name in const ['offline_map_regions', 'geocode_cache']) {
+        if (Hive.isBoxOpen(name)) {
+          await Hive.box(name).clear();
+        } else if (await Hive.boxExists(name)) {
+          await Hive.deleteBoxFromDisk(name);
+        }
+      }
+      Logger.hive('User data cleared');
+    } catch (e) {
+      Logger.hive('Error clearing user data', error: e);
+      throw CacheException(message: 'Failed to clear user data', originalError: e);
+    }
+  }
+
   Future<void> clearAllData() async {
     try {
       Logger.hive('Clearing all data');

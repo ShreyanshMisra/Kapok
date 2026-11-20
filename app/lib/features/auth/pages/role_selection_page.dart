@@ -150,6 +150,8 @@ class RoleSelectionPage extends StatelessWidget {
       final hiveSource = sl<HiveSource>();
       await hiveSource.saveUser(updatedUser);
 
+      if (!context.mounted) return;
+
       // Update AuthBloc state
       context.read<AuthBloc>().add(ProfileUpdateRequested(user: updatedUser));
 
@@ -168,6 +170,7 @@ class RoleSelectionPage extends StatelessWidget {
         );
       }
     } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error selecting role: ${e.toString()}'),

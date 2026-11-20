@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/error/exceptions.dart';
@@ -129,24 +131,27 @@ class FirebaseSource {
 
       Logger.firebase('Firestore document reference: ${docRef.path}');
 
-      try {
-        final teamData = team.toFirestore();
-        Logger.firebase(
-          'Team data serialized successfully. Keys: ${teamData.keys.join(", ")}',
-        );
-        Logger.firebase('Team data: $teamData');
-      } catch (serializeError) {
-        Logger.firebase('Error serializing team data', error: serializeError);
-        throw DatabaseException(
-          message:
-              'Failed to serialize team data: ${serializeError.toString()}',
-          originalError: serializeError,
-        );
+      // The invite code is reserved in /teamCodes in the same batch; security
+      // rules reject a team whose code isn't reserved for it. If the code was
+      // taken in the meantime (e.g. a team created offline), pick a new one.
+      var teamCode = team.teamCode;
+      for (var attempt = 0; await isTeamCodeTaken(teamCode); attempt++) {
+        if (attempt >= 5) {
+          throw DatabaseException(
+            message: 'Failed to generate a unique team code',
+          );
+        }
+        teamCode = generateTeamCode();
       }
-
-      final teamData = team.toFirestore();
+      final teamData = team.copyWith(teamCode: teamCode).toFirestore();
       Logger.firebase('Writing team to Firestore...');
-      await docRef.set(teamData);
+      final batch = _firestore.batch();
+      batch.set(docRef, teamData);
+      batch.set(_firestore.collection('teamCodes').doc(teamCode), {
+        'teamId': docRef.id,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      await batch.commit();
       Logger.firebase('Team document written to Firestore');
 
       // Read back to verify creation
@@ -205,50 +210,50 @@ class FirebaseSource {
     }
   }
 
-  Future<TeamModel> getTeamByCode(String teamCode) async {
-    try {
-      Logger.firebase('Getting team by code: $teamCode');
-      final query = await _firestore
-          .collection('teams')
-          .where('teamCode', isEqualTo: teamCode)
-          .where('isActive', isEqualTo: true)
-          .limit(1)
-          .get();
-
-      if (query.docs.isNotEmpty) {
-        return TeamModel.fromFirestore(query.docs.first);
-      } else {
-        throw DatabaseException(message: 'Team code not found');
-      }
-    } catch (e) {
-      Logger.firebase('Error getting team by code', error: e);
-      throw DatabaseException(
-        message: 'Failed to get team by code',
-        originalError: e,
-      );
-    }
+  /// Generates a random 6-character invite code (A-Z, 0-9).
+  static String generateTeamCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random.secure();
+    return String.fromCharCodes(
+      Iterable.generate(
+        6,
+        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+      ),
+    );
   }
 
-  Future<void> joinTeamByCode(String teamCode, String userId) async {
+  /// Whether [teamCode] is already reserved in /teamCodes.
+  Future<bool> isTeamCodeTaken(String teamCode) async {
+    final doc = await _firestore.collection('teamCodes').doc(teamCode).get();
+    return doc.exists;
+  }
+
+  /// Resolves an invite code to a team ID, or null if the code doesn't exist.
+  /// Team documents themselves are only readable by members, so joining goes
+  /// through this lookup.
+  Future<String?> lookupTeamIdByCode(String teamCode) async {
+    Logger.firebase('Looking up team code: $teamCode');
+    final doc = await _firestore.collection('teamCodes').doc(teamCode).get();
+    if (!doc.exists) return null;
+    final teamId = doc.data()?['teamId'];
+    return teamId is String && teamId.isNotEmpty ? teamId : null;
+  }
+
+  /// Creates the /teamCodes entry for a team that predates the teamCodes
+  /// collection. Only the team's leader is allowed to do this. Best effort.
+  Future<void> ensureTeamCodeIndexed(TeamModel team) async {
+    if (team.teamCode.isEmpty || !team.isActive) return;
+    final ref = _firestore.collection('teamCodes').doc(team.teamCode);
     try {
-      Logger.firebase('Joining team with code: $teamCode for user: $userId');
-
-      final team = await getTeamByCode(teamCode);
-
-      if (team.memberIds.contains(userId)) {
-        Logger.firebase('User already in team');
-        return;
-      }
-
-      await _firestore.collection('teams').doc(team.id).update({
-        'memberIds': FieldValue.arrayUnion([userId]),
-        'updatedAt': FieldValue.serverTimestamp(),
+      final doc = await ref.get();
+      if (doc.exists) return;
+      await ref.set({
+        'teamId': team.id,
+        'createdAt': FieldValue.serverTimestamp(),
       });
-
-      Logger.firebase('User joined team successfully');
+      Logger.firebase('Backfilled team code for ${team.id}');
     } catch (e) {
-      Logger.firebase('Error joining team', error: e);
-      throw DatabaseException(message: 'Failed to join team', originalError: e);
+      Logger.firebase('Could not backfill team code for ${team.id}', error: e);
     }
   }
 
@@ -325,10 +330,15 @@ class FirebaseSource {
   Future<TeamModel> updateTeam(TeamModel team) async {
     try {
       Logger.firebase('Updating team: ${team.id}');
-      await _firestore
-          .collection('teams')
-          .doc(team.id)
-          .update(team.toFirestore());
+      // Only fields a leader edits directly. memberIds/taskIds/leaderId/
+      // teamCode have dedicated flows; writing them from a possibly stale
+      // cached model would silently drop members who joined meanwhile.
+      await _firestore.collection('teams').doc(team.id).update({
+        'teamName': team.teamName,
+        'description': team.description ?? FieldValue.delete(),
+        'isActive': team.isActive,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
       Logger.firebase('Team updated successfully');
       return team;
     } catch (e) {
@@ -458,21 +468,6 @@ class FirebaseSource {
     } catch (e) {
       Logger.firebase('Error getting task', error: e);
       throw DatabaseException(message: 'Failed to get task', originalError: e);
-    }
-  }
-
-  Future<List<TaskModel>> getTasks() async {
-    try {
-      Logger.firebase('Getting all tasks');
-      final query = await _firestore
-          .collection('tasks')
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      return query.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
-    } catch (e) {
-      Logger.firebase('Error getting tasks', error: e);
-      throw DatabaseException(message: 'Failed to get tasks', originalError: e);
     }
   }
 

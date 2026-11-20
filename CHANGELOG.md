@@ -10,6 +10,17 @@ of truth; update it in the same PR as the changelog entry.
 
 ## [Unreleased]
 
+### Security & data-handling pass (2026-11-19) — build 1.0.0+3
+
+- **Firestore rules rewritten** (`firebase/firestore.rules`, not yet deployed). Teams, tasks, and member profiles are no longer readable or writable across teams. Team leaders can only manage their own team. Joining requires the invite code, which is now resolved through a new `teamCodes/{code}` collection. Task creation requires team membership. Added server-side rules tests (`firebase/rules_test.py`) and a one-off code backfill (`firebase/backfill_team_codes.py`).
+- **Teams:** create/join/delete adapted to the new rules. `updateTeam` writes only editable fields, so a stale cached team no longer drops newly joined members. Changing a member's specialty (`changeMemberRole`) now works (the old rules denied it).
+- **Tasks:** loading tasks for non-admins queries only the user's teams (the unfiltered query was always denied and silently fell back to the cache).
+- **Sign-out / account deletion:** local cached data (users, teams, tasks, sync queue, offline region metadata, geocode cache) is cleared. Before signing out with unsynced changes, the app tries to sync, then warns that the remaining changes will be discarded. Queued changes are tagged with their owner and never replayed under another account.
+- **Sync:** operations rejected permanently (permission-denied, not-found, invalid data) are dropped and reported to Crashlytics instead of blocking the queue forever.
+- **Privacy Policy:** discloses Mapbox (map areas, searches, geocoding, default telemetry, and how to opt out) and names the service providers; last updated 2026-11-19.
+- **Android:** `allowBackup="false"`, so cached team data isn't backed up to or restored from Google Drive.
+- **Misc:** removed the unused `translator` dependency; fixed `BuildContext` use after `await` in role selection, settings, and the sign-out listener; `pubspec.lock` is now tracked.
+
 ### QA pass & store-readiness review (2026-10-24)
 
 - **Tasks:** deleting a task now reaches Firestore (the transaction read the team *after* writing, which Firestore rejects). Offline/failed deletes queued as `delete_task_and_update_team` are now replayed by `SyncService` (previously dropped). The address shown on Create Task is now saved. The Edit Task and Create Task assignee dropdowns no longer break the form's layout (`isExpanded: true`). Unassigned tasks read "Assigned to none".
