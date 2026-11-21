@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -35,6 +33,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
   bool _changingRole = false;
+  bool _deletingAccount = false;
 
   /// Confirms, then switches the user between team member and team leader.
   Future<void> _confirmRoleChange(UserRole newRole) async {
@@ -297,8 +296,14 @@ class _SettingsPageState extends State<SettingsPage> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _showDeleteAccountDialog,
-              icon: const Icon(Icons.delete_forever),
+              onPressed: _deletingAccount ? null : _showDeleteAccountDialog,
+              icon: _deletingAccount
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_forever),
               label: Text(
                 AppLocalizations.of(context).deleteAccount.toUpperCase(),
               ),
@@ -616,24 +621,23 @@ class _SettingsPageState extends State<SettingsPage> {
     final localizations = AppLocalizations.of(context);
     // Team/Task/Map BLoCs are reset by KapokApp's auth listener once the
     // account is gone (AuthUnauthenticated); a refused deletion keeps them.
-    final authBloc = context.read<AuthBloc>();
-    late final StreamSubscription<AuthState> sub;
-    sub = authBloc.stream.listen((next) {
-      if (next is AuthUnauthenticated) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(localizations.deleteAccountSuccess)),
-        );
-        if (mounted) {
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/login', (_) => false);
+    // On success, KapokApp's auth listener routes to /login on
+    // AuthUnauthenticated.
+    setState(() => _deletingAccount = true);
+    context.read<AuthBloc>().add(DeleteAccountRequested(
+      onComplete: (error) {
+        if (error == null) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(localizations.deleteAccountSuccess)),
+          );
+          return;
         }
-        sub.cancel();
-      } else if (next is AuthError) {
-        messenger.showSnackBar(SnackBar(content: Text(next.message)));
-        sub.cancel();
-      }
-    });
-    authBloc.add(const DeleteAccountRequested());
+        messenger.showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: AppColors.error),
+        );
+        if (mounted) setState(() => _deletingAccount = false);
+      },
+    ));
   }
 
   /// Show sign out confirmation dialog

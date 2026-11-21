@@ -53,24 +53,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     DeleteAccountRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // No AuthLoading/AuthError here: the state stays AuthAuthenticated until
+    // deletion succeeds, so a refused deletion leaves the user where they are.
     try {
-      emit(const AuthLoading());
       Logger.auth('Account deletion requested');
       await _authRepository.deleteAccount();
       emit(const AuthUnauthenticated());
       Logger.auth('Account deleted successfully');
+      event.onComplete?.call(null);
     } catch (e) {
       Logger.auth('Account deletion failed', error: e);
-      final message = e is AuthException
-          ? e.message
-          : 'Failed to delete account. Please try again.';
-      // Restore authenticated state with an inline error so the user stays in
-      // the app instead of being kicked out on failure.
-      final previous = state;
-      emit(AuthError(message: message));
-      if (previous is AuthAuthenticated) {
-        emit(previous);
-      }
+      event.onComplete?.call(
+        e is AuthException
+            ? e.message
+            : 'Failed to delete account. Please try again.',
+      );
     }
   }
 
