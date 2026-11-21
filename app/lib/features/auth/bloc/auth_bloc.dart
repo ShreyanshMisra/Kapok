@@ -21,30 +21,53 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<PasswordResetRequested>(_onPasswordResetRequested);
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<ProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<UserRoleChangeRequested>(_onUserRoleChangeRequested);
+  }
+
+  Future<void> _onUserRoleChangeRequested(
+    UserRoleChangeRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final current = state;
+    if (current is! AuthAuthenticated) {
+      event.onComplete?.call('You must be signed in to change your role.');
+      return;
+    }
+    try {
+      final user = await _authRepository.changeUserRole(
+        current.user,
+        event.newRole,
+      );
+      emit(AuthAuthenticated(user: user));
+      event.onComplete?.call(null);
+    } catch (e) {
+      Logger.auth('Role change failed', error: e);
+      // State is left untouched so the user stays on the current page.
+      event.onComplete?.call(
+        e is AuthException ? e.message : 'Failed to change role. Please try again.',
+      );
+    }
   }
 
   Future<void> _onDeleteAccountRequested(
     DeleteAccountRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // No AuthLoading/AuthError here: the state stays AuthAuthenticated until
+    // deletion succeeds, so a refused deletion leaves the user where they are.
     try {
-      emit(const AuthLoading());
       Logger.auth('Account deletion requested');
       await _authRepository.deleteAccount();
       emit(const AuthUnauthenticated());
       Logger.auth('Account deleted successfully');
+      event.onComplete?.call(null);
     } catch (e) {
       Logger.auth('Account deletion failed', error: e);
-      final message = e is AuthException
-          ? e.message
-          : 'Failed to delete account. Please try again.';
-      // Restore authenticated state with an inline error so the user stays in
-      // the app instead of being kicked out on failure.
-      final previous = state;
-      emit(AuthError(message: message));
-      if (previous is AuthAuthenticated) {
-        emit(previous);
-      }
+      event.onComplete?.call(
+        e is AuthException
+            ? e.message
+            : 'Failed to delete account. Please try again.',
+      );
     }
   }
 

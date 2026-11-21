@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +5,7 @@ import '../../../app/legal_document_page.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/privacy_policy.dart';
 import '../../../core/constants/terms_of_service.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
@@ -33,6 +32,59 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
+  bool _changingRole = false;
+  bool _deletingAccount = false;
+
+  /// Confirms, then switches the user between team member and team leader.
+  Future<void> _confirmRoleChange(UserRole newRole) async {
+    final localizations = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.changeRoleTitle),
+        content: Text(
+          newRole == UserRole.teamLeader
+              ? localizations.changeRoleToLeaderBody
+              : localizations.changeRoleToMemberBody,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(localizations.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(localizations.changeRoleConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _changingRole = true);
+    final messenger = ScaffoldMessenger.of(context);
+    context.read<AuthBloc>().add(UserRoleChangeRequested(
+      newRole,
+      onComplete: (error) {
+        messenger.showSnackBar(
+          error != null
+              ? SnackBar(content: Text(error), backgroundColor: AppColors.error)
+              : SnackBar(
+                  content: Text(localizations.roleChangedTo(
+                    newRole == UserRole.teamLeader
+                        ? localizations.teamLeader
+                        : localizations.teamMember,
+                  )),
+                ),
+        );
+        if (mounted) setState(() => _changingRole = false);
+      },
+    ));
+  }
 
   int _estimateStorageKB() {
     try {
@@ -62,6 +114,41 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Account role section (hidden for admins and while signed out)
+          BlocBuilder<AuthBloc, AuthState>(
+            buildWhen: (_, current) => current is AuthAuthenticated,
+            builder: (context, state) {
+              if (state is! AuthAuthenticated ||
+                  state.user.userRole == UserRole.admin) {
+                return const SizedBox.shrink();
+              }
+              final localizations = AppLocalizations.of(context);
+              final isLeader = state.user.userRole == UserRole.teamLeader;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildSection(localizations.accountRole, [
+                  SwitchListTile(
+                    secondary: Icon(
+                      isLeader ? Icons.groups : Icons.person_outline,
+                    ),
+                    title: Text(localizations.teamLeader),
+                    subtitle: Text(
+                      '${isLeader ? localizations.teamLeader : localizations.teamMember}'
+                      ' · ${localizations.accountRoleSwitchSubtitle}',
+                    ),
+                    value: isLeader,
+                    onChanged: _changingRole
+                        ? null
+                        : (value) => _confirmRoleChange(
+                              value ? UserRole.teamLeader : UserRole.teamMember,
+                            ),
+                    activeThumbColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ]),
+              );
+            },
+          ),
+
           // Location section
           _buildSection(
             AppLocalizations.of(context).location,
@@ -209,8 +296,14 @@ class _SettingsPageState extends State<SettingsPage> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _showDeleteAccountDialog,
-              icon: const Icon(Icons.delete_forever),
+              onPressed: _deletingAccount ? null : _showDeleteAccountDialog,
+              icon: _deletingAccount
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_forever),
               label: Text(
                 AppLocalizations.of(context).deleteAccount.toUpperCase(),
               ),
@@ -528,24 +621,23 @@ class _SettingsPageState extends State<SettingsPage> {
     final localizations = AppLocalizations.of(context);
     // Team/Task/Map BLoCs are reset by KapokApp's auth listener once the
     // account is gone (AuthUnauthenticated); a refused deletion keeps them.
-    final authBloc = context.read<AuthBloc>();
-    late final StreamSubscription<AuthState> sub;
-    sub = authBloc.stream.listen((next) {
-      if (next is AuthUnauthenticated) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(localizations.deleteAccountSuccess)),
-        );
-        if (mounted) {
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/login', (_) => false);
+    // On success, KapokApp's auth listener routes to /login on
+    // AuthUnauthenticated.
+    setState(() => _deletingAccount = true);
+    context.read<AuthBloc>().add(DeleteAccountRequested(
+      onComplete: (error) {
+        if (error == null) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(localizations.deleteAccountSuccess)),
+          );
+          return;
         }
-        sub.cancel();
-      } else if (next is AuthError) {
-        messenger.showSnackBar(SnackBar(content: Text(next.message)));
-        sub.cancel();
-      }
-    });
-    authBloc.add(const DeleteAccountRequested());
+        messenger.showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: AppColors.error),
+        );
+        if (mounted) setState(() => _deletingAccount = false);
+      },
+    ));
   }
 
   /// Show sign out confirmation dialog

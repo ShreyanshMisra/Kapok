@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../data/models/user_model.dart';
 
 /// Authentication events
@@ -63,9 +64,16 @@ class AuthCheckRequested extends AuthEvent {
   const AuthCheckRequested();
 }
 
-/// Permanently delete the current user's account
+/// Permanently delete the current user's account.
+///
+/// [onComplete] receives null on success or an error message on failure.
+/// Failures are reported this way rather than through AuthLoading/AuthError,
+/// because returning to AuthAuthenticated from either makes the app's auth
+/// listener navigate home.
 class DeleteAccountRequested extends AuthEvent {
-  const DeleteAccountRequested();
+  final void Function(String? error)? onComplete;
+
+  const DeleteAccountRequested({this.onComplete});
 }
 
 /// Update user profile
@@ -82,4 +90,19 @@ class ProfileUpdateRequested extends AuthEvent {
 
   @override
   List<Object?> get props => [name, role, user];
+}
+
+/// Event to switch the signed-in user between team member and team leader.
+///
+/// [onComplete] receives null on success or an error message on failure.
+/// Failures are reported this way rather than through [AuthError], because
+/// AuthError -> AuthAuthenticated makes the app's auth listener navigate home.
+class UserRoleChangeRequested extends AuthEvent {
+  final UserRole newRole;
+  final void Function(String? error)? onComplete;
+
+  const UserRoleChangeRequested(this.newRole, {this.onComplete});
+
+  @override
+  List<Object?> get props => [newRole];
 }

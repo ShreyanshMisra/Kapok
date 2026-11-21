@@ -364,6 +364,47 @@ class AuthRepository {
     }
   }
 
+  /// Switches [user] between team member and team leader.
+  ///
+  /// Requires a connection: the role controls what the user may do, so it is
+  /// not queued offline. A leader of an active team can't step down until
+  /// they transfer leadership, so the team is never left without a leader.
+  Future<UserModel> changeUserRole(UserModel user, UserRole newRole) async {
+    if (newRole != UserRole.teamLeader && newRole != UserRole.teamMember) {
+      throw AuthException(message: 'You can only switch between team member and team leader.');
+    }
+    if (user.userRole == UserRole.admin) {
+      throw AuthException(message: 'Admin accounts cannot change their role here.');
+    }
+    if (user.userRole == newRole) return user;
+
+    if (!await _networkChecker.isConnected()) {
+      throw AuthException(
+        message: 'You need an internet connection to change your role.',
+      );
+    }
+
+    if (newRole == UserRole.teamMember &&
+        await _firebaseSource.userLeadsActiveTeam(user.id)) {
+      throw AuthException(
+        code: 'leads-active-team',
+        message:
+            'You lead an active team. Transfer leadership to another member from the team page before switching to team member.',
+      );
+    }
+
+    try {
+      Logger.auth('Changing role for ${user.id}: ${user.userRole.value} -> ${newRole.value}');
+      final updatedUser = user.copyWith(userRole: newRole, updatedAt: DateTime.now());
+      await _firebaseSource.updateUser(updatedUser);
+      await _hiveSource.saveUser(updatedUser);
+      return updatedUser;
+    } catch (e) {
+      Logger.auth('Error changing user role', error: e);
+      throw AuthException(message: 'Failed to change role. Please try again.', originalError: e);
+    }
+  }
+
   /// Permanently deletes the signed-in user's account: anonymizes their tasks,
   /// removes them from team membership, deletes the Firestore user doc, clears
   /// the local Hive cache, and finally deletes the Firebase Auth user.
