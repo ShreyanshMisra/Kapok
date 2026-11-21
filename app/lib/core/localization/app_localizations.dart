@@ -377,6 +377,14 @@ class AppLocalizations {
   String get deleteAccountTransferLeadershipFirst => _getString('deleteAccountTransferLeadershipFirst');
   String get deleteAccountSuccess => _getString('deleteAccountSuccess');
   String get deleteAccountFailure => _getString('deleteAccountFailure');
+  String get accountRole => _getString('accountRole');
+  String get accountRoleSwitchSubtitle => _getString('accountRoleSwitchSubtitle');
+  String get changeRoleTitle => _getString('changeRoleTitle');
+  String get changeRoleToLeaderBody => _getString('changeRoleToLeaderBody');
+  String get changeRoleToMemberBody => _getString('changeRoleToMemberBody');
+  String get changeRoleConfirm => _getString('changeRoleConfirm');
+  String roleChangedTo(String role) =>
+      _getString('roleChangedTo').replaceAll('{role}', role);
   String get myTeams => _getString('myTeams');
   String get errorLoadingTeams => _getString('errorLoadingTeams');
   String get createNewTask => _getString('createNewTask');
@@ -817,6 +825,13 @@ class AppLocalizations {
         'deleteAccountTransferLeadershipFirst': 'You lead one or more active teams. Transfer leadership to another team member from the team page before deleting your account.',
         'deleteAccountSuccess': 'Your account has been deleted.',
         'deleteAccountFailure': 'Could not delete the account. Please try again.',
+        'accountRole': 'Account role',
+        'accountRoleSwitchSubtitle': 'Team leaders can create and manage teams',
+        'changeRoleTitle': 'Change your role?',
+        'changeRoleToLeaderBody': 'As a team leader you can create teams and manage their members and tasks. You can switch back at any time.',
+        'changeRoleToMemberBody': 'As a team member you will no longer be able to create or manage teams. If you lead an active team, transfer leadership first.',
+        'changeRoleConfirm': 'Change role',
+        'roleChangedTo': 'Your role is now {role}.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC is an organization dedicated to dispute prevention and resolution. It works to create innovative solutions that help communities prevent and resolve disputes and coordinate resources during challenging times.',
         'kapokIcon': 'Kapok Icon',
@@ -1257,6 +1272,13 @@ class AppLocalizations {
         'deleteAccountTransferLeadershipFirst': 'Usted lidera uno o más equipos activos. Transfiera el liderazgo a otro miembro desde la página del equipo antes de eliminar su cuenta.',
         'deleteAccountSuccess': 'Su cuenta ha sido eliminada.',
         'deleteAccountFailure': 'No se pudo eliminar la cuenta. Por favor, inténtelo de nuevo.',
+        'accountRole': 'Rol de la cuenta',
+        'accountRoleSwitchSubtitle': 'Los líderes de equipo pueden crear y administrar equipos',
+        'changeRoleTitle': '¿Cambiar su rol?',
+        'changeRoleToLeaderBody': 'Como líder de equipo puede crear equipos y administrar sus miembros y tareas. Puede volver a cambiar en cualquier momento.',
+        'changeRoleToMemberBody': 'Como miembro del equipo ya no podrá crear ni administrar equipos. Si lidera un equipo activo, transfiera el liderazgo primero.',
+        'changeRoleConfirm': 'Cambiar rol',
+        'roleChangedTo': 'Su rol ahora es {role}.',
         'aFairResolutionLLC': 'A Fair Resolution, LLC',
         'aFairResolutionLLCDescription': 'A Fair Resolution, LLC es una organización dedicada a la prevención y resolución de disputas. Trabaja para crear soluciones innovadoras que ayuden a las comunidades a prevenir y resolver disputas y coordinar recursos durante tiempos desafiantes.',
         'kapokIcon': 'Icono de Kapok',

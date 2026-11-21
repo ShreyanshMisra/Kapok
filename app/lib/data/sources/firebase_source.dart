@@ -567,6 +567,24 @@ class FirebaseSource {
     }
   }
 
+  /// Whether [userId] is the leader of at least one active team.
+  Future<bool> userLeadsActiveTeam(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('teams')
+          .where('leaderId', isEqualTo: userId)
+          .get();
+      // Documents without `isActive` are active (TeamModel defaults to true).
+      return snapshot.docs.any((doc) => doc.data()['isActive'] != false);
+    } catch (e) {
+      Logger.firebase('Error checking team leadership', error: e);
+      throw DatabaseException(
+        message: 'Failed to check team leadership',
+        originalError: e,
+      );
+    }
+  }
+
   // Authentication operations
   Future<UserCredential> signInWithEmailAndPassword({
     required String email,

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../core/enums/user_role.dart';
 import '../../../data/models/user_model.dart';
 
 /// Authentication events
@@ -82,4 +83,19 @@ class ProfileUpdateRequested extends AuthEvent {
 
   @override
   List<Object?> get props => [name, role, user];
+}
+
+/// Event to switch the signed-in user between team member and team leader.
+///
+/// [onComplete] receives null on success or an error message on failure.
+/// Failures are reported this way rather than through [AuthError], because
+/// AuthError -> AuthAuthenticated makes the app's auth listener navigate home.
+class UserRoleChangeRequested extends AuthEvent {
+  final UserRole newRole;
+  final void Function(String? error)? onComplete;
+
+  const UserRoleChangeRequested(this.newRole, {this.onComplete});
+
+  @override
+  List<Object?> get props => [newRole];
 }

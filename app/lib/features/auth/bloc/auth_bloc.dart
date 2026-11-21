@@ -21,6 +21,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<PasswordResetRequested>(_onPasswordResetRequested);
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<ProfileUpdateRequested>(_onProfileUpdateRequested);
+    on<UserRoleChangeRequested>(_onUserRoleChangeRequested);
+  }
+
+  Future<void> _onUserRoleChangeRequested(
+    UserRoleChangeRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final current = state;
+    if (current is! AuthAuthenticated) {
+      event.onComplete?.call('You must be signed in to change your role.');
+      return;
+    }
+    try {
+      final user = await _authRepository.changeUserRole(
+        current.user,
+        event.newRole,
+      );
+      emit(AuthAuthenticated(user: user));
+      event.onComplete?.call(null);
+    } catch (e) {
+      Logger.auth('Role change failed', error: e);
+      // State is left untouched so the user stays on the current page.
+      event.onComplete?.call(
+        e is AuthException ? e.message : 'Failed to change role. Please try again.',
+      );
+    }
   }
 
   Future<void> _onDeleteAccountRequested(
