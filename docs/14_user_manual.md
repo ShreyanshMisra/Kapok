@@ -186,8 +186,12 @@ If you don't allow location access, the map still works. It just starts at a def
 ### Editing Your Profile
 
 1. Go to **Profile** → **Edit Profile**
-2. Update your name or specialty
-3. Tap **Save Changes**
+2. Update your name or profession
+3. Tap **Save** (top right) or **Save Changes**
+
+### Switching Between Team Member and Team Leader
+
+On the **Profile** tab, use the **Role** switch. If you lead an active team, transfer leadership before switching to Team Member.
 
 ### Changing Settings
 
@@ -210,9 +214,9 @@ Go to **Profile** → **Settings** to:
 
 1. Go to **Profile** → **Settings**
 2. Scroll to the bottom and tap **Delete Account**
-3. Type the confirmation word and confirm
+3. Enter your password, type the confirmation word, and confirm
 
-Your profile is deleted. Tasks you created or were assigned to stay with your team but no longer show your name. For security you must have signed in within the last 5 minutes. If not, sign out, sign back in, and try again. If you lead an active team, transfer leadership first.
+Your profile is deleted. Tasks you created or were assigned to stay with your team but no longer show your name. You need an internet connection. If you lead an active team, transfer leadership or close the team first.
 
 ---
 

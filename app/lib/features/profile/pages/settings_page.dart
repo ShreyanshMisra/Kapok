@@ -19,6 +19,7 @@ import '../../tasks/bloc/task_event.dart';
 import '../../map/bloc/map_bloc.dart';
 import '../../map/bloc/map_event.dart';
 import '../../../core/widgets/kapok_logo.dart';
+import '../../../core/utils/logger.dart';
 
 /// Settings page for app configuration
 class SettingsPage extends StatefulWidget {
@@ -192,8 +193,8 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: const Icon(Icons.logout),
               label: Text(AppLocalizations.of(context).signOut.toUpperCase()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -401,7 +402,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (ctx) => AlertDialog(
         title: Text(localizations.clearCache),
         content: Text(
-          'This will clear approximately $sizeKB KB of locally saved data (tasks, teams, settings). You will need to sync again after clearing.',
+          localizations.clearCacheConfirmBody('$sizeKB'),
         ),
         actions: [
           TextButton(
@@ -422,14 +423,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   );
                 }
               } catch (e) {
+                Logger.error('Failed to clear cache', tag: 'SETTINGS', error: e);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to clear cache: $e'), backgroundColor: AppColors.error),
+                    SnackBar(content: Text(localizations.clearCacheFailed), backgroundColor: AppColors.error),
                   );
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: Text(localizations.clear),
           ),
         ],

@@ -29,6 +29,7 @@ import '../../tasks/bloc/task_bloc.dart';
 import '../../tasks/bloc/task_state.dart';
 import '../../../app/router.dart';
 import '../../../core/widgets/kapok_logo.dart';
+import '../../../core/utils/logger.dart';
 
 /// Map page showing interactive map with live, location-based offline map functionality
 /// It orchestrates a continuous cycle of "current location → live snapshot → offline cache refresh"
@@ -125,11 +126,11 @@ class _MapPageState extends State<MapPage> {
       _webMapController?.flyTo(position.latitude, position.longitude, 15.0);
       _mobileMapController?.flyTo(position.latitude, position.longitude, 15.0);
     } catch (e) {
+      Logger.map('Could not get current location', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not get current location: $e'),
-            backgroundColor: AppColors.primary,
+            content: Text(AppLocalizations.of(context).couldNotGetYourLocation),
           ),
         );
       }
@@ -182,7 +183,7 @@ class _MapPageState extends State<MapPage> {
           actions: [
             IconButton(
               icon: const Icon(Icons.storage),
-              tooltip: 'View Cache',
+              tooltip: AppLocalizations.of(context).viewOfflineMaps,
               onPressed: () {
                 Navigator.of(context).pushNamed('/map-cache');
               },
@@ -219,8 +220,7 @@ class _MapPageState extends State<MapPage> {
                 if (state is MapError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error: ${state.message}'),
-                      backgroundColor: AppColors.primary,
+                      content: Text(AppLocalizations.of(context).mapLoadFailed),
                     ),
                   );
                 }
@@ -247,7 +247,7 @@ class _MapPageState extends State<MapPage> {
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    const Text('Loading region for current location...'),
+                    Text(AppLocalizations.of(context).loadingMapForYourLocation),
                     if (kDebugMode) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -313,7 +313,7 @@ class _MapPageState extends State<MapPage> {
                   const SizedBox(height: 16),
                   if (state is MapError) ...[
                     Text(
-                      'ERROR: ${(state).message}',
+                      AppLocalizations.of(context).mapLoadFailed,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -323,7 +323,7 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ] else ...[
                     Text(
-                      'Map page - Waiting for region load',
+                      AppLocalizations.of(context).mapWaitingForRegion,
                       style: TextStyle(
                         fontSize: 16,
                         color: AppColors.textSecondary,
@@ -349,10 +349,10 @@ class _MapPageState extends State<MapPage> {
                       );
                     },
                     icon: const Icon(Icons.location_on),
-                    label: const Text('Refresh Offline Region'),
+                    label: Text(AppLocalizations.of(context).refreshOfflineRegion),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.surface,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -605,14 +605,14 @@ class _MapPageState extends State<MapPage> {
                 FloatingActionButton(
                   heroTag: 'map_filter_fab',
                   backgroundColor: (_filterStatus != null || _filterPriority != null)
-                      ? AppColors.primary
+                      ? Theme.of(context).colorScheme.primary
                       : surfaceColor,
                   onPressed: () => _showMapFilterSheet(context),
-                  tooltip: 'Filter markers',
+                  tooltip: AppLocalizations.of(context).filterMarkers,
                   child: Icon(
                     Icons.filter_list,
                     color: (_filterStatus != null || _filterPriority != null)
-                        ? Colors.white
+                        ? Theme.of(context).colorScheme.onPrimary
                         : Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -717,7 +717,7 @@ class _MapPageState extends State<MapPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      task.status.displayName,
+                      AppLocalizations.of(context).taskStatusName(task.status),
                       style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -729,7 +729,7 @@ class _MapPageState extends State<MapPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      task.category.displayName,
+                      AppLocalizations.of(context).taskCategoryName(task.category),
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -751,7 +751,7 @@ class _MapPageState extends State<MapPage> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Close'),
+                      child: Text(AppLocalizations.of(context).close),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -764,8 +764,7 @@ class _MapPageState extends State<MapPage> {
                           arguments: {'task': task, 'currentUserId': currentUserId},
                         );
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                      child: const Text('Open Task', style: TextStyle(color: Colors.white)),
+                      child: Text(AppLocalizations.of(context).openTask),
                     ),
                   ),
                 ],
@@ -798,15 +797,15 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Filter Map Markers', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(AppLocalizations.of(context).filterMapMarkers, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              const Text('Status', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(AppLocalizations.of(context).statusLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text(AppLocalizations.of(context).all),
                     selected: _filterStatus == null,
                     onSelected: (_) {
                       setSheetState(() => _filterStatus = null);
@@ -814,7 +813,7 @@ class _MapPageState extends State<MapPage> {
                     },
                   ),
                   ...TaskStatus.values.map((s) => FilterChip(
-                    label: Text(s.displayName),
+                    label: Text(AppLocalizations.of(context).taskStatusName(s)),
                     selected: _filterStatus == s,
                     onSelected: (_) {
                       final next = _filterStatus == s ? null : s;
@@ -825,13 +824,13 @@ class _MapPageState extends State<MapPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Priority', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(AppLocalizations.of(context).priority, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text(AppLocalizations.of(context).all),
                     selected: _filterPriority == null,
                     onSelected: (_) {
                       setSheetState(() => _filterPriority = null);
@@ -839,7 +838,7 @@ class _MapPageState extends State<MapPage> {
                     },
                   ),
                   ...TaskPriority.values.map((p) => FilterChip(
-                    label: Text(p.displayName),
+                    label: Text(AppLocalizations.of(context).taskPriorityName(p)),
                     selected: _filterPriority == p,
                     onSelected: (_) {
                       final next = _filterPriority == p ? null : p;
@@ -854,8 +853,7 @@ class _MapPageState extends State<MapPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(sheetCtx).pop(),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                  child: const Text('Apply', style: TextStyle(color: Colors.white)),
+                  child: Text(AppLocalizations.of(context).apply),
                 ),
               ),
             ],
@@ -882,20 +880,20 @@ class _MapPageState extends State<MapPage> {
     String priorityLabel;
 
     if (task.status == TaskStatus.completed) {
-      priorityLabel = 'Completed';
+      priorityLabel = AppLocalizations.of(context).completed;
       starCount = 0;
     } else {
       switch (task.priority) {
         case TaskPriority.high:
-          priorityLabel = 'High Priority';
+          priorityLabel = AppLocalizations.of(context).highPriority;
           starCount = 3;
           break;
         case TaskPriority.medium:
-          priorityLabel = 'Medium Priority';
+          priorityLabel = AppLocalizations.of(context).mediumPriority;
           starCount = 2;
           break;
         case TaskPriority.low:
-          priorityLabel = 'Low Priority';
+          priorityLabel = AppLocalizations.of(context).lowPriority;
           starCount = 1;
           break;
       }

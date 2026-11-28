@@ -24,6 +24,7 @@ import '../features/analytics/pages/analytics_page.dart';
 import 'home_page.dart';
 import 'about_page.dart';
 import 'acknowledgements_page.dart';
+import '../core/localization/app_localizations.dart';
 
 /// App router for navigation
 class AppRouter {
@@ -241,7 +242,7 @@ class NotFoundPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
-        title: const Text('Page Not Found'),
+        title: Text(AppLocalizations.of(context).pageNotFound),
         elevation: 0,
       ),
       body: Center(
@@ -261,7 +262,7 @@ class NotFoundPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Page Not Found',
+                AppLocalizations.of(context).pageNotFound,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
@@ -269,7 +270,7 @@ class NotFoundPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'The page you are looking for does not exist.',
+                AppLocalizations.of(context).pageNotFoundDescription,
                 style: Theme.of(
                   context,
                 ).textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
@@ -283,14 +284,14 @@ class NotFoundPage extends StatelessWidget {
                   ).pushNamedAndRemoveUntil(AppRouter.home, (route) => false);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,
                   ),
                 ),
-                child: const Text('Go Home'),
+                child: Text(AppLocalizations.of(context).goHome),
               ),
             ],
           ),

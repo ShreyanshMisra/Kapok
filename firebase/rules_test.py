@@ -48,6 +48,7 @@ WORLD = {
     "teamCodes/BBBBBB": {"teamId": "teamB"},
     "tasks/taskA": {"teamId": "teamA", "createdBy": "memberA", "assignedTo": "member2A", "title": "a"},
     "tasks/taskOld": {"teamId": "teamA", "createdBy": "stranger", "assignedTo": "stranger", "title": "old"},
+    "tasks/taskOld2": {"teamId": "teamA", "createdBy": "stranger", "assignedTo": "memberA", "title": "old2"},
     "tasks/taskB": {"teamId": "teamB", "createdBy": "memberB", "title": "b"},
 }
 
@@ -233,6 +234,16 @@ case("ex-member anonymizes own task", A, "stranger", "update", "tasks/taskOld",
      dict(WORLD["tasks/taskOld"], createdBy="deleted_user"))
 case("ex-member anonymizes assigned task", A, "stranger", "update", "tasks/taskOld",
      dict(WORLD["tasks/taskOld"], assignedTo="deleted_user"))
+case("ex-member anonymizes own self-assigned task (one write)", A, "stranger",
+     "update", "tasks/taskOld",
+     dict(WORLD["tasks/taskOld"], createdBy="deleted_user", assignedTo="deleted_user"))
+case("ex-member anonymizes someone else's assignment", D, "stranger", "update",
+     "tasks/taskOld2",
+     dict(WORLD["tasks/taskOld2"], createdBy="deleted_user", assignedTo="deleted_user"))
+case("ex-member anonymizes only own createdBy", A, "stranger", "update",
+     "tasks/taskOld2", dict(WORLD["tasks/taskOld2"], createdBy="deleted_user"))
+case("ex-member reassigns old task to self", D, "memberB", "update", "tasks/taskOld",
+     dict(WORLD["tasks/taskOld"], assignedTo="memberB"))
 case("ex-member edits old task", D, "stranger", "update", "tasks/taskOld",
      dict(WORLD["tasks/taskOld"], title="changed"))
 case("ex-member anonymizes + edits", D, "stranger", "update", "tasks/taskOld",

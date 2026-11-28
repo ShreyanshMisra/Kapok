@@ -114,7 +114,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              user.role,
+              AppLocalizations.of(context).professionName(user.role),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
@@ -127,7 +127,7 @@ class ProfilePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                user.userRole.displayName,
+                AppLocalizations.of(context).userRoleName(user.userRole),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -208,8 +208,8 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildInfoRow(context, AppLocalizations.of(context).email, user.email),
-            _buildInfoRow(context, AppLocalizations.of(context).role, user.userRole.displayName),
-            _buildInfoRow(context, AppLocalizations.of(context).profession, user.role),
+            _buildInfoRow(context, AppLocalizations.of(context).role, AppLocalizations.of(context).userRoleName(user.userRole)),
+            _buildInfoRow(context, AppLocalizations.of(context).profession, AppLocalizations.of(context).professionName(user.role)),
             _buildInfoRow(context, AppLocalizations.of(context).userId, user.id),
           ],
         ),
@@ -313,7 +313,7 @@ class ProfilePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${localizations.yourRole}: ${currentRole.displayName}',
+                    '${localizations.yourRole}: ${localizations.userRoleName(currentRole)}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: accent,
                       fontWeight: FontWeight.w600,

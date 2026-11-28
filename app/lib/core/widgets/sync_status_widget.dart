@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/sync_service.dart';
+import '../localization/app_localizations.dart';
 
 /// Widget that shows the current sync status as a small bar
 class SyncStatusWidget extends StatefulWidget {
@@ -63,28 +64,29 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget>
     final IconData icon;
     final String label;
 
+    final l = AppLocalizations.of(context);
     switch (_currentState) {
       case SyncState.syncing:
         bgColor = Colors.blue.shade50;
         textColor = Colors.blue.shade700;
         icon = Icons.sync;
-        label = 'Syncing...';
+        label = l.syncing;
       case SyncState.pending:
         bgColor = Colors.orange.shade50;
         textColor = Colors.orange.shade700;
         icon = Icons.cloud_queue;
-        label = '$_pendingCount pending';
+        label = l.pendingCount('$_pendingCount');
         _loadPendingCount();
       case SyncState.error:
         bgColor = Colors.red.shade50;
         textColor = Colors.red.shade700;
         icon = Icons.cloud_off;
-        label = 'Sync error';
+        label = l.syncError;
       case SyncState.synced:
         bgColor = Colors.green.shade50;
         textColor = Colors.green.shade700;
         icon = Icons.cloud_done;
-        label = 'Synced';
+        label = l.synced;
     }
 
     return Container(

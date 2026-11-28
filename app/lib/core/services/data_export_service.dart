@@ -119,7 +119,7 @@ class DataExportService {
         rethrow;
       }
       throw DataExportException(
-        message: 'Failed to export data: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to export data. Please try again.',
         originalError: e,
       );
     }
@@ -158,7 +158,7 @@ class DataExportService {
         rethrow;
       }
       throw DataExportException(
-        message: 'Failed to share export file: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to share export file. Please try again.',
         originalError: e,
       );
     }

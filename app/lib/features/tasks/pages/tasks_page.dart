@@ -335,10 +335,9 @@ class _TasksPageState extends State<TasksPage> {
               if (taskState is TaskDeleted) {
                 // Show success message
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Task deleted successfully'),
-                    backgroundColor: AppColors.primary,
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).taskDeleted),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
                 // Reload tasks to update the list
@@ -359,10 +358,10 @@ class _TasksPageState extends State<TasksPage> {
                     children: [
                       const Icon(Icons.warning_amber, size: 16, color: Colors.white),
                       const SizedBox(width: 8),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Data may be outdated — last synced over 30 min ago',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          AppLocalizations.of(context).dataMayBeOutdated,
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ],
@@ -371,7 +370,7 @@ class _TasksPageState extends State<TasksPage> {
                   actions: [
                     TextButton(
                       onPressed: () => setState(() => _isStale = false),
-                      child: const Text('Dismiss', style: TextStyle(color: Colors.white)),
+                      child: Text(AppLocalizations.of(context).dismiss, style: const TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -513,7 +512,7 @@ class _TasksPageState extends State<TasksPage> {
               _buildFilterChip(
                 label: _selectedCategory == null
                     ? localizations.allCategories
-                    : _selectedCategory!.displayName,
+                    : localizations.taskCategoryName(_selectedCategory!),
                 icon: Icons.category,
                 isSelected: _selectedCategory != null,
                 onTap: () => _showCategoryFilterDialog(),
@@ -532,7 +531,7 @@ class _TasksPageState extends State<TasksPage> {
               // Date created filter
               _buildFilterChip(
                 label: _selectedDateRange == null
-                    ? 'Any Date'
+                    ? localizations.anyDate
                     : _formatDateRangeLabel(_selectedDateRange!),
                 icon: Icons.date_range,
                 isSelected: _selectedDateRange != null,
@@ -771,7 +770,7 @@ class _TasksPageState extends State<TasksPage> {
                 },
               ),
               ...TaskCategory.values.map((category) => ListTile(
-                title: Text(category.displayName),
+                title: Text(AppLocalizations.of(context).taskCategoryName(category)),
                 leading: Radio<TaskCategory?>(
                   value: category,
                   groupValue: _selectedCategory,
@@ -877,13 +876,13 @@ class _TasksPageState extends State<TasksPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Filter by Date Created'),
+        title: Text(AppLocalizations.of(context).filterByDateCreated),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: Icon(Icons.clear, color: theme.colorScheme.primary),
-              title: const Text('Any date'),
+              title: Text(AppLocalizations.of(context).anyDate),
               onTap: () {
                 _setDateRange(null);
                 Navigator.of(ctx).pop();
@@ -891,7 +890,7 @@ class _TasksPageState extends State<TasksPage> {
             ),
             ListTile(
               leading: Icon(Icons.today, color: theme.colorScheme.primary),
-              title: const Text('Past day'),
+              title: Text(AppLocalizations.of(context).pastDay),
               onTap: () {
                 final now = DateTime.now();
                 _setDateRange(DateTimeRange(
@@ -904,7 +903,7 @@ class _TasksPageState extends State<TasksPage> {
             ListTile(
               leading:
                   Icon(Icons.date_range, color: theme.colorScheme.primary),
-              title: const Text('Past week'),
+              title: Text(AppLocalizations.of(context).pastWeek),
               onTap: () {
                 final now = DateTime.now();
                 _setDateRange(DateTimeRange(
@@ -917,7 +916,7 @@ class _TasksPageState extends State<TasksPage> {
             ListTile(
               leading: Icon(Icons.edit_calendar,
                   color: theme.colorScheme.primary),
-              title: const Text('Custom range'),
+              title: Text(AppLocalizations.of(context).customRange),
               onTap: () async {
                 Navigator.of(ctx).pop();
                 final now = DateTime.now();
@@ -1073,8 +1072,8 @@ class _TasksPageState extends State<TasksPage> {
               icon: const Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context).retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,

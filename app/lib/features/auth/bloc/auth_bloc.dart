@@ -6,6 +6,7 @@ import '../../../data/models/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import '../../../core/error/error_message.dart';
 
 /// Authentication BLoC
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -159,7 +160,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Logger.auth('Sign up successful - userRole: ${user.userRole.value}, needsOnboarding: $needsOnboarding');
     } catch (e) {
       Logger.auth('Sign up failed', error: e);
-      emit(AuthError(message: e.toString()));
+      emit(AuthError(message: userMessageFor(e)));
     }
   }
 
@@ -178,7 +179,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Logger.auth('Sign out successful');
     } catch (e) {
       Logger.auth('Sign out failed', error: e);
-      emit(AuthError(message: e.toString()));
+      emit(AuthError(message: userMessageFor(e)));
     }
   }
 
@@ -197,7 +198,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Logger.auth('Password reset email sent');
     } catch (e) {
       Logger.auth('Password reset failed', error: e);
-      emit(AuthError(message: e.toString()));
+      emit(AuthError(message: userMessageFor(e)));
     }
   }
 

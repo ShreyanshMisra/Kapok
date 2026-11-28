@@ -308,8 +308,8 @@ class _TeamsPageState extends State<TeamsPage> {
                       icon: const Icon(Icons.group_add),
                       label: Text(AppLocalizations.of(context).joinTeam),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,
@@ -331,8 +331,8 @@ class _TeamsPageState extends State<TeamsPage> {
                           icon: const Icon(Icons.add),
                           label: Text(AppLocalizations.of(context).createTeam),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.surface,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 32,
                               vertical: 16,
@@ -373,8 +373,8 @@ class _TeamsPageState extends State<TeamsPage> {
                       icon: const Icon(Icons.add),
                       label: Text(AppLocalizations.of(context).createTeam),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,

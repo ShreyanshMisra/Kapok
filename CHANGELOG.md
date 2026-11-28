@@ -10,6 +10,16 @@ of truth; update it in the same PR as the changelog entry.
 
 ## [Unreleased]
 
+### Alpha feedback fixes — build 1.0.0+4
+
+- **Dark mode:** blue text, icons and accents use a light blue that's readable on dark backgrounds. All filled buttons and the + button share one light-blue style; snackbars use a brighter blue. Light mode is unchanged.
+- **Edit Profile:** the form starts with the user's real name and profession; Save shows a result and closes the page.
+- **Delete account:** asks for the password (re-authentication) instead of requiring a sign-in within 5 minutes; fails fast when offline. Firestore rules allow anonymizing a self-created, self-assigned task in one write (rules not yet deployed; 3 new rules tests, 71/71 pass).
+- **Role / Profession:** the team member ↔ team leader switch moved from Settings to Profile. Permission level is labelled "Role" and specialty "Profession" everywhere; the separate "Team Role" row is gone (team leaders show "Leads this team").
+- **Spanish:** ~130 screens strings and all task status/priority/category, role and profession names are translated (onboarding included).
+- **Errors:** users no longer see raw exception text ("DatabaseException: …", Firebase codes); BLoCs show the app message or a generic fallback (`userMessageFor`).
+- **Android:** `bundleRelease` fails without the upload key or a `pk.` Mapbox token; the Mapbox token can come from `app/.env`; advertising-ID permissions removed.
+
 ### Security & data-handling pass (2026-11-19) — build 1.0.0+3
 
 - **Firestore rules rewritten** (`firebase/firestore.rules`, not yet deployed). Teams, tasks, and member profiles are no longer readable or writable across teams. Team leaders can only manage their own team. Joining requires the invite code, which is now resolved through a new `teamCodes/{code}` collection. Task creation requires team membership. Added server-side rules tests (`firebase/rules_test.py`) and a one-off code backfill (`firebase/backfill_team_codes.py`).

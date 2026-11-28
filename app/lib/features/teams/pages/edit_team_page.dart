@@ -73,8 +73,7 @@ class _EditTeamPageState extends State<EditTeamPage> {
           if (state is TeamUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Team updated successfully'),
-                backgroundColor: AppColors.primary,
+                content: Text(AppLocalizations.of(context).teamUpdatedSuccessfully),
               ),
             );
             Navigator.of(context).pop(state.team);
@@ -153,8 +152,8 @@ class _EditTeamPageState extends State<EditTeamPage> {
                           return ElevatedButton(
                             onPressed: state is TeamLoading ? null : _handleSave,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

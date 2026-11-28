@@ -117,7 +117,7 @@ class TaskRepository {
             }
             Logger.task('Error checking team membership', error: e);
             throw TaskException(
-              message: 'Failed to verify team membership: ${e.toString()}',
+              message: e is AppException ? e.message : 'Failed to verify team membership. Please try again.',
               originalError: e,
             );
           }
@@ -466,7 +466,7 @@ class TaskRepository {
         rethrow;
       }
       throw TaskException(
-        message: 'Failed to create task: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to create task. Please try again.',
         originalError: e,
       );
     }
@@ -863,7 +863,7 @@ class TaskRepository {
       Logger.task('=== TASK DELETION FAILED ===');
       Logger.task('Error: ${e.toString()}');
       throw TaskException(
-        message: 'Failed to delete task: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to delete task. Please try again.',
         originalError: e,
       );
     }

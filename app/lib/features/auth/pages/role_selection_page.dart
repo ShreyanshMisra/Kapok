@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/enums/user_role.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/sources/firebase_source.dart';
@@ -13,6 +12,7 @@ import '../bloc/auth_state.dart';
 import '../../teams/pages/create_team_page.dart';
 import '../../teams/pages/join_team_page.dart';
 import '../../../app/home_page.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Role selection page for user onboarding
 class RoleSelectionPage extends StatelessWidget {
@@ -30,7 +30,6 @@ class RoleSelectionPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.primary,
                 ),
               );
             }
@@ -43,7 +42,7 @@ class RoleSelectionPage extends StatelessWidget {
                 const SizedBox(height: 40),
                 // Header
                 Text(
-                  'Choose Your Role',
+                  AppLocalizations.of(context).chooseYourRole,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -52,7 +51,7 @@ class RoleSelectionPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Select your role to get started',
+                  AppLocalizations.of(context).selectYourRoleToGetStarted,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
@@ -63,24 +62,24 @@ class RoleSelectionPage extends StatelessWidget {
                 _RoleCard(
                   role: UserRole.teamLeader,
                   icon: Icons.groups,
-                  title: 'Team Leader',
-                  subtitle: 'Create and manage a team',
+                  title: AppLocalizations.of(context).teamLeader,
+                  subtitle: AppLocalizations.of(context).teamLeaderRoleDescription,
                   onTap: () => _handleRoleSelection(context, UserRole.teamLeader),
                 ),
                 const SizedBox(height: 16),
                 _RoleCard(
                   role: UserRole.teamMember,
                   icon: Icons.person_add,
-                  title: 'Team Member',
-                  subtitle: 'Join an existing team',
+                  title: AppLocalizations.of(context).teamMember,
+                  subtitle: AppLocalizations.of(context).teamMemberRoleDescription,
                   onTap: () => _handleRoleSelection(context, UserRole.teamMember),
                 ),
                 const SizedBox(height: 16),
                 _RoleCard(
                   role: UserRole.admin,
                   icon: Icons.admin_panel_settings,
-                  title: 'Admin',
-                  subtitle: 'Oversee all teams and tasks',
+                  title: AppLocalizations.of(context).admin,
+                  subtitle: AppLocalizations.of(context).adminRoleDescription,
                   onTap: () => _handleRoleSelection(context, UserRole.admin),
                 ),
               ],
@@ -98,9 +97,8 @@ class RoleSelectionPage extends StatelessWidget {
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be logged in to select a role'),
-          backgroundColor: AppColors.primary,
+        SnackBar(
+          content: Text(AppLocalizations.of(context).mustBeLoggedInToSelectRole),
         ),
       );
       return;
@@ -111,9 +109,8 @@ class RoleSelectionPage extends StatelessWidget {
     
     if (firebaseUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No authenticated user found'),
-          backgroundColor: AppColors.primary,
+        SnackBar(
+          content: Text(AppLocalizations.of(context).noSignedInUser),
         ),
       );
       return;
@@ -170,11 +167,11 @@ class RoleSelectionPage extends StatelessWidget {
         );
       }
     } catch (e) {
+      Logger.auth('Error selecting role', error: e);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error selecting role: ${e.toString()}'),
-          backgroundColor: AppColors.primary,
+          content: Text(AppLocalizations.of(context).selectRoleFailed),
         ),
       );
     }

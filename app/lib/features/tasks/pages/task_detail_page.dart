@@ -102,7 +102,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   String get assignmentDisplay {
     final assignedTo = widget.task.assignedTo;
     if (assignedTo == null || assignedTo.isEmpty) {
-      return 'Unassigned';
+      return AppLocalizations.of(context).unassigned;
     }
 
     try {
@@ -111,12 +111,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         (m) => m.id == assignedTo,
         orElse: () => throw Exception('User not found'),
       );
-      return '${member.name} (${member.role})';
+      return '${member.name} (${AppLocalizations.of(context).professionName(member.role)})';
     } catch (e) {
       // Try current user
       final authState = context.read<AuthBloc>().state;
       if (authState is AuthAuthenticated && authState.user.id == assignedTo) {
-        return '${authState.user.name} (${authState.user.role})';
+        return '${authState.user.name} (${AppLocalizations.of(context).professionName(authState.user.role)})';
       }
       // Fallback to showing ID if user not found in cache
       return assignedTo;
@@ -235,14 +235,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: const Text(
-          'Are you sure you want to delete this task? This action cannot be undone.',
-        ),
+        title: Text(AppLocalizations.of(context).deleteTask),
+        content: Text(AppLocalizations.of(context).deleteTaskConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -251,8 +249,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 DeleteTaskRequested(taskId: widget.task.id),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('DELETE'),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+            child: Text(AppLocalizations.of(context).delete.toUpperCase()),
           ),
         ],
       ),
@@ -270,7 +268,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
         title: Text(
-          _isEditing ? 'Edit Task' : AppLocalizations.of(context).taskDetails,
+          _isEditing ? AppLocalizations.of(context).editTask : AppLocalizations.of(context).taskDetails,
         ),
         centerTitle: true,
         elevation: 0,
@@ -278,30 +276,31 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.help_outline),
-              tooltip: 'Help',
+              tooltip: AppLocalizations.of(context).help,
               onPressed: () => HelpOverlay.show(
                 context,
-                title: 'Task Details',
-                tips: const [
-                  HelpTip(icon: Icons.edit, title: 'Edit', description: 'Tap the pencil icon to edit the task name, description, priority, and more.'),
-                  HelpTip(icon: Icons.share, title: 'Share', description: 'Use the share button to send task details to others.'),
-                  HelpTip(icon: Icons.delete, title: 'Delete', description: 'Tap the trash icon to permanently delete this task.'),
-                  HelpTip(icon: Icons.check_circle, title: 'Completing', description: 'Change the status to "Completed" using the status dropdown and save to mark the task done.'),
+                title: AppLocalizations.of(context).taskDetails,
+                tips: [
+                  HelpTip(icon: Icons.edit, title: AppLocalizations.of(context).edit, description: AppLocalizations.of(context).helpEditTaskTip),
+                  HelpTip(icon: Icons.share, title: AppLocalizations.of(context).share, description: AppLocalizations.of(context).helpShareTaskTip),
+                  HelpTip(icon: Icons.delete, title: AppLocalizations.of(context).delete, description: AppLocalizations.of(context).helpDeleteTaskTip),
+                  HelpTip(icon: Icons.check_circle, title: AppLocalizations.of(context).completing, description: AppLocalizations.of(context).helpCompletingTaskTip),
                 ],
               ),
             ),
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.share),
-              tooltip: 'Share task',
+              tooltip: AppLocalizations.of(context).shareTask,
               onPressed: () {
                 final task = widget.task;
+                final l = AppLocalizations.of(context);
                 Share.share(
                   '[Kapok Task]\n'
                   '${task.title}\n'
-                  'Priority: ${task.priority.displayName}\n'
-                  'Status: ${task.status.displayName}\n'
-                  'Category: ${task.category.displayName}\n'
+                  '${l.priority}: ${l.taskPriorityName(task.priority)}\n'
+                  '${l.statusLabel}: ${l.taskStatusName(task.status)}\n'
+                  '${l.category}: ${l.taskCategoryName(task.category)}\n'
                   '${task.description ?? ''}',
                   subject: task.title,
                 );
@@ -328,13 +327,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   _selectedCategory = widget.task.category;
                 });
               },
-              tooltip: 'Edit Task',
+              tooltip: AppLocalizations.of(context).editTask,
             ),
           if (!_isEditing && canDelete)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteTask,
-              tooltip: 'Delete Task',
+              tooltip: AppLocalizations.of(context).deleteTask,
             ),
           if (_isEditing) ...[
             TextButton(
@@ -350,9 +349,9 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   _selectedAssignedTo = widget.task.assignedTo;
                 });
               },
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
-            TextButton(onPressed: _saveChanges, child: const Text('Save')),
+            TextButton(onPressed: _saveChanges, child: Text(AppLocalizations.of(context).save)),
           ],
           const KapokLogo(),
         ],
@@ -363,17 +362,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             if (!_isSaving) return;
             _isSaving = false;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Task updated successfully'),
-                backgroundColor: AppColors.primary,
+              SnackBar(
+                content: Text(AppLocalizations.of(context).taskUpdated),
               ),
             );
             Navigator.of(context).pop(true);
           } else if (state is TaskDeleted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Task deleted successfully'),
-                backgroundColor: AppColors.primary,
+              SnackBar(
+                content: Text(AppLocalizations.of(context).taskDeleted),
               ),
             );
             Navigator.of(context).pop(true); // Return true to indicate deletion
@@ -381,7 +378,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.primary,
               ),
             );
           }
@@ -493,7 +489,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             controller: _titleController,
                             enabled: _isEditing,
                             decoration: InputDecoration(
-                              labelText: 'Title',
+                              labelText: AppLocalizations.of(context).titleLabel,
                               prefixIcon: const Icon(Icons.title),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -505,7 +501,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Please enter a title';
+                                return AppLocalizations.of(context).pleaseEnterATitle;
                               }
                               return null;
                             },
@@ -518,7 +514,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             enabled: _isEditing,
                             maxLines: 3,
                             decoration: InputDecoration(
-                              labelText: 'Description',
+                              labelText: AppLocalizations.of(context).description,
                               prefixIcon: const Icon(Icons.description),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -536,7 +532,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             controller: _addressController,
                             enabled: false,
                             decoration: InputDecoration(
-                              labelText: 'Location',
+                              labelText: AppLocalizations.of(context).location,
                               prefixIcon: const Icon(Icons.location_on),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -550,7 +546,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
-                                'Coordinates: ${widget.task.geoLocation.latitude.toStringAsFixed(6)}, ${widget.task.geoLocation.longitude.toStringAsFixed(6)}',
+                                AppLocalizations.of(context).coordinatesValue('${widget.task.geoLocation.latitude.toStringAsFixed(6)}, ${widget.task.geoLocation.longitude.toStringAsFixed(6)}'),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                               ),
@@ -561,7 +557,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           DropdownButtonFormField<TaskStatus>(
                             value: _selectedStatus,
                             decoration: InputDecoration(
-                              labelText: 'Status',
+                              labelText: AppLocalizations.of(context).statusLabel,
                               prefixIcon: const Icon(Icons.flag),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -582,7 +578,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                       color: _getStatusColor(status),
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(status.displayName),
+                                    Text(AppLocalizations.of(context).taskStatusName(status)),
                                   ],
                                 ),
                               );
@@ -618,7 +614,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                             ) {
                               return DropdownMenuItem<TaskCategory>(
                                 value: category,
-                                child: Text(category.displayName),
+                                child: Text(AppLocalizations.of(context).taskCategoryName(category)),
                               );
                             }).toList(),
                             onChanged: _isEditing
@@ -637,7 +633,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           DropdownButtonFormField<TaskPriority>(
                             value: _selectedPriority,
                             decoration: InputDecoration(
-                              labelText: 'Priority',
+                              labelText: AppLocalizations.of(context).priority,
                               prefixIcon: const Icon(Icons.priority_high),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -656,7 +652,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                   children: [
                                     PriorityStars(priority: priority, size: 14),
                                     const SizedBox(width: 8),
-                                    Text(priority.displayName),
+                                    Text(AppLocalizations.of(context).taskPriorityName(priority)),
                                   ],
                                 ),
                               );
@@ -705,16 +701,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                     value: effectiveValue,
                                     isExpanded: true,
                                     decoration: InputDecoration(
-                                      labelText: 'Assigned To',
+                                      labelText: AppLocalizations.of(context).assignedTo,
                                       prefixIcon: const Icon(Icons.person),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
                                     items: [
-                                      const DropdownMenuItem<String>(
+                                      DropdownMenuItem<String>(
                                         value: null,
-                                        child: Text('Unassigned'),
+                                        child: Text(AppLocalizations.of(context).unassigned),
                                       ),
                                       ...filteredMembers.map((member) {
                                         return DropdownMenuItem<String>(
@@ -729,7 +725,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                                               const SizedBox(width: 8),
                                               Expanded(
                                                 child: Text(
-                                                  '${member.name} (${member.role})',
+                                                  '${member.name} (${AppLocalizations.of(context).professionName(member.role)})',
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
@@ -752,7 +748,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                               initialValue: assignmentDisplay,
                               enabled: false,
                               decoration: InputDecoration(
-                                labelText: 'Assigned To',
+                                labelText: AppLocalizations.of(context).assignedTo,
                                 prefixIcon: const Icon(Icons.person),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -765,7 +761,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
                           // Created/Updated dates
                           _buildInfoCard(
-                            'Created',
+                            AppLocalizations.of(context).created,
                             DateFormat(
                               'MMM d, y • h:mm a',
                             ).format(widget.task.createdAt),
@@ -773,7 +769,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           ),
                           const SizedBox(height: 8),
                           _buildInfoCard(
-                            'Last Updated',
+                            AppLocalizations.of(context).lastUpdated,
                             DateFormat(
                               'MMM d, y • h:mm a',
                             ).format(widget.task.updatedAt),
@@ -782,7 +778,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           if (widget.task.completedAt != null) ...[
                             const SizedBox(height: 8),
                             _buildInfoCard(
-                              'Completed',
+                              AppLocalizations.of(context).completed,
                               DateFormat(
                                 'MMM d, y • h:mm a',
                               ).format(widget.task.completedAt!),
@@ -792,7 +788,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           // Time in current status
                           const SizedBox(height: 8),
                           _buildInfoCard(
-                            'Time in ${widget.task.status.displayName}',
+                            AppLocalizations.of(context).timeInStatusNamed(AppLocalizations.of(context).taskStatusName(widget.task.status)),
                             _getTimeInCurrentStatus(),
                             Icons.timer_outlined,
                           ),
@@ -814,16 +810,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                       child: ElevatedButton(
                         onPressed: _saveChanges,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.surface,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'SAVE',
-                          style: TextStyle(
+                        child: Text(
+                          AppLocalizations.of(context).save.toUpperCase(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -920,7 +916,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Status History',
+          AppLocalizations.of(context).statusHistory,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onSurface,
@@ -947,7 +943,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
           final formattedDate = changedAt != null
               ? DateFormat('MMM d, y • h:mm a').format(DateTime.parse(changedAt))
-              : 'Unknown date';
+              : AppLocalizations.of(context).unknownDate;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -978,8 +974,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                     children: [
                       Text(
                         previousStatus != null
-                            ? '${TaskStatus.fromString(previousStatus).displayName} → ${TaskStatus.fromString(status).displayName}'
-                            : TaskStatus.fromString(status).displayName,
+                            ? '${AppLocalizations.of(context).taskStatusName(TaskStatus.fromString(previousStatus))} → ${AppLocalizations.of(context).taskStatusName(TaskStatus.fromString(status))}'
+                            : AppLocalizations.of(context).taskStatusName(TaskStatus.fromString(status)),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.onSurface,

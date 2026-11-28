@@ -11,6 +11,7 @@ import '../../../data/repositories/task_repository.dart';
 import '../models/map_camera_state.dart';
 import 'map_event.dart';
 import 'map_state.dart';
+import '../../../core/error/error_message.dart';
 
 /// Coordinates Mapbox rendering with offline bubble management.
 class MapBloc extends Bloc<MapEvent, MapState> {
@@ -65,7 +66,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       }
     } catch (e) {
       // Logger.task('Failed to bootstrap map', error: e);
-      emit(MapError(message: e.toString()));
+      emit(MapError(message: userMessageFor(e)));
     }
   }
 
@@ -106,7 +107,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       await _startNewBubble(emit, targetLat: event.targetLat, targetLon: event.targetLon);
     } catch (e) {
       // Logger.task('Error refreshing offline bubble', error: e);
-      emit(MapError(message: e.toString()));
+      emit(MapError(message: userMessageFor(e)));
     }
   }
 
@@ -174,7 +175,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       );
     } catch (e) {
       Logger.task('Error loading tasks for map', error: e);
-      emit(MapError(message: e.toString()));
+      emit(MapError(message: userMessageFor(e)));
     }
   }
 

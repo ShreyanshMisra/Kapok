@@ -177,22 +177,19 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: AppColors.primary,
                   ),
                 );
               } else if (state is TeamDeleted) {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Team deleted successfully'),
-                    backgroundColor: AppColors.primary,
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).teamDeletedSuccessfully),
                   ),
                 );
               } else if (state is LeadershipTransferred) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(AppLocalizations.of(context).transferLeadershipSuccess),
-                    backgroundColor: AppColors.primary,
                   ),
                 );
               }
@@ -203,16 +200,14 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               if (state is TaskCreated) {
                 context.read<TaskBloc>().add(LoadTasksByTeamRequested(teamId: widget.team.id));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Task created successfully'),
-                    backgroundColor: AppColors.primary,
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).taskCreated),
                   ),
                 );
               } else if (state is TaskError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: AppColors.primary,
                   ),
                 );
               }
@@ -284,7 +279,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${widget.team.memberIds.length} member${widget.team.memberIds.length != 1 ? 's' : ''}',
+                        '${widget.team.memberIds.length} ${widget.team.memberIds.length != 1 ? AppLocalizations.of(context).members : AppLocalizations.of(context).member}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
@@ -301,7 +296,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    widget.team.isActive ? 'Active' : 'Inactive',
+                    widget.team.isActive ? AppLocalizations.of(context).active : AppLocalizations.of(context).inactive,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: widget.team.isActive ? AppColors.success : AppColors.error,
                       fontWeight: FontWeight.w600,
@@ -313,7 +308,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             if (widget.team.description != null && widget.team.description!.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                'Description',
+                AppLocalizations.of(context).description,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -354,7 +349,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Team Code',
+                  AppLocalizations.of(context).teamCode,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -384,7 +379,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Share this code with team members',
+                    AppLocalizations.of(context).shareThisCodeWithTeamMembers,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
@@ -402,7 +397,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(AppLocalizations.of(context).teamCodeCopiedToClipboard),
-                          backgroundColor: AppColors.primary,
                         ),
                       );
                     },
@@ -415,7 +409,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Share.share(
-                        'Join my team on Kapok! Team code: ${widget.team.teamCode}',
+                        AppLocalizations.of(context).joinMyTeamMessage(widget.team.teamCode),
                       );
                     },
                     icon: const Icon(Icons.share),
@@ -475,7 +469,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'No members found',
+                        AppLocalizations.of(context).noMembersFound,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
@@ -533,7 +527,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'Error loading members: ${state.message}',
+                      AppLocalizations.of(context).loadMembersFailed,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.error,
                       ),
@@ -578,7 +572,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   children: roles.map((role) {
                     return ListTile(
                       leading: Icon(getRoleIcon(role), size: 20),
-                      title: Text(role),
+                      title: Text(AppLocalizations.of(context).professionName(role)),
                       trailing: selectedRole == role
                           ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
                           : null,
@@ -592,7 +586,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -609,17 +603,16 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       );
                       ScaffoldMessenger.of(this.context).showSnackBar(
                         SnackBar(
-                          content: Text(AppLocalizations.of(this.context).professionChangedTo(member.name, selectedRole)),
-                          backgroundColor: AppColors.primary,
+                          content: Text(AppLocalizations.of(this.context).professionChangedTo(member.name, AppLocalizations.of(this.context).professionName(selectedRole))),
                         ),
                       );
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
-                  child: const Text('SAVE'),
+                  child: Text(AppLocalizations.of(context).save.toUpperCase()),
                 ),
               ],
             );
@@ -635,13 +628,6 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
     final isLeader = member.id == widget.team.leaderId;
     final isExpanded = _expandedMembers[member.id] ?? false;
 
-    // Determine display role for this team context
-    String displayRole;
-    if (isLeader) {
-      displayRole = 'Team Leader';
-    } else {
-      displayRole = 'Member';
-    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -676,7 +662,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                member.role,
+                AppLocalizations.of(context).professionName(member.role),
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(context).colorScheme.primary,
@@ -686,13 +672,17 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             ),
           ],
         ),
-        subtitle: Text(
-          displayRole,
-          style: TextStyle(
-            color: isLeader ? Theme.of(context).colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
-            fontSize: 12,
-          ),
-        ),
+        // Position in this team. Kept out of the details so "Role" only ever
+        // means the account's permission level.
+        subtitle: isLeader
+            ? Text(
+                AppLocalizations.of(context).leadsThisTeam,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 12,
+                ),
+              )
+            : null,
         trailing: isLeader
             ? Container(
                 width: 20,
@@ -715,17 +705,14 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Team Role (their role in THIS team)
-                _buildInfoRow(Icons.badge, 'Team Role', displayRole),
-                const SizedBox(height: 8),
-                // Role (their global permission level)
-                _buildInfoRow(Icons.person, AppLocalizations.of(context).role, member.userRole.displayName),
+                // Role (account permission level)
+                _buildInfoRow(Icons.person, AppLocalizations.of(context).role, AppLocalizations.of(context).userRoleName(member.userRole)),
                 const SizedBox(height: 8),
                 // Profession
-                _buildInfoRow(Icons.work, AppLocalizations.of(context).profession, member.role),
+                _buildInfoRow(Icons.work, AppLocalizations.of(context).profession, AppLocalizations.of(context).professionName(member.role)),
                 const SizedBox(height: 8),
                 // Email
-                _buildInfoRow(Icons.email, 'Email', member.email),
+                _buildInfoRow(Icons.email, AppLocalizations.of(context).email, member.email),
                 const SizedBox(height: 16),
                 // Assigned Tasks
                 FutureBuilder<List<TaskModel>>(
@@ -743,7 +730,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                             Icon(Icons.assignment, size: 16, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 8),
                             Text(
-                              'Assigned Tasks (${tasks.length})',
+                              AppLocalizations.of(context).assignedTasksCount('${tasks.length}'),
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -753,7 +740,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                         const SizedBox(height: 8),
                         if (tasks.isEmpty)
                           Text(
-                            'No assigned tasks',
+                            AppLocalizations.of(context).noAssignedTasks,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
@@ -785,8 +772,8 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                           icon: const Icon(Icons.person_remove),
                           label: Text(AppLocalizations.of(context).remove.toUpperCase()),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),
@@ -875,7 +862,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         dense: true,
         leading: PriorityStars(priority: task.priority, size: 12),
         title: Text(
-          '${task.category.displayName}: ${task.title}',
+          '${AppLocalizations.of(context).taskCategoryName(task.category)}: ${task.title}',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         trailing: Icon(Icons.chevron_right, size: 16),
@@ -946,7 +933,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'No tasks yet. Create one to get started!',
+                        AppLocalizations.of(context).noTasksYetCreateOne,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
@@ -960,7 +947,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'Error loading tasks: ${state.message}',
+                      AppLocalizations.of(context).loadTasksFailed,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.error,
                       ),
@@ -995,7 +982,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
       child: ListTile(
         leading: PriorityStars(priority: task.priority, size: 14),
         title: Text(
-          '${task.category.displayName}: ${task.title}',
+          '${AppLocalizations.of(context).taskCategoryName(task.category)}: ${task.title}',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -1020,7 +1007,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    task.status.displayName,
+                    AppLocalizations.of(context).taskStatusName(task.status),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: _getStatusColor(task.status),
                       fontSize: 10,
@@ -1073,7 +1060,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         return AlertDialog(
           title: Text(localizations.removeMember),
           content: Text(
-            '${localizations.confirmRemoveMember}\n\n${member.name} will be removed from ${widget.team.teamName}.',
+            '${localizations.confirmRemoveMember}\n\n${localizations.memberWillBeRemovedFrom(member.name, widget.team.teamName)}',
           ),
           actions: [
             TextButton(
@@ -1095,15 +1082,14 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   // Show confirmation
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${member.name} removed from team'),
-                      backgroundColor: AppColors.primary,
+                      content: Text(localizations.memberRemovedFromTeam(member.name)),
                     ),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
               child: Text(localizations.remove.toUpperCase()),
             ),
@@ -1145,8 +1131,8 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
               child: Text(localizations.transferLeadership.toUpperCase()),
             ),
@@ -1272,7 +1258,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
               ),
               child: Text(localizations.closeTeam.toUpperCase()),
             ),
@@ -1294,19 +1280,17 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               Navigator.of(context).pop(); // Close dialog
               Navigator.of(context).pop(); // Go back to teams list
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Team deleted successfully'),
-                  backgroundColor: AppColors.primary,
+                SnackBar(
+                  content: Text(AppLocalizations.of(context).teamDeletedSuccessfully),
                 ),
               );
             } else if (state is TeamError) {
               Navigator.of(context).pop(); // Close dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Failed to delete team: ${state.message}'),
-                  backgroundColor: AppColors.primary,
+                  content: Text(state.message),
                   action: SnackBarAction(
-                    label: 'Retry',
+                    label: AppLocalizations.of(context).retry,
                     onPressed: () {
                       final authState = context.read<AuthBloc>().state;
                       if (authState is AuthAuthenticated) {
@@ -1328,18 +1312,16 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               final isLoading = state is TeamLoading;
               
               return AlertDialog(
-                title: const Text('Delete Team'),
+                title: Text(AppLocalizations.of(context).deleteTeam),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Are you sure you want to permanently delete this team? This action cannot be undone. All team members will be removed from the team.',
-                    ),
+                    Text(AppLocalizations.of(context).deleteTeamConfirm),
                     if (isLoading) ...[
                       const SizedBox(height: 16),
                       const CircularProgressIndicator(),
                       const SizedBox(height: 8),
-                      const Text('Deleting team...'),
+                      Text(AppLocalizations.of(context).deletingTeam),
                     ],
                   ],
                 ),
@@ -1347,7 +1329,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   if (!isLoading)
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(AppLocalizations.of(context).cancel),
                     ),
                   ElevatedButton(
                     onPressed: isLoading
@@ -1364,10 +1346,10 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                             }
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                     ),
-                    child: const Text('DELETE'),
+                    child: Text(AppLocalizations.of(context).delete.toUpperCase()),
                   ),
                 ],
               );
@@ -1387,8 +1369,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         return AlertDialog(
           title: Text(localizations.leaveTeam),
           content: Text(
-            'Are you sure you want to leave ${widget.team.teamName}? '
-            'Any tasks assigned to you in this team will be unassigned.',
+            localizations.leaveTeamConfirm(widget.team.teamName),
           ),
           actions: [
             TextButton(
@@ -1409,14 +1390,13 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   Navigator.of(context).pop(); // Go back to teams page
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('You have left ${widget.team.teamName}'),
-                      backgroundColor: AppColors.primary,
+                      content: Text(localizations.youHaveLeftTeam(widget.team.teamName)),
                     ),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
               ),
               child: Text(localizations.leaveTeam.toUpperCase()),
             ),

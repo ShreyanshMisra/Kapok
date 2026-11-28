@@ -189,7 +189,7 @@ class FirebaseSource {
       }
 
       throw DatabaseException(
-        message: 'Failed to create team: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to create team. Please try again.',
         originalError: e,
       );
     }
@@ -397,7 +397,7 @@ class FirebaseSource {
       }
 
       throw DatabaseException(
-        message: 'Failed to create task: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to create task. Please try again.',
         originalError: e,
       );
     }

@@ -3,7 +3,6 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/widgets/help_overlay.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/mapbox_constants.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/services/geocode_service.dart';
@@ -104,7 +103,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       // Check if location services are enabled
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _useDefaultLocation('Location services are disabled');
+        _useDefaultLocation((l) => l.locationServicesDisabled);
         return;
       }
 
@@ -112,13 +111,13 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _useDefaultLocation('Location permission denied');
+          _useDefaultLocation((l) => l.locationPermissionDenied);
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _useDefaultLocation('Location permission denied permanently');
+        _useDefaultLocation((l) => l.locationPermissionDeniedPermanently);
         return;
       }
 
@@ -133,7 +132,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       // Validate coordinates
       if (position.latitude < -90 || position.latitude > 90 ||
           position.longitude < -180 || position.longitude > 180) {
-        _useDefaultLocation('Invalid coordinates received');
+        _useDefaultLocation((l) => l.invalidCoordinatesReceived);
         return;
       }
 
@@ -158,16 +157,19 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       _reverseGeocodeLocation(position.latitude, position.longitude);
     } catch (e) {
       debugPrint('Error getting location: $e');
-      _useDefaultLocation('Could not get current location');
+      _useDefaultLocation((l) => l.couldNotGetCurrentLocation);
     }
   }
 
   /// Use default fallback location when current location is unavailable
-  void _useDefaultLocation(String reason) {
+  ///
+  /// [reason] is resolved only while mounted, since this runs after awaits.
+  void _useDefaultLocation(String Function(AppLocalizations l) reason) {
     if (mounted) {
+      final l = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$reason. Using default location.'),
+          content: Text(l.usingDefaultLocation(reason(l))),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -251,7 +253,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Location set: ${_selectedAddress ?? '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}'}',
+            AppLocalizations.of(context).locationSet(_selectedAddress ?? '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}'),
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -265,10 +267,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
     if (address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please enter an address or select a location on the map',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).enterAddressOrSelectOnMap),
         ),
       );
       return false;
@@ -300,7 +300,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not find this address: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).addressNotFound)),
         );
       }
       return false;
@@ -330,15 +330,15 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
-            tooltip: 'Help',
+            tooltip: AppLocalizations.of(context).help,
             onPressed: () => HelpOverlay.show(
               context,
-              title: 'Create Task',
-              tips: const [
-                HelpTip(icon: Icons.edit, title: 'Task Name & Description', description: 'Give the task a clear name (3–100 chars) and an optional description.'),
-                HelpTip(icon: Icons.star, title: 'Priority', description: 'Set Low, Medium, or High priority so team members know what to tackle first.'),
-                HelpTip(icon: Icons.map, title: 'Location', description: 'Tap on the map or use the location button to pin the task to a specific spot.'),
-                HelpTip(icon: Icons.person, title: 'Assignment', description: 'Assign the task to a team member or leave it unassigned for anyone to pick up.'),
+              title: AppLocalizations.of(context).createTask,
+              tips: [
+                HelpTip(icon: Icons.edit, title: AppLocalizations.of(context).helpTaskNameTitle, description: AppLocalizations.of(context).helpTaskNameTip),
+                HelpTip(icon: Icons.star, title: AppLocalizations.of(context).priority, description: AppLocalizations.of(context).helpPriorityTip),
+                HelpTip(icon: Icons.map, title: AppLocalizations.of(context).location, description: AppLocalizations.of(context).helpLocationTip),
+                HelpTip(icon: Icons.person, title: AppLocalizations.of(context).assignment, description: AppLocalizations.of(context).helpAssignmentTip),
               ],
             ),
           ),
@@ -367,16 +367,12 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TaskCreated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  'Task "${state.task.title}" created successfully',
-                ),
-                backgroundColor: AppColors.primary,
+                content: Text(AppLocalizations.of(context).taskCreatedNamed(state.task.title)),
               ),
             );
             Navigator.of(context).pop();
@@ -387,18 +383,18 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             // Map view - full screen using Positioned.fill
             // Show loading indicator while fetching initial location
             if (!_initialLocationLoaded)
-              const Positioned.fill(
+              Positioned.fill(
                 child: ColoredBox(
-                  color: Color(0xFFE8F4F8),
+                  color: const Color(0xFFE8F4F8),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
                         Text(
-                          'Fetching current location...',
-                          style: TextStyle(
+                          AppLocalizations.of(context).fetchingCurrentLocation,
+                          style: const TextStyle(
                             fontSize: 16,
                             color: Colors.black54,
                           ),
@@ -451,7 +447,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Tap on the map to select a location for your task',
+                            AppLocalizations.of(context).tapMapToSelectLocation,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: theme.colorScheme.onSurface),
                           ),
@@ -528,7 +524,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       labelText: AppLocalizations.of(
                                         context,
                                       ).taskTitle,
-                                      hintText: 'Enter task title',
+                                      hintText: AppLocalizations.of(context).enterTaskTitle,
                                       prefixIcon: const Icon(
                                         Icons.title_outlined,
                                       ),
@@ -545,10 +541,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     validator: (value) {
                                       if (value == null ||
                                           value.trim().isEmpty) {
-                                        return 'Please enter a task title';
+                                        return AppLocalizations.of(context).pleaseEnterATaskTitle;
                                       }
                                       if (value.length > 100) {
-                                        return 'Title must be 100 characters or less';
+                                        return AppLocalizations.of(context).titleTooLong;
                                       }
                                       return null;
                                     },
@@ -564,7 +560,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         context,
                                       ).taskDescription,
                                       hintText:
-                                          'Enter task description (optional)',
+                                          AppLocalizations.of(context).enterTaskDescriptionOptional,
                                       prefixIcon: const Icon(
                                         Icons.description_outlined,
                                       ),
@@ -580,7 +576,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     ),
                                     validator: (value) {
                                       if (value != null && value.length > 500) {
-                                        return 'Description must be 500 characters or less';
+                                        return AppLocalizations.of(context).descriptionTooLong;
                                       }
                                       return null;
                                     },
@@ -594,8 +590,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         child: TextFormField(
                                           controller: _addressController,
                                           decoration: InputDecoration(
-                                            labelText: 'Location',
-                                            hintText: 'Address or coordinates',
+                                            labelText: AppLocalizations.of(context).location,
+                                            hintText: AppLocalizations.of(context).addressOrCoordinates,
                                             prefixIcon: const Icon(
                                               Icons.location_on_outlined,
                                             ),
@@ -619,7 +615,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       IconButton(
                                         icon: const Icon(Icons.search),
                                         onPressed: _validateAndGeocodeAddress,
-                                        tooltip: 'Search address',
+                                        tooltip: AppLocalizations.of(context).searchAddress,
                                         style: IconButton.styleFrom(
                                           backgroundColor: theme.colorScheme.primary,
                                           foregroundColor: theme.colorScheme.onPrimary,
@@ -631,7 +627,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8),
                                       child: Text(
-                                        'Coordinates: ${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}',
+                                        AppLocalizations.of(context).coordinatesValue('${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}'),
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -664,8 +660,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                       return DropdownButtonFormField<String>(
                                         value: _selectedTeamId,
                                         decoration: InputDecoration(
-                                          labelText: 'Team *',
-                                          hintText: 'Select a team',
+                                          labelText: AppLocalizations.of(context).teamRequired,
+                                          hintText: AppLocalizations.of(context).selectATeam,
                                           prefixIcon: const Icon(Icons.group),
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(
@@ -701,7 +697,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         },
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Please select a team';
+                                            return AppLocalizations.of(context).pleaseSelectATeam;
                                           }
                                           return null;
                                         },
@@ -741,7 +737,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                               ),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Select a team first to assign task',
+                                                AppLocalizations.of(context).selectTeamFirstToAssign,
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .bodySmall
@@ -782,8 +778,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                         value: _selectedAssignedTo,
                                         isExpanded: true,
                                         decoration: InputDecoration(
-                                          labelText: 'Assign To (Optional)',
-                                          hintText: 'Select a team member',
+                                          labelText: AppLocalizations.of(context).assignedToOptional,
+                                          hintText: AppLocalizations.of(context).selectATeamMember,
                                           prefixIcon: const Icon(
                                             Icons.person_outline,
                                           ),
@@ -802,9 +798,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                           ),
                                         ),
                                         items: [
-                                          const DropdownMenuItem<String>(
+                                          DropdownMenuItem<String>(
                                             value: null,
-                                            child: Text('Unassigned'),
+                                            child: Text(AppLocalizations.of(context).unassigned),
                                           ),
                                           ...sortedMembers.map((
                                             UserModel member,
@@ -846,7 +842,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                                       borderRadius: BorderRadius.circular(8),
                                                     ),
                                                     child: Text(
-                                                      member.role,
+                                                      AppLocalizations.of(context).professionName(member.role),
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         color: theme.colorScheme.primary,
@@ -894,7 +890,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                     ) {
                                       return DropdownMenuItem<TaskCategory>(
                                         value: category,
-                                        child: Text(category.displayName),
+                                        child: Text(AppLocalizations.of(context).taskCategoryName(category)),
                                       );
                                     }).toList(),
                                     onChanged: (TaskCategory? newValue) {
@@ -942,7 +938,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                           children: [
                                             PriorityStars(priority: priority, size: 14),
                                             const SizedBox(width: 8),
-                                            Text(priority.displayName),
+                                            Text(AppLocalizations.of(context).taskPriorityName(priority)),
                                           ],
                                         ),
                                       );
@@ -1054,11 +1050,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       // Validate location
       if (_latitude == null || _longitude == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Please select a location on the map or enter an address',
-            ),
-            backgroundColor: AppColors.primary,
+          SnackBar(
+            content: Text(AppLocalizations.of(context).selectLocationOnMapOrAddress),
           ),
         );
         return;
@@ -1072,7 +1065,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToCreateTasks,
             ),
-            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
@@ -1083,9 +1075,8 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
       if (_selectedTeamId == null || _selectedTeamId!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a team'),
-            backgroundColor: AppColors.primary,
+          SnackBar(
+            content: Text(AppLocalizations.of(context).pleaseSelectATeam),
           ),
         );
         return;

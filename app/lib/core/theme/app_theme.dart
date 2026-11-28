@@ -218,8 +218,10 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryLight,
-          foregroundColor: AppColors.surface,
+          // Same pairing as colorScheme.primary/onPrimary, so themed buttons
+          // and buttons that use the color scheme directly look alike.
+          backgroundColor: AppColors.primaryOnDark,
+          foregroundColor: AppColors.primaryDark,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -277,8 +279,8 @@ class AppTheme {
         color: Color(0xFFE0E0E0),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primaryLight,
-        foregroundColor: AppColors.surface,
+        backgroundColor: AppColors.primaryOnDark,
+        foregroundColor: AppColors.primaryDark,
       ),
       drawerTheme: const DrawerThemeData(
         backgroundColor: Color(0xFF1E1E1E),
@@ -288,7 +290,10 @@ class AppTheme {
         iconColor: Color(0xFFE0E0E0),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.primary,
+        // Navy blends into the near-black background; this blue stands out
+        // and keeps white text at 4.6:1.
+        backgroundColor: AppColors.primaryLight,
+        actionTextColor: Colors.white,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentTextStyle: const TextStyle(color: Colors.white),

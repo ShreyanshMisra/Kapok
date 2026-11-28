@@ -41,7 +41,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Admins have access to all teams'),
+              content: Text(AppLocalizations.of(context).adminsHaveAccessToAllTeams),
               backgroundColor: AppColors.info,
             ),
           );
@@ -68,7 +68,6 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TeamJoined) {
@@ -241,8 +240,8 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                     return ElevatedButton(
                       onPressed: state is TeamLoading ? null : _handleJoinTeam,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -289,7 +288,6 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToJoinTeams,
             ),
-            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);

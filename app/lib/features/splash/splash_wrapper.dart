@@ -3,6 +3,8 @@ import 'pages/splash_screen.dart';
 import '../../app/kapok_app.dart';
 import '../../core/services/onboarding_service.dart';
 import '../onboarding/pages/onboarding_page.dart';
+import '../../core/localization/app_localizations.dart';
+import '../../core/services/language_service.dart';
 
 /// Wrapper widget that shows splash screen, then onboarding (if needed), then main app
 class SplashWrapper extends StatefulWidget {
@@ -50,6 +52,10 @@ class _SplashWrapperState extends State<SplashWrapper> {
     if (_splashComplete && _showOnboarding) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Onboarding text is localized, so this app needs the delegates too.
+        locale: LanguageService.instance.currentLocale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: OnboardingPage(
           onComplete: _onOnboardingComplete,
         ),

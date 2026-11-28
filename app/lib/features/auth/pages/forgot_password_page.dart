@@ -47,7 +47,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.primary,
                 ),
               );
             } else if (state is PasswordResetSent) {
@@ -57,7 +56,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(AppLocalizations.of(context).passwordResetEmailSentTo.replaceAll('{email}', state.email)),
-                  backgroundColor: AppColors.primary,
                 ),
               );
             }
@@ -130,8 +128,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               ? null
                               : _handlePasswordReset,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.surface,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -194,8 +192,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

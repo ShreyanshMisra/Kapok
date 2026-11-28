@@ -5,6 +5,7 @@ import '../../../data/models/team_model.dart';
 import '../../../data/repositories/team_repository.dart';
 import 'team_event.dart';
 import 'team_state.dart';
+import '../../../core/error/error_message.dart';
 
 /// Team BLoC
 class TeamBloc extends Bloc<TeamEvent, TeamState> {
@@ -69,7 +70,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
         } else if (errorStr.contains('firestore')) {
           errorMessage = 'Database error. Please try again later.';
         } else {
-          errorMessage = 'Failed to create team: ${e.toString()}';
+          errorMessage = 'Failed to create team. Please try again.';
         }
       }
       Logger.team('Team creation error message: $errorMessage');
@@ -135,14 +136,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
             errorStr.contains('database')) {
           errorMessage = 'Database error. Please try again later.';
         } else {
-          // Try to extract the actual error message from nested exceptions
-          if (errorMessage.contains('Error:')) {
-            final parts = errorMessage.split('Error:');
-            if (parts.length > 1) {
-              errorMessage = parts.last.trim();
-            }
-          }
-          errorMessage = 'Failed to join team: $errorMessage';
+          errorMessage = 'Failed to join team. Please try again.';
         }
       }
       Logger.team('Team join error message: $errorMessage');
@@ -176,7 +170,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
     } catch (e) {
       Logger.team('Error leaving team', error: e);
       emit(TeamError(
-        message: e.toString(),
+        message: userMessageFor(e),
         teams: state.teams,
         members: state.members,
       ));
@@ -201,7 +195,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Error loading user teams', error: e);
       emit(
         TeamError(
-          message: e.toString(),
+          message: userMessageFor(e),
           teams: state.teams,
           members: state.members,
         ),
@@ -231,7 +225,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Team loaded successfully: ${team.id}');
     } catch (e) {
       Logger.team('Error loading team', error: e);
-      emit(TeamError(message: e.toString(), teams: state.teams, members: state.members));
+      emit(TeamError(message: userMessageFor(e), teams: state.teams, members: state.members));
     }
   }
 
@@ -259,7 +253,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Team updated successfully: ${team.id}');
     } catch (e) {
       Logger.team('Error updating team', error: e);
-      emit(TeamError(message: e.toString()));
+      emit(TeamError(message: userMessageFor(e)));
     }
   }
 
@@ -282,7 +276,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Team closed successfully');
     } catch (e) {
       Logger.team('Error closing team', error: e);
-      emit(TeamError(message: e.toString()));
+      emit(TeamError(message: userMessageFor(e)));
     }
   }
 
@@ -320,7 +314,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Error deleting team', error: e);
       emit(
         TeamError(
-          message: e.toString(),
+          message: userMessageFor(e),
           teams: state.teams,
           members: state.members,
         ),
@@ -352,7 +346,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Error removing member', error: e);
       // Preserve teams so TeamsPage still renders.
       emit(TeamError(
-        message: e is Exception ? e.toString() : 'Failed to remove member',
+        message: userMessageFor(e, fallback: 'Failed to remove member. Please try again.'),
         teams: state.teams,
         members: state.members,
       ));
@@ -379,7 +373,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Error loading team members', error: e);
       emit(
         TeamError(
-          message: e.toString(),
+          message: userMessageFor(e),
           teams: state.teams,
           members: state.members,
         ),
@@ -410,7 +404,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       Logger.team('Error changing member role', error: e);
       emit(
         TeamError(
-          message: e.toString(),
+          message: userMessageFor(e),
           teams: state.teams,
           members: state.members,
         ),
@@ -454,7 +448,7 @@ class TeamBloc extends Bloc<TeamEvent, TeamState> {
       } else if (e is DatabaseException) {
         errorMessage = e.message;
       } else {
-        errorMessage = 'Failed to transfer leadership: ${e.toString()}';
+        errorMessage = 'Failed to transfer leadership. Please try again.';
       }
       emit(
         TeamError(
