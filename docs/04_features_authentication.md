@@ -53,11 +53,12 @@ The authentication system handles user registration, login, password reset, and 
 
 Required by both the App Store (guideline 5.1.1(v)) and Google Play.
 
-1. User opens **Profile → Settings → Delete Account** and types the confirmation word in the dialog
+1. User opens **Profile → Settings → Delete Account**, enters their password, and types the confirmation word in the dialog
 2. `DeleteAccountRequested` event dispatched to `AuthBloc`
 3. `FirebaseSource.deleteAccount()` checks, before touching any data:
-   - **Recent sign-in**: the sign-in must be under 5 minutes old (Firebase Auth rejects `delete()` with `requires-recent-login` otherwise). If not, the user is asked to sign out and back in. This check prevents a half-deleted account (data gone, login still working).
-   - **Team leadership**: if the user leads any team with `isActive != false`, deletion is refused until leadership is transferred
+   - **Connection**: deletion needs to be online (checked in `AuthRepository.deleteAccount`)
+   - **Re-authentication**: the password is verified with `reauthenticateWithCredential`, so Firebase Auth's `requires-recent-login` can't fail the final `delete()` after data is gone. A wrong password stops here with nothing changed
+   - **Team leadership**: if the user leads any team with `isActive != false`, deletion is refused until leadership is transferred or the team is closed
 4. In one Firestore batch: tasks the user created/was assigned are anonymized (`createdBy`/`assignedTo` → `deleted_user`), the user is removed from `memberIds` of teams they belong to (closed teams they led are left as-is), and `users/{uid}` is deleted
 5. Local Hive user cache is cleared, then the Firebase Auth user is deleted
 6. `AuthUnauthenticated` is emitted; `KapokApp` resets the Team/Task/Map BLoCs and returns to Login. On failure, `AuthError` is shown and the user stays signed in with their data intact

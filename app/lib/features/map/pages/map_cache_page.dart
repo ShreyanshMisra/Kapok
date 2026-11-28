@@ -5,6 +5,8 @@ import '../../../data/models/offline_map_region_model.dart';
 import '../../../data/repositories/offline_map_region_repository.dart';
 import '../widgets/mapbox_map_view.dart';
 import '../../../core/widgets/kapok_logo.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/utils/logger.dart';
 
 /// Cache Page displays information about cached offline map regions
 class MapCachePage extends StatefulWidget {
@@ -39,10 +41,11 @@ class _MapCachePageState extends State<MapCachePage> {
       _latestRegion = await _regionRepository.getLatestRegion();
       _allRegions = await _regionRepository.getAllRegions();
     } catch (e) {
+      Logger.map('Error loading offline regions', error: e);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error loading regions: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).loadRegionsFailed)));
       }
     } finally {
       if (mounted) {
@@ -64,7 +67,7 @@ class _MapCachePageState extends State<MapCachePage> {
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
-        title: const Text('Maps Stored Offline'),
+        title: Text(AppLocalizations.of(context).mapsStoredOffline),
         centerTitle: true,
         elevation: 0,
         actions: const [KapokLogo()],
@@ -83,7 +86,7 @@ class _MapCachePageState extends State<MapCachePage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No cached regions',
+                    AppLocalizations.of(context).noCachedRegions,
                     style: TextStyle(
                       fontSize: 18,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -91,7 +94,7 @@ class _MapCachePageState extends State<MapCachePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Download a region from the map page',
+                    AppLocalizations.of(context).downloadRegionFromMapPage,
                     style: TextStyle(
                       fontSize: 14,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -108,7 +111,7 @@ class _MapCachePageState extends State<MapCachePage> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
-                      'These are your cached maps which are stored offline temporarily. They are downloaded when you zoom into a new location in Maps so that you can access this map while you are not connected to the internet. You can delete maps stored offline using Clear Cache in settings to free up storage.',
+                      AppLocalizations.of(context).cachedMapsExplanation,
                       style: TextStyle(
                         fontSize: 13,
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
@@ -125,13 +128,13 @@ class _MapCachePageState extends State<MapCachePage> {
                         children: [
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.location_on,
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Latest Region',
+                                AppLocalizations.of(context).latestRegion,
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -153,7 +156,7 @@ class _MapCachePageState extends State<MapCachePage> {
                   // All regions list
                   if (_allRegions.length > 1) ...[
                       Text(
-                        'All Saved Regions (${_allRegions.length})',
+                        AppLocalizations.of(context).allSavedRegions('${_allRegions.length}'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -168,10 +171,10 @@ class _MapCachePageState extends State<MapCachePage> {
                           leading: const Icon(Icons.map),
                           title: Text(region.name),
                           subtitle: Text(
-                            'Downloaded: ${_formatDate(region.lastSyncedAt)}',
+                            AppLocalizations.of(context).downloadedOn(_formatDate(region.lastSyncedAt)),
                           ),
                           trailing: Text(
-                            '${region.downloadedTiles}/${region.totalTiles} tiles',
+                            AppLocalizations.of(context).tilesProgress('${region.downloadedTiles}', '${region.totalTiles}'),
                             style: TextStyle(
                               fontSize: 12,
                               color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -188,26 +191,27 @@ class _MapCachePageState extends State<MapCachePage> {
   }
 
   Widget _buildRegionInfo(OfflineMapRegion region) {
+    final l = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow('Name', region.name),
+        _buildInfoRow(l.name, region.name),
         _buildInfoRow(
-          'Center',
+          l.regionCenter,
           '${region.centerLat.toStringAsFixed(4)}, ${region.centerLon.toStringAsFixed(4)}',
         ),
         _buildInfoRow(
-          'Bounding Box',
+          l.boundingBox,
           'NE: ${region.northEastLat.toStringAsFixed(4)}, ${region.northEastLon.toStringAsFixed(4)}\n'
               'SW: ${region.southWestLat.toStringAsFixed(4)}, ${region.southWestLon.toStringAsFixed(4)}',
         ),
-        _buildInfoRow('Zoom Range', '${region.zoomMin} - ${region.zoomMax}'),
+        _buildInfoRow(l.zoomRange, '${region.zoomMin} - ${region.zoomMax}'),
         _buildInfoRow(
-          'Tiles',
+          l.tiles,
           '${region.downloadedTiles} / ${region.totalTiles}',
         ),
-        _buildInfoRow('Status', region.status.toString().split('.').last),
-        _buildInfoRow('Last Synced', _formatDate(region.lastSyncedAt)),
+        _buildInfoRow(l.statusLabel, region.status.toString().split('.').last),
+        _buildInfoRow(l.lastSynced, _formatDate(region.lastSyncedAt)),
       ],
     );
   }
@@ -252,7 +256,7 @@ class _MapCachePageState extends State<MapCachePage> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.primary, width: 2),
+        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -300,11 +304,11 @@ class _MapCachePageState extends State<MapCachePage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.map, size: 16, color: AppColors.primary),
+                    Icon(Icons.map, size: 16, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Cached Region Preview - Center: ${region.centerLat.toStringAsFixed(4)}, ${region.centerLon.toStringAsFixed(4)}',
+                        AppLocalizations.of(context).cachedRegionPreview('${region.centerLat.toStringAsFixed(4)}, ${region.centerLon.toStringAsFixed(4)}'),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,

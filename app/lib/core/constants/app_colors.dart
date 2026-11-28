@@ -5,6 +5,11 @@ class AppColors {
   static const Color primary = Color(0xFF013576); // Blue
   static const Color primaryLight = Color(0xFF1976D2);
   static const Color primaryDark = Color(0xFF001A3A);
+
+  // Dark-mode accent. AppColors.primary (#013576) is ~1.4:1 against the dark
+  // surfaces, so dark mode uses this light blue for blue text, icons and
+  // accents (~9.5:1 on #1E1E1E), with primaryDark as the text on top of it.
+  static const Color primaryOnDark = Color(0xFF90CAF9);
   
   // Secondary Colors
   static const Color secondary = Color(0xFF1976D2); // Blue

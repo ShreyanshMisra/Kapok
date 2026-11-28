@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../widgets/onboarding_slide.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Onboarding page with introduction slides for first-time users
 class OnboardingPage extends StatefulWidget {
@@ -19,40 +20,43 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingSlideData> _slides = const [
-    OnboardingSlideData(
+  List<OnboardingSlideData> get _slides {
+    final l = AppLocalizations.of(context);
+    return [
+      OnboardingSlideData(
       icon: Icons.medical_services,
       iconColor: AppColors.medical,
-      title: 'Welcome to Kapok',
+      title: l.onboardingWelcomeTitle,
       description:
-          'Coordinate disaster response efforts with your team. Manage tasks, track progress, and respond to emergencies efficiently.',
+          l.onboardingWelcomeBody,
       backgroundColor: AppColors.primary,
     ),
-    OnboardingSlideData(
+      OnboardingSlideData(
       icon: Icons.cloud_off,
       iconColor: AppColors.online,
-      title: 'Works Completely Offline',
+      title: l.onboardingOfflineTitle,
       description:
-          'No internet? No problem. Create tasks, manage teams, and coordinate response efforts even without connectivity. Everything syncs automatically when you reconnect.',
+          l.onboardingOfflineBody,
       backgroundColor: AppColors.primaryDark,
     ),
-    OnboardingSlideData(
+      OnboardingSlideData(
       icon: Icons.groups,
       iconColor: AppColors.teamLeader,
-      title: 'Team Coordination',
+      title: l.onboardingTeamsTitle,
       description:
-          'Create teams with unique join codes. Assign roles, manage members, and keep everyone synchronized on priorities and responsibilities.',
+          l.onboardingTeamsBody,
       backgroundColor: AppColors.primary,
     ),
-    OnboardingSlideData(
+      OnboardingSlideData(
       icon: Icons.task_alt,
       iconColor: AppColors.success,
-      title: 'Smart Task Management',
+      title: l.onboardingTasksTitle,
       description:
-          'Create location-based tasks with priorities and categories. Assign to team members, track status, and visualize everything on an interactive map.',
+          l.onboardingTasksBody,
       backgroundColor: AppColors.primaryDark,
     ),
-  ];
+    ];
+  }
 
   @override
   void dispose() {
@@ -94,9 +98,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _skip,
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context).skip,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -147,8 +151,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   child: Text(
                     _currentPage == _slides.length - 1
-                        ? 'Get Started'
-                        : 'Next',
+                        ? AppLocalizations.of(context).getStarted
+                        : AppLocalizations.of(context).next,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

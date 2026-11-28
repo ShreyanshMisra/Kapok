@@ -60,7 +60,8 @@ Future<bool> confirmAndSignOut(
         ElevatedButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
           style: ElevatedButton.styleFrom(
-            backgroundColor: hasUnsynced ? AppColors.error : AppColors.primary,
+            backgroundColor: hasUnsynced ? AppColors.error : Theme.of(context).colorScheme.primary,
+            foregroundColor: hasUnsynced ? Colors.white : Theme.of(context).colorScheme.onPrimary,
           ),
           child: Text(
             hasUnsynced

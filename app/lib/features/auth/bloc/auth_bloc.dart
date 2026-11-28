@@ -6,6 +6,7 @@ import '../../../data/models/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import '../../../core/error/error_message.dart';
 
 /// Authentication BLoC
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -57,7 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // deletion succeeds, so a refused deletion leaves the user where they are.
     try {
       Logger.auth('Account deletion requested');
-      await _authRepository.deleteAccount();
+      await _authRepository.deleteAccount(password: event.password);
       emit(const AuthUnauthenticated());
       Logger.auth('Account deleted successfully');
       event.onComplete?.call(null);
@@ -159,7 +160,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Logger.auth('Sign up successful - userRole: ${user.userRole.value}, needsOnboarding: $needsOnboarding');
     } catch (e) {
       Logger.auth('Sign up failed', error: e);
-      emit(AuthError(message: e.toString()));
+      emit(AuthError(message: userMessageFor(e)));
     }
   }
 
@@ -178,7 +179,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Logger.auth('Sign out successful');
     } catch (e) {
       Logger.auth('Sign out failed', error: e);
-      emit(AuthError(message: e.toString()));
+      emit(AuthError(message: userMessageFor(e)));
     }
   }
 
@@ -197,7 +198,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Logger.auth('Password reset email sent');
     } catch (e) {
       Logger.auth('Password reset failed', error: e);
-      emit(AuthError(message: e.toString()));
+      emit(AuthError(message: userMessageFor(e)));
     }
   }
 
@@ -251,33 +252,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         
         final user = await _authRepository.updateUserProfile(updatedUser);
-        
+
         // Only require onboarding if the user still has no role (temporary user).
         final needsOnboarding = user.role.isEmpty && user.userRole != UserRole.admin;
-        
+
         // Emit new authenticated state without going through loading
-        // This prevents navigation issues
+        // This prevents navigation issues.
+        //
+        // Full-model updates come from onboarding (create/join team, role
+        // selection), which clear isNewSignup so the app's auth listener routes
+        // onward. A plain name/profession edit (Edit Profile) must not change
+        // the flag, or that listener would yank the user off the page.
         emit(AuthAuthenticated(
           user: user,
           needsOnboarding: needsOnboarding,
-          isNewSignup: false,
+          isNewSignup: event.user == null ? currentState.isNewSignup : false,
         ));
         Logger.auth('Profile updated successfully');
+        event.onComplete?.call(null);
       } else {
         // If not authenticated, don't emit error - just log it
         // This prevents navigation to login page
         Logger.auth('Profile update skipped - user not authenticated');
+        event.onComplete?.call('You must be signed in to update your profile.');
       }
     } catch (e) {
       Logger.auth('Profile update failed', error: e);
-      // Don't emit AuthError - keep user authenticated even if update fails
-      // This prevents navigation to login page
-      // The error is logged but user stays authenticated
-      final currentState = state;
-      if (currentState is AuthAuthenticated) {
-        // Keep the current authenticated state
-        emit(currentState);
-      }
+      // Don't emit AuthError - keep user authenticated even if update fails.
+      // This prevents navigation to login page; the caller is told instead.
+      event.onComplete?.call(
+        e is AuthException ? e.message : 'Failed to update profile. Please try again.',
+      );
     }
   }
 }

@@ -231,13 +231,19 @@ service cloud.firestore {
       allow update: if signedIn() && (
         isAdmin() ||
         // Account deletion anonymizes the user's tasks, including tasks in
-        // teams they've since left. Only the identifying field may change.
-        (resource.data.createdBy == uid() &&
-         changedKeys().hasOnly(['createdBy']) &&
-         request.resource.data.createdBy == 'deleted_user') ||
-        (resource.data.get('assignedTo', null) == uid() &&
-         changedKeys().hasOnly(['assignedTo']) &&
-         request.resource.data.assignedTo == 'deleted_user') || (
+        // teams they've since left. Only the identifying fields may change,
+        // each only from the caller's uid to the marker. Covers a task the
+        // caller both created and self-assigned (one write, both fields).
+        (changedKeys().hasOnly(['createdBy', 'assignedTo']) &&
+         (resource.data.createdBy == uid() ||
+          resource.data.get('assignedTo', null) == uid()) &&
+         (request.resource.data.createdBy == resource.data.createdBy ||
+          (resource.data.createdBy == uid() &&
+           request.resource.data.createdBy == 'deleted_user')) &&
+         (request.resource.data.get('assignedTo', null) ==
+            resource.data.get('assignedTo', null) ||
+          (resource.data.get('assignedTo', null) == uid() &&
+           request.resource.data.assignedTo == 'deleted_user'))) || (
           inTeam(resource.data.teamId) &&
           (resource.data.createdBy == uid() ||
            resource.data.get('assignedTo', null) == uid() ||

@@ -8,6 +8,7 @@ import '../../../features/auth/bloc/auth_bloc.dart';
 import '../../../features/auth/bloc/auth_state.dart';
 import 'edit_profile_page.dart';
 import 'settings_page.dart';
+import '../widgets/account_role_switch.dart';
 import '../../../core/widgets/kapok_logo.dart';
 
 /// Profile page showing user information
@@ -59,6 +60,12 @@ class ProfilePage extends StatelessWidget {
                   _buildAccountInfo(context, state.user),
                   const SizedBox(height: 24),
 
+                  // Team member <-> team leader switch (hidden for admins)
+                  if (state.user.userRole != UserRole.admin) ...[
+                    AccountRoleSwitch(currentRole: state.user.userRole),
+                    const SizedBox(height: 24),
+                  ],
+
                   // Permissions table
                   _buildPermissionsTable(context, state.user.userRole),
                 ],
@@ -107,7 +114,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              user.role,
+              AppLocalizations.of(context).professionName(user.role),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
@@ -120,7 +127,7 @@ class ProfilePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                user.userRole.displayName,
+                AppLocalizations.of(context).userRoleName(user.userRole),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -201,8 +208,8 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildInfoRow(context, AppLocalizations.of(context).email, user.email),
-            _buildInfoRow(context, AppLocalizations.of(context).accountType, user.userRole.displayName),
-            _buildInfoRow(context, AppLocalizations.of(context).role, user.role),
+            _buildInfoRow(context, AppLocalizations.of(context).role, AppLocalizations.of(context).userRoleName(user.userRole)),
+            _buildInfoRow(context, AppLocalizations.of(context).profession, AppLocalizations.of(context).professionName(user.role)),
             _buildInfoRow(context, AppLocalizations.of(context).userId, user.id),
           ],
         ),
@@ -243,6 +250,7 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildPermissionsTable(BuildContext context, UserRole currentRole) {
     final theme = Theme.of(context);
+    final accent = theme.colorScheme.primary;
     final localizations = AppLocalizations.of(context);
 
     int roleIndex(UserRole role) {
@@ -288,26 +296,26 @@ class ProfilePage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.security, color: AppColors.primary, size: 22),
+                Icon(Icons.security, color: accent, size: 22),
                 const SizedBox(width: 8),
                 Text(
                   localizations.permissions,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: accent,
                   ),
                 ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: accent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${localizations.yourRole}: ${currentRole.displayName}',
+                    '${localizations.yourRole}: ${localizations.userRoleName(currentRole)}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.primary,
+                      color: accent,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -318,7 +326,7 @@ class ProfilePage extends StatelessWidget {
             _HorizontallyScrollableTable(
               child: DataTable(
                 headingRowColor: WidgetStateProperty.all(
-                  AppColors.primary.withOpacity(0.08),
+                  accent.withOpacity(0.08),
                 ),
                 columnSpacing: 20,
                 columns: [
@@ -327,7 +335,7 @@ class ProfilePage extends StatelessWidget {
                       localizations.action,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: accent,
                       ),
                     ),
                   ),
@@ -340,7 +348,7 @@ class ProfilePage extends StatelessWidget {
                               ? FontWeight.bold
                               : FontWeight.w500,
                           color: i == currentIdx
-                              ? AppColors.primary
+                              ? accent
                               : theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
@@ -358,7 +366,7 @@ class ProfilePage extends StatelessWidget {
                             ),
                             decoration: i == currentIdx
                                 ? BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.06),
+                                    color: accent.withOpacity(0.06),
                                     borderRadius: BorderRadius.circular(6),
                                   )
                                 : null,

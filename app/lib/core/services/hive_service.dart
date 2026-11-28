@@ -359,13 +359,35 @@ class HiveService {
     }
   }
 
+  /// Settings that are device preferences rather than cached data, so
+  /// clearAllData keeps them: ThemeService's 'theme_mode',
+  /// LanguageService.languageKey, OnboardingService's completion flag, and
+  /// FirstLoginService's per-account 'has_logged_in_before_<uid>' flags.
+  static const List<String> _preferenceKeys = [
+    'theme_mode',
+    'language_code',
+    'onboarding_completed',
+  ];
+  static const String _firstLoginKeyPrefix = 'has_logged_in_before_';
+
+  bool _isPreferenceKey(dynamic key) =>
+      key is String &&
+      (_preferenceKeys.contains(key) || key.startsWith(_firstLoginKeyPrefix));
+
+  /// Clears cached data (Settings → Clear Cache). Device preferences (theme,
+  /// language, onboarding and first-login flags) are kept.
   Future<void> clearAllData() async {
     try {
       Logger.hive('Clearing all data');
       await usersBox.clear();
       await teamsBox.clear();
       await tasksBox.clear();
+      final preferences = {
+        for (final key in settingsBox.keys)
+          if (_isPreferenceKey(key)) key: settingsBox.get(key),
+      };
       await settingsBox.clear();
+      await settingsBox.putAll(preferences);
       await syncBox.clear();
       Logger.hive('All data cleared successfully');
     } catch (e) {

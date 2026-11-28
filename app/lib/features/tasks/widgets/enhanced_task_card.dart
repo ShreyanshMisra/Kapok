@@ -136,7 +136,7 @@ class EnhancedTaskCard extends StatelessWidget {
                           Icon(_getStatusIcon(), size: 14, color: statusColor),
                           const SizedBox(width: 4),
                           Text(
-                            task.status.displayName,
+                            AppLocalizations.of(context).taskStatusName(task.status),
                             style: TextStyle(
                               color: statusColor,
                               fontSize: 11,
@@ -153,7 +153,7 @@ class EnhancedTaskCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      task.category.displayName,
+                      AppLocalizations.of(context).taskCategoryName(task.category),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
@@ -162,7 +162,7 @@ class EnhancedTaskCard extends StatelessWidget {
                     PriorityStars(priority: task.priority, size: 14),
                     const SizedBox(width: 8),
                     Text(
-                      '${_getTimeInStatus()} in status',
+                      AppLocalizations.of(context).timeInStatusShort(_getTimeInStatus()),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                         fontSize: 11,
@@ -252,11 +252,11 @@ class EnhancedTaskCard extends StatelessWidget {
                     ] else ...[
                       CircleAvatar(
                         radius: 12,
-                        backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                         child: Text(
                           (assigneeName?.isNotEmpty ?? false) ? assigneeName![0].toUpperCase() : '?',
                           style: TextStyle(
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -373,7 +373,7 @@ class EnhancedTaskCard extends StatelessWidget {
                   PriorityStars(priority: task.priority),
                   const SizedBox(width: 12),
                   Text(
-                    '${task.category.displayName} • ${task.status.displayName}',
+                    '${AppLocalizations.of(context).taskCategoryName(task.category)} • ${AppLocalizations.of(context).taskStatusName(task.status)}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
@@ -414,8 +414,8 @@ class EnhancedTaskCard extends StatelessWidget {
                     onTap();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                   child: Text(loc.openTask),
                 ),

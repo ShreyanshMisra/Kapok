@@ -19,12 +19,12 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 | Android release signing | Wired to `key.properties`, but the file/keystore don't exist yet; falls back to debug signing | **Blocker for Play** (deferred) |
 | Privacy Policy / Terms text | In-app, contact `kapok@afairresolution.com`, last updated 2026-10-24; DRAFT pending legal review | Med |
 | Privacy Policy / Terms **URL** | Not hosted yet | **Blocker** (both stores) |
-| Account deletion | In-app, with recent-login and team-leader safeguards | Done |
+| Account deletion | In-app; password re-authentication, online-only, team-leader safeguard | Done |
 | Location-denied behavior | Map falls back to a default center | Done |
-| Firestore rules | Rewritten 2026-11-19 for per-team isolation and invite-code joins (67/67 server-side tests pass); **not deployed**; live ruleset matched the old repo copy on 2026-11-19 | **Blocker** (deploy + backfill) |
+| Firestore rules | Rewritten 2026-11-19 for per-team isolation and invite-code joins; **deployed 2026-11-20**. Build 1.0.0+4's task-anonymization clause (71/71 server-side tests pass) **deployed 2026-11-28**; invite-code backfill dry run found nothing missing (2026-11-28) | Done |
 | Admin role | Self-assignable at sign-up (C1); accepted for internal testing only | **Blocker** for public release |
 | Secrets hygiene | `.env`, `GoogleService-Info.plist`, `google-services.json`, `key.properties` all gitignored; `.env` only holds the public `pk.` token | Done |
-| Tests / CI | 106 unit/widget tests pass; CI runs analyze + test | Low |
+| Tests / CI | 119 unit/widget tests pass; CI runs analyze + test (GitHub Actions re-enabled 2026-11-28) | Low |
 | Store listing content | Not started | High |
 
 ---
@@ -42,10 +42,10 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 ### iOS (now)
 
 1. **Host the Privacy Policy and Terms of Service** at stable public URLs (same text as `lib/core/constants/privacy_policy.dart` / `terms_of_service.dart`, after legal review). Enter them in App Store Connect, plus a **support URL**.
-2. **Deploy Firestore rules and backfill invite codes** together with build 1.0.0+3. Old builds can't create or join teams under the new rules, so have testers update. Procedure: `12_development_notes.md` → Firestore Rules Deployment.
-3. **Run `pod install`** before the next build (the `pointer_interceptor` plugin was added), and bump the build number (`1.0.0+3`).
+2. ~~Deploy the build 1.0.0+4 rules change and confirm the invite-code backfill.~~ Done 2026-11-28: rules deployed (live matches `firebase/firestore.rules`), backfill dry run found 0 missing codes. For future rule changes, follow `12_development_notes.md` → Firestore Rules Deployment.
+3. **Run `pod install`** before the next build (the `pointer_interceptor` plugin was added), and bump the build number (now `1.0.0+4`).
 4. **App Privacy answers** in App Store Connect must match `PrivacyInfo.xcprivacy`: Email, Name, User ID, Precise Location, Other User Content (app functionality, linked); Product Interaction (analytics, linked); Crash Data (not linked); no tracking. Also include third-party SDK collection: the Mapbox SDK sends de-identified location and usage telemetry by default (users can opt out from the map's (i) button), and address searches go to Mapbox's geocoding API. Decide with counsel whether to declare **Search History** and Mapbox's **Coarse Location / Product Interaction (analytics, not linked)**. The Play Data Safety form needs the same answers.
-5. **Reviewer account**: a dedicated Team Member account in a test team, plus a note that team leaders must transfer leadership before deleting their account.
+5. **Reviewer account**: a dedicated Team Member account in a test team, plus a note that deleting an account asks for the password, and team leaders must transfer leadership or close their team first.
 6. **Screenshots** for the iPhone 6.9"/6.7" class (no iPad, since the app is iPhone-only).
 
 ### Android (after iOS)
@@ -54,7 +54,7 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 2. First `flutter build appbundle --release` on a machine with enough disk. Confirm it's signed with the upload key (not debug) and that maps load.
 3. Enroll in Play App Signing; upload to **internal testing** first.
 4. Data safety form, content rating, target audience, privacy policy URL, feature graphic and screenshots.
-5. Optional hardening: make `bundleRelease` **fail** when `key.properties` or the Mapbox token is missing, instead of silently falling back.
+5. Done in 1.0.0+4: `bundleRelease` fails when `key.properties` or a `pk.` Mapbox token is missing.
 
 ## 3. Fixed in the 2026-10-24 Review
 
@@ -105,7 +105,7 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 
 ## 8. Tests & CI
 
-`flutter test` runs 106 tests (enums, models, logger, localization completeness, map BLoC, team permissions/removal, critical-flow and widget tests). `.github/workflows/ci.yml` runs analyze + test on pushes/PRs to `main` and `test`. Gaps worth filling next: `AuthBloc` flows (including deletion), `TaskBloc` mutations, sync-queue replay, Firestore rules tests with the emulator, and an on-device integration run.
+`flutter test` runs 119 tests (enums, models, logger, localization completeness and display names, error messages, `AuthBloc` profile update and deletion, map BLoC, team permissions/removal, critical-flow and widget tests). `.github/workflows/ci.yml` runs analyze + test on pushes/PRs to `main` and `test`. Gaps worth filling next: other `AuthBloc` flows, `TaskBloc` mutations, sync-queue replay, Firestore rules tests with the emulator, and an on-device integration run.
 
 ## 9. Per-Release Checklist
 

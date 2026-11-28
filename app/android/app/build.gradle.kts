@@ -18,13 +18,17 @@ val keyProperties: Properties? = rootProject.file("key.properties")
     ?.let { file -> Properties().apply { file.inputStream().use { load(it) } } }
 
 // Read MAPBOX_ACCESS_TOKEN from (in order): key.properties, the environment,
-// a Gradle property, and finally an empty string. The empty fallback keeps
-// debug builds working when a developer hasn't set the token yet — the map will
-// fail to authenticate at runtime, but the build won't break.
+// a Gradle property, and finally app/.env (the same file the Dart side loads).
+// Debug builds tolerate a missing token (the map just won't authenticate);
+// bundleRelease fails instead — see the check at the bottom of this file.
 val mapboxAccessToken: String = run {
-    keyProperties?.getProperty("MAPBOX_ACCESS_TOKEN")
-        ?: System.getenv("MAPBOX_ACCESS_TOKEN")
-        ?: providers.gradleProperty("MAPBOX_ACCESS_TOKEN").orNull
+    keyProperties?.getProperty("MAPBOX_ACCESS_TOKEN")?.takeIf { it.isNotBlank() }
+        ?: System.getenv("MAPBOX_ACCESS_TOKEN")?.takeIf { it.isNotBlank() }
+        ?: providers.gradleProperty("MAPBOX_ACCESS_TOKEN").orNull?.takeIf { it.isNotBlank() }
+        ?: rootProject.file("../.env").takeIf { it.exists() }?.readLines()
+            ?.map { it.trim() }
+            ?.firstOrNull { it.startsWith("MAPBOX_ACCESS_TOKEN=") }
+            ?.substringAfter("=")?.trim()?.trim('"', '\'')
         ?: ""
 }
 
@@ -82,4 +86,27 @@ dependencies {
 
 flutter {
     source = "../.."
+}
+
+// Play Console rejects debug-signed bundles, and a bundle without a Mapbox
+// token ships a blank map. Fail the store build instead of falling back
+// silently. (`flutter run --release` / assembleRelease still fall back.)
+gradle.taskGraph.whenReady {
+    val buildingStoreBundle = allTasks.any {
+        it.project == project && it.name == "bundleRelease"
+    }
+    if (buildingStoreBundle) {
+        if (android.signingConfigs.findByName("release") == null) {
+            throw GradleException(
+                "bundleRelease needs the upload key: create app/android/key.properties " +
+                    "(see key.properties.example)."
+            )
+        }
+        if (!mapboxAccessToken.startsWith("pk.")) {
+            throw GradleException(
+                "bundleRelease needs a public Mapbox token (pk.*): set MAPBOX_ACCESS_TOKEN " +
+                    "in app/.env or app/android/key.properties."
+            )
+        }
+    }
 }

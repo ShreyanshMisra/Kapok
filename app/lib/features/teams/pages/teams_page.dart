@@ -308,8 +308,8 @@ class _TeamsPageState extends State<TeamsPage> {
                       icon: const Icon(Icons.group_add),
                       label: Text(AppLocalizations.of(context).joinTeam),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,
@@ -331,8 +331,8 @@ class _TeamsPageState extends State<TeamsPage> {
                           icon: const Icon(Icons.add),
                           label: Text(AppLocalizations.of(context).createTeam),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.surface,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 32,
                               vertical: 16,
@@ -351,7 +351,7 @@ class _TeamsPageState extends State<TeamsPage> {
                           icon: const Icon(Icons.group_add),
                           label: Text(AppLocalizations.of(context).joinTeam),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
+                            foregroundColor: Theme.of(context).colorScheme.primary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 32,
                               vertical: 16,
@@ -373,8 +373,8 @@ class _TeamsPageState extends State<TeamsPage> {
                       icon: const Icon(Icons.add),
                       label: Text(AppLocalizations.of(context).createTeam),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,
@@ -416,12 +416,12 @@ class _TeamsPageState extends State<TeamsPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.group,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 24,
                     ),
                   ),

@@ -8,6 +8,7 @@ import '../../../data/models/task_model.dart';
 import '../../../data/repositories/task_repository.dart';
 import 'task_event.dart';
 import 'task_state.dart';
+import '../../../core/error/error_message.dart';
 
 /// Task BLoC
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
@@ -77,7 +78,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task created successfully');
     } catch (e) {
       Logger.task('Error creating task', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -98,7 +99,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Loaded ${tasks.length} tasks');
     } catch (e) {
       Logger.task('Error loading tasks', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -117,7 +118,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Loaded ${tasks.length} tasks for team');
     } catch (e) {
       Logger.task('Error loading team tasks', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -136,7 +137,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Loaded ${tasks.length} tasks for user');
     } catch (e) {
       Logger.task('Error loading user tasks', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -160,7 +161,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Loaded ${tasks.length} tasks for user\'s teams');
     } catch (e) {
       Logger.task('Error loading tasks for user\'s teams', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -197,7 +198,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task updated successfully');
     } catch (e) {
       Logger.task('Error updating task', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -228,7 +229,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task edited successfully');
     } catch (e) {
       Logger.task('Error editing task', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -247,7 +248,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task deleted successfully');
     } catch (e) {
       Logger.task('Error deleting task', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -269,7 +270,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task completion status updated');
     } catch (e) {
       Logger.task('Error marking task as completed', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -288,7 +289,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task assigned successfully');
     } catch (e) {
       Logger.task('Error assigning task', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 
@@ -312,7 +313,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       Logger.task('Task status changed successfully');
     } catch (e) {
       Logger.task('Error changing task status', error: e);
-      emit(TaskError(message: e.toString()));
+      emit(TaskError(message: userMessageFor(e)));
     }
   }
 

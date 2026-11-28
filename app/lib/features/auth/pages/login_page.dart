@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/validated_text_field.dart';
@@ -42,7 +41,6 @@ class _LoginPageState extends State<LoginPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: AppColors.primary,
                   duration: const Duration(seconds: 4),
                 ),
               );

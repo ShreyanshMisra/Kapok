@@ -50,7 +50,8 @@ jobs:
         # `--fatal-infos` is too noisy given the existing withOpacity deprecations;
         # we promote warnings + errors but tolerate infos until the codebase is
         # migrated to .withValues().
-        run: flutter analyze --fatal-warnings
+        # flutter analyze treats infos as fatal by default, hence --no-fatal-infos.
+        run: flutter analyze --fatal-warnings --no-fatal-infos
 
       - name: Unit + widget tests
         run: flutter test --reporter=expanded

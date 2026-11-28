@@ -85,7 +85,7 @@ class TeamRepository {
           rethrow;
         }
         throw TeamException(
-          message: 'Failed to generate team code: ${e.toString()}',
+          message: e is AppException ? e.message : 'Failed to generate team code. Please try again.',
           originalError: e,
         );
       }
@@ -547,7 +547,7 @@ class TeamRepository {
             Logger.team('Error loading from local cache', error: cacheError);
             // If both fail, throw the original Firebase error
             throw TeamException(
-              message: 'Failed to load teams: ${e.toString()}',
+              message: e is AppException ? e.message : 'Failed to load teams. Please try again.',
               originalError: e,
             );
           }
@@ -565,7 +565,7 @@ class TeamRepository {
         rethrow;
       }
       throw TeamException(
-        message: 'Failed to load all teams: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to load all teams. Please try again.',
         originalError: e,
       );
     }
@@ -863,7 +863,7 @@ class TeamRepository {
         rethrow;
       }
       throw TeamException(
-        message: 'Failed to delete team: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to delete team. Please try again.',
         originalError: e,
       );
     }
@@ -1097,7 +1097,7 @@ class TeamRepository {
       Logger.team('Error transferring leadership', error: e);
       if (e is TeamException) rethrow;
       throw TeamException(
-        message: 'Failed to transfer leadership: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to transfer leadership. Please try again.',
         originalError: e,
       );
     }

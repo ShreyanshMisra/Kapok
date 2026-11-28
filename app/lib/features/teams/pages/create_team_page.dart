@@ -45,10 +45,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Only team leaders and admins can create teams',
-              ),
-              backgroundColor: AppColors.primary,
+              content: Text(AppLocalizations.of(context).onlyLeadersCanCreateTeams),
             ),
           );
           Navigator.of(context).pop();
@@ -74,7 +71,6 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.primary,
               ),
             );
           } else if (state is TeamCreated) {
@@ -111,13 +107,13 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                Icon(Icons.group_add, size: 80, color: AppColors.primary),
+                Icon(Icons.group_add, size: 80, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 24),
 
                 Text(
                   AppLocalizations.of(context).createNewTeam,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -136,7 +132,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                   validator: Validators.validateName,
@@ -159,7 +155,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                 ),
@@ -216,8 +212,8 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                           ? null
                           : _handleCreateTeam,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -263,7 +259,6 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
             content: Text(
               AppLocalizations.of(context).youMustBeLoggedInToCreateTeams,
             ),
-            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.of(context).pushReplacementNamed(AppRouter.login);
@@ -295,30 +290,30 @@ class _TeamCreatedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text(
-        'Team Created Successfully!',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      title: Text(
+        AppLocalizations.of(context).teamCreatedTitle,
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Team Name: ${team.teamName}',
+            AppLocalizations.of(context).teamNameValue(team.teamName),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Team Code:',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          Text(
+            '${AppLocalizations.of(context).teamCode}:',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.primary),
+              border: Border.all(color: Theme.of(context).colorScheme.primary),
             ),
             child: Row(
               children: [
@@ -337,7 +332,7 @@ class _TeamCreatedDialog extends StatelessWidget {
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: team.teamCode));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Team code copied!')),
+                      SnackBar(content: Text(AppLocalizations.of(context).teamCodeCopiedToClipboard)),
                     );
                   },
                 ),
@@ -346,7 +341,7 @@ class _TeamCreatedDialog extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Share this code with your team members',
+            AppLocalizations.of(context).shareCodeWithYourTeamMembers,
             style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           ),
         ],
@@ -371,10 +366,10 @@ class _TeamCreatedDialog extends StatelessWidget {
             });
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.surface,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
           ),
-          child: const Text('OK'),
+          child: Text(AppLocalizations.of(context).ok),
         ),
       ],
     );

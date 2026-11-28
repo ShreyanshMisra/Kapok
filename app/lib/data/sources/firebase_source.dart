@@ -189,7 +189,7 @@ class FirebaseSource {
       }
 
       throw DatabaseException(
-        message: 'Failed to create team: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to create team. Please try again.',
         originalError: e,
       );
     }
@@ -397,7 +397,7 @@ class FirebaseSource {
       }
 
       throw DatabaseException(
-        message: 'Failed to create task: ${e.toString()}',
+        message: e is AppException ? e.message : 'Failed to create task. Please try again.',
         originalError: e,
       );
     }
@@ -674,26 +674,46 @@ class FirebaseSource {
   /// destroyed. This sequence keeps disaster-response data usable for the
   /// rest of the team while removing identifying ties to the leaving user.
   ///
-  /// Throws [AuthException] if the user is currently the leader of any team —
-  /// they must transfer leadership first so the team isn't orphaned.
-  Future<void> deleteAccount(String userId) async {
+  /// [password] re-authenticates the user first. Firebase Auth refuses
+  /// delete() with requires-recent-login unless the sign-in is fresh, and the
+  /// app keeps sessions signed in for days, so asking for the password here is
+  /// what makes deletion work for a normal, long-lived session.
+  ///
+  /// Throws [AuthException] if the password is wrong or the user is currently
+  /// the leader of an active team — they must transfer leadership or close
+  /// the team first so it isn't orphaned.
+  Future<void> deleteAccount(String userId, {required String password}) async {
     final authUser = _auth.currentUser;
     if (authUser == null || authUser.uid != userId) {
       throw AuthException(
         message: 'You must be signed in as this user to delete the account.',
       );
     }
-
-    // Firebase Auth rejects delete() with requires-recent-login once the
-    // sign-in is older than ~5 minutes. Check up front so we never anonymize
-    // tasks and delete the user doc but then fail to delete the Auth user.
-    final lastSignIn = authUser.metadata.lastSignInTime;
-    if (lastSignIn == null ||
-        DateTime.now().difference(lastSignIn) > const Duration(minutes: 5)) {
+    final email = authUser.email;
+    if (email == null || email.isEmpty) {
       throw AuthException(
-        message:
-            'For your security, please sign out and sign back in, then delete your account.',
+        message: 'This account has no email address, so it cannot be verified for deletion.',
       );
+    }
+
+    // Re-authenticate before touching any data, so we never anonymize tasks
+    // and delete the user doc but then fail to delete the Auth user.
+    try {
+      await authUser.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: email, password: password),
+      );
+    } on FirebaseAuthException catch (e) {
+      Logger.firebase('Re-authentication failed during account deletion', error: e);
+      if (e.code == 'wrong-password' ||
+          e.code == 'invalid-credential' ||
+          e.code == 'INVALID_LOGIN_CREDENTIALS') {
+        throw AuthException(
+          code: 'wrong-password',
+          message: 'Incorrect password. Please try again.',
+          originalError: e,
+        );
+      }
+      throw _handleAuthError(e.code, e.message, e);
     }
 
     try {
@@ -707,8 +727,9 @@ class FirebaseSource {
           .get();
       if (ledTeams.docs.any((doc) => doc.data()['isActive'] != false)) {
         throw AuthException(
+          code: 'leads-active-team',
           message:
-              'You lead one or more active teams. Transfer leadership before deleting your account.',
+              'You lead one or more active teams. Transfer leadership to another team leader, or close the team, before deleting your account.',
         );
       }
 
@@ -719,17 +740,26 @@ class FirebaseSource {
           .collection('tasks')
           .where('createdBy', isEqualTo: userId)
           .get();
-      for (final doc in createdTasks.docs) {
-        batch.update(doc.reference, {'createdBy': anonymizedMarker});
-      }
-
       final assignedTasks = await _firestore
           .collection('tasks')
           .where('assignedTo', isEqualTo: userId)
           .get();
-      for (final doc in assignedTasks.docs) {
-        batch.update(doc.reference, {'assignedTo': anonymizedMarker});
+
+      // One update per task, so a task the user both created and
+      // self-assigned gets a single createdBy+assignedTo write. The security
+      // rules have a matching anonymization clause that doesn't depend on the
+      // user still being in that task's team.
+      final taskUpdates = <String, Map<String, dynamic>>{};
+      final taskRefs = <String, DocumentReference<Map<String, dynamic>>>{};
+      for (final doc in createdTasks.docs) {
+        taskRefs[doc.id] = doc.reference;
+        (taskUpdates[doc.id] ??= {})['createdBy'] = anonymizedMarker;
       }
+      for (final doc in assignedTasks.docs) {
+        taskRefs[doc.id] = doc.reference;
+        (taskUpdates[doc.id] ??= {})['assignedTo'] = anonymizedMarker;
+      }
+      taskUpdates.forEach((id, fields) => batch.update(taskRefs[id]!, fields));
 
       final memberOf = await _firestore
           .collection('teams')

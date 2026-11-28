@@ -1,6 +1,6 @@
 # Profile & Settings Features
 
-_Last verified against the codebase: 2026-10-24._
+_Last verified against the codebase: 2026-11-28._
 
 ## Overview
 
@@ -17,14 +17,15 @@ The profile area covers the user's account, app settings, legal documents, the A
 2. **Profile Header Card**
    - Avatar with user initial (first letter of name)
    - User name (bold, large)
-   - User specialty/role (e.g., "Medical", "Engineering")
-   - Account type badge (Team Leader, Team Member, Admin)
+   - Profession (e.g., "Medical", "Engineering")
+   - Role badge (Team Leader, Team Member, Admin)
 3. **Profile Actions Card**
    - Edit Profile → EditProfilePage
    - Settings → SettingsPage
    - About → AboutPage
-4. **Account Information Card**: email, account type, role/specialty, user ID
-5. **Permissions Table**
+4. **Account Information Card**: email, Role (permission level), Profession, user ID
+5. **Role switch** (`widgets/account_role_switch.dart`, non-admins only): switches between Team Member and Team Leader after a confirmation. Requires a connection; a leader of an active team must transfer leadership first
+6. **Permissions Table**
    - `DataTable` with columns: Action | Team Member | Team Leader | Admin
    - Rows: Create Team, Join Team, View Team, Edit Team, Close Team, Delete Team, Remove Member, Leave Team, View All Teams, Edit Own Tasks, Edit All Tasks
    - The current user's role column is highlighted, with a "Your Role: [role]" chip; horizontally scrollable on small screens
@@ -38,11 +39,11 @@ The page requires `AuthAuthenticated` state. If the user is not authenticated, i
 ### Location
 `lib/features/profile/pages/edit_profile_page.dart`
 
-- Edit user name and role/specialty
-- Saves via `AuthBloc` `ProfileUpdateRequested`
+- Edit user name and profession (pre-filled from the signed-in user)
+- Saves via `AuthBloc` `ProfileUpdateRequested` with an `onComplete` callback: success shows a snackbar and pops, an error shows a snackbar and keeps the form
 - Form validation for required fields
 
-### Available Roles (Specialties)
+### Available Professions
 
 Medical, Engineering, Carpentry, Plumbing, Construction, Electrical, Supplies, Transportation, Other
 
@@ -61,7 +62,7 @@ Sections, top to bottom: **Location**, **Language**, **Appearance**, **Data**, *
 | Location Services | Toggle for app location access |
 
 #### 2. Language
-English (en) or Spanish (es), chosen in a dialog. Persisted via `LanguageProvider` in Hive.
+English (en) or Spanish (es), chosen in a dialog, via `LanguageProvider`/`LanguageService`. Saved in the Hive settings box (`language_code`) and loaded at startup in `initializeCoreServices`; defaults to English.
 
 #### 3. Appearance (Theme)
 Three options (the follow-device option is labeled "Default", not "System"):
@@ -74,7 +75,7 @@ Persisted via `ThemeProvider` / `ThemeService` in Hive.
 #### 4. Data
 | Action | Description |
 |--------|-------------|
-| Clear Cache | Shows the approximate local cache size ("~N KB cached locally"); after confirmation calls `HiveService.clearAllData()` (tasks, teams, settings). Data is re-fetched from Firebase on next load. |
+| Clear Cache | Shows the approximate local cache size ("~N KB cached locally"); after confirmation calls `HiveService.clearAllData()` (tasks, teams, settings such as task filters). Device preferences are kept: theme, language, onboarding-seen and first-login flags. Data is re-fetched from Firebase on next load. |
 
 Analytics and crash reporting have no in-app toggle; collection defaults are applied by `AnalyticsService`. The privacy policy does not promise an in-app opt-out.
 

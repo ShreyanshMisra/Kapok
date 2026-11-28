@@ -5,14 +5,12 @@ import '../../../app/legal_document_page.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/privacy_policy.dart';
 import '../../../core/constants/terms_of_service.dart';
-import '../../../core/enums/user_role.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../core/services/hive_service.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
-import '../../auth/bloc/auth_state.dart';
 import '../../auth/widgets/sign_out_flow.dart';
 import '../../teams/bloc/team_bloc.dart';
 import '../../teams/bloc/team_event.dart';
@@ -21,6 +19,7 @@ import '../../tasks/bloc/task_event.dart';
 import '../../map/bloc/map_bloc.dart';
 import '../../map/bloc/map_event.dart';
 import '../../../core/widgets/kapok_logo.dart';
+import '../../../core/utils/logger.dart';
 
 /// Settings page for app configuration
 class SettingsPage extends StatefulWidget {
@@ -32,59 +31,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _locationEnabled = true;
-  bool _changingRole = false;
   bool _deletingAccount = false;
-
-  /// Confirms, then switches the user between team member and team leader.
-  Future<void> _confirmRoleChange(UserRole newRole) async {
-    final localizations = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(localizations.changeRoleTitle),
-        content: Text(
-          newRole == UserRole.teamLeader
-              ? localizations.changeRoleToLeaderBody
-              : localizations.changeRoleToMemberBody,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(localizations.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(localizations.changeRoleConfirm),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _changingRole = true);
-    final messenger = ScaffoldMessenger.of(context);
-    context.read<AuthBloc>().add(UserRoleChangeRequested(
-      newRole,
-      onComplete: (error) {
-        messenger.showSnackBar(
-          error != null
-              ? SnackBar(content: Text(error), backgroundColor: AppColors.error)
-              : SnackBar(
-                  content: Text(localizations.roleChangedTo(
-                    newRole == UserRole.teamLeader
-                        ? localizations.teamLeader
-                        : localizations.teamMember,
-                  )),
-                ),
-        );
-        if (mounted) setState(() => _changingRole = false);
-      },
-    ));
-  }
 
   int _estimateStorageKB() {
     try {
@@ -114,41 +61,6 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Account role section (hidden for admins and while signed out)
-          BlocBuilder<AuthBloc, AuthState>(
-            buildWhen: (_, current) => current is AuthAuthenticated,
-            builder: (context, state) {
-              if (state is! AuthAuthenticated ||
-                  state.user.userRole == UserRole.admin) {
-                return const SizedBox.shrink();
-              }
-              final localizations = AppLocalizations.of(context);
-              final isLeader = state.user.userRole == UserRole.teamLeader;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildSection(localizations.accountRole, [
-                  SwitchListTile(
-                    secondary: Icon(
-                      isLeader ? Icons.groups : Icons.person_outline,
-                    ),
-                    title: Text(localizations.teamLeader),
-                    subtitle: Text(
-                      '${isLeader ? localizations.teamLeader : localizations.teamMember}'
-                      ' · ${localizations.accountRoleSwitchSubtitle}',
-                    ),
-                    value: isLeader,
-                    onChanged: _changingRole
-                        ? null
-                        : (value) => _confirmRoleChange(
-                              value ? UserRole.teamLeader : UserRole.teamMember,
-                            ),
-                    activeThumbColor: Theme.of(context).colorScheme.primary,
-                  ),
-                ]),
-              );
-            },
-          ),
-
           // Location section
           _buildSection(
             AppLocalizations.of(context).location,
@@ -281,8 +193,8 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: const Icon(Icons.logout),
               label: Text(AppLocalizations.of(context).signOut.toUpperCase()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -371,11 +283,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     await languageProvider.changeLanguage(value);
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      final newLocalizations = AppLocalizations.of(context);
+                      // The tree hasn't rebuilt in the new locale yet, so
+                      // build the message from the chosen locale directly.
+                      final newLocalizations = AppLocalizations(value);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${newLocalizations.language} ${newLocalizations.english.toLowerCase()}',
+                            '${newLocalizations.language}: ${newLocalizations.english}',
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -393,11 +307,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     await languageProvider.changeLanguage(value);
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      final newLocalizations = AppLocalizations.of(context);
+                      final newLocalizations = AppLocalizations(value);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${newLocalizations.language} ${newLocalizations.spanish.toLowerCase()}',
+                            '${newLocalizations.language}: ${newLocalizations.spanish}',
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -490,7 +404,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (ctx) => AlertDialog(
         title: Text(localizations.clearCache),
         content: Text(
-          'This will clear approximately $sizeKB KB of locally saved data (tasks, teams, settings). You will need to sync again after clearing.',
+          localizations.clearCacheConfirmBody('$sizeKB'),
         ),
         actions: [
           TextButton(
@@ -511,14 +425,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   );
                 }
               } catch (e) {
+                Logger.error('Failed to clear cache', tag: 'SETTINGS', error: e);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to clear cache: $e'), backgroundColor: AppColors.error),
+                    SnackBar(content: Text(localizations.clearCacheFailed), backgroundColor: AppColors.error),
                   );
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: Text(localizations.clear),
           ),
         ],
@@ -550,73 +465,20 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Prompts the user to type "DELETE" before destroying their account.
+  /// Asks for the user's password and for them to type "DELETE" before
+  /// destroying their account. The password re-authenticates the session,
+  /// which Firebase Auth requires before deleting a long-lived sign-in.
   Future<void> _showDeleteAccountDialog() async {
     final localizations = AppLocalizations.of(context);
-    final controller = TextEditingController();
-    var canConfirm = false;
-    final confirmed = await showDialog<bool>(
+    final password = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, setDialogState) => AlertDialog(
-          title: Text(localizations.deleteAccountWarningTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(localizations.deleteAccountWarningBody),
-              const SizedBox(height: 16),
-              Text(
-                localizations.deleteAccountConfirmPrompt,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller,
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: InputDecoration(
-                  hintText: localizations.deleteAccountConfirmWord,
-                  border: const OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  final next = value.trim() ==
-                      localizations.deleteAccountConfirmWord;
-                  if (next != canConfirm) {
-                    setDialogState(() => canConfirm = next);
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(localizations.cancel),
-            ),
-            ElevatedButton.icon(
-              onPressed: canConfirm
-                  ? () => Navigator.of(dialogContext).pop(true)
-                  : null,
-              icon: const Icon(Icons.delete_forever),
-              label: Text(localizations.deleteAccount.toUpperCase()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppColors.error.withOpacity(0.4),
-                disabledForegroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => _DeleteAccountDialog(localizations: localizations),
     );
-    controller.dispose();
-    if (confirmed != true || !mounted) return;
-    _performAccountDeletion();
+    if (password == null || password.isEmpty || !mounted) return;
+    _performAccountDeletion(password);
   }
 
-  void _performAccountDeletion() {
+  void _performAccountDeletion(String password) {
     final messenger = ScaffoldMessenger.of(context);
     final localizations = AppLocalizations.of(context);
     // Team/Task/Map BLoCs are reset by KapokApp's auth listener once the
@@ -625,6 +487,7 @@ class _SettingsPageState extends State<SettingsPage> {
     // AuthUnauthenticated.
     setState(() => _deletingAccount = true);
     context.read<AuthBloc>().add(DeleteAccountRequested(
+      password: password,
       onComplete: (error) {
         if (error == null) {
           messenger.showSnackBar(
@@ -657,5 +520,113 @@ class _SettingsPageState extends State<SettingsPage> {
         Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
       }
     });
+  }
+}
+
+/// Confirmation dialog for account deletion. Pops with the entered password
+/// once the user has typed the confirmation word, or null if cancelled.
+class _DeleteAccountDialog extends StatefulWidget {
+  const _DeleteAccountDialog({required this.localizations});
+
+  final AppLocalizations localizations;
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  final _confirmController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  bool get _canConfirm =>
+      _confirmController.text.trim() ==
+          widget.localizations.deleteAccountConfirmWord &&
+      _passwordController.text.isNotEmpty;
+
+  @override
+  void dispose() {
+    _confirmController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_canConfirm) Navigator.of(context).pop(_passwordController.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = widget.localizations;
+    return AlertDialog(
+      title: Text(l.deleteAccountWarningTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l.deleteAccountWarningBody),
+            const SizedBox(height: 16),
+            Text(
+              l.deleteAccountPasswordPrompt,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              autocorrect: false,
+              enableSuggestions: false,
+              decoration: InputDecoration(
+                hintText: l.password,
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l.deleteAccountConfirmPrompt,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _confirmController,
+              autocorrect: false,
+              enableSuggestions: false,
+              decoration: InputDecoration(
+                hintText: l.deleteAccountConfirmWord,
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() {}),
+              onSubmitted: (_) => _submit(),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.cancel),
+        ),
+        ElevatedButton.icon(
+          onPressed: _canConfirm ? _submit : null,
+          icon: const Icon(Icons.delete_forever),
+          label: Text(l.deleteAccount.toUpperCase()),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.error,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: AppColors.error.withValues(alpha: 0.4),
+            disabledForegroundColor: Colors.white,
+          ),
+        ),
+      ],
+    );
   }
 }
