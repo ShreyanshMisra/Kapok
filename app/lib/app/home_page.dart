@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:badges/badges.dart' as badges;
-import '../core/constants/app_colors.dart';
 import '../core/enums/task_status.dart';
 import '../core/localization/app_localizations.dart';
 import '../core/widgets/sync_status_widget.dart';
@@ -148,10 +147,13 @@ class _HomePageState extends State<HomePage> {
                       return badges.Badge(
                         badgeContent: Text(
                           pendingCount > 99 ? '99+' : '$pendingCount',
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: 10,
+                          ),
                         ),
-                        badgeStyle: const badges.BadgeStyle(
-                          badgeColor: AppColors.primary,
+                        badgeStyle: badges.BadgeStyle(
+                          badgeColor: Theme.of(context).colorScheme.primary,
                           padding: EdgeInsets.all(4),
                         ),
                         child: const Icon(Icons.assignment),

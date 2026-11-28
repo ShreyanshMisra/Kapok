@@ -19,7 +19,7 @@ The app uses strongly-typed Dart models with JSON serialization support. Models 
 | `name` | String | Yes | Display name |
 | `email` | String | Yes | Email address |
 | `userRole` | UserRole | Yes | Account type enum |
-| `role` | String | Yes | Specialty (Medical, Engineering, etc.) |
+| `role` | String | Yes | Profession, shown as "Profession" (Medical, Engineering, etc.). The permission level is `userRole`, shown as "Role" |
 | `teamId` | String? | No | Associated team ID |
 | `createdAt` | DateTime | Yes | Account creation timestamp |
 | `updatedAt` | DateTime | Yes | Last modification timestamp |
