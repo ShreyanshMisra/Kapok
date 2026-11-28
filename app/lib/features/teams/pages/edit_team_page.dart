@@ -94,7 +94,7 @@ class _EditTeamPageState extends State<EditTeamPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.edit, size: 64, color: AppColors.primary),
+                Icon(Icons.edit, size: 64, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 24),
 
                 TextFormField(
@@ -107,7 +107,7 @@ class _EditTeamPageState extends State<EditTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                   validator: Validators.validateName,
@@ -126,7 +126,7 @@ class _EditTeamPageState extends State<EditTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                 ),

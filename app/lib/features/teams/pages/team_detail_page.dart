@@ -262,12 +262,12 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.group,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 32,
                   ),
                 ),
@@ -349,7 +349,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               children: [
                 Icon(
                   Icons.vpn_key,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -366,10 +366,10 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                 ),
               ),
               child: Column(
@@ -377,7 +377,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   Text(
                     widget.team.teamCode,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
                     ),
@@ -447,7 +447,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               children: [
                 Icon(
                   Icons.people,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -499,17 +499,17 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.07),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.07),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.25),
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
                             ),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(Icons.swap_horiz,
-                                  size: 16, color: AppColors.primary),
+                                  size: 16, color: Theme.of(context).colorScheme.primary),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -519,7 +519,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall
-                                      ?.copyWith(color: AppColors.primary),
+                                      ?.copyWith(color: Theme.of(context).colorScheme.primary),
                                 ),
                               ),
                             ],
@@ -571,7 +571,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text('Change Role for ${member.name}'),
+              title: Text(AppLocalizations.of(context).changeProfessionFor(member.name)),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -580,7 +580,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       leading: Icon(getRoleIcon(role), size: 20),
                       title: Text(role),
                       trailing: selectedRole == role
-                          ? Icon(Icons.check, color: AppColors.primary)
+                          ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
                           : null,
                       onTap: () {
                         setDialogState(() => selectedRole = role);
@@ -609,7 +609,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       );
                       ScaffoldMessenger.of(this.context).showSnackBar(
                         SnackBar(
-                          content: Text('${member.name}\'s role changed to $selectedRole'),
+                          content: Text(AppLocalizations.of(this.context).professionChangedTo(member.name, selectedRole)),
                           backgroundColor: AppColors.primary,
                         ),
                       );
@@ -651,10 +651,10 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
       ),
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
           child: Icon(
             getRoleIcon(member.role),
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             size: 20,
           ),
         ),
@@ -668,18 +668,18 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 ),
               ),
             ),
-            // Specialty role badge
+            // Profession badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 member.role,
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -689,7 +689,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
         subtitle: Text(
           displayRole,
           style: TextStyle(
-            color: isLeader ? AppColors.primary : theme.colorScheme.onSurface.withOpacity(0.6),
+            color: isLeader ? Theme.of(context).colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
             fontSize: 12,
           ),
         ),
@@ -698,7 +698,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 width: 20,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
               )
@@ -718,11 +718,11 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                 // Team Role (their role in THIS team)
                 _buildInfoRow(Icons.badge, 'Team Role', displayRole),
                 const SizedBox(height: 8),
-                // Account Type (their global account type)
-                _buildInfoRow(Icons.person, 'Account Type', member.userRole.displayName),
+                // Role (their global permission level)
+                _buildInfoRow(Icons.person, AppLocalizations.of(context).role, member.userRole.displayName),
                 const SizedBox(height: 8),
-                // Specialty
-                _buildInfoRow(Icons.work, 'Specialty', member.role),
+                // Profession
+                _buildInfoRow(Icons.work, AppLocalizations.of(context).profession, member.role),
                 const SizedBox(height: 8),
                 // Email
                 _buildInfoRow(Icons.email, 'Email', member.email),
@@ -740,7 +740,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.assignment, size: 16, color: AppColors.primary),
+                            Icon(Icons.assignment, size: 16, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 8),
                             Text(
                               'Assigned Tasks (${tasks.length})',
@@ -775,7 +775,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                         child: OutlinedButton.icon(
                           onPressed: () => _showChangeRoleDialog(member),
                           icon: const Icon(Icons.swap_horiz),
-                          label: const Text('CHANGE ROLE'),
+                          label: Text(AppLocalizations.of(context).changeProfession.toUpperCase()),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -802,8 +802,8 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                         icon: const Icon(Icons.swap_horiz),
                         label: Text(AppLocalizations.of(context).makeTeamLeader.toUpperCase()),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: BorderSide(color: AppColors.primary),
+                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          side: BorderSide(color: Theme.of(context).colorScheme.primary),
                         ),
                       ),
                     ),
@@ -908,7 +908,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
               children: [
                 Icon(
                   Icons.assignment,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -1043,7 +1043,7 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
   }
 
   Color _getStatusColor(dynamic status) {
-    return AppColors.primary;
+    return Theme.of(context).colorScheme.primary;
   }
 
   /// Get current user ID
@@ -1207,8 +1207,8 @@ class _TeamDetailPageState extends State<TeamDetailPage> {
                   (m) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: Icon(Icons.person, color: AppColors.primary, size: 20),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                      child: Icon(Icons.person, color: Theme.of(context).colorScheme.primary, size: 20),
                     ),
                     title: Text(m.name),
                     subtitle: Text(m.email),

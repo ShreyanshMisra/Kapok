@@ -154,13 +154,15 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
-        primary: AppColors.primaryLight,
+        // Blue text/icons/accents in dark mode come from colorScheme.primary,
+        // so it must be light enough to read on the dark surfaces.
+        primary: AppColors.primaryOnDark,
         primaryContainer: AppColors.primary,
         secondary: AppColors.secondaryLight,
         secondaryContainer: AppColors.secondary,
         surface: const Color(0xFF1E1E1E),
         error: AppColors.error,
-        onPrimary: AppColors.surface,
+        onPrimary: AppColors.primaryDark,
         onSecondary: AppColors.surface,
         onSurface: const Color(0xFFE0E0E0),
         onError: AppColors.surface,
@@ -203,7 +205,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryOnDark, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -227,7 +229,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.primaryLight),
+          foregroundColor: AppColors.primaryOnDark,
+          side: const BorderSide(color: AppColors.primaryOnDark),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -236,7 +239,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryLight,
+          foregroundColor: AppColors.primaryOnDark,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -245,7 +248,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: const Color(0xFF1E1E1E),
-        selectedItemColor: AppColors.primaryLight,
+        selectedItemColor: AppColors.primaryOnDark,
         unselectedItemColor: const Color(0xFF9E9E9E),
         type: BottomNavigationBarType.fixed,
       ),

@@ -124,13 +124,13 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                Icon(Icons.group_add, size: 80, color: AppColors.primary),
+                Icon(Icons.group_add, size: 80, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 24),
 
                 Text(
                   AppLocalizations.of(context).joinATeam,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -163,7 +163,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                   validator: (value) {

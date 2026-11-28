@@ -198,8 +198,17 @@ class AppLocalizations {
   String get editProfile => _getString('editProfile');
   String get changeName => _getString('changeName');
   String get changeRole => _getString('changeRole');
-  String get accountType => _getString('accountType');
+  /// Permission level: admin, team leader, team member (UserModel.userRole).
   String get role => _getString('role');
+  /// Specialty: medical, engineering, carpentry... (UserModel.role).
+  String get profession => _getString('profession');
+  String get changeProfession => _getString('changeProfession');
+  String changeProfessionFor(String name) =>
+      _getString('changeProfessionFor').replaceAll('{name}', name);
+  String professionChangedTo(String name, String profession) =>
+      _getString('professionChangedTo')
+          .replaceAll('{name}', name)
+          .replaceAll('{profession}', profession);
 
   // About
   String get aboutKapok => _getString('aboutKapok');
@@ -374,10 +383,10 @@ class AppLocalizations {
   String get deleteAccountWarningBody => _getString('deleteAccountWarningBody');
   String get deleteAccountConfirmPrompt => _getString('deleteAccountConfirmPrompt');
   String get deleteAccountConfirmWord => _getString('deleteAccountConfirmWord');
+  String get deleteAccountPasswordPrompt => _getString('deleteAccountPasswordPrompt');
   String get deleteAccountTransferLeadershipFirst => _getString('deleteAccountTransferLeadershipFirst');
   String get deleteAccountSuccess => _getString('deleteAccountSuccess');
   String get deleteAccountFailure => _getString('deleteAccountFailure');
-  String get accountRole => _getString('accountRole');
   String get accountRoleSwitchSubtitle => _getString('accountRoleSwitchSubtitle');
   String get changeRoleTitle => _getString('changeRoleTitle');
   String get changeRoleToLeaderBody => _getString('changeRoleToLeaderBody');
@@ -657,8 +666,11 @@ class AppLocalizations {
         'editProfile': 'Edit Profile',
         'changeName': 'Change Name',
         'changeRole': 'Change Role',
-        'accountType': 'Account Type',
         'role': 'Role',
+        'profession': 'Profession',
+        'changeProfession': 'Change profession',
+        'changeProfessionFor': 'Change profession for {name}',
+        'professionChangedTo': "{name}'s profession changed to {profession}",
         
         // About
         'aboutKapok': 'About Kapok',
@@ -822,10 +834,10 @@ class AppLocalizations {
         'deleteAccountWarningBody': 'This permanently removes your profile and signs you out. Tasks you created or were assigned to will be kept for your team but anonymized (your name is replaced with "deleted_user"). This cannot be undone.',
         'deleteAccountConfirmPrompt': 'Type DELETE to confirm',
         'deleteAccountConfirmWord': 'DELETE',
+        'deleteAccountPasswordPrompt': 'Enter your password to confirm it\'s you',
         'deleteAccountTransferLeadershipFirst': 'You lead one or more active teams. Transfer leadership to another team member from the team page before deleting your account.',
         'deleteAccountSuccess': 'Your account has been deleted.',
         'deleteAccountFailure': 'Could not delete the account. Please try again.',
-        'accountRole': 'Account role',
         'accountRoleSwitchSubtitle': 'Team leaders can create and manage teams',
         'changeRoleTitle': 'Change your role?',
         'changeRoleToLeaderBody': 'As a team leader you can create teams and manage their members and tasks. You can switch back at any time.',
@@ -1104,8 +1116,11 @@ class AppLocalizations {
         'editProfile': 'Editar Perfil',
         'changeName': 'Cambiar Nombre',
         'changeRole': 'Cambiar Rol',
-        'accountType': 'Tipo de Cuenta',
         'role': 'Rol',
+        'profession': 'Profesión',
+        'changeProfession': 'Cambiar profesión',
+        'changeProfessionFor': 'Cambiar profesión de {name}',
+        'professionChangedTo': 'La profesión de {name} cambió a {profession}',
         
         // About
         'aboutKapok': 'Acerca de Kapok',
@@ -1269,10 +1284,10 @@ class AppLocalizations {
         'deleteAccountWarningBody': 'Esto eliminará permanentemente su perfil y cerrará su sesión. Las tareas que creó o tiene asignadas se conservarán para su equipo pero serán anonimizadas (su nombre se reemplaza por "deleted_user"). Esta acción no se puede deshacer.',
         'deleteAccountConfirmPrompt': 'Escriba ELIMINAR para confirmar',
         'deleteAccountConfirmWord': 'ELIMINAR',
+        'deleteAccountPasswordPrompt': 'Ingrese su contraseña para confirmar su identidad',
         'deleteAccountTransferLeadershipFirst': 'Usted lidera uno o más equipos activos. Transfiera el liderazgo a otro miembro desde la página del equipo antes de eliminar su cuenta.',
         'deleteAccountSuccess': 'Su cuenta ha sido eliminada.',
         'deleteAccountFailure': 'No se pudo eliminar la cuenta. Por favor, inténtelo de nuevo.',
-        'accountRole': 'Rol de la cuenta',
         'accountRoleSwitchSubtitle': 'Los líderes de equipo pueden crear y administrar equipos',
         'changeRoleTitle': '¿Cambiar su rol?',
         'changeRoleToLeaderBody': 'Como líder de equipo puede crear equipos y administrar sus miembros y tareas. Puede volver a cambiar en cualquier momento.',

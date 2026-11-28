@@ -71,21 +71,29 @@ class AuthCheckRequested extends AuthEvent {
 /// because returning to AuthAuthenticated from either makes the app's auth
 /// listener navigate home.
 class DeleteAccountRequested extends AuthEvent {
+  /// Current password, used to re-authenticate before deletion.
+  final String password;
   final void Function(String? error)? onComplete;
 
-  const DeleteAccountRequested({this.onComplete});
+  const DeleteAccountRequested({required this.password, this.onComplete});
 }
 
 /// Update user profile
+///
+/// [onComplete] receives null on success or an error message on failure.
+/// Failures are reported this way rather than through [AuthError], because
+/// AuthError -> AuthAuthenticated makes the app's auth listener navigate home.
 class ProfileUpdateRequested extends AuthEvent {
   final String? name;
   final String? role;
   final UserModel? user; // Optional: if provided, use this user model directly
+  final void Function(String? error)? onComplete;
 
   const ProfileUpdateRequested({
     this.name,
     this.role,
     this.user,
+    this.onComplete,
   });
 
   @override

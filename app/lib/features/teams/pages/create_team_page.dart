@@ -111,13 +111,13 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                Icon(Icons.group_add, size: 80, color: AppColors.primary),
+                Icon(Icons.group_add, size: 80, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 24),
 
                 Text(
                   AppLocalizations.of(context).createNewTeam,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -136,7 +136,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                   validator: Validators.validateName,
@@ -159,7 +159,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                 ),
@@ -316,9 +316,9 @@ class _TeamCreatedDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.primary),
+              border: Border.all(color: Theme.of(context).colorScheme.primary),
             ),
             child: Row(
               children: [

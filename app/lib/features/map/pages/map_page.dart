@@ -582,7 +582,7 @@ class _MapPageState extends State<MapPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                icon: Icon(Icons.my_location, color: AppColors.primary),
+                icon: Icon(Icons.my_location, color: Theme.of(context).colorScheme.primary),
                 tooltip: AppLocalizations.of(context).currentLocation,
                 onPressed: _goToCurrentLocation,
               ),
@@ -613,7 +613,7 @@ class _MapPageState extends State<MapPage> {
                     Icons.filter_list,
                     color: (_filterStatus != null || _filterPriority != null)
                         ? Colors.white
-                        : AppColors.primary,
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 if (_filterStatus != null || _filterPriority != null)
@@ -725,7 +725,7 @@ class _MapPageState extends State<MapPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

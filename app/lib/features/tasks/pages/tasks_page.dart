@@ -930,17 +930,6 @@ class _TasksPageState extends State<TasksPage> {
                         start: now.subtract(const Duration(days: 7)),
                         end: now,
                       ),
-                  builder: (context, child) {
-                    return Theme(
-                      data: Theme.of(context).copyWith(
-                        colorScheme: Theme.of(context).colorScheme.copyWith(
-                              primary: AppColors.primary,
-                              onPrimary: Colors.white,
-                            ),
-                      ),
-                      child: child!,
-                    );
-                  },
                 );
                 if (picked != null) _setDateRange(picked);
               },

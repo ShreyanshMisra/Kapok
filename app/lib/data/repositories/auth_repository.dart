@@ -409,17 +409,28 @@ class AuthRepository {
   /// removes them from team membership, deletes the Firestore user doc, clears
   /// the local Hive cache, and finally deletes the Firebase Auth user.
   ///
-  /// Throws [AuthException] if the user leads an active team (transfer
-  /// leadership first) or if Firebase Auth requires a recent sign-in.
-  Future<void> deleteAccount() async {
+  /// [password] re-authenticates the user, which Firebase Auth requires
+  /// before deleting a long-lived session.
+  ///
+  /// Throws [AuthException] if offline, if the password is wrong, or if the
+  /// user leads an active team (transfer leadership or close it first).
+  Future<void> deleteAccount({required String password}) async {
     final firebaseUser = _firebaseSource.currentUser;
     if (firebaseUser == null) {
       throw AuthException(message: 'You are not signed in.');
     }
 
+    // Deletion is a multi-step server operation; offline, the Firestore batch
+    // would wait for the server indefinitely and leave the spinner running.
+    if (!await _networkChecker.isConnected()) {
+      throw AuthException(
+        message: 'You need an internet connection to delete your account.',
+      );
+    }
+
     try {
       Logger.auth('Deleting account: ${firebaseUser.uid}');
-      await _firebaseSource.deleteAccount(firebaseUser.uid);
+      await _firebaseSource.deleteAccount(firebaseUser.uid, password: password);
       await _clearLocalUserData();
       Logger.auth('Account deletion completed');
     } catch (e) {

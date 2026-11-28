@@ -252,11 +252,11 @@ class EnhancedTaskCard extends StatelessWidget {
                     ] else ...[
                       CircleAvatar(
                         radius: 12,
-                        backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                         child: Text(
                           (assigneeName?.isNotEmpty ?? false) ? assigneeName![0].toUpperCase() : '?',
                           style: TextStyle(
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),

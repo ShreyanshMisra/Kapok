@@ -125,9 +125,9 @@ class _MapCachePageState extends State<MapCachePage> {
                         children: [
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.location_on,
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -252,7 +252,7 @@ class _MapCachePageState extends State<MapCachePage> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.primary, width: 2),
+        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -300,7 +300,7 @@ class _MapCachePageState extends State<MapCachePage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.map, size: 16, color: AppColors.primary),
+                    Icon(Icons.map, size: 16, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

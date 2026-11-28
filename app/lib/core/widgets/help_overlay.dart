@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
 
 /// Help tip item displayed inside the overlay sheet.
 class HelpTip {
@@ -56,7 +55,7 @@ class HelpOverlay {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.help_outline, color: AppColors.primary),
+                  Icon(Icons.help_outline, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
                     title,
@@ -79,10 +78,10 @@ class HelpOverlay {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(tip.icon, size: 20, color: AppColors.primary),
+                          child: Icon(tip.icon, size: 20, color: Theme.of(context).colorScheme.primary),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

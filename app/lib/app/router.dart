@@ -255,7 +255,7 @@ class NotFoundPage extends StatelessWidget {
               Text(
                 '404',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
