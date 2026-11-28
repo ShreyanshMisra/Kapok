@@ -14,7 +14,7 @@ of truth; update it in the same PR as the changelog entry.
 
 - **Dark mode:** blue text, icons and accents use a light blue that's readable on dark backgrounds. All filled buttons and the + button share one light-blue style; snackbars use a brighter blue. Light mode is unchanged.
 - **Edit Profile:** the form starts with the user's real name and profession; Save shows a result and closes the page.
-- **Delete account:** asks for the password (re-authentication) instead of requiring a sign-in within 5 minutes; fails fast when offline. Firestore rules allow anonymizing a self-created, self-assigned task in one write (rules not yet deployed; 3 new rules tests, 71/71 pass).
+- **Delete account:** asks for the password (re-authentication) instead of requiring a sign-in within 5 minutes; fails fast when offline. Firestore rules allow anonymizing a self-created, self-assigned task in one write (deployed 2026-11-28; 3 new rules tests, 71/71 pass).
 - **Role / Profession:** the team member ↔ team leader switch moved from Settings to Profile. Permission level is labelled "Role" and specialty "Profession" everywhere; the separate "Team Role" row is gone (team leaders show "Leads this team").
 - **Spanish:** ~130 on-screen strings and all task status/priority/category, role and profession names are translated (onboarding included).
 - **Language is remembered** between launches (saved with the theme in Hive). Clear Cache now keeps the language, theme, onboarding-seen and first-login flags instead of resetting them. The language-change snackbar is no longer half English.

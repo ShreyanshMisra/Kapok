@@ -21,7 +21,7 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 | Privacy Policy / Terms **URL** | Not hosted yet | **Blocker** (both stores) |
 | Account deletion | In-app; password re-authentication, online-only, team-leader safeguard | Done |
 | Location-denied behavior | Map falls back to a default center | Done |
-| Firestore rules | Rewritten 2026-11-19 for per-team isolation and invite-code joins; **deployed 2026-11-20** (live matched `main` on 2026-11-28). Build 1.0.0+4 adds one task-anonymization clause (71/71 server-side tests pass), not yet deployed | Med (deploy +4 clause; confirm backfill) |
+| Firestore rules | Rewritten 2026-11-19 for per-team isolation and invite-code joins; **deployed 2026-11-20**. Build 1.0.0+4's task-anonymization clause (71/71 server-side tests pass) **deployed 2026-11-28**; invite-code backfill dry run found nothing missing (2026-11-28) | Done |
 | Admin role | Self-assignable at sign-up (C1); accepted for internal testing only | **Blocker** for public release |
 | Secrets hygiene | `.env`, `GoogleService-Info.plist`, `google-services.json`, `key.properties` all gitignored; `.env` only holds the public `pk.` token | Done |
 | Tests / CI | 119 unit/widget tests pass; CI runs analyze + test (GitHub Actions re-enabled 2026-11-28) | Low |
@@ -42,7 +42,7 @@ Since the May evaluation, all of its code/config blockers have been resolved: pr
 ### iOS (now)
 
 1. **Host the Privacy Policy and Terms of Service** at stable public URLs (same text as `lib/core/constants/privacy_policy.dart` / `terms_of_service.dart`, after legal review). Enter them in App Store Connect, plus a **support URL**.
-2. **Deploy the build 1.0.0+4 rules change** (one-write anonymization of a self-created, self-assigned task during account deletion) and confirm the invite-code backfill with a dry run of `firebase/backfill_team_codes.py`. The 2026-11-19 rewrite is already live. Procedure: `12_development_notes.md` → Firestore Rules Deployment.
+2. ~~Deploy the build 1.0.0+4 rules change and confirm the invite-code backfill.~~ Done 2026-11-28: rules deployed (live matches `firebase/firestore.rules`), backfill dry run found 0 missing codes. For future rule changes, follow `12_development_notes.md` → Firestore Rules Deployment.
 3. **Run `pod install`** before the next build (the `pointer_interceptor` plugin was added), and bump the build number (now `1.0.0+4`).
 4. **App Privacy answers** in App Store Connect must match `PrivacyInfo.xcprivacy`: Email, Name, User ID, Precise Location, Other User Content (app functionality, linked); Product Interaction (analytics, linked); Crash Data (not linked); no tracking. Also include third-party SDK collection: the Mapbox SDK sends de-identified location and usage telemetry by default (users can opt out from the map's (i) button), and address searches go to Mapbox's geocoding API. Decide with counsel whether to declare **Search History** and Mapbox's **Coarse Location / Product Interaction (analytics, not linked)**. The Play Data Safety form needs the same answers.
 5. **Reviewer account**: a dedicated Team Member account in a test team, plus a note that deleting an account asks for the password, and team leaders must transfer leadership or close their team first.
