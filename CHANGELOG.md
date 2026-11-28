@@ -17,6 +17,7 @@ of truth; update it in the same PR as the changelog entry.
 - **Delete account:** asks for the password (re-authentication) instead of requiring a sign-in within 5 minutes; fails fast when offline. Firestore rules allow anonymizing a self-created, self-assigned task in one write (rules not yet deployed; 3 new rules tests, 71/71 pass).
 - **Role / Profession:** the team member ↔ team leader switch moved from Settings to Profile. Permission level is labelled "Role" and specialty "Profession" everywhere; the separate "Team Role" row is gone (team leaders show "Leads this team").
 - **Spanish:** ~130 on-screen strings and all task status/priority/category, role and profession names are translated (onboarding included).
+- **Language is remembered** between launches (saved with the theme in Hive). Clear Cache now keeps the language, theme, onboarding-seen and first-login flags instead of resetting them. The language-change snackbar is no longer half English.
 - **Errors:** users no longer see raw exception text ("DatabaseException: …", Firebase codes); BLoCs show the app message or a generic fallback (`userMessageFor`).
 - **Android:** `bundleRelease` fails without the upload key or a `pk.` Mapbox token; the Mapbox token can come from `app/.env`; advertising-ID permissions removed.
 

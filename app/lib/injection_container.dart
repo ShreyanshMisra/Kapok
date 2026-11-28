@@ -29,6 +29,7 @@ import 'features/auth/bloc/auth_bloc.dart';
 import 'features/tasks/bloc/task_bloc.dart';
 import 'features/teams/bloc/team_bloc.dart';
 import 'features/map/bloc/map_bloc.dart';
+import 'core/services/language_service.dart';
 // import 'features/profile/bloc/profile_bloc.dart';
 
 /// Dependency injection container
@@ -45,6 +46,7 @@ Future<void> initializeDependencies() async {
   sl.registerLazySingleton<NetworkChecker>(() => NetworkChecker.instance);
   sl.registerLazySingleton<SyncService>(() => SyncService.instance);
   sl.registerLazySingleton<ThemeService>(() => ThemeService.instance);
+  sl.registerLazySingleton<LanguageService>(() => LanguageService.instance);
 
   // Data sources
   sl.registerLazySingleton<FirebaseSource>(() => FirebaseSource());
@@ -132,10 +134,11 @@ Future<void> initializeCoreServices() async {
       sl<HiveService>().initialize(),
     ]);
 
-    // ThemeService depends on Hive; map cache and region repo also depend on
-    // Hive but are independent of each other — run all three in parallel.
+    // Theme and language preferences, the map cache, and the region repo all
+    // depend on Hive but not on each other — run them in parallel.
     await Future.wait([
       sl<ThemeService>().initialize(),
+      sl<LanguageService>().initialize(),
       sl<OfflineMapCache>().initialize(),
       sl<OfflineMapRegionRepository>().initialize(),
     ]);

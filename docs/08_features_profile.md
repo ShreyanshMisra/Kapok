@@ -62,7 +62,7 @@ Sections, top to bottom: **Location**, **Language**, **Appearance**, **Data**, *
 | Location Services | Toggle for app location access |
 
 #### 2. Language
-English (en) or Spanish (es), chosen in a dialog, via `LanguageProvider`/`LanguageService`. **Not persisted yet**: the app starts in English on every launch.
+English (en) or Spanish (es), chosen in a dialog, via `LanguageProvider`/`LanguageService`. Saved in the Hive settings box (`language_code`) and loaded at startup in `initializeCoreServices`; defaults to English.
 
 #### 3. Appearance (Theme)
 Three options (the follow-device option is labeled "Default", not "System"):
@@ -75,7 +75,7 @@ Persisted via `ThemeProvider` / `ThemeService` in Hive.
 #### 4. Data
 | Action | Description |
 |--------|-------------|
-| Clear Cache | Shows the approximate local cache size ("~N KB cached locally"); after confirmation calls `HiveService.clearAllData()` (tasks, teams, settings). Data is re-fetched from Firebase on next load. |
+| Clear Cache | Shows the approximate local cache size ("~N KB cached locally"); after confirmation calls `HiveService.clearAllData()` (tasks, teams, settings such as task filters). Device preferences are kept: theme, language, onboarding-seen and first-login flags. Data is re-fetched from Firebase on next load. |
 
 Analytics and crash reporting have no in-app toggle; collection defaults are applied by `AnalyticsService`. The privacy policy does not promise an in-app opt-out.
 

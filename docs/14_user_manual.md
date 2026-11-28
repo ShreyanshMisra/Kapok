@@ -197,10 +197,10 @@ On the **Profile** tab, use the **Role** switch. If you lead an active team, tra
 
 Go to **Profile** → **Settings** to:
 
-- **Language**: Switch between English and Spanish
+- **Language**: Switch between English and Spanish (remembered between launches)
 - **Theme**: Choose Light, Dark, or Default (follows device setting)
 - **Location Services**: Enable/disable location access
-- **Clear Cache**: Remove locally cached data
+- **Clear Cache**: Remove locally cached data (your language and theme are kept)
 - **About**: App version, Privacy Policy, and Terms of Service
 
 ### Signing Out

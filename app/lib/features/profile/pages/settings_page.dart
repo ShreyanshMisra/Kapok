@@ -283,11 +283,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     await languageProvider.changeLanguage(value);
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      final newLocalizations = AppLocalizations.of(context);
+                      // The tree hasn't rebuilt in the new locale yet, so
+                      // build the message from the chosen locale directly.
+                      final newLocalizations = AppLocalizations(value);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${newLocalizations.language} ${newLocalizations.english.toLowerCase()}',
+                            '${newLocalizations.language}: ${newLocalizations.english}',
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -305,11 +307,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     await languageProvider.changeLanguage(value);
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      final newLocalizations = AppLocalizations.of(context);
+                      final newLocalizations = AppLocalizations(value);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${newLocalizations.language} ${newLocalizations.spanish.toLowerCase()}',
+                            '${newLocalizations.language}: ${newLocalizations.spanish}',
                           ),
                           duration: const Duration(seconds: 2),
                         ),
